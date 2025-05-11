@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Bitcoin, Github, Twitter } from 'lucide-react';
+import { Bitcoin, Github, Instagram, Telegram } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -29,25 +29,31 @@ const Footer: React.FC = () => {
           
           <div className="flex space-x-3">
             <a 
-              href="#" 
+              href="https://t.me/No_dts" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-full border border-satotrack-neon/20 hover:border-satotrack-neon/60 hover:bg-satotrack-neon/5 transition-all" 
-              aria-label="Bitcoin"
+              aria-label="Telegram"
             >
-              <Bitcoin className="h-4 w-4 text-satotrack-neon" />
+              <Telegram className="h-4 w-4 text-satotrack-neon" />
             </a>
             <a 
-              href="#" 
+              href="https://instagram.com/dantas_dts" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-full border border-satotrack-neon/20 hover:border-satotrack-neon/60 hover:bg-satotrack-neon/5 transition-all" 
+              aria-label="Instagram"
+            >
+              <Instagram className="h-4 w-4 text-satotrack-neon" />
+            </a>
+            <a 
+              href="https://github.com/no_dts" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-full border border-satotrack-neon/20 hover:border-satotrack-neon/60 hover:bg-satotrack-neon/5 transition-all" 
               aria-label="Github"
             >
               <Github className="h-4 w-4 text-satotrack-neon" />
-            </a>
-            <a 
-              href="#" 
-              className="p-2 rounded-full border border-satotrack-neon/20 hover:border-satotrack-neon/60 hover:bg-satotrack-neon/5 transition-all" 
-              aria-label="Twitter"
-            >
-              <Twitter className="h-4 w-4 text-satotrack-neon" />
             </a>
           </div>
         </div>
