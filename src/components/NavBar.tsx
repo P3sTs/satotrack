@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Menu, X, LogOut, User, Wallet } from 'lucide-react';
 import UserSettings from './UserSettings';
 import MainNav from './MainNav';
+import { SecurityIndicator } from './SecurityIndicator';
 import {
   Sheet,
   SheetContent,
@@ -128,6 +129,7 @@ const NavBar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-2">
             {user ? (
               <div className="flex items-center space-x-2">
+                <SecurityIndicator />
                 <UserSettings />
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-1" />
