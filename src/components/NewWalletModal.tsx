@@ -43,7 +43,19 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
       toast.success("Carteira adicionada com sucesso!");
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao adicionar carteira");
+      // Improved error handling to properly extract the error message
+      console.error("Error adding wallet:", error);
+      let errorMessage = "Erro ao adicionar carteira";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Handle Supabase or other object errors
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error_description || errorObj.details || JSON.stringify(error);
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
 import { fetchCarteiraDados, fetchTransacoes, validarEnderecoBitcoin } from '../services/api';
@@ -87,11 +86,16 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
 
     // Verificar se o endereço já existe
-    const { data: existingWallet } = await supabase
+    const { data: existingWallet, error: checkError } = await supabase
       .from('bitcoin_wallets')
       .select('id')
       .eq('address', endereco)
       .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking existing wallet:', checkError);
+      throw new Error(`Erro ao verificar carteira: ${checkError.message}`);
+    }
 
     if (existingWallet) {
       throw new Error('Este endereço já está sendo monitorado');
@@ -118,7 +122,8 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
         .single();
       
       if (error) {
-        throw error;
+        console.error('Error inserting wallet:', error);
+        throw new Error(`Erro ao adicionar carteira: ${error.message}`);
       }
       
       // Adicionar a nova carteira ao estado
@@ -137,12 +142,26 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       toast.success(`Carteira "${nome}" adicionada com sucesso!`);
       
       // Carregar transações iniciais
-      const txs = await fetchTransacoes(data.id);
-      setTransacoes(prev => ({...prev, [data.id]: txs}));
+      try {
+        const txs = await fetchTransacoes(data.id);
+        setTransacoes(prev => ({...prev, [data.id]: txs}));
+      } catch (txError) {
+        console.error('Error loading transactions:', txError);
+        // Don't throw here, just log the error as this is not critical
+      }
       
     } catch (error) {
-      toast.error('Erro ao adicionar carteira: ' + (error instanceof Error ? error.message : String(error)));
-      throw error;
+      console.error('Error adding wallet:', error);
+      if (error instanceof Error) {
+        toast.error(`Erro ao adicionar carteira: ${error.message}`);
+        throw error;
+      } else {
+        const errorMessage = typeof error === 'object' && error !== null 
+          ? JSON.stringify(error)
+          : 'Erro desconhecido';
+        toast.error(`Erro ao adicionar carteira: ${errorMessage}`);
+        throw new Error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }

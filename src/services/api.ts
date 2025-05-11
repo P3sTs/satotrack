@@ -1,10 +1,18 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
 
-// Função para validar endereço Bitcoin
+// Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
 export function validarEnderecoBitcoin(endereco: string): boolean {
-  return /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(endereco);
+  // Valida endereços Bitcoin Legacy (1...)
+  const legacyRegex = /^[1][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  
+  // Valida endereços SegWit (3...)
+  const segwitRegex = /^[3][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+  
+  // Valida endereços Bech32 (bc1...)
+  const bech32Regex = /^(bc1)[a-zA-HJ-NP-Z0-9]{25,89}$/;
+  
+  return legacyRegex.test(endereco) || segwitRegex.test(endereco) || bech32Regex.test(endereco);
 }
 
 // Buscar dados da carteira diretamente da API blockchain via edge function
