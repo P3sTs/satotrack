@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Menu, X, LogOut, User, Wallet } from 'lucide-react';
 import UserSettings from './UserSettings';
 import MainNav from './MainNav';

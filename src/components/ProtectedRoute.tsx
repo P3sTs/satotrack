@@ -1,5 +1,5 @@
 
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/auth';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
