@@ -21,6 +21,9 @@ export const formatBitcoinValue = (value: number): string => {
   return `${value.toFixed(4)} BTC`.replace(/\.?0+$/, '');
 };
 
+// Alias for backward compatibility
+export const formatarBTC = formatBitcoinValue;
+
 // Formats a bitcoin price in USD
 export const formatBitcoinPrice = (price: number): string => {
   if (price === 0) return '$0.00';
@@ -43,6 +46,14 @@ export const formatBitcoinPrice = (price: number): string => {
   }).format(price);
 };
 
+// Format currency
+export const formatCurrency = (value: number, currency: string = 'USD', locale: string = 'en-US'): string => {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency
+  }).format(value);
+};
+
 // Format date for display
 export const formatDate = (date: Date | string): string => {
   const dateObj = date instanceof Date ? date : new Date(date);
@@ -50,6 +61,10 @@ export const formatDate = (date: Date | string): string => {
     locale: ptBR
   });
 };
+
+// Alias for backward compatibility
+export const formatarData = formatDate;
+export const formatarDataHora = formatDate;
 
 // Format percentage
 export const formatPercentage = (value: number): string => {

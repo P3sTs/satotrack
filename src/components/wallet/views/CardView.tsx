@@ -58,14 +58,14 @@ const TransactionCard: React.FC<{ transaction: TransacaoBTC }> = ({ transaction 
           </div>
           <div className="text-sm">
             <span className="text-muted-foreground">TxID: </span>
-            <span className="font-mono text-xs truncate block">{transaction.txid}</span>
+            <span className="font-mono text-xs truncate block">{transaction.hash}</span>
           </div>
           <div className="flex justify-between gap-2 mt-2">
             <Button 
               variant="outline" 
               size="sm" 
               className="flex-1 text-xs"
-              onClick={() => copyToClipboard(transaction.txid, "ID da transação")}
+              onClick={() => copyToClipboard(transaction.hash, "ID da transação")}
             >
               <CopyIcon className="h-3.5 w-3.5 mr-1" />
               Copiar TxID
@@ -77,7 +77,7 @@ const TransactionCard: React.FC<{ transaction: TransacaoBTC }> = ({ transaction 
               asChild
             >
               <a 
-                href={`https://mempool.space/tx/${transaction.txid}`} 
+                href={`https://mempool.space/tx/${transaction.hash}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
@@ -106,7 +106,7 @@ const CardView: React.FC<CardViewProps> = ({ transacoes }) => {
           </Card>
         ) : (
           transacoes.map(transaction => (
-            <TransactionCard key={transaction.txid} transaction={transaction} />
+            <TransactionCard key={transaction.hash} transaction={transaction} />
           ))
         )}
       </div>

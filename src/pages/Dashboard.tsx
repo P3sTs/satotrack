@@ -6,7 +6,7 @@ import { Bitcoin, Plus, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NewWalletModal from '../components/NewWalletModal';
 import { Button } from '@/components/ui/button';
-import ViewModeSelector from '../components/ViewModeSelector';
+import ViewModeSelector from '../components/wallet/ViewModeSelector';
 
 const Dashboard: React.FC = () => {
   const { 

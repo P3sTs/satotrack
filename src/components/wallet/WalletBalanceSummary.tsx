@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { CarteiraBTC } from '@/types/types';
-import { formatarBTC, formatarDataHora } from '@/utils/formatters';
+import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
+import { formatarBTC, formatDate } from '@/utils/formatters';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 
 interface WalletBalanceSummaryProps {
@@ -52,7 +52,7 @@ const WalletBalanceSummary: React.FC<WalletBalanceSummaryProps> = ({
       </div>
       
       <div className="text-sm text-muted-foreground mt-4 text-right">
-        Atualizado em: {formatarDataHora(carteira.ultimo_update)}
+        Atualizado em: {formatDate(carteira.ultimo_update)}
       </div>
     </div>
   );

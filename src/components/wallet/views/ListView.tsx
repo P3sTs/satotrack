@@ -32,7 +32,7 @@ const ListView: React.FC<ListViewProps> = ({ transacoes }) => {
   // Filter transactions by search term
   const filteredTransactions = transacoes.filter(tx => 
     tx.endereco.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.txid.toLowerCase().includes(searchTerm.toLowerCase())
+    tx.hash.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sort transactions
@@ -97,7 +97,7 @@ const ListView: React.FC<ListViewProps> = ({ transacoes }) => {
                   </TableRow>
                 ) : (
                   sortedTransactions.map((tx) => (
-                    <TableRow key={tx.txid}>
+                    <TableRow key={tx.hash}>
                       <TableCell className="font-medium">
                         {formatDate(tx.data)}
                       </TableCell>

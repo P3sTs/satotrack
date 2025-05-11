@@ -1,21 +1,30 @@
-
-import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../../types/types';
-
-export interface CarteirasContextType {
+export interface CarteiraContextType {
   carteiras: CarteiraBTC[];
-  transacoes: Record<string, TransacaoBTC[]>;
-  adicionarCarteira: (nome: string, endereco: string) => Promise<void>;
-  atualizarCarteira: (id: string) => Promise<void>;
-  carregarTransacoes: (id: string) => Promise<TransacaoBTC[]>;
-  removerCarteira: (id: string) => void;
-  ordenarCarteiras: (opcao: SortOption, direcao: SortDirection) => void;
-  definirCarteiraPrincipal: (id: string | null) => void;
-  atualizarNomeCarteira: (id: string, nome: string) => Promise<void>;
   carteiraPrincipal: string | null;
-  sortOption: SortOption;
-  sortDirection: SortDirection;
   isLoading: boolean;
-  isUpdating: Record<string, boolean>;
+  isUpdating: { [walletId: string]: boolean };
+  sortOption: string;
+  sortDirection: 'asc' | 'desc';
+  adicionarCarteira: (carteira: Omit<CarteiraBTC, 'id'>) => Promise<void>;
+  removerCarteira: (id: string) => Promise<void>;
+  atualizarNomeCarteira: (id: string, novoNome: string) => Promise<void>;
+  atualizarCarteira: (id: string) => Promise<void>;
+  definirCarteiraPrincipal: (id: string | null) => void;
+  ordenarCarteiras: (option: string) => void;
 }
 
-export const STORAGE_KEY_PRIMARY = 'satotrack_carteira_principal';
+// Export the CarteiraBTC interface
+export interface CarteiraBTC {
+  id: string;
+  nome: string;
+  endereco: string;
+  saldo: number;
+  total_entradas: number;
+  total_saidas: number;
+  qtde_transacoes: number;
+  ultimo_update: Date | string;
+}
+
+export interface CarteiraProviderProps {
+  children: React.ReactNode;
+}

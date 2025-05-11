@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TransacaoBTC } from '../types/types';
-import { formatarBTC, formatarData } from '../utils/formatters';
+import { formatBitcoinValue, formatDate } from '../utils/formatters';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 
 interface TransacoesListProps {
@@ -44,7 +44,7 @@ const TransacoesList: React.FC<TransacoesListProps> = ({ transacoes, isLoading =
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-muted-foreground mb-1">
-                {tx.tipo === 'entrada' ? 'Recebido' : 'Enviado'} • {formatarData(tx.data)}
+                {tx.tipo === 'entrada' ? 'Recebido' : 'Enviado'} • {formatDate(tx.data)}
               </p>
               <p className="text-xs font-mono text-muted-foreground truncate w-56 sm:w-auto">
                 {tx.hash}
@@ -56,7 +56,7 @@ const TransacoesList: React.FC<TransacoesListProps> = ({ transacoes, isLoading =
               ) : (
                 <ArrowUp className="h-3 w-3 mr-1" />
               )}
-              <span className="font-medium">{formatarBTC(tx.valor)}</span>
+              <span className="font-medium">{formatBitcoinValue(tx.valor)}</span>
             </div>
           </div>
         </div>

@@ -1,20 +1,21 @@
-
 export interface CarteiraBTC {
   id: string;
   nome: string;
   endereco: string;
   saldo: number;
-  ultimo_update: string;
   total_entradas: number;
   total_saidas: number;
   qtde_transacoes: number;
+  ultimo_update: Date | string;
 }
 
 export interface TransacaoBTC {
-  hash: string;
-  valor: number;
-  tipo: 'entrada' | 'saida';
-  data: string;
+  hash: string; // Transaction hash
+  txid: string; // Same as hash, needed for compatibility
+  valor: number; // Value in BTC
+  tipo: 'entrada' | 'saida'; // Type: received or sent
+  data: Date | string; // Date of the transaction
+  endereco: string; // Address involved in the transaction
 }
 
 export type SortOption = 'saldo' | 'ultimo_update';

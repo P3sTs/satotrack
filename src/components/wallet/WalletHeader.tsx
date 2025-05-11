@@ -33,7 +33,7 @@ const WalletHeader: React.FC<WalletHeaderProps> = ({ carteira, className, extraE
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold">{carteira.nome}</h1>
-            <WalletEditor walletId={carteira.id} initialName={carteira.nome} />
+            <WalletEditor initialName={carteira.nome} />
             <button
               onClick={togglePrimary}
               className="focus:outline-none"

@@ -43,9 +43,7 @@ function App() {
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <ViewModeProvider>
-                      <Dashboard />
-                    </ViewModeProvider>
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />
@@ -53,9 +51,7 @@ function App() {
                 path="/carteiras"
                 element={
                   <ProtectedRoute>
-                    <ViewModeProvider>
-                      <WalletsManager />
-                    </ViewModeProvider>
+                    <WalletsManager />
                   </ProtectedRoute>
                 }
               />

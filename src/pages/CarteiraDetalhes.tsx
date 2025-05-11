@@ -19,7 +19,7 @@ const CarteiraDetalhes: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { carteiras } = useCarteiras();
-  const { bitcoinData } = useBitcoinPrice();
+  const { data: bitcoinData } = useBitcoinPrice();
   const [transacoes, setTransacoes] = useState<TransacaoBTC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -83,7 +83,7 @@ const CarteiraDetalhes: React.FC = () => {
 
         <WalletBalanceSummary
           carteira={carteira}
-          bitcoinPrice={bitcoinData?.price_usd}
+          bitcoinData={bitcoinData}
         />
 
         <div className="mt-8">
@@ -92,7 +92,7 @@ const CarteiraDetalhes: React.FC = () => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-bitcoin"></div>
             </div>
           ) : transacoes.length === 0 ? (
-            <EmptyWalletState />
+            <EmptyWalletState onAddWallet={() => {}} />
           ) : (
             <ViewController 
               wallet={carteira}

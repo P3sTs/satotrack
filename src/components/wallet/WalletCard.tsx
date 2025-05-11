@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CarteiraBTC } from '../../types/types';
-import { formatarBTC, formatarData } from '../../utils/formatters';
+import { formatBitcoinValue, formatDate } from '../../utils/formatters';
 import { Button } from '@/components/ui/button';
 import { Pencil, RefreshCw, Star } from 'lucide-react';
 import { useCarteiras } from '../../contexts/CarteirasContext';
@@ -113,11 +113,11 @@ const WalletCard: React.FC<WalletCardProps> = ({ carteira }) => {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Total recebido</p>
-              <p className="font-medium">{formatarBTC(carteira.total_entradas)}</p>
+              <p className="font-medium">{formatBitcoinValue(carteira.total_entradas)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Total enviado</p>
-              <p className="font-medium">{formatarBTC(carteira.total_saidas)}</p>
+              <p className="font-medium">{formatBitcoinValue(carteira.total_saidas)}</p>
             </div>
           </div>
         </div>
@@ -125,12 +125,12 @@ const WalletCard: React.FC<WalletCardProps> = ({ carteira }) => {
         <div className="md:w-1/3 md:border-l md:pl-6 pt-4 md:pt-0">
           <div className="mb-4">
             <p className="text-xs text-muted-foreground mb-1">Saldo atual</p>
-            <p className="text-2xl font-bold bitcoin-gradient-text">{formatarBTC(carteira.saldo)}</p>
+            <p className="text-2xl font-bold bitcoin-gradient-text">{formatBitcoinValue(carteira.saldo)}</p>
           </div>
           
           <div className="mb-4">
             <p className="text-xs text-muted-foreground mb-1">Última atualização</p>
-            <p>{formatarData(carteira.ultimo_update)}</p>
+            <p>{formatDate(carteira.ultimo_update)}</p>
           </div>
           
           <div className="mb-4">

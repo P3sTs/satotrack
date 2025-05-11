@@ -67,7 +67,7 @@ const CompactView: React.FC<CompactViewProps> = ({ wallet, transacoes, bitcoinPr
               </div>
             ) : (
               latestTransactions.map((tx) => (
-                <div key={tx.txid} className="flex justify-between items-center p-4">
+                <div key={tx.hash} className="flex justify-between items-center p-4">
                   <div className="space-y-1">
                     <div className="flex items-center">
                       {tx.tipo === 'entrada' ? (

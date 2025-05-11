@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bitcoin, ArrowRight, RefreshCw, Star, Trash2 } from 'lucide-react';
 import { CarteiraBTC } from '../types/types';
-import { formatarBTC, formatarData } from '../utils/formatters';
+import { formatBitcoinValue, formatDate } from '../utils/formatters';
 import { Button } from '@/components/ui/button';
 import { useCarteiras } from '../contexts/CarteirasContext';
 import { 
@@ -86,11 +85,11 @@ const CarteiraCard: React.FC<CarteiraCardProps> = ({ carteira, isPrimary = false
           <div className="flex justify-between items-end">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Saldo</p>
-              <p className="text-xl md:text-2xl font-bold bitcoin-gradient-text">{formatarBTC(carteira.saldo)}</p>
+              <p className="text-xl md:text-2xl font-bold bitcoin-gradient-text">{formatBitcoinValue(carteira.saldo)}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-muted-foreground mb-1">Última atualização</p>
-              <p className="text-xs md:text-sm">{formatarData(carteira.ultimo_update)}</p>
+              <p className="text-xs md:text-sm">{formatDate(carteira.ultimo_update)}</p>
             </div>
           </div>
         </div>
