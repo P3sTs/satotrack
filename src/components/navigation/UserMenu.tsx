@@ -1,15 +1,11 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
 import { SecurityIndicator } from '../SecurityIndicator';
 import UserSettings from '../UserSettings';
-
-// Fix import path for AuthUser
-interface AuthUser {
-  id: string;
-  email: string;
-}
+import { AuthUser } from '@/contexts/auth/types';
 
 interface UserMenuProps {
   user: AuthUser | null;

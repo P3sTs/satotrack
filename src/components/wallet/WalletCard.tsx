@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CarteiraBTC } from '../../types/types';
 import { formatarBTC, formatarData } from '../../utils/formatters';
@@ -16,7 +15,7 @@ interface WalletCardProps {
 const WalletCard: React.FC<WalletCardProps> = ({ carteira }) => {
   const { 
     removerCarteira, 
-    updateWalletName, 
+    atualizarNomeCarteira, 
     atualizarCarteira, 
     isUpdating, 
     definirCarteiraPrincipal, 
@@ -41,7 +40,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ carteira }) => {
     }
 
     try {
-      await updateWalletName(carteira.id, newName.trim());
+      await atualizarNomeCarteira(carteira.id, newName.trim());
       setEditingWallet(false);
       toast.success('Nome da carteira atualizado com sucesso');
     } catch (error) {
