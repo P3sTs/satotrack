@@ -5,12 +5,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
 import { SecurityIndicator } from '../SecurityIndicator';
 import UserSettings from '../UserSettings';
+import { AuthUser } from '@/contexts/auth/types';
 
 interface UserMenuProps {
-  user: {
-    email: string;
-    [key: string]: any;
-  } | null;
+  user: AuthUser | null;
   getUserInitials: () => string;
   handleLogout: () => Promise<void>;
   navigate: (path: string) => void;
