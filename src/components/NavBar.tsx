@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,6 +30,7 @@ const NavBar: React.FC = () => {
     try {
       await signOut();
       navigate('/');
+      setIsMobileMenuOpen(false); // Close mobile menu after logout
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -44,6 +44,12 @@ const NavBar: React.FC = () => {
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+  
+  // Handle navigation in mobile menu
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMobileMenuOpen(false);
   };
 
   const MobileMenu = () => (
@@ -62,61 +68,55 @@ const NavBar: React.FC = () => {
         </div>
       )}
       
-      <Link 
-        to="/" 
-        className={`flex items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-        onClick={() => setIsMobileMenuOpen(false)}
+      <button 
+        onClick={() => handleNavigation('/')}
+        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
         <User className="h-4 w-4 mr-2" />
         Início
-      </Link>
+      </button>
       
       {user && (
         <>
-          <Link 
-            to="/dashboard" 
-            className={`flex items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-            onClick={() => setIsMobileMenuOpen(false)}
+          <button 
+            onClick={() => handleNavigation('/dashboard')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
           >
-            <User className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 mr-2" />
             Dashboard
-          </Link>
-          <Link 
-            to="/carteiras" 
-            className={`flex items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-            onClick={() => setIsMobileMenuOpen(false)}
+          </button>
+          <button 
+            onClick={() => handleNavigation('/carteiras')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
           >
             <Wallet className="h-4 w-4 mr-2" />
             Gerenciar Carteiras
-          </Link>
-          <Link 
-            to="/nova-carteira" 
-            className={`flex items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
-            onClick={() => setIsMobileMenuOpen(false)}
+          </button>
+          <button 
+            onClick={() => handleNavigation('/nova-carteira')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
           >
             <Wallet className="h-4 w-4 mr-2" />
             Nova Carteira
-          </Link>
+          </button>
         </>
       )}
       
-      <Link 
-        to="/sobre" 
-        className={`flex items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-        onClick={() => setIsMobileMenuOpen(false)}
+      <button 
+        onClick={() => handleNavigation('/sobre')}
+        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
         <User className="h-4 w-4 mr-2" />
         Sobre
-      </Link>
+      </button>
 
-      <Link 
-        to="/privacidade" 
-        className={`flex items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-        onClick={() => setIsMobileMenuOpen(false)}
+      <button 
+        onClick={() => handleNavigation('/privacidade')}
+        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
         <User className="h-4 w-4 mr-2" />
         Privacidade
-      </Link>
+      </button>
       
       <div className="pt-2 border-t border-dashboard-medium/30 mt-2">
         {user ? (
