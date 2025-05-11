@@ -1,37 +1,19 @@
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
-import { fetchCarteiraDados, fetchTransacoes, validarEnderecoBitcoin } from '../services/api';
-import { toast } from '@/components/ui/sonner';
-import { supabase } from '../integrations/supabase/client';
+import { CarteirasContextType, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
+import { 
+  loadCarteiras, 
+  addCarteira, 
+  updateCarteira, 
+  loadTransacoes, 
+  removeCarteira 
+} from '../services/carteirasService';
 
-interface CarteirasContextType {
-  carteiras: CarteiraBTC[];
-  transacoes: Record<string, TransacaoBTC[]>;
-  adicionarCarteira: (nome: string, endereco: string) => Promise<void>;
-  atualizarCarteira: (id: string) => Promise<void>;
-  carregarTransacoes: (id: string) => Promise<TransacaoBTC[]>;
-  removerCarteira: (id: string) => void;
-  ordenarCarteiras: (opcao: SortOption, direcao: SortDirection) => void;
-  definirCarteiraPrincipal: (id: string | null) => void;
-  carteiraPrincipal: string | null;
-  sortOption: SortOption;
-  sortDirection: SortDirection;
-  isLoading: boolean;
-  isUpdating: Record<string, boolean>;
-}
+export const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
 
-const STORAGE_KEY_PRIMARY = 'satotrack_carteira_principal';
-
-const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
-
-export const useCarteiras = () => {
-  const context = useContext(CarteirasContext);
-  if (!context) {
-    throw new Error('useCarteiras deve ser usado dentro de CarteirasProvider');
-  }
-  return context;
-};
+// Export useCarteiras from the hooks file
+export { useCarteiras } from './hooks/useCarteirasContext';
 
 export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [carteiras, setCarteiras] = useState<CarteiraBTC[]>([]);
@@ -47,32 +29,10 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
   // Carregar todas as carteiras do usuário
   useEffect(() => {
     async function carregarCarteiras() {
+      setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('bitcoin_wallets')
-          .select('*')
-          .order(sortOption === 'saldo' ? 'balance' : 'last_updated', { ascending: sortDirection === 'asc' });
-          
-        if (error) {
-          throw error;
-        }
-        
-        // Mapear do formato do banco para o formato da aplicação
-        const carteirasFormatadas = data.map(c => ({
-          id: c.id,
-          nome: c.name,
-          endereco: c.address,
-          saldo: Number(c.balance),
-          ultimo_update: c.last_updated,
-          total_entradas: Number(c.total_received),
-          total_saidas: Number(c.total_sent),
-          qtde_transacoes: c.transaction_count
-        }));
-        
-        setCarteiras(carteirasFormatadas);
-      } catch (error) {
-        console.error('Erro ao carregar carteiras:', error);
-        toast.error('Erro ao carregar suas carteiras');
+        const data = await loadCarteiras(sortOption, sortDirection);
+        setCarteiras(data);
       } finally {
         setIsLoading(false);
       }
@@ -82,86 +42,18 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [sortOption, sortDirection]);
 
   const adicionarCarteira = useCallback(async (nome: string, endereco: string): Promise<void> => {
-    if (!validarEnderecoBitcoin(endereco)) {
-      throw new Error('Endereço Bitcoin inválido');
-    }
-
-    // Verificar se o endereço já existe para este usuário
-    const { data: existingWallet, error: checkError } = await supabase
-      .from('bitcoin_wallets')
-      .select('id')
-      .eq('address', endereco)
-      .maybeSingle();
-
-    if (checkError) {
-      console.error('Error checking existing wallet:', checkError);
-      throw new Error(`Erro ao verificar carteira: ${checkError.message}`);
-    }
-
-    if (existingWallet) {
-      throw new Error('Este endereço já está sendo monitorado por você');
-    }
-
     setIsLoading(true);
     try {
-      // Buscar dados atualizados da carteira
-      const dados = await fetchCarteiraDados(endereco);
-      
-      // Inserir nova carteira no banco
-      const { data, error } = await supabase
-        .from('bitcoin_wallets')
-        .insert({
-          name: nome,
-          address: endereco,
-          balance: dados.saldo,
-          total_received: dados.total_entradas,
-          total_sent: dados.total_saidas,
-          transaction_count: dados.qtde_transacoes,
-          last_updated: new Date().toISOString()
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error inserting wallet:', error);
-        throw new Error(`Erro ao adicionar carteira: ${error.message}`);
-      }
-      
-      // Adicionar a nova carteira ao estado
-      const novaCarteira: CarteiraBTC = {
-        id: data.id,
-        nome: data.name,
-        endereco: data.address,
-        saldo: Number(data.balance),
-        ultimo_update: data.last_updated,
-        total_entradas: Number(data.total_received),
-        total_saidas: Number(data.total_sent),
-        qtde_transacoes: data.transaction_count
-      };
-      
+      const novaCarteira = await addCarteira(nome, endereco);
       setCarteiras(prevCarteiras => [...prevCarteiras, novaCarteira]);
-      toast.success(`Carteira "${nome}" adicionada com sucesso!`);
       
       // Carregar transações iniciais
       try {
-        const txs = await fetchTransacoes(data.id);
-        setTransacoes(prev => ({...prev, [data.id]: txs}));
+        const txs = await loadTransacoes(novaCarteira.id);
+        setTransacoes(prev => ({...prev, [novaCarteira.id]: txs}));
       } catch (txError) {
         console.error('Error loading transactions:', txError);
         // Don't throw here, just log the error as this is not critical
-      }
-      
-    } catch (error) {
-      console.error('Error adding wallet:', error);
-      if (error instanceof Error) {
-        toast.error(`Erro ao adicionar carteira: ${error.message}`);
-        throw error;
-      } else {
-        const errorMessage = typeof error === 'object' && error !== null 
-          ? JSON.stringify(error)
-          : 'Erro desconhecido';
-        toast.error(`Erro ao adicionar carteira: ${errorMessage}`);
-        throw new Error(errorMessage);
       }
     } finally {
       setIsLoading(false);
@@ -174,29 +66,17 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setIsUpdating(prev => ({ ...prev, [id]: true }));
     try {
-      // Chamar edge function para atualizar dados na blockchain
-      const dados = await fetchCarteiraDados(carteira.endereco, id);
+      // Atualizar carteira usando o serviço
+      const carteiraAtualizada = await updateCarteira(carteira);
       
       // Atualizar carteira localmente
       setCarteiras(prevCarteiras => 
-        prevCarteiras.map(c => c.id === id ? {
-          ...c,
-          saldo: dados.saldo!,
-          ultimo_update: new Date().toISOString(),
-          total_entradas: dados.total_entradas!,
-          total_saidas: dados.total_saidas!,
-          qtde_transacoes: dados.qtde_transacoes!
-        } : c)
+        prevCarteiras.map(c => c.id === id ? carteiraAtualizada : c)
       );
       
       // Buscar transações atualizadas
-      const txs = await fetchTransacoes(id);
+      const txs = await loadTransacoes(id);
       setTransacoes(prev => ({...prev, [id]: txs}));
-      
-      toast.success(`Dados da carteira "${carteira.nome}" atualizados!`);
-    } catch (error) {
-      toast.error('Erro ao atualizar carteira: ' + (error instanceof Error ? error.message : String(error)));
-      throw error;
     } finally {
       setIsUpdating(prev => ({ ...prev, [id]: false }));
     }
@@ -210,26 +90,14 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       return transacoes[id];
     }
 
-    try {
-      const txs = await fetchTransacoes(id);
-      setTransacoes(prev => ({...prev, [id]: txs}));
-      return txs;
-    } catch (error) {
-      toast.error('Erro ao carregar transações: ' + (error instanceof Error ? error.message : String(error)));
-      return [];
-    }
+    const txs = await loadTransacoes(id);
+    setTransacoes(prev => ({...prev, [id]: txs}));
+    return txs;
   }, [carteiras, transacoes]);
 
   const removerCarteira = useCallback(async (id: string): Promise<void> => {
     try {
-      const { error } = await supabase
-        .from('bitcoin_wallets')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
+      await removeCarteira(id);
       
       // Se a carteira removida era a principal, limpar a configuração
       if (carteiraPrincipal === id) {
@@ -243,9 +111,8 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
         delete newTransacoes[id];
         return newTransacoes;
       });
-      toast.info('Carteira removida do monitoramento');
     } catch (error) {
-      toast.error('Erro ao remover carteira: ' + (error instanceof Error ? error.message : String(error)));
+      console.error('Error removing wallet:', error);
     }
   }, [carteiraPrincipal]);
 
