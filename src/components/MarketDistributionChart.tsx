@@ -35,12 +35,12 @@ const MarketDistributionChart = () => {
         const marketCapPercentage = data.data.market_cap_percentage;
         
         // Formatar dados para o gráfico
-        const formattedData = Object.entries(marketCapPercentage)
-          .sort(([, a], [, b]) => (b as number) - (a as number))
+        const formattedData: MarketData[] = Object.entries(marketCapPercentage)
+          .sort(([, a], [, b]) => (Number(b) - Number(a)))
           .slice(0, 6) // Pegar as 6 maiores criptomoedas
           .map(([name, value], index) => ({
             name: name.toUpperCase(),
-            value: value,
+            value: Number(value),
             color: COLORS[index % COLORS.length]
           }));
         
@@ -121,10 +121,10 @@ const MarketDistributionChart = () => {
             formatter={(value, entry, index) => marketData[index].name}
           />
           <Tooltip
-            formatter={(value) => [`${value.toFixed(2)}%`, 'Dominância']}
+            formatter={(value) => [`${Number(value).toFixed(2)}%`, 'Dominância']}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
-                const data = payload[0].payload;
+                const data = payload[0].payload as MarketData;
                 return (
                   <Card className="p-3 border shadow-md">
                     <p className="font-medium">{data.name}</p>

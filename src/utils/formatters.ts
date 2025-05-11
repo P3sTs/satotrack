@@ -39,3 +39,13 @@ export function formatarHash(hash: string): string {
   if (hash.length <= 16) return hash;
   return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
 }
+
+// Adding the missing formatCurrency function
+export function formatCurrency(value: number, currency: string = 'USD', digits: number = 2): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  }).format(value);
+}
