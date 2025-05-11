@@ -18,12 +18,28 @@ export const useBitcoinPrice = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   const fetchBitcoinData = useCallback(async () => {
     try {
-      // CoinGecko API endpoint
+      // Indicar que estamos carregando dados
+      if (!isRefreshing && !bitcoinData) {
+        setIsLoading(true);
+      }
+      
+      console.log('Buscando dados do Bitcoin da API CoinGecko...');
+      
+      // CoinGecko API endpoint com parâmetros opcionais para evitar rate limiting
       const response = await fetch(
-        'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false'
+        'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false',
+        { 
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
+          cache: 'no-store'
+        }
       );
       
       if (!response.ok) {
@@ -62,43 +78,69 @@ export const useBitcoinPrice = () => {
         last_updated: data.market_data.last_updated
       };
       
+      console.log('Dados do Bitcoin obtidos com sucesso:', formattedData);
+      
       setBitcoinData(formattedData);
       setError(null);
+      setRetryCount(0); // Reseta o contador de tentativas após sucesso
     } catch (err) {
       console.error('Error fetching Bitcoin data:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch Bitcoin data'));
       
-      // Show error toast only once
-      if (!error) {
-        toast({
-          variant: "destructive",
-          title: "Erro ao carregar dados do mercado",
-          description: "Não foi possível obter os dados de preço do Bitcoin."
-        });
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Tentativa ${retryCount + 1} de ${MAX_RETRIES}. Tentando novamente em 3 segundos...`);
+        // Incrementa o contador de tentativas e tenta novamente após um tempo
+        setRetryCount(prevCount => prevCount + 1);
+        setTimeout(() => {
+          fetchBitcoinData();
+        }, 3000);
+      } else {
+        setError(err instanceof Error ? err : new Error('Failed to fetch Bitcoin data'));
+        
+        // Mostrar toast de erro apenas uma vez
+        if (!error) {
+          toast({
+            variant: "destructive",
+            title: "Erro ao carregar dados do mercado",
+            description: "Não foi possível obter os dados de preço do Bitcoin. Tente novamente mais tarde."
+          });
+        }
       }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [bitcoinData, error]);
+  }, [bitcoinData, error, isRefreshing, retryCount]);
   
   // Initial load
   useEffect(() => {
-    fetchBitcoinData();
+    let isMounted = true;
     
-    // Set up 15-second refresh interval
+    const loadData = async () => {
+      if (isMounted) {
+        await fetchBitcoinData();
+      }
+    };
+    
+    loadData();
+    
+    // Set up refresh interval - a cada 15 segundos
     const intervalId = setInterval(() => {
-      fetchBitcoinData();
+      if (isMounted) {
+        fetchBitcoinData();
+      }
     }, 15000);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [fetchBitcoinData]);
   
-  // Function to manually refresh data
-  const refreshData = () => {
+  // Função para atualizar manualmente os dados
+  const refreshData = useCallback(() => {
     setIsRefreshing(true);
     fetchBitcoinData();
-  };
+  }, [fetchBitcoinData]);
   
   return {
     bitcoinData,
