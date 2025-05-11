@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import BitcoinMarketData from './BitcoinMarketData';
 import BitcoinCharts from './BitcoinCharts';
-import LoadingStates from './LoadingStates';
+import { LoadingStates } from './LoadingStates';
 import { RefreshCw } from 'lucide-react';
 
 interface MarketSummaryProps {
