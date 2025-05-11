@@ -40,9 +40,21 @@ export function formatarHash(hash: string): string {
   return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
 }
 
-// Adding the missing formatCurrency function
+// Aprimorando a função formatCurrency para ter melhor formatação
 export function formatCurrency(value: number, currency: string = 'USD', digits: number = 2): string {
-  return new Intl.NumberFormat('en-US', {
+  const locale = currency === 'BRL' ? 'pt-BR' : 'en-US';
+  
+  // Para valores muito grandes, usar formatação compacta
+  if (value > 1000000) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      notation: 'compact',
+      compactDisplay: 'short'
+    }).format(value);
+  }
+  
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: digits,

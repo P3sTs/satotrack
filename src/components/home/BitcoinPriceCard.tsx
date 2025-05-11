@@ -21,22 +21,24 @@ const BitcoinPriceCard = ({
   showChange = true,
   digits = 2 
 }: BitcoinPriceCardProps) => {
+  const isNegative = changePercentage !== undefined && changePercentage < 0;
+  
   return (
-    <Card className="bitcoin-card">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
+    <Card className="bitcoin-card overflow-hidden border-none shadow-md">
+      <CardHeader className="pb-2 bg-muted/30">
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <div className="flex items-baseline justify-between">
-          <div className="text-2xl font-bold">{formatCurrency(price, currency, digits)}</div>
+          <div className="text-2xl md:text-3xl font-bold">{formatCurrency(price, currency, digits)}</div>
           {showChange && changePercentage !== undefined && (
-            <div className={`flex items-center ${changePercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {changePercentage >= 0 ? (
-                <TrendingUp className="h-4 w-4 mr-1" />
-              ) : (
+            <div className={`flex items-center font-medium ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
+              {isNegative ? (
                 <TrendingDown className="h-4 w-4 mr-1" />
+              ) : (
+                <TrendingUp className="h-4 w-4 mr-1" />
               )}
-              <span>{changePercentage.toFixed(2)}%</span>
+              <span>{Math.abs(changePercentage).toFixed(2)}%</span>
             </div>
           )}
         </div>

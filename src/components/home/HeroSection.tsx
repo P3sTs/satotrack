@@ -1,39 +1,50 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Bitcoin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-dashboard-dark to-background">
-      <div className="container px-4 md:px-6 mx-auto flex flex-col items-center text-center gap-4">
-        <Bitcoin className="h-12 w-12 text-bitcoin animate-pulse-slow" />
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tighter bitcoin-gradient-text">
-          SatoTrack
-        </h1>
-        <p className="max-w-[700px] text-zinc-200 md:text-xl">
-          Monitore o mercado de Bitcoin e suas carteiras em tempo real.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          {!user ? (
-            <Link to="/auth">
-              <Button className="bg-bitcoin hover:bg-bitcoin-dark">
-                Monitorar Carteiras BTC
-                <ArrowRight className="ml-2 h-4 w-4" />
+    <section className="bg-gradient-to-r from-primary/90 to-bitcoin py-12 text-white">
+      <div className="container px-4 md:px-6 mx-auto">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold">
+            Monitor e Analise seus <span className="text-bitcoin">Bitcoins</span>
+          </h1>
+          <p className="text-lg md:text-xl max-w-2xl opacity-90">
+            Acompanhe suas carteiras de Bitcoin, analise o mercado em tempo real e tome decisões mais informadas.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <Button 
+              onClick={handleGetStarted}
+              size="lg" 
+              className="bg-bitcoin hover:bg-bitcoin/80 text-white font-bold"
+            >
+              {user ? 'Acessar Dashboard' : 'Começar Agora'}
+            </Button>
+            {!user && (
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/auth')}
+                className="bg-transparent border-white text-white hover:bg-white/10"
+              >
+                Entrar
               </Button>
-            </Link>
-          ) : (
-            <Link to="/dashboard">
-              <Button className="bg-bitcoin hover:bg-bitcoin-dark">
-                Ir para o Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </section>
