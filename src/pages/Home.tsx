@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 
 const Home = () => {
-  const { data: bitcoinData, previousPrice, isLoading, isRefreshing, refresh } = useBitcoinPrice();
+  const { bitcoinData, previousPrice, isLoading, isRefreshing, refreshData } = useBitcoinPrice();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -26,7 +26,7 @@ const Home = () => {
           isRefreshing={isRefreshing}
           bitcoinData={bitcoinData}
           previousPrice={previousPrice}
-          onRefresh={refresh}
+          onRefresh={refreshData}
         />
         
         {/* Call to Action Section */}
