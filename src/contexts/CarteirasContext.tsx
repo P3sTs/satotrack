@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
 import { fetchCarteiraDados, fetchTransacoes, validarEnderecoBitcoin } from '../services/api';
@@ -85,7 +86,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       throw new Error('Endereço Bitcoin inválido');
     }
 
-    // Verificar se o endereço já existe
+    // Verificar se o endereço já existe para este usuário
     const { data: existingWallet, error: checkError } = await supabase
       .from('bitcoin_wallets')
       .select('id')
@@ -98,7 +99,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
 
     if (existingWallet) {
-      throw new Error('Este endereço já está sendo monitorado');
+      throw new Error('Este endereço já está sendo monitorado por você');
     }
 
     setIsLoading(true);
