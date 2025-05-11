@@ -4,17 +4,28 @@ import { useCarteiras } from '../contexts/CarteirasContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pencil, Save, X, Plus, AlertTriangle } from 'lucide-react';
+import { Pencil, Save, X, Plus, AlertTriangle, RefreshCw, Star } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import NewWalletModal from '../components/NewWalletModal';
 import { CarteiraBTC } from '../types/types';
 import { formatarBTC, formatarData } from '../utils/formatters';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const WalletsManager: React.FC = () => {
-  const { carteiras, isLoading, removerCarteira, updateWalletName } = useCarteiras();
+  const { carteiras, isLoading, removerCarteira, updateWalletName, atualizarCarteira, isUpdating, definirCarteiraPrincipal, carteiraPrincipal } = useCarteiras();
   const [isNewWalletModalOpen, setIsNewWalletModalOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
   const [newWalletName, setNewWalletName] = useState('');
+  const [walletToDelete, setWalletToDelete] = useState<string | null>(null);
 
   const handleStartEdit = (carteira: CarteiraBTC) => {
     setEditingWallet(carteira.id);
@@ -43,6 +54,39 @@ const WalletsManager: React.FC = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (walletToDelete) {
+      try {
+        await removerCarteira(walletToDelete);
+        setWalletToDelete(null);
+        toast.success('Carteira removida com sucesso');
+      } catch (error) {
+        toast.error('Erro ao remover a carteira');
+        console.error(error);
+      }
+    }
+  };
+
+  const handleUpdate = async (id: string) => {
+    try {
+      await atualizarCarteira(id);
+      toast.success('Carteira atualizada com sucesso');
+    } catch (error) {
+      toast.error('Erro ao atualizar a carteira');
+      console.error(error);
+    }
+  };
+
+  const togglePrimaryWallet = (id: string) => {
+    if (carteiraPrincipal === id) {
+      definirCarteiraPrincipal(null);
+      toast.success('Carteira principal removida');
+    } else {
+      definirCarteiraPrincipal(id);
+      toast.success('Carteira definida como principal');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -52,9 +96,11 @@ const WalletsManager: React.FC = () => {
         </div>
         <Button 
           onClick={() => setIsNewWalletModalOpen(true)}
-          className="bg-bitcoin hover:bg-bitcoin-dark text-white"
+          variant="bitcoin"
+          size="lg"
+          className="gap-2"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4" />
           Nova Carteira
         </Button>
       </div>
@@ -79,16 +125,18 @@ const WalletsManager: React.FC = () => {
           <p className="text-muted-foreground mb-6">Adicione uma carteira Bitcoin para começar a monitorá-la</p>
           <Button 
             onClick={() => setIsNewWalletModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 rounded-lg bg-bitcoin hover:bg-bitcoin-dark text-white transition-colors"
+            variant="bitcoin"
+            size="lg"
+            className="gap-2"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Adicionar Carteira
           </Button>
         </div>
       ) : (
         <div className="space-y-4">
           {carteiras.map(carteira => (
-            <div key={carteira.id} className="border rounded-lg p-6 bg-card">
+            <div key={carteira.id} className={`border rounded-lg p-6 bg-card ${carteiraPrincipal === carteira.id ? 'ring-2 ring-bitcoin' : ''}`}>
               <div className="flex flex-col md:flex-row justify-between">
                 <div className="md:w-2/3">
                   {editingWallet === carteira.id ? (
@@ -167,7 +215,34 @@ const WalletsManager: React.FC = () => {
                     <p>{carteira.qtde_transacoes}</p>
                   </div>
                   
-                  <div className="flex space-x-2 mt-4">
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleUpdate(carteira.id)}
+                      disabled={!!isUpdating[carteira.id]}
+                      className="w-full"
+                    >
+                      {isUpdating[carteira.id] ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                      )}
+                      Atualizar
+                    </Button>
+                    
+                    <Button 
+                      variant={carteiraPrincipal === carteira.id ? "neon" : "outline"}
+                      size="sm"
+                      onClick={() => togglePrimaryWallet(carteira.id)}
+                      className="w-full"
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      {carteiraPrincipal === carteira.id ? "Principal" : "Favoritar"}
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 mt-2">
                     <Button 
                       variant="outline" 
                       size="sm" 
@@ -179,7 +254,7 @@ const WalletsManager: React.FC = () => {
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => removerCarteira(carteira.id)}
+                      onClick={() => setWalletToDelete(carteira.id)}
                       className="w-full"
                     >
                       Remover
@@ -196,6 +271,23 @@ const WalletsManager: React.FC = () => {
         isOpen={isNewWalletModalOpen}
         onClose={() => setIsNewWalletModalOpen(false)}
       />
+
+      <AlertDialog open={!!walletToDelete} onOpenChange={(open) => !open && setWalletToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover carteira?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Esta carteira será removida do seu monitoramento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              Sim, remover carteira
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
