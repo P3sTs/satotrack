@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useCarteiras } from '../contexts/CarteirasContext';
 import CarteiraCard from '../components/CarteiraCard';
 import SortControls from '../components/SortControls';
-import { Bitcoin, Plus } from 'lucide-react';
+import { Bitcoin, Plus, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NewWalletModal from '../components/NewWalletModal';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,13 @@ const Dashboard: React.FC = () => {
             <Plus className="h-4 w-4 mr-2" />
             Nova Carteira
           </Button>
+          
+          <Link to="/carteiras">
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Gerenciar Carteiras</span>
+            </Button>
+          </Link>
           
           <SortControls 
             sortOption={sortOption}

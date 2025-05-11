@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Sobre from "./pages/Sobre";
 import Privacidade from "./pages/Privacidade";
+import WalletsManager from "./pages/WalletsManager";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,16 @@ const App = () => (
                       <NavBar />
                       <main className="flex-grow">
                         <Dashboard />
+                      </main>
+                      <Footer />
+                    </>
+                  } />
+                  
+                  <Route path="/carteiras" element={
+                    <>
+                      <NavBar />
+                      <main className="flex-grow">
+                        <WalletsManager />
                       </main>
                       <Footer />
                     </>

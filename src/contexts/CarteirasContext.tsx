@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
 import { CarteirasContextType, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
@@ -6,7 +7,8 @@ import {
   addCarteira, 
   updateCarteira, 
   loadTransacoes, 
-  removeCarteira 
+  removeCarteira,
+  updateWalletName 
 } from '../services/carteiras';
 
 export const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
@@ -115,6 +117,20 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [carteiraPrincipal]);
 
+  const updateWalletName = useCallback(async (id: string, nome: string): Promise<void> => {
+    try {
+      await updateWalletName(id, nome);
+      
+      // Atualizar carteira localmente
+      setCarteiras(prevCarteiras => 
+        prevCarteiras.map(c => c.id === id ? { ...c, nome } : c)
+      );
+    } catch (error) {
+      console.error('Error updating wallet name:', error);
+      throw error;
+    }
+  }, []);
+
   const ordenarCarteiras = useCallback((opcao: SortOption, direcao: SortDirection): void => {
     setSortOption(opcao);
     setSortDirection(direcao);
@@ -141,6 +157,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       ordenarCarteiras,
       definirCarteiraPrincipal,
       carteiraPrincipal,
+      updateWalletName,
       sortOption,
       sortDirection,
       isLoading,
