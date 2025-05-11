@@ -64,6 +64,7 @@ const Footer: React.FC = () => {
             <span className="inline-block h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-satotrack-neon mr-1 md:mr-2 animate-pulse-slow"></span>
             Acompanhando transações em tempo real com alta precisão
           </p>
+          <p className="mt-2 text-satotrack-neon">Feito com ❤️🇧🇷</p>
         </div>
       </div>
     </footer>

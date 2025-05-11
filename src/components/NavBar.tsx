@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Menu, X, LogOut, User, Wallet } from 'lucide-react';
+import { Menu, X, LogOut, User, Wallet, Mail } from 'lucide-react';
 import UserSettings from './UserSettings';
 import MainNav from './MainNav';
 import { SecurityIndicator } from './SecurityIndicator';
@@ -18,11 +18,13 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NavBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   
   const handleLogout = async () => {
@@ -34,13 +36,38 @@ const NavBar: React.FC = () => {
     }
   };
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.email) return 'U';
+    return user.email.substring(0, 1).toUpperCase();
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   const MobileMenu = () => (
     <div className="space-y-3 py-3">
+      {user && (
+        <div className="flex flex-col items-center py-4 mb-2 border-b border-dashboard-medium/30">
+          <Avatar className="h-16 w-16 mb-2">
+            <AvatarFallback className="bg-satotrack-neon/20 text-satotrack-neon text-lg">
+              {getUserInitials()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="text-center">
+            <p className="text-sm font-medium">{user.email}</p>
+            <p className="text-xs text-satotrack-text mt-1">Usuário SatoTrack</p>
+          </div>
+        </div>
+      )}
+      
       <Link 
         to="/" 
-        className="block py-2 px-4 rounded-md hover:bg-dashboard-medium/20"
+        className={`flex items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
+        <User className="h-4 w-4 mr-2" />
         Início
       </Link>
       
@@ -48,14 +75,15 @@ const NavBar: React.FC = () => {
         <>
           <Link 
             to="/dashboard" 
-            className="block py-2 px-4 rounded-md hover:bg-dashboard-medium/20"
+            className={`flex items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
+            <User className="h-4 w-4 mr-2" />
             Dashboard
           </Link>
           <Link 
             to="/carteiras" 
-            className="flex items-center py-2 px-4 rounded-md hover:bg-dashboard-medium/20"
+            className={`flex items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <Wallet className="h-4 w-4 mr-2" />
@@ -63,9 +91,10 @@ const NavBar: React.FC = () => {
           </Link>
           <Link 
             to="/nova-carteira" 
-            className="flex items-center py-2 px-4 rounded-md hover:bg-dashboard-medium/20 ml-6"
+            className={`flex items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
+            <Wallet className="h-4 w-4 mr-2" />
             Nova Carteira
           </Link>
         </>
@@ -73,10 +102,20 @@ const NavBar: React.FC = () => {
       
       <Link 
         to="/sobre" 
-        className="block py-2 px-4 rounded-md hover:bg-dashboard-medium/20"
+        className={`flex items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
+        <User className="h-4 w-4 mr-2" />
         Sobre
+      </Link>
+
+      <Link 
+        to="/privacidade" 
+        className={`flex items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        <User className="h-4 w-4 mr-2" />
+        Privacidade
       </Link>
       
       <div className="pt-2 border-t border-dashboard-medium/30 mt-2">
@@ -120,20 +159,30 @@ const NavBar: React.FC = () => {
             </Link>
           </div>
           
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden md:flex items-center justify-center flex-1 px-4">
             <MainNav />
           </div>
           
           {/* Auth actions */}
           <div className="hidden md:flex items-center gap-2">
             {user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <SecurityIndicator />
-                <UserSettings />
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <div className="flex items-center gap-2 border-l border-dashboard-medium/30 pl-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-satotrack-neon/20 text-satotrack-neon">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden lg:block">
+                    <p className="text-sm font-medium">{user.email}</p>
+                  </div>
+                  <UserSettings />
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="ml-1">
                   <LogOut className="h-4 w-4 mr-1" />
-                  Sair
+                  <span className="hidden sm:inline">Sair</span>
                 </Button>
               </div>
             ) : (
