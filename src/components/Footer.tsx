@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Bitcoin, Github, Instagram, MessageCircle } from 'lucide-react';
+import { Github, Instagram, MessageCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -59,10 +59,10 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="mt-6 text-center text-xs text-satotrack-text">
-          <p>© {new Date().getFullYear()} SatoTrack. <span>O olho invisível da blockchain.</span></p>
+          <p>© {new Date().getFullYear()} SatoTrack. <span>Sistema avançado de monitoramento de transações blockchain.</span></p>
           <p className="mt-1">
             <span className="inline-block h-2 w-2 rounded-full bg-satotrack-neon mr-2 animate-pulse-slow"></span>
-            Monitorando a blockchain em tempo real
+            Acompanhando transações em tempo real com alta precisão
           </p>
         </div>
       </div>

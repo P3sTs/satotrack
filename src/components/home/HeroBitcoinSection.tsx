@@ -34,7 +34,7 @@ const HeroBitcoinSection = () => {
             </h1>
           </div>
           <p className="text-lg md:text-xl max-w-2xl text-gray-300 font-inter">
-            O olho invisível da blockchain
+            Sistema avançado de monitoramento de transações blockchain
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             {!user && (
