@@ -6,11 +6,11 @@ import { LogOut, User } from 'lucide-react';
 import { SecurityIndicator } from '../SecurityIndicator';
 import UserSettings from '../UserSettings';
 
-// Import from the source file directly to match the exact type
-import { User as AuthUser } from '@/contexts/auth/types';
-
 interface UserMenuProps {
-  user: AuthUser | null;
+  user: {
+    email: string;
+    [key: string]: any;
+  } | null;
   getUserInitials: () => string;
   handleLogout: () => Promise<void>;
   navigate: (path: string) => void;
