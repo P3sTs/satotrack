@@ -8,7 +8,7 @@ const Home = () => {
   const { data: bitcoinData, previousPrice, isLoading, isRefreshing, refresh } = useBitcoinPrice();
   
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-dashboard-dark">
       <HeroBitcoinSection />
       <MarketSummary 
         isLoading={isLoading}

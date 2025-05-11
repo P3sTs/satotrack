@@ -1,42 +1,50 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+
+/* Estilos específicos do SatoTrack */
+
+.satotrack-logo {
+  filter: drop-shadow(0 0 2px rgba(0, 255, 194, 0.5));
+  transition: filter 0.3s ease;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.satotrack-logo:hover {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 194, 0.8));
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.tech-panel {
+  background: linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%);
+  border: 1px solid rgba(0, 255, 194, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.cyber-button {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1A1A1A 0%, #0F0F0F 100%);
+  border: 1px solid rgba(0, 255, 194, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cyber-button:hover {
+  border-color: rgba(0, 255, 194, 0.8);
+  box-shadow: 0 0 15px rgba(0, 255, 194, 0.4);
+}
+
+.cyber-button:before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 194, 0.7), transparent);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: translateX(100%);
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

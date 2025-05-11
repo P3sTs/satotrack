@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				orbitron: ['Orbitron', 'sans-serif'],
+				inter: ['Inter', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -68,9 +72,14 @@ export default {
 					dark: '#D97C0B'
 				},
 				dashboard: {
-					dark: '#1A1F2C',
-					medium: '#252D3F',
-					light: '#2E3650'
+					dark: '#0F0F0F',   // Preto profundo
+					medium: '#1A1A1A',  // Base neutra 1
+					light: '#2B2B2B'    // Base neutra 2
+				},
+				satotrack: {
+					neon: '#00FFC2',    // Verde neon para destaques
+					alert: '#FF6F00',   // Laranja queimado para alertas
+					text: '#727272'     // Cinza médio para textos secundários
 				}
 			},
 			borderRadius: {
@@ -102,12 +111,21 @@ export default {
 					'50%': {
 						opacity: '0.8'
 					}
+				},
+				'glow': {
+					'0%, 100%': {
+						filter: 'drop-shadow(0 0 2px #00FFC2)'
+					},
+					'50%': {
+						filter: 'drop-shadow(0 0 6px #00FFC2)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-slow': 'pulse-slow 3s infinite'
+				'pulse-slow': 'pulse-slow 3s infinite',
+				'glow': 'glow 3s infinite'
 			}
 		}
 	},

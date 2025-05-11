@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, AlertCircle, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BitcoinPriceCard from './BitcoinPriceCard';
@@ -25,12 +26,12 @@ const MarketSummary = ({
   return (
     <section className="container px-4 md:px-6 py-8 mx-auto">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold">Mercado Bitcoin</h2>
+        <h2 className="text-2xl md:text-3xl font-orbitron satotrack-gradient-text">Mercado Bitcoin</h2>
         <Button 
           variant="outline" 
           onClick={onRefresh} 
           disabled={isRefreshing}
-          className="flex items-center gap-2 border-bitcoin text-bitcoin hover:bg-bitcoin/10"
+          className="flex items-center gap-2 border-satotrack-neon text-satotrack-neon hover:bg-satotrack-neon/10"
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           Atualizar
@@ -38,18 +39,18 @@ const MarketSummary = ({
       </div>
 
       {bitcoinData?.market_trend === 'bullish' && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 mb-6">
-          <TrendingUp className="h-5 w-5 text-green-600" />
-          <p className="text-green-800">
+        <div className="bg-satotrack-neon/5 border border-satotrack-neon/20 rounded-lg p-4 flex items-center gap-3 mb-6">
+          <TrendingUp className="h-5 w-5 text-satotrack-neon" />
+          <p className="text-satotrack-neon">
             <strong>Mercado em Alta:</strong> O Bitcoin está em tendência de alta com variação positiva significativa nas últimas 24h.
           </p>
         </div>
       )}
 
       {bitcoinData?.market_trend === 'bearish' && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3 mb-6">
-          <TrendingDown className="h-5 w-5 text-red-600" />
-          <p className="text-red-800">
+        <div className="bg-satotrack-alert/5 border border-satotrack-alert/20 rounded-lg p-4 flex items-center gap-3 mb-6">
+          <TrendingDown className="h-5 w-5 text-satotrack-alert" />
+          <p className="text-satotrack-alert">
             <strong>Mercado em Baixa:</strong> O Bitcoin está em tendência de queda com variação negativa significativa nas últimas 24h.
           </p>
         </div>
@@ -57,23 +58,23 @@ const MarketSummary = ({
       
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-bitcoin"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-satotrack-neon"></div>
         </div>
       ) : bitcoinData ? (
         <>
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="bg-bitcoin/10 p-2 rounded-full">
+                <div className="bg-satotrack-neon/10 p-2 rounded-full">
                   <img 
                     src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
                     alt="SatoTrack Logo" 
-                    className="h-8 w-8 object-contain"
+                    className="h-8 w-8 object-contain satotrack-logo"
                   />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Bitcoin</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <h2 className="text-2xl font-orbitron font-bold">Bitcoin</h2>
+                  <p className="text-sm text-satotrack-text">
                     Atualizado: {formatarData(bitcoinData.last_updated)}
                   </p>
                 </div>
@@ -82,10 +83,12 @@ const MarketSummary = ({
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               <div className="col-span-1 lg:col-span-2">
-                <BitcoinCandlestickChart 
-                  priceUSD={bitcoinData.price_usd}
-                  changePercentage={bitcoinData.price_change_percentage_24h}
-                />
+                <div className="cyberpunk-card p-1">
+                  <BitcoinCandlestickChart 
+                    priceUSD={bitcoinData.price_usd}
+                    changePercentage={bitcoinData.price_change_percentage_24h}
+                  />
+                </div>
               </div>
               
               <div className="space-y-6">
@@ -122,12 +125,12 @@ const MarketSummary = ({
 
             {/* Market Data Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-              <Card className="bitcoin-card border-none shadow-md">
+              <Card className="cyberpunk-card border-none shadow-md">
                 <CardContent className="pt-6 pb-6">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                  <p className="text-sm font-medium text-satotrack-text mb-1">
                     Capitalização de Mercado
                   </p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-bold font-orbitron text-satotrack-neon">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
                       currency: 'USD',
@@ -138,13 +141,13 @@ const MarketSummary = ({
                 </CardContent>
               </Card>
 
-              <Card className="bitcoin-card border-none shadow-md">
+              <Card className="cyberpunk-card border-none shadow-md">
                 <CardContent className="pt-6 pb-6">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                  <p className="text-sm font-medium text-satotrack-text mb-1">
                     Variação 24h
                   </p>
-                  <div className={`flex items-center text-2xl font-bold ${
-                    bitcoinData.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'
+                  <div className={`flex items-center text-2xl font-bold font-orbitron ${
+                    bitcoinData.price_change_percentage_24h >= 0 ? 'text-satotrack-neon' : 'text-satotrack-alert'
                   }`}>
                     {bitcoinData.price_change_percentage_24h >= 0 ? (
                       <TrendingUp className="mr-1 h-5 w-5" />
@@ -157,14 +160,14 @@ const MarketSummary = ({
                 </CardContent>
               </Card>
 
-              <Card className="bitcoin-card border-none shadow-md">
+              <Card className="cyberpunk-card border-none shadow-md">
                 <CardContent className="pt-6 pb-6">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                  <p className="text-sm font-medium text-satotrack-text mb-1">
                     Tendência
                   </p>
-                  <div className={`text-lg font-semibold ${
-                    bitcoinData.market_trend === 'bullish' ? 'text-green-500' : 
-                    bitcoinData.market_trend === 'bearish' ? 'text-red-500' : 
+                  <div className={`text-lg font-semibold font-orbitron ${
+                    bitcoinData.market_trend === 'bullish' ? 'text-satotrack-neon' : 
+                    bitcoinData.market_trend === 'bearish' ? 'text-satotrack-alert' : 
                     'text-yellow-500'
                   }`}>
                     {bitcoinData.market_trend === 'bullish' && (
@@ -189,32 +192,37 @@ const MarketSummary = ({
                 </CardContent>
               </Card>
 
-              <Card className="bitcoin-card border-none shadow-md">
+              <Card className="cyberpunk-card border-none shadow-md">
                 <CardContent className="pt-6 pb-6 flex flex-col justify-between h-full">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                  <p className="text-sm font-medium text-satotrack-text mb-1">
                     Informações
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Atualização:</span>
-                    <span className="text-sm font-medium">a cada 10s</span>
+                    <span className="text-sm font-medium text-satotrack-neon">a cada 10s</span>
                   </div>
                   {bitcoinData.last_updated && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Última:</span>
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium text-white">
                         {new Date(bitcoinData.last_updated).toLocaleTimeString('pt-BR')}
                       </span>
                     </div>
                   )}
+                  <div className="flex items-center justify-end mt-2">
+                    <span className="text-xs text-satotrack-text flex items-center">
+                      <Eye className="h-3 w-3 mr-1 text-satotrack-neon" /> Monitorando
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         </>
       ) : (
-        <Card className="bitcoin-card">
+        <Card className="cyberpunk-card">
           <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">Não foi possível carregar os dados do Bitcoin</p>
+            <p className="text-center text-satotrack-text">Não foi possível carregar os dados do Bitcoin</p>
           </CardContent>
         </Card>
       )}
