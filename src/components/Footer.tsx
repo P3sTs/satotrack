@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Bitcoin } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -8,7 +7,11 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <Bitcoin className="h-5 w-5 text-bitcoin" />
+            <img 
+              src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+              alt="SatoTrack Logo" 
+              className="h-5 w-5 object-contain"
+            />
             <span className="font-semibold text-lg">SatoTrack</span>
           </div>
           

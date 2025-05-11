@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TrendingUp, TrendingDown, RefreshCw, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -65,14 +64,11 @@ const MarketSummary = ({
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="bg-bitcoin p-2 rounded-full">
+                <div className="bg-bitcoin/10 p-2 rounded-full">
                   <img 
-                    src="/bitcoin-logo.svg" 
-                    alt="Bitcoin" 
-                    className="h-8 w-8"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://cryptologos.cc/logos/bitcoin-btc-logo.svg';
-                    }}
+                    src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+                    alt="SatoTrack Logo" 
+                    className="h-8 w-8 object-contain"
                   />
                 </div>
                 <div>

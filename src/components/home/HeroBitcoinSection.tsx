@@ -22,12 +22,9 @@ const HeroBitcoinSection = () => {
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="flex items-center gap-3 mb-2">
             <img 
-              src="/bitcoin-logo.svg" 
-              alt="Bitcoin" 
-              className="h-12 w-12"
-              onError={(e) => {
-                e.currentTarget.src = 'https://cryptologos.cc/logos/bitcoin-btc-logo.svg';
-              }}
+              src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+              alt="SatoTrack Logo" 
+              className="h-16 w-16 object-contain"
             />
             <h1 className="text-3xl md:text-5xl font-extrabold">
               SatoTrack

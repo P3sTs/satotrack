@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bitcoin, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UserSettings from './UserSettings';
 import NewWalletModal from './NewWalletModal';
@@ -24,7 +24,11 @@ const NavBar: React.FC = () => {
     <nav className="sticky top-0 z-10 w-full bg-card/80 backdrop-blur-sm border-b border-border/40 shadow-sm">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
-          <Bitcoin className="h-6 w-6 text-bitcoin" />
+          <img 
+            src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+            alt="SatoTrack Logo" 
+            className="h-7 w-7 object-contain"
+          />
           <span className="font-bold text-xl tracking-tight">SatoTrack</span>
         </Link>
         
