@@ -33,7 +33,7 @@ const ProtectedRoute = () => {
   return (
     <>
       {securityStatus !== 'secure' && (
-        <Alert variant={securityStatus === 'danger' ? 'destructive' : 'warning'} className="mb-4 mx-4 mt-4">
+        <Alert variant={securityStatus === 'danger' ? 'destructive' : 'default'} className="mb-4 mx-4 mt-4">
           {securityStatus === 'danger' ? <ShieldAlert className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           <AlertTitle>
             {securityStatus === 'danger' ? 'Alerta de Segurança' : 'Atenção'}

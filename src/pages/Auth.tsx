@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -142,7 +141,7 @@ const Auth = () => {
         </div>
         
         {failedLoginAttempts > 0 && (
-          <Alert variant="warning" className="mb-4 bg-yellow-500/10 border-yellow-500/50">
+          <Alert variant="default" className="mb-4 bg-yellow-500/10 border-yellow-500/50">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               {failedLoginAttempts >= 3 
