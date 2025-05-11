@@ -8,6 +8,7 @@ import { CarteirasProvider } from "./contexts/CarteirasContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import CarteiraDetalhes from "./pages/CarteiraDetalhes";
 import NovaCarteira from "./pages/NovaCarteira";
@@ -27,10 +28,20 @@ const App = () => (
             <Sonner />
             <div className="min-h-screen flex flex-col bg-background text-foreground">
               <Routes>
+                <Route path="/" element={
+                  <>
+                    <NavBar />
+                    <main className="flex-grow">
+                      <Home />
+                    </main>
+                    <Footer />
+                  </>
+                } />
+                
                 <Route path="/auth" element={<Auth />} />
                 
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/" element={
+                  <Route path="/dashboard" element={
                     <>
                       <NavBar />
                       <main className="flex-grow">

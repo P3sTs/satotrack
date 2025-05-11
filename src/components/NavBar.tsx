@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Bitcoin, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UserSettings from './UserSettings';
@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 const NavBar: React.FC = () => {
   const [isNewWalletModalOpen, setIsNewWalletModalOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -28,8 +29,16 @@ const NavBar: React.FC = () => {
         </Link>
         
         <div className="flex items-center space-x-4">
-          {user && (
+          {user ? (
             <>
+              {location.pathname !== '/dashboard' && (
+                <Link to="/dashboard">
+                  <Button variant="outline" size="sm">
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+              
               <Button 
                 variant="outline"
                 size="sm"
@@ -59,6 +68,14 @@ const NavBar: React.FC = () => {
                 Sair
               </Button>
             </>
+          ) : (
+            location.pathname !== '/auth' && (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
+              </Link>
+            )
           )}
         </div>
       </div>
