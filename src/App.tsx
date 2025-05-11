@@ -5,34 +5,64 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CarteirasProvider } from "./contexts/CarteirasContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import NavBar from "./components/NavBar";
 import Dashboard from "./pages/Dashboard";
 import CarteiraDetalhes from "./pages/CarteiraDetalhes";
 import NovaCarteira from "./pages/NovaCarteira";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CarteirasProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen flex flex-col bg-background text-foreground">
-            <NavBar />
-            <main className="flex-grow">
+      <BrowserRouter>
+        <AuthProvider>
+          <CarteirasProvider>
+            <Toaster />
+            <Sonner />
+            <div className="min-h-screen flex flex-col bg-background text-foreground">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
-                <Route path="/nova-carteira" element={<NovaCarteira />} />
+                <Route path="/auth" element={<Auth />} />
+                
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/" element={
+                    <>
+                      <NavBar />
+                      <main className="flex-grow">
+                        <Dashboard />
+                      </main>
+                    </>
+                  } />
+                  
+                  <Route path="/carteira/:id" element={
+                    <>
+                      <NavBar />
+                      <main className="flex-grow">
+                        <CarteiraDetalhes />
+                      </main>
+                    </>
+                  } />
+                  
+                  <Route path="/nova-carteira" element={
+                    <>
+                      <NavBar />
+                      <main className="flex-grow">
+                        <NovaCarteira />
+                      </main>
+                    </>
+                  } />
+                </Route>
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </CarteirasProvider>
+            </div>
+          </CarteirasProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

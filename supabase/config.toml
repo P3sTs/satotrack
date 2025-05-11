@@ -1,1 +1,5 @@
+
 project_id = "cwmzzdwoagtmxdmgtfzj"
+
+[functions.fetch-wallet-data]
+verify_jwt = true

@@ -45,6 +45,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bitcoin_wallets: {
+        Row: {
+          address: string
+          balance: number | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          name: string
+          total_received: number | null
+          total_sent: number | null
+          transaction_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          address: string
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          name: string
+          total_received?: number | null
+          total_sent?: number | null
+          transaction_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          name?: string
+          total_received?: number | null
+          total_sent?: number | null
+          transaction_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string | null
@@ -324,6 +363,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          hash: string
+          id: string
+          transaction_date: string
+          transaction_type: string
+          wallet_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          hash: string
+          id?: string
+          transaction_date: string
+          transaction_type: string
+          wallet_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          hash?: string
+          id?: string
+          transaction_date?: string
+          transaction_type?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bitcoin_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
