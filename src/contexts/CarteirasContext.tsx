@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
 import { CarteirasContextType, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
@@ -8,7 +7,7 @@ import {
   updateCarteira, 
   loadTransacoes, 
   removeCarteira 
-} from '../services/carteirasService';
+} from '../services/carteiras';
 
 export const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
 
