@@ -23,8 +23,8 @@ const Footer: React.FC = () => {
             <Link to="/" className="hover:text-satotrack-neon transition-colors">Home</Link>
             <Link to="/dashboard" className="hover:text-satotrack-neon transition-colors">Dashboard</Link>
             <Link to="/auth" className="hover:text-satotrack-neon transition-colors">Login</Link>
-            <a href="#" className="hover:text-satotrack-neon transition-colors">Sobre</a>
-            <a href="#" className="hover:text-satotrack-neon transition-colors">Privacidade</a>
+            <Link to="/sobre" className="hover:text-satotrack-neon transition-colors">Sobre</Link>
+            <Link to="/privacidade" className="hover:text-satotrack-neon transition-colors">Privacidade</Link>
           </div>
           
           <div className="flex space-x-3">

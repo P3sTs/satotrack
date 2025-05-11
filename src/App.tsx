@@ -14,6 +14,8 @@ import CarteiraDetalhes from "./pages/CarteiraDetalhes";
 import NovaCarteira from "./pages/NovaCarteira";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Sobre from "./pages/Sobre";
+import Privacidade from "./pages/Privacidade";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -39,6 +41,9 @@ const App = () => (
                 } />
                 
                 <Route path="/auth" element={<Auth />} />
+                
+                <Route path="/sobre" element={<Sobre />} />
+                <Route path="/privacidade" element={<Privacidade />} />
                 
                 <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={

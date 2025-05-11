@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import HeroBitcoinSection from '@/components/home/HeroBitcoinSection';
 import MarketSummary from '@/components/home/MarketSummary';
@@ -52,7 +52,7 @@ const Home = () => {
                   <Button 
                     variant="outline" 
                     size="lg"
-                    onClick={() => navigate('/auth')}
+                    onClick={() => navigate('/sobre')}
                   >
                     Saiba Mais
                   </Button>
@@ -73,6 +73,11 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-orbitron mb-3">Monitoramento em Tempo Real</h3>
               <p className="text-satotrack-text">Acompanhe suas carteiras Bitcoin com atualizações em tempo real. Visualize transações assim que ocorrem na blockchain.</p>
+              <div className="mt-4">
+                <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
+                  Saber mais <ArrowRight className="ml-1 w-3 h-3" />
+                </Link>
+              </div>
             </div>
             
             <div className="hacker-card p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
@@ -83,6 +88,11 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-orbitron mb-3">Acompanhamento de Saldo</h3>
               <p className="text-satotrack-text">Visualize o valor total de suas carteiras em BTC, USD e BRL. Acompanhe a variação histórica do seu portfolio.</p>
+              <div className="mt-4">
+                <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
+                  Saber mais <ArrowRight className="ml-1 w-3 h-3" />
+                </Link>
+              </div>
             </div>
             
             <div className="hacker-card p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
@@ -95,6 +105,11 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-orbitron mb-3">Análise Detalhada</h3>
               <p className="text-satotrack-text">Acesse métricas avançadas sobre suas transações. Identifique padrões e otimize sua estratégia no mercado de criptomoedas.</p>
+              <div className="mt-4">
+                <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
+                  Saber mais <ArrowRight className="ml-1 w-3 h-3" />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
