@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export interface BitcoinPriceData {
   price_usd: number;
@@ -8,263 +8,101 @@ export interface BitcoinPriceData {
   price_change_percentage_24h: number;
   market_cap_usd: number;
   volume_24h_usd: number;
-  market_trend: 'bullish' | 'bearish' | 'neutral';
   last_updated: string;
+  market_trend: 'bullish' | 'bearish' | 'neutral';
 }
 
-// Valores padrão para demonstração caso API falhe
-const fallbackData: BitcoinPriceData = {
-  price_usd: 68750,
-  price_brl: 352500,
-  price_change_percentage_24h: 1.2,
-  market_cap_usd: 1350000000000,
-  volume_24h_usd: 28500000000, 
-  market_trend: 'bullish',
-  last_updated: new Date().toISOString()
-};
-
-export const useBitcoinPrice = () => {
-  const [bitcoinData, setBitcoinData] = useState<BitcoinPriceData | null>(null);
+export function useBitcoinPrice(pollingInterval = 10000) {
+  const [data, setData] = useState<BitcoinPriceData | null>(null);
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const [lastSuccess, setLastSuccess] = useState<Date | null>(null);
-  const MAX_RETRIES = 3;
-  const APIS = [
-    {
-      name: 'CoinGecko',
-      url: 'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false'
-    },
-    {
-      name: 'CoinCap',
-      url: 'https://api.coincap.io/v2/assets/bitcoin'
-    },
-    {
-      name: 'Binance',
-      url: 'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'
-    }
-  ];
-  
-  // Índice da API atual
-  const [currentApiIndex, setCurrentApiIndex] = useState(0);
+  const { toast } = useToast();
 
-  const fetchBitcoinData = useCallback(async () => {
+  const fetchBitcoinData = async () => {
     try {
-      // Indicar que estamos carregando dados
-      if (!isRefreshing && !bitcoinData) {
-        setIsLoading(true);
-      }
-      
-      const currentApi = APIS[currentApiIndex];
-      console.log(`Tentando API: ${currentApi.name}`);
-      
-      // Adicionar nonce para prevenir cache
-      const nonce = Date.now();
-      const apiUrl = `${currentApi.url}${currentApi.url.includes('?') ? '&' : '?'}_=${nonce}`;
-      
-      // Fazer requisição com timeout de 5 segundos
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch(apiUrl, { 
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache, no-store'
-        },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
+      setIsRefreshing(true);
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false'
+      );
       
       if (!response.ok) {
-        throw new Error(`API returned status: ${response.status}`);
+        throw new Error('Falha ao carregar dados do Bitcoin');
       }
       
-      const data = await response.json();
+      const apiData = await response.json();
       
-      // Salvar preço anterior para animação
-      if (bitcoinData) {
-        setPreviousPrice(bitcoinData.price_usd);
+      // Store previous price before updating
+      if (data?.price_usd) {
+        setPreviousPrice(data.price_usd);
+      }
+
+      // Determine market trend
+      const changePercentage = apiData.market_data.price_change_percentage_24h;
+      let marketTrend: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+      
+      if (changePercentage >= 3) {
+        marketTrend = 'bullish';
+      } else if (changePercentage <= -3) {
+        marketTrend = 'bearish';
       }
       
-      // Formatar dados de acordo com a API
-      let formattedData: BitcoinPriceData;
+      const newData = {
+        price_usd: apiData.market_data.current_price.usd,
+        price_brl: apiData.market_data.current_price.brl,
+        price_change_percentage_24h: apiData.market_data.price_change_percentage_24h,
+        market_cap_usd: apiData.market_data.market_cap.usd,
+        volume_24h_usd: apiData.market_data.total_volume.usd,
+        last_updated: apiData.market_data.last_updated,
+        market_trend: marketTrend
+      };
       
-      if (currentApi.name === 'CoinGecko') {
-        if (!data.market_data) {
-          throw new Error('Market data not available');
-        }
-        
-        // Determinar tendência de mercado
-        let marketTrend: 'bullish' | 'bearish' | 'neutral' = 'neutral';
-        const priceChange = data.market_data.price_change_percentage_24h;
-        
-        if (priceChange >= 5) {
-          marketTrend = 'bullish';
-        } else if (priceChange <= -5) {
-          marketTrend = 'bearish';
-        }
-        
-        formattedData = {
-          price_usd: data.market_data.current_price.usd,
-          price_brl: data.market_data.current_price.brl,
-          price_change_percentage_24h: data.market_data.price_change_percentage_24h,
-          market_cap_usd: data.market_data.market_cap.usd,
-          volume_24h_usd: data.market_data.total_volume.usd,
-          market_trend: marketTrend,
-          last_updated: data.market_data.last_updated
-        };
-      } 
-      else if (currentApi.name === 'CoinCap') {
-        // Estimar BRL com taxa de câmbio aproximada
-        const usdToBrl = 5.15; // Taxa aproximada
-        const priceUsd = parseFloat(data.data.priceUsd);
-        const changePercent = parseFloat(data.data.changePercent24Hr);
-        
-        let marketTrend: 'bullish' | 'bearish' | 'neutral' = 'neutral';
-        if (changePercent >= 5) {
-          marketTrend = 'bullish';
-        } else if (changePercent <= -5) {
-          marketTrend = 'bearish';
-        }
-        
-        formattedData = {
-          price_usd: priceUsd,
-          price_brl: priceUsd * usdToBrl,
-          price_change_percentage_24h: changePercent,
-          market_cap_usd: parseFloat(data.data.marketCapUsd),
-          volume_24h_usd: parseFloat(data.data.volumeUsd24Hr),
-          market_trend: marketTrend,
-          last_updated: new Date().toISOString()
-        };
+      setData(newData);
+      setIsLoading(false);
+      setIsRefreshing(false);
+
+      // Check for significant price movements
+      if (previousPrice && Math.abs((newData.price_usd - previousPrice) / previousPrice * 100) >= 5) {
+        const direction = newData.price_usd > previousPrice ? 'subiu' : 'caiu';
+        toast({
+          title: `Alerta de Movimento Significativo!`,
+          description: `O preço do Bitcoin ${direction} mais de 5% em um curto período!`,
+          variant: newData.price_usd > previousPrice ? "default" : "destructive",
+        });
       }
-      else if (currentApi.name === 'Binance') {
-        // Estimar BRL com taxa de câmbio aproximada
-        const usdToBrl = 5.15; // Taxa aproximada
-        const priceUsd = parseFloat(data.lastPrice);
-        const changePercent = parseFloat(data.priceChangePercent);
-        
-        let marketTrend: 'bullish' | 'bearish' | 'neutral' = 'neutral';
-        if (changePercent >= 5) {
-          marketTrend = 'bullish';
-        } else if (changePercent <= -5) {
-          marketTrend = 'bearish';
-        }
-        
-        formattedData = {
-          price_usd: priceUsd,
-          price_brl: priceUsd * usdToBrl,
-          price_change_percentage_24h: changePercent,
-          market_cap_usd: 0, // Não disponível na Binance API, precisaria estimar
-          volume_24h_usd: parseFloat(data.volume),
-          market_trend: marketTrend,
-          last_updated: new Date().toISOString()
-        };
-      }
-      else {
-        throw new Error('API não suportada');
-      }
-      
-      console.log(`${currentApi.name} API respondeu com sucesso:`, formattedData);
-      
-      setBitcoinData(formattedData);
-      setError(null);
-      setRetryCount(0); // Zerar contador de tentativas
-      setLastSuccess(new Date()); // Marcar timestamp do último sucesso
-      setCurrentApiIndex(0); // Voltar para a primeira API preferida
-    } catch (err) {
-      console.error(`Erro na API ${APIS[currentApiIndex].name}:`, err);
-      
-      // Tentar próxima API ou reiniciar ciclo
-      if (currentApiIndex < APIS.length - 1) {
-        console.log(`Tentando próxima API: ${APIS[currentApiIndex + 1].name}`);
-        setCurrentApiIndex(currentApiIndex + 1);
-        setTimeout(() => {
-          fetchBitcoinData();
-        }, 1000); // Pequeno delay entre APIs
-      } else {
-        // Voltamos ao início, incrementar contagem de tentativa
-        setCurrentApiIndex(0);
-        
-        if (retryCount < MAX_RETRIES) {
-          console.log(`Tentativa ${retryCount + 1} de ${MAX_RETRIES}. Tentando novamente em 3 segundos...`);
-          setRetryCount(prevCount => prevCount + 1);
-          setTimeout(() => {
-            fetchBitcoinData();
-          }, 3000);
-        } else {
-          setError(err instanceof Error ? err : new Error('Failed to fetch Bitcoin data'));
-          
-          // Se já temos dados, continuar mostrando-os
-          if (!bitcoinData) {
-            console.log('Usando dados de fallback após falhas em todas as APIs');
-            setBitcoinData(fallbackData);
-            toast({
-              variant: "warning",
-              title: "Usando dados offline",
-              description: "Não foi possível obter os preços atualizados do Bitcoin."
-            });
-          } else {
-            // Mostrar toast de erro apenas uma vez
-            if (!error) {
-              toast({
-                variant: "warning",
-                title: "Erro de atualização",
-                description: "Dados podem estar desatualizados. Tentando novamente em breve."
-              });
-            }
-          }
-        }
-      }
-    } finally {
+    } catch (error) {
+      console.error('Erro ao buscar dados do Bitcoin:', error);
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [bitcoinData, currentApiIndex, error, isRefreshing, retryCount]);
+  };
   
-  // Initial load
+  // Initial fetch
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (isMounted) {
-        await fetchBitcoinData();
-      }
-    };
-    
-    loadData();
-    
-    // Set up refresh interval - a cada 15 segundos
-    const intervalId = setInterval(() => {
-      if (isMounted) {
-        setIsRefreshing(true);
-        fetchBitcoinData();
-      }
-    }, 15000);
-    
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, [fetchBitcoinData]);
-  
-  // Função para atualizar manualmente os dados
-  const refreshData = useCallback(() => {
-    setIsRefreshing(true);
     fetchBitcoinData();
-  }, [fetchBitcoinData]);
+    
+    // Set up polling for real-time updates
+    const intervalId = setInterval(() => {
+      fetchBitcoinData();
+    }, pollingInterval);
+    
+    // Clear interval when component is unmounted
+    return () => clearInterval(intervalId);
+  }, [pollingInterval]);
+  
+  const manualRefresh = () => {
+    fetchBitcoinData();
+    toast({
+      title: "Dados atualizados",
+      description: "Os dados de mercado do Bitcoin foram atualizados.",
+    });
+  };
   
   return {
-    bitcoinData,
+    data,
     previousPrice,
     isLoading,
     isRefreshing,
-    error,
-    refreshData,
-    lastSuccessUpdate: lastSuccess
+    refresh: manualRefresh
   };
-};
-
-export default useBitcoinPrice;
+}
