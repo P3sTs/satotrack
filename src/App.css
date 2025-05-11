@@ -188,18 +188,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
-/* Skip to content - acessibilidade */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: #00FFC2;
-  color: black;
-  padding: 8px;
-  z-index: 100;
-  transition: top 0.3s;
+/* Where can I view and edit the code? */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
-.skip-link:focus {
-  top: 0;
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-exit {
+  opacity: 1;
+}
+
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
 }

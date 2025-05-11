@@ -15,9 +15,6 @@ const Home = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-dashboard-dark">
-      {/* Skip link for accessibility */}
-      <a href="#main-content" className="skip-link">Pular para o conteúdo</a>
-      
       <HeroBitcoinSection />
       
       <div id="main-content" className="page-transition">
