@@ -1,6 +1,7 @@
 
 import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
+import { toast } from '@/hooks/use-toast';
 
 // Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
 export function validarEnderecoBitcoin(endereco: string): boolean {
@@ -41,6 +42,11 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
     };
   } catch (error) {
     console.error('Erro ao buscar dados da carteira:', error);
+    toast({
+      title: "Erro",
+      description: 'Erro ao conectar com as APIs blockchain',
+      variant: "destructive"
+    });
     throw new Error('Erro ao conectar com as APIs blockchain');
   }
 }
@@ -56,6 +62,11 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
 
     if (error) {
       console.error('Erro ao buscar transações:', error);
+      toast({
+        title: "Erro",
+        description: 'Erro ao buscar histórico de transações',
+        variant: "destructive"
+      });
       throw error;
     }
 
@@ -83,6 +94,11 @@ export async function atualizarDadosCron(wallet_id: string): Promise<void> {
 
     if (error) {
       console.error('Erro ao buscar carteira:', error);
+      toast({
+        title: "Erro",
+        description: `Erro ao buscar carteira: ${error.message}`,
+        variant: "destructive"
+      });
       throw new Error(`Erro ao buscar carteira: ${error.message}`);
     }
 
