@@ -21,7 +21,7 @@ const MainNav = () => {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link to="/" legacyBehavior passHref>
+          <Link to="/">
             <NavigationMenuLink className={cn(
               navigationMenuTriggerStyle(),
               location.pathname === "/" && "text-satotrack-neon font-medium"
@@ -34,7 +34,7 @@ const MainNav = () => {
         {user && (
           <>
             <NavigationMenuItem>
-              <Link to="/dashboard" legacyBehavior passHref>
+              <Link to="/dashboard">
                 <NavigationMenuLink className={cn(
                   navigationMenuTriggerStyle(),
                   location.pathname === "/dashboard" && "text-satotrack-neon font-medium"
@@ -91,7 +91,7 @@ const MainNav = () => {
         )}
         
         <NavigationMenuItem>
-          <Link to="/sobre" legacyBehavior passHref>
+          <Link to="/sobre">
             <NavigationMenuLink className={cn(
               navigationMenuTriggerStyle(),
               location.pathname === "/sobre" && "text-satotrack-neon font-medium"
