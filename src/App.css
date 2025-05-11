@@ -2,25 +2,25 @@
 /* Estilos específicos do SatoTrack */
 
 .satotrack-logo {
-  filter: drop-shadow(0 0 2px rgba(0, 255, 194, 0.5));
+  filter: drop-shadow(0 0 0.125rem rgba(0, 255, 194, 0.5));
   transition: filter 0.3s ease, transform 0.3s ease;
 }
 
 .satotrack-logo:hover {
-  filter: drop-shadow(0 0 8px rgba(0, 255, 194, 0.8));
+  filter: drop-shadow(0 0 0.5rem rgba(0, 255, 194, 0.8));
   transform: scale(1.05);
 }
 
 .tech-panel {
   background: linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%);
   border: 1px solid rgba(0, 255, 194, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
 }
 
 .tech-panel:hover {
   border-color: rgba(0, 255, 194, 0.4);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 194, 0.2);
+  box-shadow: 0 0.5rem 1.875rem rgba(0, 0, 0, 0.6), 0 0 0.938rem rgba(0, 255, 194, 0.2);
 }
 
 .cyber-button {
@@ -33,7 +33,7 @@
 
 .cyber-button:hover {
   border-color: rgba(0, 255, 194, 0.8);
-  box-shadow: 0 0 15px rgba(0, 255, 194, 0.4);
+  box-shadow: 0 0 0.938rem rgba(0, 255, 194, 0.4);
 }
 
 .cyber-button:before {
@@ -50,11 +50,11 @@
 .terminal-wrapper {
   background-color: rgba(15, 15, 15, 0.9);
   border: 1px solid rgba(0, 255, 194, 0.4);
-  border-radius: 4px;
-  padding: 12px 16px;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
   font-family: 'Courier New', monospace;
   color: #00FFC2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(0, 255, 194, 0.2);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.3), 0 0 0.5rem rgba(0, 255, 194, 0.2);
 }
 
 .terminal-wrapper::before {
@@ -77,7 +77,7 @@
   background-image: 
     linear-gradient(rgba(0, 255, 194, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 255, 194, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-size: 1.25rem 1.25rem;
 }
 
 /* Estilo para campos de input */
@@ -85,8 +85,8 @@
   background: rgba(15, 15, 15, 0.7);
   border: 1px solid rgba(0, 255, 194, 0.3);
   color: white;
-  padding: 10px 16px;
-  border-radius: 4px;
+  padding: 0.625rem 1rem;
+  border-radius: 0.25rem;
   transition: all 0.3s ease;
 }
 
@@ -103,11 +103,11 @@
 /* Pulse effect para indicar status online */
 .status-pulse {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background-color: #00FFC2;
-  margin-right: 8px;
+  margin-right: 0.5rem;
   position: relative;
 }
 
@@ -141,7 +141,7 @@
 /* Estilo para transições de página */
 .page-enter {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(0.625rem);
 }
 
 .page-enter-active {
@@ -170,7 +170,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 4px;
+  width: 0.25rem;
   height: 100%;
 }
 
@@ -188,23 +188,43 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
-/* Where can I view and edit the code? */
-.page-enter {
-  opacity: 0;
-  transform: translateY(10px);
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .page-enter {
+    transform: translateY(0.5rem);
+  }
 }
 
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
+/* Impedir scroll horizontal em dispositivos móveis */
+body {
+  overflow-x: hidden;
+  width: 100%;
 }
 
-.page-exit {
-  opacity: 1;
+/* Melhorar comportamento responsivo para tabelas e conteúdo que pode escapar */
+.overflow-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.page-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
+/* Melhorar tamanho de toque para dispositivos móveis */
+@media (max-width: 768px) {
+  button, 
+  .btn,
+  a.btn,
+  [role="button"] {
+    min-height: 2.5rem;
+  }
+  
+  input, 
+  select, 
+  textarea {
+    font-size: 1rem;
+  }
 }

@@ -47,17 +47,17 @@ const NovaCarteira: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4 mr-1" />
         Voltar para o Dashboard
       </Link>
       
-      <div className="max-w-md mx-auto">
-        <Card>
+      <div className="w-full max-w-md mx-auto">
+        <Card className="w-full">
           <CardHeader>
-            <CardTitle>Adicionar Nova Carteira</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl md:text-2xl">Adicionar Nova Carteira</CardTitle>
+            <CardDescription className="text-sm">
               Insira os detalhes da carteira Bitcoin que você deseja monitorar
             </CardDescription>
           </CardHeader>
@@ -96,6 +96,7 @@ const NovaCarteira: React.FC = () => {
                 <Input
                   id="endereco"
                   placeholder="Ex: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+                  className="font-mono text-sm"
                   {...register('endereco', { 
                     required: 'O endereço Bitcoin é obrigatório',
                     validate: {
@@ -108,12 +109,12 @@ const NovaCarteira: React.FC = () => {
                 <div className="flex items-center">
                   {endereco && (
                     enderecoValido ? (
-                      <p className="text-sm text-green-500 flex items-center">
+                      <p className="text-xs md:text-sm text-green-500 flex items-center">
                         <Check className="h-3 w-3 mr-1" />
                         Endereço válido
                       </p>
                     ) : (
-                      <p className="text-sm text-red-500 flex items-center">
+                      <p className="text-xs md:text-sm text-red-500 flex items-center">
                         <AlertCircle className="h-3 w-3 mr-1" />
                         Endereço inválido
                       </p>
@@ -122,7 +123,7 @@ const NovaCarteira: React.FC = () => {
                 </div>
                 
                 {errors.endereco && (
-                  <p className="text-sm text-red-500">{errors.endereco.message}</p>
+                  <p className="text-xs md:text-sm text-red-500">{errors.endereco.message}</p>
                 )}
               </div>
             </CardContent>

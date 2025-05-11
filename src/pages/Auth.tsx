@@ -23,17 +23,17 @@ const Auth = () => {
   }, [failedLoginAttempts, resetFailedLoginAttempts]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <div className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-background p-4">
+      <div className="w-full max-w-sm md:max-w-md">
         <div className="flex justify-center mb-6">
-          <div className="flex items-center space-x-2">
-            <Bitcoin size={32} className="text-bitcoin" />
-            <h1 className="text-2xl font-bold">Bitcoin Wallet Monitor</h1>
+          <div className="flex items-center gap-2">
+            <Bitcoin size={28} className="text-bitcoin" />
+            <h1 className="text-xl md:text-2xl font-bold">Bitcoin Wallet Monitor</h1>
           </div>
         </div>
         
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm text-muted-foreground">Área segura</div>
+          <div className="text-xs md:text-sm text-muted-foreground">Área segura</div>
           <SecurityStatus securityStatus={securityStatus} />
         </div>
         

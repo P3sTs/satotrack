@@ -25,14 +25,14 @@ const MarketSummary = ({
   onRefresh 
 }: MarketSummaryProps) => {
   return (
-    <section className="container px-4 md:px-6 py-8 mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-orbitron satotrack-gradient-text">Mercado Bitcoin</h2>
+    <section className="container px-4 md:px-6 py-6 md:py-8 mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 md:mb-8">
+        <h2 className="text-xl md:text-3xl font-orbitron satotrack-gradient-text">Mercado Bitcoin</h2>
         <Button 
           variant="outline" 
           onClick={onRefresh} 
           disabled={isRefreshing}
-          className="flex items-center gap-2 border-satotrack-neon text-satotrack-neon hover:bg-satotrack-neon/10"
+          className="flex items-center gap-2 border-satotrack-neon text-satotrack-neon hover:bg-satotrack-neon/10 self-end sm:self-auto"
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           Atualizar
@@ -46,11 +46,15 @@ const MarketSummary = ({
       {!isLoading && bitcoinData ? (
         <>
           <BitcoinHeader bitcoinData={bitcoinData} />
-          <BitcoinChartGrid 
-            bitcoinData={bitcoinData} 
-            previousPrice={previousPrice}
-          />
-          <MarketDataCards bitcoinData={bitcoinData} />
+          <div className="overflow-x-hidden">
+            <BitcoinChartGrid 
+              bitcoinData={bitcoinData} 
+              previousPrice={previousPrice}
+            />
+          </div>
+          <div className="overflow-x-hidden">
+            <MarketDataCards bitcoinData={bitcoinData} />
+          </div>
         </>
       ) : !isLoading ? (
         <ErrorState />

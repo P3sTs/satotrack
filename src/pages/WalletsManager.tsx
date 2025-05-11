@@ -30,17 +30,17 @@ const WalletsManager: React.FC = () => {
   }, [carteiras, searchQuery]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Gerenciamento de Carteiras</h1>
-          <p className="text-muted-foreground">Gerencie suas carteiras Bitcoin em um só lugar</p>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">Gerenciamento de Carteiras</h1>
+          <p className="text-sm text-muted-foreground">Gerencie suas carteiras Bitcoin em um só lugar</p>
         </div>
         <Button 
           onClick={() => setIsNewWalletModalOpen(true)}
           variant="bitcoin"
           size="lg"
-          className="gap-2"
+          className="gap-2 self-start md:self-auto"
         >
           <Plus className="h-4 w-4" />
           Nova Carteira
@@ -48,21 +48,23 @@ const WalletsManager: React.FC = () => {
       </div>
 
       {!isLoading && carteiras.length > 0 && (
-        <div className="mb-6 space-y-4">
+        <div className="mb-4 md:mb-6 space-y-3 md:space-y-4">
           <SearchWallets 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
           
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+            <p className="text-sm text-muted-foreground order-2 md:order-1">
               {filteredWallets.length} {filteredWallets.length === 1 ? 'carteira encontrada' : 'carteiras encontradas'}
             </p>
-            <SortControls 
-              sortOption={sortOption}
-              sortDirection={sortDirection}
-              onSort={ordenarCarteiras}
-            />
+            <div className="order-1 md:order-2">
+              <SortControls 
+                sortOption={sortOption}
+                sortDirection={sortDirection}
+                onSort={ordenarCarteiras}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -72,9 +74,9 @@ const WalletsManager: React.FC = () => {
       ) : carteiras.length === 0 ? (
         <EmptyWalletState onAddWallet={() => setIsNewWalletModalOpen(true)} />
       ) : filteredWallets.length === 0 ? (
-        <div className="text-center p-12 border border-dashed border-border rounded-lg">
-          <h3 className="text-xl font-medium mb-2">Nenhuma carteira encontrada</h3>
-          <p className="text-muted-foreground mb-6">Nenhuma carteira corresponde à sua pesquisa</p>
+        <div className="text-center p-6 md:p-12 border border-dashed border-border rounded-lg">
+          <h3 className="text-lg md:text-xl font-medium mb-2">Nenhuma carteira encontrada</h3>
+          <p className="text-muted-foreground mb-4 md:mb-6">Nenhuma carteira corresponde à sua pesquisa</p>
           <Button 
             variant="outline"
             onClick={() => setSearchQuery('')}

@@ -109,12 +109,12 @@ const NavBar: React.FC = () => {
   return (
     <header className="bg-dashboard-dark text-white sticky top-0 z-50 border-b border-dashboard-medium/30">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14 md:h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="SatoTrack Logo" className="h-8 w-8" />
-              <span className="font-orbitron text-xl font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="SatoTrack Logo" className="h-6 w-6 md:h-8 md:w-8" />
+              <span className="font-orbitron text-lg md:text-xl font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
                 SatoTrack
               </span>
             </Link>
@@ -126,9 +126,9 @@ const NavBar: React.FC = () => {
           </div>
           
           {/* Auth actions */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center gap-2">
             {user ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <SecurityIndicator />
                 <UserSettings />
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -149,13 +149,13 @@ const NavBar: React.FC = () => {
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[85%] sm:w-[350px] bg-dashboard-dark border-dashboard-medium/30">
                 <div className="h-full flex flex-col">
                   <div className="flex items-center justify-between py-4 border-b border-dashboard-medium/30">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="SatoTrack Logo" className="h-6 w-6" />
                       <span className="font-orbitron text-lg font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
                         SatoTrack
@@ -175,7 +175,7 @@ const NavBar: React.FC = () => {
             <Drawer>
               <DrawerTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-5 w-5" />
                 </Button>
               </DrawerTrigger>
               <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white">

@@ -11,7 +11,7 @@ export const LoginSecurityAlert: React.FC<LoginSecurityAlertProps> = ({ failedAt
   if (failedAttempts === 0) return null;
   
   return (
-    <Alert variant="default" className="mb-4 bg-yellow-500/10 border-yellow-500/50">
+    <Alert variant="default" className="mb-4 bg-yellow-500/10 border-yellow-500/50 w-full">
       <AlertCircle className="h-4 w-4" />
       <AlertDescription>
         {failedAttempts >= 3 
