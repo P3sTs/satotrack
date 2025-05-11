@@ -13,11 +13,15 @@ interface CarteirasContextType {
   carregarTransacoes: (id: string) => Promise<TransacaoBTC[]>;
   removerCarteira: (id: string) => void;
   ordenarCarteiras: (opcao: SortOption, direcao: SortDirection) => void;
+  definirCarteiraPrincipal: (id: string | null) => void;
+  carteiraPrincipal: string | null;
   sortOption: SortOption;
   sortDirection: SortDirection;
   isLoading: boolean;
   isUpdating: Record<string, boolean>;
 }
+
+const STORAGE_KEY_PRIMARY = 'satotrack_carteira_principal';
 
 const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
 
@@ -36,6 +40,9 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState<Record<string, boolean>>({});
+  const [carteiraPrincipal, setCarteiraPrincipal] = useState<string | null>(
+    localStorage.getItem(STORAGE_KEY_PRIMARY)
+  );
   
   // Carregar todas as carteiras do usuário
   useEffect(() => {
@@ -204,6 +211,12 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
         throw error;
       }
       
+      // Se a carteira removida era a principal, limpar a configuração
+      if (carteiraPrincipal === id) {
+        setCarteiraPrincipal(null);
+        localStorage.removeItem(STORAGE_KEY_PRIMARY);
+      }
+      
       setCarteiras(prevCarteiras => prevCarteiras.filter(c => c.id !== id));
       setTransacoes(prev => {
         const newTransacoes = {...prev};
@@ -214,11 +227,21 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     } catch (error) {
       toast.error('Erro ao remover carteira: ' + (error instanceof Error ? error.message : String(error)));
     }
-  }, []);
+  }, [carteiraPrincipal]);
 
   const ordenarCarteiras = useCallback((opcao: SortOption, direcao: SortDirection): void => {
     setSortOption(opcao);
     setSortDirection(direcao);
+  }, []);
+  
+  const definirCarteiraPrincipal = useCallback((id: string | null): void => {
+    setCarteiraPrincipal(id);
+    
+    if (id) {
+      localStorage.setItem(STORAGE_KEY_PRIMARY, id);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_PRIMARY);
+    }
   }, []);
 
   return (
@@ -230,6 +253,8 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       carregarTransacoes,
       removerCarteira,
       ordenarCarteiras,
+      definirCarteiraPrincipal,
+      carteiraPrincipal,
       sortOption,
       sortDirection,
       isLoading,

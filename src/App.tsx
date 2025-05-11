@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CarteirasProvider } from "./contexts/CarteirasContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
 import Dashboard from "./pages/Dashboard";
 import CarteiraDetalhes from "./pages/CarteiraDetalhes";
 import NovaCarteira from "./pages/NovaCarteira";
@@ -35,6 +36,7 @@ const App = () => (
                       <main className="flex-grow">
                         <Dashboard />
                       </main>
+                      <Footer />
                     </>
                   } />
                   
@@ -44,6 +46,7 @@ const App = () => (
                       <main className="flex-grow">
                         <CarteiraDetalhes />
                       </main>
+                      <Footer />
                     </>
                   } />
                   
@@ -53,6 +56,7 @@ const App = () => (
                       <main className="flex-grow">
                         <NovaCarteira />
                       </main>
+                      <Footer />
                     </>
                   } />
                 </Route>
