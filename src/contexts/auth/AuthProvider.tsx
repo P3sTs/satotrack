@@ -132,7 +132,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     lastActivity, 
     updateLastActivity, 
     securityStatus: activitySecurityStatus, 
-    setSecurityStatus 
+    setSecurityStatus,
+    setLastActivity  // Add this line to get the setLastActivity function
   } = useActivityMonitor(user, signOut);
 
   // Combine security statuses from different sources

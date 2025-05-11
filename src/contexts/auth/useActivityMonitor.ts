@@ -82,6 +82,7 @@ export const useActivityMonitor = (
     lastActivity,
     updateLastActivity,
     securityStatus,
-    setSecurityStatus
+    setSecurityStatus,
+    setLastActivity  // Also export setLastActivity function
   };
 };

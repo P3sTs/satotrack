@@ -5,7 +5,7 @@ import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import HeroBitcoinSection from '@/components/home/HeroBitcoinSection';
 import MarketSummary from '@/components/home/MarketSummary';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 
 const Home = () => {
