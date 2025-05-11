@@ -1,75 +1,91 @@
 
-export function formatarBTC(valor: number): string {
-  return `${valor.toFixed(8)} BTC`;
-}
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-export function formatarData(dataIso: string): string {
-  const data = new Date(dataIso);
-  const agora = new Date();
-  const diff = agora.getTime() - data.getTime();
+// Formats a BTC value with 8 decimal places when needed
+export const formatBitcoinValue = (value: number): string => {
+  if (value === 0) return '0 BTC';
+  if (value < 0.00000001) return '< 0.00000001 BTC';
   
-  // Se for hoje, mostrar apenas a hora
-  if (data.toDateString() === agora.toDateString()) {
-    return `Hoje, ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  // For small amounts, show all required decimals
+  if (value < 0.0001) {
+    return `${value.toFixed(8)} BTC`.replace(/\.?0+$/, '');
   }
   
-  // Se for ontem
-  const ontem = new Date();
-  ontem.setDate(agora.getDate() - 1);
-  if (data.toDateString() === ontem.toDateString()) {
-    return `Ontem, ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  // For medium amounts, limit to 6 decimals
+  if (value < 0.1) {
+    return `${value.toFixed(6)} BTC`.replace(/\.?0+$/, '');
   }
   
-  // Se for há menos de 7 dias, mostrar o dia da semana
-  if (diff < 7 * 24 * 60 * 60 * 1000) {
-    return data.toLocaleDateString('pt-BR', { weekday: 'long', hour: '2-digit', minute: '2-digit' });
-  }
+  // For larger amounts, limit to 4 decimals
+  return `${value.toFixed(4)} BTC`.replace(/\.?0+$/, '');
+};
+
+// Formats a bitcoin price in USD
+export const formatBitcoinPrice = (price: number): string => {
+  if (price === 0) return '$0.00';
   
-  // Caso contrário, mostrar a data completa
-  return data.toLocaleDateString('pt-BR', { 
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-// Adiciona a função formatarDataHora que estava faltando
-export function formatarDataHora(dataIso: string): string {
-  const data = new Date(dataIso);
-  return data.toLocaleDateString('pt-BR', { 
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-export function formatarHash(hash: string): string {
-  if (hash.length <= 16) return hash;
-  return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
-}
-
-// Aprimorando a função formatCurrency para ter melhor formatação
-export function formatCurrency(value: number, currency: string = 'USD', digits: number = 2): string {
-  const locale = currency === 'BRL' ? 'pt-BR' : 'en-US';
-  
-  // Para valores muito grandes, usar formatação compacta
-  if (value > 1000000) {
-    return new Intl.NumberFormat(locale, {
+  // For large prices (over $1000), use commas as thousands separators
+  if (price >= 1000) {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency,
-      notation: 'compact',
-      compactDisplay: 'short'
-    }).format(value);
+      currency: 'USD',
+      maximumFractionDigits: 2
+    }).format(price);
   }
   
-  return new Intl.NumberFormat(locale, {
+  // For small prices, show more decimals
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency,
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits
-  }).format(value);
-}
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  }).format(price);
+};
+
+// Format date for display
+export const formatDate = (date: Date | string): string => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return format(dateObj, "dd MMM yyyy HH:mm", {
+    locale: ptBR
+  });
+};
+
+// Format percentage
+export const formatPercentage = (value: number): string => {
+  const formatted = value.toFixed(2);
+  return `${value >= 0 ? '+' : ''}${formatted}%`;
+};
+
+// Format short date (only day and month)
+export const formatShortDate = (date: Date | string): string => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return format(dateObj, "dd MMM", {
+    locale: ptBR
+  });
+};
+
+// Format time only (hour and minute)
+export const formatTime = (date: Date | string): string => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return format(dateObj, "HH:mm", {
+    locale: ptBR
+  });
+};
+
+// Format compact number (1000 -> 1K)
+export const formatCompactNumber = (value: number): string => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+  });
+  return formatter.format(value);
+};
+
+// Format full date with words
+export const formatFullDate = (date: Date | string): string => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return format(dateObj, "dd 'de' MMMM 'de' yyyy", {
+    locale: ptBR
+  });
+};

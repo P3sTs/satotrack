@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useCarteiras } from '../contexts/CarteirasContext';
 import CarteiraCard from '../components/CarteiraCard';
@@ -7,6 +6,7 @@ import { Bitcoin, Plus, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NewWalletModal from '../components/NewWalletModal';
 import { Button } from '@/components/ui/button';
+import ViewModeSelector from '../components/ViewModeSelector';
 
 const Dashboard: React.FC = () => {
   const { 
@@ -60,11 +60,7 @@ const Dashboard: React.FC = () => {
             </Button>
           </Link>
           
-          <SortControls 
-            sortOption={sortOption}
-            sortDirection={sortDirection}
-            onSort={ordenarCarteiras}
-          />
+          <ViewModeSelector />
         </div>
       </div>
       
