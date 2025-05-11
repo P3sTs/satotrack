@@ -8,6 +8,7 @@ import BitcoinHeader from './BitcoinHeader';
 import BitcoinChartGrid from './BitcoinChartGrid';
 import MarketDataCards from './MarketDataCards';
 import { LoadingState, ErrorState } from './LoadingStates';
+import InteractiveChart from '../charts/InteractiveChart';
 
 interface MarketSummaryProps {
   isLoading: boolean;
@@ -46,6 +47,11 @@ const MarketSummary = ({
       {!isLoading && bitcoinData ? (
         <>
           <BitcoinHeader bitcoinData={bitcoinData} />
+          
+          <div className="my-6 md:my-8">
+            <InteractiveChart bitcoinData={bitcoinData} />
+          </div>
+          
           <div className="overflow-x-hidden">
             <BitcoinChartGrid 
               bitcoinData={bitcoinData} 
