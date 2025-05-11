@@ -10,13 +10,17 @@ interface BitcoinData {
   market_cap_usd: number;
   volume_24h_usd: number;
   last_updated: string;
+  market_trend?: 'bullish' | 'bearish' | 'neutral';
 }
 
 interface BitcoinMarketDataProps {
   bitcoinData: BitcoinData;
+  lastSuccessUpdate?: Date | null;
 }
 
-const BitcoinMarketData = ({ bitcoinData }: BitcoinMarketDataProps) => {
+const BitcoinMarketData = ({ bitcoinData, lastSuccessUpdate }: BitcoinMarketDataProps) => {
+  const updateTimeToShow = lastSuccessUpdate ? formatarData(lastSuccessUpdate.toISOString()) : formatarData(bitcoinData.last_updated);
+  
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -33,8 +37,13 @@ const BitcoinMarketData = ({ bitcoinData }: BitcoinMarketDataProps) => {
           </div>
           <div>
             <h2 className="text-2xl font-bold">Bitcoin</h2>
-            <p className="text-sm text-muted-foreground">
-              Atualizado: {formatarData(bitcoinData.last_updated)}
+            <p className="text-sm text-muted-foreground flex items-center">
+              <span>Atualizado: {updateTimeToShow}</span>
+              {lastSuccessUpdate && Date.now() - lastSuccessUpdate.getTime() > 120000 && (
+                <span className="ml-2 px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                  Desatualizado
+                </span>
+              )}
             </p>
           </div>
         </div>

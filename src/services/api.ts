@@ -1,7 +1,7 @@
 
 import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 
 // Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
 export function validarEnderecoBitcoin(endereco: string): boolean {
@@ -22,9 +22,23 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
   try {
     console.log(`Buscando dados para carteira ${endereco}${wallet_id ? ` (ID: ${wallet_id})` : ''}`);
     
+    // Indicar extração de dados em andamento
+    if (wallet_id) {
+      // Atualizar timestamp de tentativa de atualização no banco
+      await supabase
+        .from('bitcoin_wallets')
+        .update({ 
+          last_update_attempt: new Date().toISOString() 
+        })
+        .eq('id', wallet_id);
+    }
+    
     // Chamar a edge function para buscar dados atualizados
     const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
-      body: { address: endereco, wallet_id }
+      body: { address: endereco, wallet_id },
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
     });
 
     if (error) {
@@ -41,11 +55,22 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
 
     console.log('Dados obtidos com sucesso:', data);
     
+    // Atualizar timestamp da última atualização bem-sucedida
+    if (wallet_id) {
+      await supabase
+        .from('bitcoin_wallets')
+        .update({ 
+          last_successful_update: new Date().toISOString() 
+        })
+        .eq('id', wallet_id);
+    }
+    
     return {
       saldo: data.balance,
       total_entradas: data.total_received,
       total_saidas: data.total_sent,
-      qtde_transacoes: data.transaction_count
+      qtde_transacoes: data.transaction_count,
+      ultimo_update: data.last_updated
     };
   } catch (error) {
     console.error('Erro ao buscar dados da carteira:', error);
@@ -56,19 +81,20 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
         console.log('Tentando buscar dados existentes do banco...');
         const { data: existingWallet } = await supabase
           .from('bitcoin_wallets')
-          .select('balance, total_received, total_sent, transaction_count, last_updated')
+          .select('balance, total_received, total_sent, transaction_count, last_updated, last_successful_update')
           .eq('id', wallet_id)
           .maybeSingle();
           
         if (existingWallet) {
           console.log('Usando dados existentes do banco:', existingWallet);
-          toast.warning('Usando dados offline (última atualização). Tente novamente mais tarde.');
+          toast.warning(`Usando dados offline (última atualização: ${new Date(existingWallet.last_successful_update || existingWallet.last_updated).toLocaleString()})`);
           
           return {
             saldo: Number(existingWallet.balance),
             total_entradas: Number(existingWallet.total_received),
             total_saidas: Number(existingWallet.total_sent),
-            qtde_transacoes: existingWallet.transaction_count
+            qtde_transacoes: existingWallet.transaction_count,
+            ultimo_update: existingWallet.last_updated
           };
         }
       } catch (dbError) {
