@@ -84,11 +84,7 @@
 
 @layer components {
   .bitcoin-card {
-    @apply bg-card rounded-lg shadow-md border border-border/20 overflow-hidden transition-all;
-  }
-  
-  .bitcoin-card:hover {
-    @apply shadow-lg border-satotrack-neon/30;
+    @apply bg-card rounded-lg shadow-md border border-border/20 overflow-hidden transition-all hover:border-satotrack-neon/30 hover:shadow-lg;
   }
   
   .bitcoin-gradient-text {
@@ -100,19 +96,154 @@
   }
   
   .cyberpunk-card {
-    @apply bg-dashboard-medium border border-satotrack-neon/20 rounded-lg shadow-lg overflow-hidden;
-  }
-  
-  .cyberpunk-card:hover {
-    @apply border-satotrack-neon/50 shadow-satotrack-neon/20;
+    @apply bg-dashboard-medium border border-satotrack-neon/20 rounded-lg shadow-lg overflow-hidden transition-all duration-300
+    hover:border-satotrack-neon/50 hover:shadow-satotrack-neon/20;
   }
   
   .tech-outline {
-    @apply border border-satotrack-neon/30 shadow-sm;
+    @apply border border-satotrack-neon/30 shadow-sm transition-all duration-300
+    hover:border-satotrack-neon/50 hover:shadow-[0_0_10px_rgba(0,255,194,0.2)];
   }
   
   .neon-glow {
     @apply animate-glow;
+  }
+
+  .terminal-text {
+    @apply font-mono text-satotrack-neon tracking-wide;
+  }
+  
+  .hacker-card {
+    @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-satotrack-neon/30 rounded-lg 
+    shadow-[0_4px_15px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300
+    hover:shadow-[0_8px_25px_rgba(0,0,0,0.5)] hover:border-satotrack-neon/60;
+  }
+  
+  .hacker-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-satotrack-neon/60 to-transparent;
+    animation: scan 2s linear infinite;
+  }
+  
+  .price-up {
+    @apply text-green-400;
+  }
+  
+  .price-down {
+    @apply text-satotrack-alert;
+  }
+  
+  /* Focus styles for accessibility */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-satotrack-neon/70 
+    focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  
+  .page-transition {
+    @apply animate-fade-in;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 3s infinite;
+  }
+  
+  .animate-terminal-typing {
+    overflow: hidden;
+    border-right: 2px solid #00FFC2;
+    white-space: nowrap;
+    animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+    max-width: fit-content;
+  }
+}
+
+/* Keyframes for animations */
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #00FFC2;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #00FFC2);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #00FFC2);
   }
 }
 
