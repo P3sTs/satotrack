@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Bitcoin, Github, Instagram, Telegram } from 'lucide-react';
+import { Bitcoin, Github, Instagram, MessageCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
               className="p-2 rounded-full border border-satotrack-neon/20 hover:border-satotrack-neon/60 hover:bg-satotrack-neon/5 transition-all" 
               aria-label="Telegram"
             >
-              <Telegram className="h-4 w-4 text-satotrack-neon" />
+              <MessageCircle className="h-4 w-4 text-satotrack-neon" />
             </a>
             <a 
               href="https://instagram.com/dantas_dts" 
