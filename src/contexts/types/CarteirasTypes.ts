@@ -10,7 +10,7 @@ export interface CarteirasContextType {
   removerCarteira: (id: string) => void;
   ordenarCarteiras: (opcao: SortOption, direcao: SortDirection) => void;
   definirCarteiraPrincipal: (id: string | null) => void;
-  updateWalletName: (id: string, nome: string) => Promise<void>;
+  atualizarNomeCarteira: (id: string, nome: string) => Promise<void>;
   carteiraPrincipal: string | null;
   sortOption: SortOption;
   sortDirection: SortDirection;

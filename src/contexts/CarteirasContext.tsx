@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, ReactNode, useCallback, useEffect, useContext } from 'react';
 import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
 import { CarteirasContextType, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
@@ -123,7 +122,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [carteiraPrincipal]);
 
-  const updateWalletName = useCallback(async (id: string, nome: string): Promise<void> => {
+  const atualizarNomeCarteira = useCallback(async (id: string, nome: string): Promise<void> => {
     try {
       await updateWalletName(id, nome);
       
@@ -163,7 +162,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       ordenarCarteiras,
       definirCarteiraPrincipal,
       carteiraPrincipal,
-      updateWalletName,
+      atualizarNomeCarteira,
       sortOption,
       sortDirection,
       isLoading,

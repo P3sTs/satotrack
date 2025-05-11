@@ -14,26 +14,39 @@ import {
 interface DeleteWalletDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
+  onDelete?: () => void; // Added to match the usage in CarteiraDetalhes
+  walletName?: string; // Added to match the usage in CarteiraDetalhes
 }
 
 const DeleteWalletDialog: React.FC<DeleteWalletDialogProps> = ({ 
   isOpen, 
   onClose, 
-  onConfirm 
+  onConfirm,
+  onDelete,
+  walletName = 'esta carteira'
 }) => {
+  // Use onDelete if provided, otherwise fall back to onConfirm
+  const handleConfirm = () => {
+    if (onDelete) {
+      onDelete();
+    } else if (onConfirm) {
+      onConfirm();
+    }
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Remover carteira?</AlertDialogTitle>
+          <AlertDialogTitle>Remover {walletName}?</AlertDialogTitle>
           <AlertDialogDescription>
             Esta ação não pode ser desfeita. Esta carteira será removida do seu monitoramento.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground">
+          <AlertDialogAction onClick={handleConfirm} className="bg-destructive text-destructive-foreground">
             Sim, remover carteira
           </AlertDialogAction>
         </AlertDialogFooter>

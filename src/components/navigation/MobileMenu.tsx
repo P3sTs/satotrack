@@ -1,10 +1,13 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User, Wallet, Mail } from 'lucide-react';
-import { AuthUser } from '@/contexts/auth/types';
+
+interface AuthUser {
+  id: string;
+  email: string;
+}
 
 interface MobileMenuProps {
   user: AuthUser | null;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -13,7 +12,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import MobileMenu from './MobileMenu';
-import { AuthUser } from '@/contexts/auth/types';
+
+// Fix import path for AuthUser
+interface AuthUser {
+  id: string;
+  email: string;
+}
 
 interface MobileMenuContainerProps {
   isMobile: boolean;

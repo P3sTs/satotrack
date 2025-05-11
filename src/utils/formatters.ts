@@ -35,6 +35,18 @@ export function formatarData(dataIso: string): string {
   });
 }
 
+// Adiciona a função formatarDataHora que estava faltando
+export function formatarDataHora(dataIso: string): string {
+  const data = new Date(dataIso);
+  return data.toLocaleDateString('pt-BR', { 
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
 export function formatarHash(hash: string): string {
   if (hash.length <= 16) return hash;
   return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;

@@ -6,10 +6,10 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 
 interface TransacoesListProps {
   transacoes: TransacaoBTC[];
-  isLoading: boolean;
+  isLoading?: boolean; // Make isLoading optional
 }
 
-const TransacoesList: React.FC<TransacoesListProps> = ({ transacoes, isLoading }) => {
+const TransacoesList: React.FC<TransacoesListProps> = ({ transacoes, isLoading = false }) => {
   if (isLoading) {
     return (
       <div className="space-y-2">
