@@ -1,3 +1,4 @@
+
 import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
 
@@ -24,7 +25,12 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
     });
 
     if (error) {
+      console.error('Erro na Edge Function:', error);
       throw new Error(`Erro ao conectar com as APIs blockchain: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Não foi possível obter dados do endereço Bitcoin');
     }
 
     return {
@@ -49,6 +55,7 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
       .order('transaction_date', { ascending: false });
 
     if (error) {
+      console.error('Erro ao buscar transações:', error);
       throw error;
     }
 
@@ -68,11 +75,16 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
 export async function atualizarDadosCron(wallet_id: string): Promise<void> {
   try {
     // Buscar o endereço da carteira
-    const { data: wallet } = await supabase
+    const { data: wallet, error } = await supabase
       .from('bitcoin_wallets')
       .select('address')
       .eq('id', wallet_id)
       .single();
+
+    if (error) {
+      console.error('Erro ao buscar carteira:', error);
+      throw new Error(`Erro ao buscar carteira: ${error.message}`);
+    }
 
     if (wallet) {
       await fetchCarteiraDados(wallet.address, wallet_id);
