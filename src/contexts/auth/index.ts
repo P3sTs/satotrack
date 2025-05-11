@@ -1,4 +1,4 @@
 
 export { useAuth, AuthProvider } from './AuthProvider';
 export { checkPasswordStrength } from './passwordUtils';
-export type { AuthContextType, LoginAttempt, PasswordStrengthResult } from './types';
+export type { AuthContextType, LoginAttempt, PasswordStrengthResult, AuthUser } from './types';

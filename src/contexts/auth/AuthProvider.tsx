@@ -1,9 +1,9 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { supabase } from '../../integrations/supabase/client';
-import { AuthError } from '@supabase/supabase-js';
+import { AuthError, User } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
-import { AuthContextType } from './types';
+import { AuthContextType, AuthUser } from './types';
 import { checkPasswordStrength } from './passwordUtils';
 import { useAuthSession } from './useAuthSession';
 import { useActivityMonitor } from './useActivityMonitor';
@@ -20,9 +20,21 @@ export const useAuth = () => {
   return context;
 };
 
+// Função para converter User para AuthUser (garantindo email)
+const convertToAuthUser = (user: User | null): AuthUser | null => {
+  if (!user || !user.email) return null;
+  return { ...user, email: user.email };
+};
+
 // Provedor do contexto de autenticação
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { session, user, loading, setSession, setUser } = useAuthSession();
+  const { session, user: supabaseUser, loading, setSession } = useAuthSession();
+  const [user, setUser] = useState<AuthUser | null>(convertToAuthUser(supabaseUser));
+
+  // Atualiza o user quando supabaseUser mudar
+  React.useEffect(() => {
+    setUser(convertToAuthUser(supabaseUser));
+  }, [supabaseUser]);
 
   const { 
     loginAttempts, 
@@ -133,7 +145,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateLastActivity, 
     securityStatus: activitySecurityStatus, 
     setSecurityStatus,
-    setLastActivity  // Add this line to get the setLastActivity function
+    setLastActivity
   } = useActivityMonitor(user, signOut);
 
   // Combine security statuses from different sources

@@ -14,10 +14,15 @@ export interface PasswordStrengthResult {
   feedback: string;
 }
 
+// Interface for authenticated user (extends Supabase User with required email)
+export interface AuthUser extends Omit<User, 'email'> {
+  email: string; // Fazendo email como obrigatório para nossa aplicação
+}
+
 // Interface for the context of authentication
 export interface AuthContextType {
   session: Session | null;
-  user: User | null;
+  user: AuthUser | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;

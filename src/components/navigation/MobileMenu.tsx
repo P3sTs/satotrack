@@ -3,11 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User, Wallet, Mail } from 'lucide-react';
-
-interface AuthUser {
-  id: string;
-  email: string;
-}
+import { AuthUser } from '@/contexts/auth';
 
 interface MobileMenuProps {
   user: AuthUser | null;

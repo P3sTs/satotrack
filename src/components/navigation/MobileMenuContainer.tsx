@@ -12,12 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import MobileMenu from './MobileMenu';
-
-// Fix import path for AuthUser
-interface AuthUser {
-  id: string;
-  email: string;
-}
+import { AuthUser } from '@/contexts/auth';
 
 interface MobileMenuContainerProps {
   isMobile: boolean;
