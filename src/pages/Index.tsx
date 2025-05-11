@@ -2,7 +2,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Dashboard from "./Dashboard";
 
 const Index = () => {
   const { user, loading } = useAuth();
