@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
 import { CarteiraBTC } from '../types/types';
 import { ReportGenerator } from '@/components/monetization/ReportGenerator';
@@ -12,15 +13,19 @@ const CarteiraDetalhes = () => {
   const [carteira, setCarteira] = useState<CarteiraBTC | null>(null);
   const { userPlan } = useAuth();
   const showAds = userPlan === 'free';
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (id && carteiras.length > 0) {
       const selectedCarteira = carteiras.find((c) => c.id.toString() === id);
       if (selectedCarteira) {
         setCarteira(selectedCarteira);
+      } else {
+        // If wallet is not found in user's wallets, redirect to dashboard
+        navigate('/dashboard', { replace: true });
       }
     }
-  }, [id, carteiras]);
+  }, [id, carteiras, navigate]);
 
   if (!carteira) {
     return (

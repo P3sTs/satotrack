@@ -10,6 +10,7 @@ import {
   removeCarteira,
   updateWalletName 
 } from '../services/carteiras';
+import { supabase } from '@/integrations/supabase/client';
 
 export const CarteirasContext = createContext<CarteiraContextType | undefined>(undefined);
 
@@ -32,23 +33,51 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [carteiraPrincipal, setCarteiraPrincipal] = useState<string | null>(
     localStorage.getItem(STORAGE_KEY_PRIMARY)
   );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   
   // Carregar todas as carteiras do usuário
   useEffect(() => {
     async function carregarCarteiras() {
       setIsLoading(true);
       try {
-        const data = await loadCarteiras(sortOption, sortDirection);
-        setCarteiras(data);
+        if (isAuthenticated) {
+          const data = await loadCarteiras(sortOption, sortDirection);
+          setCarteiras(data);
+        } else {
+          setCarteiras([]);
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     carregarCarteiras();
-  }, [sortOption, sortDirection]);
+  }, [sortOption, sortDirection, isAuthenticated]);
 
   const adicionarCarteira = useCallback(async (nome: string, endereco: string): Promise<void> => {
+    if (!isAuthenticated) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     setIsLoading(true);
     try {
       const novaCarteira = await addCarteira(nome, endereco);
@@ -65,9 +94,13 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const atualizarCarteira = useCallback(async (id: string): Promise<void> => {
+    if (!isAuthenticated) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     const carteira = carteiras.find(c => c.id === id);
     if (!carteira) return;
 
@@ -87,9 +120,13 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     } finally {
       setIsUpdating(prev => ({ ...prev, [id]: false }));
     }
-  }, [carteiras]);
+  }, [carteiras, isAuthenticated]);
 
   const carregarTransacoes = useCallback(async (id: string): Promise<TransacaoBTC[]> => {
+    if (!isAuthenticated) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     const carteira = carteiras.find(c => c.id === id);
     if (!carteira) return [];
 
@@ -100,9 +137,13 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     const txs = await loadTransacoes(id);
     setTransacoes(prev => ({...prev, [id]: txs}));
     return txs;
-  }, [carteiras, transacoes]);
+  }, [carteiras, transacoes, isAuthenticated]);
 
   const removerCarteira = useCallback(async (id: string): Promise<void> => {
+    if (!isAuthenticated) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     try {
       await removeCarteira(id);
       
@@ -121,9 +162,13 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     } catch (error) {
       console.error('Error removing wallet:', error);
     }
-  }, [carteiraPrincipal]);
+  }, [carteiraPrincipal, isAuthenticated]);
 
   const atualizarNomeCarteira = useCallback(async (id: string, nome: string): Promise<void> => {
+    if (!isAuthenticated) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     try {
       await updateWalletName(id, nome);
       
@@ -135,7 +180,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
       console.error('Error updating wallet name:', error);
       throw error;
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const ordenarCarteiras = useCallback((opcao: SortOption, direcao: SortDirection): void => {
     setSortOption(opcao);
@@ -143,6 +188,10 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
   
   const definirCarteiraPrincipal = useCallback((id: string | null): void => {
+    if (!isAuthenticated && id) {
+      throw new Error('Usuário não autenticado');
+    }
+    
     setCarteiraPrincipal(id);
     
     if (id) {
@@ -150,7 +199,7 @@ export const CarteirasProvider: React.FC<{ children: ReactNode }> = ({ children 
     } else {
       localStorage.removeItem(STORAGE_KEY_PRIMARY);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <CarteirasContext.Provider value={{

@@ -8,9 +8,17 @@ import { toast } from '@/components/ui/sonner';
  */
 export const loadCarteiras = async (sortOption: string, sortDirection: string) => {
   try {
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     const { data, error } = await supabase
       .from('bitcoin_wallets')
       .select('*')
+      .eq('user_id', user.id) // Only fetch wallets belonging to the current user
       .order(sortOption === 'saldo' ? 'balance' : 'last_updated', { ascending: sortDirection === 'asc' });
       
     if (error) {

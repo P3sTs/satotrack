@@ -3,6 +3,15 @@ import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
 import { toast } from '@/hooks/use-toast';
 
+// Check if user is authenticated
+const checkAuthentication = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user;
+};
+
 // Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
 export function validarEnderecoBitcoin(endereco: string): boolean {
   // Valida endereços Bitcoin Legacy (1...)
@@ -20,6 +29,9 @@ export function validarEnderecoBitcoin(endereco: string): boolean {
 // Buscar dados da carteira diretamente da API blockchain via edge function
 export async function fetchCarteiraDados(endereco: string, wallet_id?: string): Promise<Partial<CarteiraBTC>> {
   try {
+    // Check authentication first
+    await checkAuthentication();
+    
     // Chamar a edge function para buscar dados atualizados
     const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
       body: { address: endereco, wallet_id }
@@ -54,6 +66,22 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
 // Função para buscar transações da carteira
 export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]> {
   try {
+    // Check authentication first
+    const user = await checkAuthentication();
+    
+    // First check if the wallet belongs to the user
+    const { data: wallet, error: walletError } = await supabase
+      .from('bitcoin_wallets')
+      .select('id')
+      .eq('id', wallet_id)
+      .eq('user_id', user.id)
+      .single();
+      
+    if (walletError || !wallet) {
+      console.error('Wallet not found or access denied');
+      throw new Error('Acesso negado: Esta carteira não pertence ao usuário atual');
+    }
+
     const { data, error } = await supabase
       .from('wallet_transactions')
       .select('*')
@@ -87,11 +115,15 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
 // Função para atualizar dados de uma carteira específica via cron
 export async function atualizarDadosCron(wallet_id: string): Promise<void> {
   try {
+    // Check authentication first
+    const user = await checkAuthentication();
+    
     // Buscar o endereço da carteira
     const { data: wallet, error } = await supabase
       .from('bitcoin_wallets')
       .select('address')
       .eq('id', wallet_id)
+      .eq('user_id', user.id) // Ensure user owns this wallet
       .single();
 
     if (error) {
