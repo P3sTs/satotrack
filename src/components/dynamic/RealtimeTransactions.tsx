@@ -2,7 +2,7 @@
 import React from 'react';
 import { useRealtimeData } from '@/hooks/useRealtimeData';
 import { TransacaoBTC } from '@/types/types';
-import { useCarteiras } from '@/contexts/hooks/useCarteirasContext';
+import { useCarteiras } from '@/contexts/carteiras';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowDown, ArrowUp, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';

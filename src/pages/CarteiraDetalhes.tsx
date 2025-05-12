@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
+import { useCarteiras } from '../contexts/carteiras';
 import { CarteiraBTC } from '../types/types';
 import { ReportGenerator } from '@/components/monetization/ReportGenerator';
 import { useAuth } from '@/contexts/auth';

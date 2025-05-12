@@ -6,7 +6,7 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatBitcoinValue, formatCurrency } from '@/utils/formatters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCarteiras } from '@/contexts/hooks/useCarteirasContext';
+import { useCarteiras } from '@/contexts/carteiras';
 import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 

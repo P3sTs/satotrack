@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
+import { useCarteiras } from '../contexts/carteiras';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import NewWalletModal from '../components/NewWalletModal';

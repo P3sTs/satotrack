@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
+import { useCarteiras } from '../contexts/carteiras';
 import CarteiraCard from '../components/CarteiraCard';
 import SortControls from '../components/SortControls';
 import { Bitcoin, Plus, Settings, Lock, Bell, FileText } from 'lucide-react';

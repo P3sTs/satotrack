@@ -16,3 +16,5 @@ export const useCarteirasContext = (): CarteiraContextType => {
   return context;
 };
 
+// Export useCarteiras from carteiras context for backwards compatibility
+export { useCarteiras } from '../carteiras';

@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { CarteiraBTC } from '../../types/types';
 import { formatBitcoinValue, formatDate } from '../../utils/formatters';
 import { Button } from '@/components/ui/button';
 import { Pencil, RefreshCw, Star } from 'lucide-react';
-import { useCarteiras } from '../../contexts/CarteirasContext';
+import { useCarteiras } from '../../contexts/carteiras';
 import { toast } from '@/components/ui/sonner';
 import WalletEditor from './WalletEditor';
 import DeleteWalletDialog from './DeleteWalletDialog';
