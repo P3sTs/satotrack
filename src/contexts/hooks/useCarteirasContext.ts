@@ -13,3 +13,5 @@ export const useCarteiras = (): CarteiraContextType => {
   }
   return context;
 };
+
+export default useCarteiras;
