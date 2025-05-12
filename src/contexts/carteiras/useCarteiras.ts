@@ -26,3 +26,4 @@ export const useCarteiras = (): CarteiraContextType => {
 };
 
 export default useCarteiras;
+

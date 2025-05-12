@@ -1,18 +1,22 @@
 
-import React, { useState, ReactNode, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SortOption, SortDirection } from '../../types/types';
 import { CarteiraBTC, TransacaoBTC } from '../types/CarteirasTypes';
-import { 
-  loadCarteiras, 
-  addCarteira, 
-  updateCarteira, 
-  loadTransacoes, 
-  removeCarteira,
-  updateWalletName 
-} from '../../services/carteiras';
-import { supabase } from '@/integrations/supabase/client';
 import { CarteirasContext } from './CarteirasContext';
 import { STORAGE_KEY_PRIMARY, CarteirasProviderProps } from './types';
+import { checkAuthentication, setupAuthListener } from './auth/walletAuthUtils';
+import { 
+  loadUserWallets, 
+  addNewWallet, 
+  updateWalletData,
+  loadWalletTransactions,
+  removeUserWallet,
+  updateWalletNameOp
+} from './operations/walletOperations';
+import { 
+  getPrimaryWalletFromStorage, 
+  setPrimaryWalletInStorage 
+} from './storage/primaryWalletStorage';
 
 export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }) => {
   const [carteiras, setCarteiras] = useState<CarteiraBTC[]>([]);
@@ -22,22 +26,22 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState<Record<string, boolean>>({});
   const [carteiraPrincipal, setCarteiraPrincipal] = useState<string | null>(
-    localStorage.getItem(STORAGE_KEY_PRIMARY)
+    getPrimaryWalletFromStorage()
   );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
+      const isAuthd = await checkAuthentication();
+      setIsAuthenticated(isAuthd);
     };
     
     checkAuth();
     
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
+    const subscription = setupAuthListener((isAuthd) => {
+      setIsAuthenticated(isAuthd);
     });
     
     return () => {
@@ -50,12 +54,8 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     async function carregarCarteiras() {
       setIsLoading(true);
       try {
-        if (isAuthenticated) {
-          const data = await loadCarteiras(sortOption, sortDirection);
-          setCarteiras(data);
-        } else {
-          setCarteiras([]);
-        }
+        const data = await loadUserWallets(sortOption, sortDirection, isAuthenticated);
+        setCarteiras(data);
       } finally {
         setIsLoading(false);
       }
@@ -71,16 +71,15 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     
     setIsLoading(true);
     try {
-      const novaCarteira = await addCarteira(nome, endereco);
+      const novaCarteira = await addNewWallet(nome, endereco, isAuthenticated);
       setCarteiras(prevCarteiras => [...prevCarteiras, novaCarteira]);
       
       // Carregar transações iniciais
       try {
-        const txs = await loadTransacoes(novaCarteira.id);
+        const txs = await loadWalletTransactions(novaCarteira.id, isAuthenticated);
         setTransacoes(prev => ({...prev, [novaCarteira.id]: txs}));
       } catch (txError) {
         console.error('Error loading transactions:', txError);
-        // Don't throw here, just log the error as this is not critical
       }
     } finally {
       setIsLoading(false);
@@ -98,7 +97,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     setIsUpdating(prev => ({ ...prev, [id]: true }));
     try {
       // Atualizar carteira usando o serviço
-      const carteiraAtualizada = await updateCarteira(carteira);
+      const carteiraAtualizada = await updateWalletData(carteira, isAuthenticated);
       
       // Atualizar carteira localmente
       setCarteiras(prevCarteiras => 
@@ -106,7 +105,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
       );
       
       // Buscar transações atualizadas
-      const txs = await loadTransacoes(id);
+      const txs = await loadWalletTransactions(id, isAuthenticated);
       setTransacoes(prev => ({...prev, [id]: txs}));
     } finally {
       setIsUpdating(prev => ({ ...prev, [id]: false }));
@@ -125,7 +124,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
       return transacoes[id];
     }
 
-    const txs = await loadTransacoes(id);
+    const txs = await loadWalletTransactions(id, isAuthenticated);
     setTransacoes(prev => ({...prev, [id]: txs}));
     return txs;
   }, [carteiras, transacoes, isAuthenticated]);
@@ -136,12 +135,12 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     }
     
     try {
-      await removeCarteira(id);
+      await removeUserWallet(id, isAuthenticated);
       
       // Se a carteira removida era a principal, limpar a configuração
       if (carteiraPrincipal === id) {
         setCarteiraPrincipal(null);
-        localStorage.removeItem(STORAGE_KEY_PRIMARY);
+        setPrimaryWalletInStorage(null);
       }
       
       setCarteiras(prevCarteiras => prevCarteiras.filter(c => c.id !== id));
@@ -161,7 +160,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     }
     
     try {
-      await updateWalletName(id, nome);
+      await updateWalletNameOp(id, nome, isAuthenticated);
       
       // Atualizar carteira localmente
       setCarteiras(prevCarteiras => 
@@ -184,12 +183,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     }
     
     setCarteiraPrincipal(id);
-    
-    if (id) {
-      localStorage.setItem(STORAGE_KEY_PRIMARY, id);
-    } else {
-      localStorage.removeItem(STORAGE_KEY_PRIMARY);
-    }
+    setPrimaryWalletInStorage(id);
   }, [isAuthenticated]);
 
   return (
@@ -213,3 +207,4 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     </CarteirasContext.Provider>
   );
 };
+
