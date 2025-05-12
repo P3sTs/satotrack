@@ -17,7 +17,7 @@ import TransactionTooltip from '../tooltips/TransactionTooltip';
 
 interface TransactionBarChartProps {
   data: TransactionDataPoint[];
-  timeRange: '1D' | '7D' | '30D';
+  timeRange: '7D' | '30D' | '6M' | '1Y';
 }
 
 const TransactionBarChart: React.FC<TransactionBarChartProps> = ({ data, timeRange }) => {
@@ -33,6 +33,7 @@ const TransactionBarChart: React.FC<TransactionBarChartProps> = ({ data, timeRan
           tick={{ fontSize: 10, fill: '#9ca3af' }}
           axisLine={{ stroke: '#374151' }}
           tickLine={{ stroke: '#374151' }}
+          minTickGap={30}
         />
         <YAxis 
           tickFormatter={formatBitcoinValue}
@@ -44,7 +45,7 @@ const TransactionBarChart: React.FC<TransactionBarChartProps> = ({ data, timeRan
         <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" opacity={0.3} />
         <ReferenceLine y={0} stroke="#525252" />
         <Tooltip content={<TransactionTooltip />} />
-        <Bar dataKey="valor">
+        <Bar dataKey="valor" animationDuration={1000} animationEasing="ease-out">
           {data.map((entry, index) => (
             <Cell 
               key={`cell-${index}`} 

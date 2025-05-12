@@ -1,27 +1,57 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { formatBitcoinValue } from '../utils/ChartFormatters';
+import { formatDateTime, formatBitcoinValue, formatCurrencyValue, formatBRL } from '../utils/ChartFormatters';
 
-interface TransactionTooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-}
-
-const TransactionTooltip: React.FC<TransactionTooltipProps> = ({ active, payload, label }) => {
+const TransactionTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    const timestamp = data.timestamp;
+    const valor = data.valor;
+    const tipo = data.tipo;
+    
+    // Calculate USD and BRL values (for demonstration)
+    const bitcoinPrice = 65000; // Example BTC price in USD
+    const valorUSD = valor * bitcoinPrice;
+    const exchangeRate = 5.05; // Example BRL to USD rate
+    const valorBRL = valorUSD * exchangeRate;
+
+    const isEntrada = tipo === 'entrada';
+
     return (
-      <div className="bg-dashboard-dark border border-dashboard-medium/50 p-2 rounded shadow-md">
-        <p className="text-xs">{format(data.timestamp, 'PPpp', { locale: ptBR })}</p>
-        <p className={`text-sm font-semibold ${data.tipo === 'entrada' ? 'text-green-500' : 'text-red-500'}`}>
-          {data.tipo === 'entrada' ? '+ ' : '- '}{formatBitcoinValue(Math.abs(data.valor))}
-        </p>
+      <div className="bg-dashboard-dark/90 backdrop-blur-sm border border-satotrack-neon/20 p-3 rounded-lg shadow-lg">
+        <div className="font-medium text-white mb-1.5">
+          {formatDateTime(timestamp)}
+        </div>
+        <div className="space-y-1">
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground text-sm">Tipo:</span>
+            <span className={isEntrada ? "font-medium text-green-500" : "font-medium text-red-500"}>
+              {isEntrada ? 'Recebido' : 'Enviado'}
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground text-sm">Valor BTC:</span>
+            <span className={isEntrada ? "font-medium text-green-500" : "font-medium text-red-500"}>
+              {isEntrada ? '+' : '-'}{formatBitcoinValue(Math.abs(valor))} BTC
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground text-sm">Valor USD:</span>
+            <span className="font-medium">
+              {isEntrada ? '+' : '-'}{formatCurrencyValue(Math.abs(valorUSD))}
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground text-sm">Valor BRL:</span>
+            <span className="font-medium">
+              {isEntrada ? '+' : '-'}{formatBRL(Math.abs(valorBRL))}
+            </span>
+          </div>
+        </div>
       </div>
     );
   }
+  
   return null;
 };
 

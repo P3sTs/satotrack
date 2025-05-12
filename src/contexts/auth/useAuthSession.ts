@@ -35,12 +35,28 @@ export const useAuthSession = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Handle redirects based on current path if needed
+      if (session && location.pathname === '/auth') {
+        navigate('/dashboard', { replace: true });
+      } else if (!session && location.pathname !== '/' && 
+                location.pathname !== '/home' && 
+                location.pathname !== '/auth' && 
+                location.pathname !== '/sobre' && 
+                location.pathname !== '/privacidade' &&
+                location.pathname !== '/planos') {
+        // Save the current location to redirect back after authentication
+        navigate('/auth', { 
+          replace: true,
+          state: { from: location }
+        });
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, location.state]);
+  }, [navigate, location]);
 
   return { session, user, loading, setSession, setUser };
 };

@@ -7,7 +7,7 @@ import TransactionBarChart from './balance/TransactionBarChart';
 
 interface BalanceChartProps {
   wallet: CarteiraBTC | undefined;
-  timeRange: '1D' | '7D' | '30D';
+  timeRange: '7D' | '30D' | '6M' | '1Y';
 }
 
 const BalanceChart: React.FC<BalanceChartProps> = ({ wallet, timeRange }) => {

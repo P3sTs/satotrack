@@ -16,7 +16,7 @@ import BalanceTooltip from '../tooltips/BalanceTooltip';
 
 interface BalanceAreaChartProps {
   data: BalanceDataPoint[];
-  timeRange: '1D' | '7D' | '30D';
+  timeRange: '7D' | '30D' | '6M' | '1Y';
 }
 
 const BalanceAreaChart: React.FC<BalanceAreaChartProps> = ({ data, timeRange }) => {
@@ -46,6 +46,7 @@ const BalanceAreaChart: React.FC<BalanceAreaChartProps> = ({ data, timeRange }) 
             tick={{ fontSize: 10, fill: '#9ca3af' }}
             axisLine={{ stroke: '#374151' }}
             tickLine={{ stroke: '#374151' }}
+            minTickGap={30}
           />
           <YAxis 
             tickFormatter={formatBitcoinValue}
@@ -63,6 +64,8 @@ const BalanceAreaChart: React.FC<BalanceAreaChartProps> = ({ data, timeRange }) 
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#balanceGradient)"
+            animationDuration={1000}
+            animationEasing="ease-in-out"
           />
         </AreaChart>
       </ResponsiveContainer>

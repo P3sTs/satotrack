@@ -6,7 +6,7 @@ import PriceAreaChart from './price/PriceAreaChart';
 
 interface PriceChartProps {
   bitcoinData: BitcoinPriceData | null | undefined;
-  timeRange: '1D' | '7D' | '30D';
+  timeRange: '7D' | '30D' | '6M' | '1Y';
 }
 
 const PriceChart: React.FC<PriceChartProps> = ({ bitcoinData, timeRange }) => {
@@ -29,7 +29,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ bitcoinData, timeRange }) => {
   }
 
   return (
-    <div className="w-full h-60 md:h-72">
+    <div className="w-full h-60 md:h-72 animate-fade-in">
       <PriceAreaChart data={chartData} timeRange={timeRange} />
     </div>
   );

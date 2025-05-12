@@ -6,6 +6,8 @@ import WalletAnalytics from '@/components/wallet/WalletAnalytics';
 import { Card, CardContent } from '@/components/ui/card';
 import TransacoesList from '@/components/TransacoesList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/auth';
+import PremiumBanner from '@/components/monetization/PremiumBanner';
 
 interface ChartViewProps {
   bitcoinData?: BitcoinPriceData | null;
@@ -14,8 +16,16 @@ interface ChartViewProps {
 }
 
 const ChartView: React.FC<ChartViewProps> = ({ bitcoinData, walletId, transacoes }) => {
+  const { userPlan } = useAuth();
+  const isPremium = userPlan === 'premium';
+  
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Show premium banner for free users */}
+      {!isPremium && (
+        <PremiumBanner className="mb-2" />
+      )}
+      
       <WalletAnalytics bitcoinData={bitcoinData} walletId={walletId} />
       
       <Card>

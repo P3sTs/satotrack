@@ -7,7 +7,7 @@ export interface PriceDataPoint {
   price: number;
 }
 
-type TimeRange = '1D' | '7D' | '30D';
+type TimeRange = '7D' | '30D' | '6M' | '1Y';
 
 export function usePriceChartData(bitcoinData: BitcoinPriceData | null | undefined, timeRange: TimeRange) {
   const [chartData, setChartData] = useState<PriceDataPoint[]>([]);
@@ -20,14 +20,17 @@ export function usePriceChartData(bitcoinData: BitcoinPriceData | null | undefin
         // Determine time range in milliseconds
         let timeInDays;
         switch (timeRange) {
-          case '1D':
-            timeInDays = 1;
-            break;
           case '7D':
             timeInDays = 7;
             break;
           case '30D':
             timeInDays = 30;
+            break;
+          case '6M':
+            timeInDays = 180; // Approximately 6 months
+            break;
+          case '1Y':
+            timeInDays = 365; // 1 year
             break;
           default:
             timeInDays = 7;
@@ -42,19 +45,22 @@ export function usePriceChartData(bitcoinData: BitcoinPriceData | null | undefin
         const currentPrice = bitcoinData?.price_usd || 50000;
         const volatility = 0.02; // 2% volatility
         
-        // Generate data points - one per day for 30D, hourly for 7D, every 30 min for 1D
+        // Generate data points with appropriate interval based on time range
         let interval;
         let points;
         
-        if (timeRange === '1D') {
-          interval = 30 * 60 * 1000; // 30 minutes
-          points = 48; // 48 points in a day (30 min intervals)
-        } else if (timeRange === '7D') {
+        if (timeRange === '7D') {
           interval = 3 * 60 * 60 * 1000; // 3 hours
           points = 7 * 8; // 7 days * 8 points per day
-        } else {
+        } else if (timeRange === '30D') {
           interval = 24 * 60 * 60 * 1000; // 1 day
           points = 30; // 30 days
+        } else if (timeRange === '6M') {
+          interval = 7 * 24 * 60 * 60 * 1000; // 1 week
+          points = 26; // ~26 weeks in 6 months
+        } else { // 1Y
+          interval = 14 * 24 * 60 * 60 * 1000; // 2 weeks
+          points = 26; // 26 biweekly points in a year
         }
         
         for (let i = 0; i < points; i++) {
