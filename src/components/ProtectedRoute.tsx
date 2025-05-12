@@ -1,12 +1,17 @@
 
+import { ReactNode } from 'react';
 import { useAuth } from '../contexts/auth';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useEffect } from 'react';
 
-const ProtectedRoute = () => {
-  const { user, loading, isAuthenticated, lastActivity, updateLastActivity, securityStatus } = useAuth();
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, loading, isAuthenticated, updateLastActivity, securityStatus } = useAuth();
   const location = useLocation();
   
   // Atualiza atividade do usuário ao navegar entre rotas protegidas
@@ -45,7 +50,7 @@ const ProtectedRoute = () => {
           </AlertDescription>
         </Alert>
       )}
-      <Outlet />
+      {children}
     </>
   );
 };
