@@ -1,25 +1,12 @@
+import { Session, User } from '@supabase/supabase-js';
 
-import { Session, User, AuthError } from '@supabase/supabase-js';
+export type PlanType = 'free' | 'premium';
 
-// Interface for login attempts
-export interface LoginAttempt {
+export interface AuthUser extends User {
   email: string;
-  timestamp: number;
-  success: boolean;
+  plan?: PlanType;
 }
 
-// Interface for password strength result
-export interface PasswordStrengthResult {
-  score: number;
-  feedback: string;
-}
-
-// Interface for authenticated user (extends Supabase User with required email)
-export interface AuthUser extends Omit<User, 'email'> {
-  email: string; // Fazendo email como obrigatório para nossa aplicação
-}
-
-// Interface for the context of authentication
 export interface AuthContextType {
   session: Session | null;
   user: AuthUser | null;
@@ -28,10 +15,16 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   loading: boolean;
   isAuthenticated: boolean;
-  passwordStrength: (password: string) => PasswordStrengthResult;
-  lastActivity: number | null;
+  passwordStrength: (password: string) => { score: number; feedback: string };
+  lastActivity: Date | null;
   updateLastActivity: () => void;
   securityStatus: 'secure' | 'warning' | 'danger';
   failedLoginAttempts: number;
   resetFailedLoginAttempts: () => void;
+  upgradeUserPlan?: () => Promise<void>;
+  userPlan: PlanType;
+  canAddMoreWallets: boolean;
+  generateApiToken?: () => Promise<string>;
+  apiToken?: string | null;
+  apiRequestsRemaining?: number;
 }

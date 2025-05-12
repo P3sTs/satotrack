@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
-import { Home, Wallet, Info, Shield, Mail } from "lucide-react";
+import { Home, Wallet, Info, Shield, Mail, Code, CreditCard } from "lucide-react";
 
 const MainNav = () => {
   const location = useLocation();
@@ -100,8 +100,34 @@ const MainNav = () => {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
+            
+            <NavigationMenuItem>
+              <Link to="/api">
+                <NavigationMenuLink className={cn(
+                  navigationMenuTriggerStyle(),
+                  "flex items-center",
+                  location.pathname === "/api" && "text-satotrack-neon font-medium"
+                )}>
+                  <Code className="h-4 w-4 mr-1.5" />
+                  API
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           </>
         )}
+        
+        <NavigationMenuItem>
+          <Link to="/planos">
+            <NavigationMenuLink className={cn(
+              navigationMenuTriggerStyle(),
+              "flex items-center",
+              location.pathname === "/planos" && "text-satotrack-neon font-medium"
+            )}>
+              <CreditCard className="h-4 w-4 mr-1.5" />
+              Planos
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
         
         <NavigationMenuItem>
           <Link to="/sobre">

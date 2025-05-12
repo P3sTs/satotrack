@@ -6,6 +6,7 @@ import { LogOut, User } from 'lucide-react';
 import { SecurityIndicator } from '../SecurityIndicator';
 import UserSettings from '../UserSettings';
 import { AuthUser } from '@/contexts/auth/types';
+import { PlanBadge } from '../monetization/PlanDisplay';
 
 interface UserMenuProps {
   user: AuthUser | null;
@@ -35,6 +36,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout
         </Avatar>
         <div className="hidden lg:block">
           <p className="text-sm font-medium">{user.email}</p>
+          <div className="flex items-center gap-1">
+            <PlanBadge />
+          </div>
         </div>
         <UserSettings />
       </div>

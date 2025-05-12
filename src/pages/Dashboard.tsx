@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useCarteiras } from '../contexts/CarteirasContext';
+import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
 import CarteiraCard from '../components/CarteiraCard';
 import SortControls from '../components/SortControls';
-import { Bitcoin, Plus, Settings } from 'lucide-react';
+import { Bitcoin, Plus, Settings, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NewWalletModal from '../components/NewWalletModal';
 import { Button } from '@/components/ui/button';
 import ViewModeSelector from '../components/wallet/ViewModeSelector';
+import { useAuth } from '@/contexts/auth';
+import { Advertisement } from '@/components/monetization/Advertisement';
+import { UpgradeButton } from '@/components/monetization/PlanDisplay';
 
 const Dashboard: React.FC = () => {
   const { 
@@ -18,9 +21,15 @@ const Dashboard: React.FC = () => {
     carteiraPrincipal
   } = useCarteiras();
   
+  const { userPlan } = useAuth();
+  
   const [isNewWalletModalOpen, setIsNewWalletModalOpen] = useState(false);
   const [principalCarteira, setCarteiraPrincipal] = useState<typeof carteiras[0] | null>(null);
   const [outrasCarteiras, setOutrasCarteiras] = useState<typeof carteiras>([]);
+  
+  const isPremium = userPlan === 'premium';
+  const walletLimit = isPremium ? null : 1;
+  const reachedLimit = !isPremium && carteiras.length >= 1;
   
   // Separar a carteira principal das outras
   useEffect(() => {
@@ -45,13 +54,17 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            onClick={() => setIsNewWalletModalOpen(true)}
-            className="bg-bitcoin hover:bg-bitcoin-dark text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Carteira
-          </Button>
+          {reachedLimit ? (
+            <UpgradeButton />
+          ) : (
+            <Button
+              onClick={() => setIsNewWalletModalOpen(true)}
+              className="bg-bitcoin hover:bg-bitcoin-dark text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Carteira
+            </Button>
+          )}
           
           <Link to="/carteiras">
             <Button variant="outline" className="flex items-center gap-2">
@@ -64,6 +77,27 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       
+      {/* Free plan limitation notice */}
+      {!isPremium && (
+        <div className="mb-6 p-4 border border-dashed rounded-lg flex items-center justify-between bg-card">
+          <div className="flex items-center gap-3">
+            <div className="bg-muted rounded-full p-2">
+              <Lock className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="font-medium">Plano Gratuito</h3>
+              <p className="text-sm text-muted-foreground">
+                Você pode adicionar {walletLimit} {walletLimit === 1 ? 'carteira' : 'carteiras'}.
+                {walletLimit && ` ${carteiras.length}/${walletLimit} utilizado.`}
+              </p>
+            </div>
+          </div>
+          <Link to="/planos">
+            <Button variant="neon" size="sm">Ver planos</Button>
+          </Link>
+        </div>
+      )}
+      
       {/* Carteira Principal */}
       {principalCarteira && (
         <div className="mb-6 md:mb-8">
@@ -75,6 +109,11 @@ const Dashboard: React.FC = () => {
             />
           </div>
         </div>
+      )}
+      
+      {/* Advertisement for free users */}
+      {!isPremium && (
+        <Advertisement position="panel" className="mb-6" />
       )}
       
       {/* Lista de Carteiras */}
@@ -104,10 +143,29 @@ const Dashboard: React.FC = () => {
             <Button 
               onClick={() => setIsNewWalletModalOpen(true)}
               className="inline-flex items-center gap-2 bg-bitcoin hover:bg-bitcoin-dark text-white transition-colors"
+              disabled={reachedLimit}
             >
-              <Plus className="h-4 w-4" />
-              Adicionar Carteira
+              {reachedLimit ? (
+                <>
+                  <Lock className="h-4 w-4 mr-2" />
+                  Limite atingido
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Adicionar Carteira
+                </>
+              )}
             </Button>
+            {reachedLimit && (
+              <div className="mt-4">
+                <Link to="/planos">
+                  <Button variant="outline">
+                    Ver planos premium
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

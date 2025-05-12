@@ -8,6 +8,7 @@ import MainNav from './MainNav';
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileMenuContainer from './navigation/MobileMenuContainer';
 import UserMenu from './navigation/UserMenu';
+import { PlanBadge } from './monetization/PlanDisplay';
 
 const NavBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -70,6 +71,7 @@ const NavBar: React.FC = () => {
           
           {/* Auth actions */}
           <div className="hidden md:flex items-center gap-2">
+            {user && <PlanBadge />}
             <UserMenu 
               user={user} 
               getUserInitials={getUserInitials} 
