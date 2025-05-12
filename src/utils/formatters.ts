@@ -1,4 +1,3 @@
-
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -103,4 +102,26 @@ export const formatFullDate = (date: Date | string): string => {
   return format(dateObj, "dd 'de' MMMM 'de' yyyy", {
     locale: ptBR
   });
+};
+
+/**
+ * Formata um timestamp para "tempo atrás" (ex: "5 minutos atrás")
+ */
+export const formatTimeAgo = (date: Date | string): string => {
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now.getTime() - past.getTime();
+  const diffSecs = Math.round(diffMs / 1000);
+  const diffMins = Math.round(diffSecs / 60);
+  const diffHours = Math.round(diffMins / 60);
+  const diffDays = Math.round(diffHours / 24);
+
+  if (diffSecs < 10) return 'agora';
+  if (diffSecs < 60) return `${diffSecs} segundos atrás`;
+  if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? 'minuto' : 'minutos'} atrás`;
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hora' : 'horas'} atrás`;
+  if (diffDays < 30) return `${diffDays} ${diffDays === 1 ? 'dia' : 'dias'} atrás`;
+  
+  // Se for mais antigo, usar o formatDate normal
+  return formatDate(date);
 };

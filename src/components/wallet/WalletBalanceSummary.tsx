@@ -3,6 +3,7 @@ import React from 'react';
 import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 import { formatarBTC, formatDate } from '@/utils/formatters';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
+import { RealtimeWalletBalance } from '@/components/dynamic/RealtimeWalletBalance';
 
 interface WalletBalanceSummaryProps {
   carteira: CarteiraBTC;
@@ -21,9 +22,13 @@ const WalletBalanceSummary: React.FC<WalletBalanceSummaryProps> = ({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-lg font-medium text-muted-foreground mb-1">Saldo Total</h2>
-          <div className="text-3xl md:text-4xl font-semibold font-mono">
-            {formatarBTC(carteira.saldo)}
-          </div>
+          <RealtimeWalletBalance
+            walletId={carteira.id}
+            showFiatValue={false}
+            bitcoinData={bitcoinData}
+            size="lg"
+            showRefreshButton={true}
+          />
           
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 mt-2 text-muted-foreground text-sm">
             <div>
@@ -37,15 +42,15 @@ const WalletBalanceSummary: React.FC<WalletBalanceSummaryProps> = ({
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 md:text-right">
           <div>
-            <div className="text-sm font-medium text-muted-foreground">Transações</div>
+            <div className="text-sm font-medium text-muted-foreground mb-1">Transações</div>
             <div className="text-xl md:text-2xl font-mono">{carteira.qtde_transacoes}</div>
           </div>
           <div>
-            <div className="text-sm font-medium text-muted-foreground">Recebido</div>
+            <div className="text-sm font-medium text-muted-foreground mb-1">Recebido</div>
             <div className="text-xl md:text-2xl font-mono text-green-500">{formatarBTC(carteira.total_entradas)}</div>
           </div>
           <div>
-            <div className="text-sm font-medium text-muted-foreground">Enviado</div>
+            <div className="text-sm font-medium text-muted-foreground mb-1">Enviado</div>
             <div className="text-xl md:text-2xl font-mono text-red-500">{formatarBTC(carteira.total_saidas)}</div>
           </div>
         </div>

@@ -1,8 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatters';
+import { DynamicValue } from '@/components/dynamic/DynamicValue';
+import { ValueChangeState } from '@/hooks/useRealtimeData';
 
 interface BitcoinPriceCardProps {
   title: string;
@@ -26,43 +28,35 @@ const BitcoinPriceCard = ({
   animateChanges = true
 }: BitcoinPriceCardProps) => {
   const isNegative = changePercentage !== undefined && changePercentage < 0;
-  const [animate, setAnimate] = useState<'increase' | 'decrease' | null>(null);
-  const [lastPrice, setLastPrice] = useState(price);
-
-  useEffect(() => {
-    if (animateChanges && previousPrice !== null && previousPrice !== undefined) {
-      if (price > previousPrice) {
-        setAnimate('increase');
-      } else if (price < previousPrice) {
-        setAnimate('decrease');
-      }
-      
-      const timer = setTimeout(() => {
-        setAnimate(null);
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
-    
-    setLastPrice(price);
-  }, [price, previousPrice, animateChanges]);
+  
+  // Determinar estado de mudança para o DynamicValue
+  const getChangeState = (): ValueChangeState => {
+    if (previousPrice === undefined || previousPrice === null) return 'initial';
+    if (price > previousPrice) return 'increased';
+    if (price < previousPrice) return 'decreased';
+    return 'unchanged';
+  };
+  
+  const changeState = getChangeState();
   
   return (
-    <Card className={`bitcoin-card overflow-hidden border-none shadow-md transition-all duration-300 ${
-      animate === 'increase' ? 'ring-2 ring-green-500' : 
-      animate === 'decrease' ? 'ring-2 ring-red-500' : ''
-    }`}>
+    <Card className="bitcoin-card overflow-hidden border-none shadow-md transition-all duration-300">
       <CardHeader className="pb-2 bg-muted/30">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent className="pt-4">
         <div className="flex items-baseline justify-between">
-          <div className={`text-2xl md:text-3xl font-bold transition-colors duration-500 ${
-            animate === 'increase' ? 'text-green-500' : 
-            animate === 'decrease' ? 'text-red-500' : ''
-          }`}>
-            {formatCurrency(price, currency)}
-          </div>
+          <DynamicValue
+            value={price}
+            previousValue={previousPrice}
+            formatFunc={(val) => formatCurrency(val, currency)}
+            changeState={changeState}
+            showAnimation={animateChanges}
+            className="text-2xl md:text-3xl font-bold"
+            iconClassName="h-4 w-4 ml-1"
+            showIcon={false}
+          />
+          
           {showChange && changePercentage !== undefined && (
             <div className={`flex items-center font-medium ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
               {isNegative ? (
@@ -74,14 +68,6 @@ const BitcoinPriceCard = ({
             </div>
           )}
         </div>
-        
-        {animate && (
-          <div className={`mt-2 text-xs font-medium ${
-            animate === 'increase' ? 'text-green-500' : 'text-red-500'
-          }`}>
-            {animate === 'increase' ? '↑ Em alta' : '↓ Em queda'}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
