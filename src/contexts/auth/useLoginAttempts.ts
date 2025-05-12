@@ -14,6 +14,11 @@ export const useLoginAttempts = () => {
     saveLoginAttempts(newAttempts);
   };
 
+  // Correctly reference resetLoginAttempts from useLoginStorage
+  const resetFailedLoginAttempts = () => {
+    resetLoginAttempts();
+  };
+
   return {
     loginAttempts,
     checkFailedLoginAttempts,
