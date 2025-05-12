@@ -49,3 +49,22 @@ export const formatBitcoinValue = (value: number): string => {
   
   return `₿ ${value.toFixed(8)}`;
 };
+
+/**
+ * Format date and time for tooltips
+ */
+export const formatDateTime = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  return format(date, 'dd MMM yyyy HH:mm');
+};
+
+/**
+ * Format BRL currency values
+ */
+export const formatBRL = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};
+

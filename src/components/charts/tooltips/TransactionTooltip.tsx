@@ -56,3 +56,4 @@ const TransactionTooltip = ({ active, payload, label }: any) => {
 };
 
 export default TransactionTooltip;
+

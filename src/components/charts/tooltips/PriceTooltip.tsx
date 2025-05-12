@@ -4,7 +4,7 @@ import { TooltipProps } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
-interface PriceTooltipProps extends TooltipProps {
+interface PriceTooltipProps extends TooltipProps<number, string> {
   active?: boolean;
   payload?: any[];
   label?: string;
@@ -30,3 +30,4 @@ const PriceTooltip: React.FC<PriceTooltipProps> = ({ active, payload, label }) =
 };
 
 export default PriceTooltip;
+

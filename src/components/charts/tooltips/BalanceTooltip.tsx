@@ -41,3 +41,4 @@ const BalanceTooltip = ({ active, payload, label }: any) => {
 };
 
 export default BalanceTooltip;
+
