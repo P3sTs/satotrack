@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -12,9 +11,8 @@ export const useAuthPlans = (user: AuthUser | null) => {
   // Fetch user plan from database
   const fetchUserPlan = async (userId: string) => {
     try {
-      // Use type assertion to work around the type checking
       const { data, error } = await supabase
-        .from('user_plans' as any)
+        .from('user_plans')
         .select('plan_type, api_token, api_requests')
         .eq('user_id', userId)
         .single();
@@ -41,7 +39,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
       
       // Use type assertion to work around the type checking
       const { error } = await supabase
-        .from('user_plans' as any)
+        .from('user_plans')
         .upsert({ 
           user_id: user.id, 
           plan_type: 'premium',
@@ -78,7 +76,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
       
       // Use type assertion to work around the type checking
       const { error } = await supabase
-        .from('user_plans' as any)
+        .from('user_plans')
         .upsert({ 
           user_id: user.id, 
           api_token: token,

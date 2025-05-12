@@ -19,8 +19,8 @@ export function SecurityIndicator() {
   const getTimeSinceLastActivity = () => {
     if (!lastActivity) return 'Desconhecido';
     
-    // Convert lastActivity to number if it's a Date object
-    const timestamp = lastActivity instanceof Date ? lastActivity.getTime() : lastActivity;
+    // Convert lastActivity to number if needed
+    const timestamp = typeof lastActivity === 'number' ? lastActivity : Number(lastActivity);
     const diffMinutes = Math.floor((new Date().getTime() - timestamp) / 60000);
     
     if (diffMinutes < 1) return 'Agora';
