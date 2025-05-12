@@ -1,3 +1,4 @@
+
 import { Session, User } from '@supabase/supabase-js';
 
 export type PlanType = 'free' | 'premium';
@@ -27,4 +28,15 @@ export interface AuthContextType {
   generateApiToken?: () => Promise<string>;
   apiToken?: string | null;
   apiRequestsRemaining?: number;
+}
+
+export interface LoginAttempt {
+  email: string;
+  timestamp: number;
+  success: boolean;
+}
+
+export interface PasswordStrengthResult {
+  score: number;
+  feedback: string;
 }

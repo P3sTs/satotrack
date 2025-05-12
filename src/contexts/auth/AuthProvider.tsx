@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { AuthError, User } from '@supabase/supabase-js';
@@ -47,8 +48,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Fetch user plan from database
   const fetchUserPlan = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_plans')
+      // Use any as a workaround until Supabase types are updated
+      const { data, error } = await (supabase
+        .from('user_plans') as any)
         .select('plan_type, api_token, api_requests')
         .eq('user_id', userId)
         .single();
@@ -179,8 +181,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (!user) throw new Error('User not authenticated');
       
-      const { error } = await supabase
-        .from('user_plans')
+      const { error } = await (supabase
+        .from('user_plans') as any)
         .upsert({ 
           user_id: user.id, 
           plan_type: 'premium',
@@ -215,8 +217,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = Math.random().toString(36).substring(2, 15) + 
                     Math.random().toString(36).substring(2, 15);
       
-      const { error } = await supabase
-        .from('user_plans')
+      const { error } = await (supabase
+        .from('user_plans') as any)
         .upsert({ 
           user_id: user.id, 
           api_token: token,
@@ -265,7 +267,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const securityStatus = determineSecurityStatus();
 
   // Calculate if user can add more wallets based on their plan
-  const canAddMoreWallets = userPlan === 'premium' || true; // This will be checked against wallet count in useCarteiras
+  const canAddMoreWallets = userPlan === 'premium' || true;
 
   return (
     <AuthContext.Provider value={{

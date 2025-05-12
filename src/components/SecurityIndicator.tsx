@@ -18,7 +18,7 @@ export function SecurityIndicator() {
   // Calcula tempo desde última atividade
   const getTimeSinceLastActivity = () => {
     if (!lastActivity) return 'Desconhecido';
-    const diffMinutes = Math.floor((Date.now() - lastActivity) / 60000);
+    const diffMinutes = Math.floor((new Date().getTime() - lastActivity.getTime()) / 60000);
     
     if (diffMinutes < 1) return 'Agora';
     if (diffMinutes === 1) return '1 minuto atrás';
