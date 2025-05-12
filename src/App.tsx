@@ -19,8 +19,12 @@ import WalletsManager from "@/pages/WalletsManager";
 import Index from "@/pages/Index";
 import ApiDocs from "@/pages/ApiDocs";
 import PlanosPage from "@/pages/PlanosPage";
+import Historico from "@/pages/Historico";
+import Mercado from "@/pages/Mercado";
+import Configuracoes from "@/pages/Configuracoes";
 
 // Components
+import AppLayout from "@/components/layout/AppLayout";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -60,61 +64,66 @@ function AppContent() {
   
   return (
     <div className="flex flex-col min-h-screen">
-      <NavBar />
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/privacidade" element={<Privacidade />} />
-          <Route path="/planos" element={<PlanosPage />} />
-          <Route
-            path="/api"
-            element={
-              <ProtectedRoute>
-                <ApiDocs />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/carteiras"
-            element={
-              <ProtectedRoute>
-                <WalletsManager />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/carteira/:id"
-            element={
-              <ProtectedRoute>
-                <CarteiraDetalhes />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/nova-carteira"
-            element={
-              <ProtectedRoute>
-                <NovaCarteira />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      <Footer />
+      <Routes>
+        {/* Public routes with standard layout */}
+        <Route path="/" element={<><NavBar /><Index /><Footer />{showAds && <Advertisement position="footer" />}</>} />
+        <Route path="/home" element={<><NavBar /><Home /><Footer />{showAds && <Advertisement position="footer" />}</>} />
+        <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <><NavBar /><Auth /><Footer /></>} />
+        <Route path="/sobre" element={<><NavBar /><Sobre /><Footer />{showAds && <Advertisement position="footer" />}</>} />
+        <Route path="/privacidade" element={<><NavBar /><Privacidade /><Footer />{showAds && <Advertisement position="footer" />}</>} />
+        <Route path="/planos" element={<><NavBar /><PlanosPage /><Footer />{showAds && <Advertisement position="footer" />}</>} />
+        
+        {/* App routes with sidebar layout */}
+        <Route element={<AppLayout />}>
+          <Route path="/mercado" element={<Mercado />} />
+          
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/carteiras" element={
+            <ProtectedRoute>
+              <WalletsManager />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/carteira/:id" element={
+            <ProtectedRoute>
+              <CarteiraDetalhes />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/nova-carteira" element={
+            <ProtectedRoute>
+              <NovaCarteira />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/historico" element={
+            <ProtectedRoute>
+              <Historico />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/configuracoes" element={
+            <ProtectedRoute>
+              <Configuracoes />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/api" element={
+            <ProtectedRoute>
+              <ApiDocs />
+            </ProtectedRoute>
+          } />
+        </Route>
+        
+        {/* 404 page */}
+        <Route path="*" element={<><NavBar /><NotFound /><Footer /></>} />
+      </Routes>
       <Toaster position="top-center" />
-      {showAds && <Advertisement position="footer" />}
     </div>
   );
 }
