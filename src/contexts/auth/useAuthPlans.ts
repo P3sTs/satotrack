@@ -36,7 +36,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
   // Upgrade user plan to premium
   const upgradeUserPlan = async () => {
     try {
-      if (!user) throw new Error('User not authenticated');
+      if (!user || !user.id) throw new Error('User not authenticated');
       
       // Use type assertion to work around the type checking
       const { error } = await supabase
@@ -68,7 +68,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
   // Generate API token for premium users
   const generateApiToken = async () => {
     try {
-      if (!user) throw new Error('User not authenticated');
+      if (!user || !user.id) throw new Error('User not authenticated');
       if (userPlan !== 'premium') throw new Error('API tokens are only available for premium users');
       
       // Generate a random token

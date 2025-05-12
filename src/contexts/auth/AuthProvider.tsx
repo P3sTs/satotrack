@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Use the session hook to manage authentication state
   const { session, user: supabaseUser, loading, setSession } = useAuthSession();
-  const [user, setUser] = useState<AuthUser | null>(convertToAuthUser(supabaseUser));
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   // Initialize login attempts monitoring
   const { 
