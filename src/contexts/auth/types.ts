@@ -1,11 +1,9 @@
 
-import { Session, User } from '@supabase/supabase-js';
-
 export type PlanType = 'free' | 'premium';
 
 export interface AuthUser extends User {
   email: string;
-  plan?: PlanType;
+  plan?: PanType;
 }
 
 export interface AuthContextType {

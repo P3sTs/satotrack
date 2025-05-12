@@ -67,4 +67,3 @@ export const formatBRL = (value: number): string => {
     currency: 'BRL'
   }).format(value);
 };
-
