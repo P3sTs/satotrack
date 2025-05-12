@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useCarteiras } from '../contexts/CarteirasContext';
+import { useCarteiras } from '../contexts/hooks/useCarteirasContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import NewWalletModal from '../components/NewWalletModal';
@@ -9,6 +9,7 @@ import EmptyWalletState from '../components/wallet/EmptyWalletState';
 import WalletsSkeleton from '../components/wallet/WalletsSkeleton';
 import SearchWallets from '../components/wallet/SearchWallets';
 import SortControls from '../components/SortControls';
+import { SortOption } from '@/types/types';
 
 const WalletsManager: React.FC = () => {
   const { carteiras, isLoading, ordenarCarteiras, sortOption, sortDirection } = useCarteiras();
@@ -60,7 +61,7 @@ const WalletsManager: React.FC = () => {
             </p>
             <div className="order-1 md:order-2">
               <SortControls 
-                sortOption={sortOption}
+                sortOption={sortOption as SortOption}
                 sortDirection={sortDirection}
                 onSort={ordenarCarteiras}
               />
