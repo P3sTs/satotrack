@@ -337,6 +337,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_plans: {
+        Row: {
+          api_requests: number | null
+          api_token: string | null
+          created_at: string | null
+          id: string
+          plan_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          api_requests?: number | null
+          api_token?: string | null
+          created_at?: string | null
+          id?: string
+          plan_type?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          api_requests?: number | null
+          api_token?: string | null
+          created_at?: string | null
+          id?: string
+          plan_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string | null

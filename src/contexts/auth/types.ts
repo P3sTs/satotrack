@@ -17,7 +17,7 @@ export interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   passwordStrength: (password: string) => { score: number; feedback: string };
-  lastActivity: Date | null;
+  lastActivity: number | null;
   updateLastActivity: () => void;
   securityStatus: 'secure' | 'warning' | 'danger';
   failedLoginAttempts: number;

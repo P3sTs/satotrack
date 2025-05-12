@@ -48,12 +48,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Fetch user plan from database
   const fetchUserPlan = async (userId: string) => {
     try {
-      // Use any as a workaround until Supabase types are updated
+      // Use type assertion to work around the type checking
       const { data, error } = await (supabase
-        .from('user_plans') as any)
+        .from('user_plans' as any)
         .select('plan_type, api_token, api_requests')
         .eq('user_id', userId)
-        .single();
+        .single());
       
       if (error) {
         console.error('Error fetching user plan:', error);
@@ -181,8 +181,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (!user) throw new Error('User not authenticated');
       
+      // Use type assertion to work around the type checking
       const { error } = await (supabase
-        .from('user_plans') as any)
+        .from('user_plans' as any)
         .upsert({ 
           user_id: user.id, 
           plan_type: 'premium',
@@ -217,8 +218,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = Math.random().toString(36).substring(2, 15) + 
                     Math.random().toString(36).substring(2, 15);
       
+      // Use type assertion to work around the type checking
       const { error } = await (supabase
-        .from('user_plans') as any)
+        .from('user_plans' as any)
         .upsert({ 
           user_id: user.id, 
           api_token: token,
