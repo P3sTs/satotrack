@@ -2,6 +2,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
+import TopBar from './TopBar';
 import NavBar from '../NavBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Footer from '../Footer';

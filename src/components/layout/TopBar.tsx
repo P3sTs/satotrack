@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Plus, 
-  ScreenshotIcon, 
+  ScreenShare, 
   RefreshCw, 
   Clock, 
   ChevronDown 
@@ -74,7 +74,7 @@ const TopBar = () => {
           </Button>
           
           <Button onClick={handleScreenshot} size="sm" variant="outline">
-            <ScreenshotIcon className="h-4 w-4 mr-2" />
+            <ScreenShare className="h-4 w-4 mr-2" />
             Screenshot
           </Button>
           

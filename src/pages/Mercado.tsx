@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 
 const Mercado = () => {
-  const { data: bitcoinData, isLoading, error } = useBitcoinPrice();
+  const { data: bitcoinData, isLoading, isRefreshing } = useBitcoinPrice();
   
   if (isLoading) {
     return (
@@ -20,7 +20,7 @@ const Mercado = () => {
     );
   }
   
-  if (error) {
+  if (!bitcoinData) {
     return (
       <div className="container mx-auto px-4 py-8">
         <p>Erro ao carregar dados do mercado.</p>
@@ -40,7 +40,7 @@ const Mercado = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {bitcoinData?.bpi.USD.rate_float.toLocaleString('en-US', {
+              {bitcoinData.price_usd.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD'
               })}
@@ -54,8 +54,8 @@ const Mercado = () => {
             <CardDescription>Mudança em 24 horas</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-500">
-              +1.5%
+            <p className={`text-2xl font-bold ${bitcoinData.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {bitcoinData.price_change_percentage_24h >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_24h.toFixed(2)}%
             </p>
           </CardContent>
         </Card>
@@ -67,7 +67,11 @@ const Mercado = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              $23.5B
+              {bitcoinData.volume_24h_usd.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+              })}
             </p>
           </CardContent>
         </Card>
