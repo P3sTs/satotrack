@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCarteiras } from '../contexts/carteiras';
@@ -7,6 +6,8 @@ import { ReportGenerator } from '@/components/monetization/ReportGenerator';
 import { useAuth } from '@/contexts/auth';
 import { Advertisement } from '@/components/monetization/Advertisement';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
+import WalletDetailCard from '@/components/wallet/WalletDetailCard';
 
 const CarteiraDetalhes = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ const CarteiraDetalhes = () => {
   const showAds = userPlan === 'free';
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { data: bitcoinData } = useBitcoinPrice();
   
   useEffect(() => {
     if (!user) {
@@ -60,35 +62,11 @@ const CarteiraDetalhes = () => {
           <div>
             <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">{carteira.nome}</h1>
             
-            <div className="bg-card p-4 md:p-6 rounded-lg border mb-4 md:mb-6">
-              <h2 className="text-lg font-semibold mb-3 md:mb-4">Detalhes da Carteira</h2>
-              <div className="space-y-3 md:space-y-4">
-                <div>
-                  <p className="text-xs md:text-sm text-muted-foreground mb-1">Endereço</p>
-                  <p className="font-mono text-xs md:text-sm break-all">{carteira.endereco}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground mb-1">Saldo</p>
-                    <p className="font-bold text-lg md:text-xl">{carteira.saldo} BTC</p>
-                  </div>
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground mb-1">Transações</p>
-                    <p>{carteira.qtde_transacoes}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground mb-1">Total Recebido</p>
-                    <p>{carteira.total_entradas} BTC</p>
-                  </div>
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground mb-1">Total Enviado</p>
-                    <p>{carteira.total_saidas} BTC</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* New Wallet Detail Card Component */}
+            <WalletDetailCard 
+              carteira={carteira} 
+              bitcoinData={bitcoinData} 
+            />
             
             {/* Existing Chart Components */}
             {/* Conteúdo original da página aqui */}

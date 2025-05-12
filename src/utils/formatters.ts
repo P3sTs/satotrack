@@ -54,11 +54,23 @@ export const formatCurrency = (value: number, currency: string = 'USD', locale: 
 };
 
 // Format date for display
-export const formatDate = (date: Date | string): string => {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  return format(dateObj, "dd MMM yyyy HH:mm", {
-    locale: ptBR
-  });
+export const formatDate = (date: Date | string, showTime = false): string => {
+  if (!date) return 'N/A';
+  
+  const dateObj = new Date(date);
+  
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  };
+  
+  if (showTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+  }
+  
+  return dateObj.toLocaleDateString('pt-BR', options);
 };
 
 // Alias for backward compatibility
