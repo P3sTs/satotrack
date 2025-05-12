@@ -12,12 +12,12 @@ import AuthRedirect from '@/components/auth/AuthRedirect';
 const Auth = () => {
   const { failedLoginAttempts, securityStatus, resetFailedLoginAttempts } = useAuth();
 
-  // Resetar contador de tentativas ao carregar para prevenir bloqueio permanente
+  // Reset login attempt counter after 15 minutes
   React.useEffect(() => {
     if (failedLoginAttempts > 0) {
       const timer = setTimeout(() => {
         resetFailedLoginAttempts();
-      }, 15 * 60 * 1000); // 15 minutos
+      }, 15 * 60 * 1000); // 15 minutes
 
       return () => clearTimeout(timer);
     }
@@ -25,10 +25,10 @@ const Auth = () => {
 
   return (
     <>
-      {/* Componente de redirecionamento para usuários já logados */}
+      {/* Redirect logged in users */}
       <AuthRedirect />
       
-      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-background p-4">
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-background px-4 py-8 md:py-12">
         <div className="w-full max-w-sm md:max-w-md">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth";
@@ -28,7 +28,14 @@ import { Advertisement } from "@/components/monetization/Advertisement";
 import { useAuth } from "./contexts/auth";
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
@@ -48,65 +55,67 @@ function App() {
 
 // Separate component to use hooks
 function AppContent() {
-  const { userPlan } = useAuth();
+  const { userPlan, user } = useAuth();
   const showAds = userPlan === 'free';
   
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/sobre" element={<Sobre />} />
-        <Route path="/privacidade" element={<Privacidade />} />
-        <Route path="/planos" element={<PlanosPage />} />
-        <Route
-          path="/api"
-          element={
-            <ProtectedRoute>
-              <ApiDocs />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/carteiras"
-          element={
-            <ProtectedRoute>
-              <WalletsManager />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/carteira/:id"
-          element={
-            <ProtectedRoute>
-              <CarteiraDetalhes />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nova-carteira"
-          element={
-            <ProtectedRoute>
-              <NovaCarteira />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
+          <Route path="/sobre" element={<Sobre />} />
+          <Route path="/privacidade" element={<Privacidade />} />
+          <Route path="/planos" element={<PlanosPage />} />
+          <Route
+            path="/api"
+            element={
+              <ProtectedRoute>
+                <ApiDocs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/carteiras"
+            element={
+              <ProtectedRoute>
+                <WalletsManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/carteira/:id"
+            element={
+              <ProtectedRoute>
+                <CarteiraDetalhes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/nova-carteira"
+            element={
+              <ProtectedRoute>
+                <NovaCarteira />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
       <Footer />
-      <Toaster />
+      <Toaster position="top-center" />
       {showAds && <Advertisement position="footer" />}
-    </>
+    </div>
   );
 }
 

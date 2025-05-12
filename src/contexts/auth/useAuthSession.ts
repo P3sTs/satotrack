@@ -2,30 +2,35 @@
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Configura o listener de eventos de auth PRIMEIRO
+    // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Handle redirects when auth state changes
         if (event === 'SIGNED_IN') {
-          navigate('/dashboard');
+          // Redirect to dashboard on sign in, unless there's a specific redirect path
+          const redirectTo = location.state?.from?.pathname || '/dashboard';
+          navigate(redirectTo, { replace: true });
         } else if (event === 'SIGNED_OUT') {
-          navigate('/auth');
+          // On sign out, redirect to auth page
+          navigate('/auth', { replace: true });
         }
       }
     );
 
-    // DEPOIS verifica sessão existente
+    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -35,7 +40,7 @@ export const useAuthSession = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   return { session, user, loading, setSession, setUser };
 };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -52,7 +53,7 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
         <SheetTrigger asChild>
           {trigger}
         </SheetTrigger>
-        <SheetContent side="right" className="w-[85%] sm:w-[350px] bg-dashboard-dark border-dashboard-medium/30">
+        <SheetContent side="right" className="w-[85%] sm:w-[350px] bg-dashboard-dark border-dashboard-medium/30 z-50">
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between py-4 border-b border-dashboard-medium/30">
               <div className="flex items-center gap-2">
@@ -79,7 +80,7 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
       <DrawerTrigger asChild>
         {trigger}
       </DrawerTrigger>
-      <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white">
+      <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white z-50">
         <MobileMenu {...mobileMenuProps} />
       </DrawerContent>
     </Drawer>
