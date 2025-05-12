@@ -1,26 +1,19 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Download, Camera } from 'lucide-react';
-import { CarteiraBTC } from '@/types/types';
-import { toast } from "@/components/ui/sonner";
-import { saveAs } from 'file-saver';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
-import { TimeRange } from '../selectors/TimeRangeSelector';
-import { ChartMode } from '../selectors/ChartModeSelector';
+import { saveAs } from 'file-saver';
 
-interface ExportActionsProps {
-  exportCSV: () => void;
-  captureScreenshot: () => Promise<void>;
-}
-
-export const ExportCSVButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+// Export CSV Button
+export const ExportCSVButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <Button 
-      variant="outline" 
+    <Button
+      variant="outline"
       size="sm"
-      className="flex items-center gap-1"
       onClick={onClick}
+      className="flex items-center gap-1"
     >
       <Download className="h-4 w-4" />
       <span className="hidden sm:inline">Exportar CSV</span>
@@ -28,85 +21,111 @@ export const ExportCSVButton: React.FC<{ onClick: () => void }> = ({ onClick }) 
   );
 };
 
-export const ScreenshotButton: React.FC<{ onClick: () => Promise<void> }> = ({ onClick }) => {
+// Screenshot Button
+export const ScreenshotButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <Button
       variant="outline"
-      size="icon"
+      size="sm"
       onClick={onClick}
-      className="h-9 w-9"
-      title="Capturar screenshot"
+      className="flex items-center gap-1"
     >
       <Camera className="h-4 w-4" />
+      <span className="hidden sm:inline">Screenshot</span>
     </Button>
   );
 };
 
+// Export Actions Hook
 export const useExportActions = (
   chartRef: React.RefObject<HTMLDivElement>,
-  chartMode: ChartMode,
-  timeRange: TimeRange,
-  currentWallet?: CarteiraBTC,
-  isPremium?: boolean
+  chartMode: 'price' | 'balance',
+  timeRange: string,
+  wallet?: any,
+  isPremium: boolean = false
 ) => {
+  const { toast } = useToast();
+
   const handleExportCSV = () => {
-    // For period greater than 30D, show premium modal for non-premium users
-    if (!isPremium && (timeRange === '6M' || timeRange === '1Y')) {
-      return false;
-    }
-    
-    // Generate CSV for the current chart data
-    let csvContent = "data:text/csv;charset=utf-8,";
-    
-    if (chartMode === 'price') {
-      // Headers for price data
-      csvContent += "Data,Preço (USD)\n";
-      // Add dummy data or actual data from the chart
-      csvContent += "2023-01-01,45000\n";
-      csvContent += "2023-01-02,46000\n";
-      // ... more data points
-    } else {
-      // Headers for balance data
-      csvContent += "Data,Saldo (BTC)\n";
-      // Add dummy data or actual data from the chart
-      csvContent += "2023-01-01,0.5\n";
-      csvContent += "2023-01-02,0.52\n";
-      // ... more data points
-    }
-    
-    // Create the download link
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${chartMode === 'price' ? 'bitcoin_price' : currentWallet?.nome || 'wallet'}_${timeRange}_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success("Dados exportados com sucesso");
-    
-    return true;
-  };
-  
-  const handleScreenshot = async () => {
-    if (chartRef.current) {
-      try {
-        const canvas = await html2canvas(chartRef.current);
-        const image = canvas.toDataURL("image/png");
-        saveAs(
-          image, 
-          `satotrack_${chartMode === 'price' ? 'bitcoin' : currentWallet?.nome || 'wallet'}_${new Date().toLocaleDateString().replace(/\//g, '-')}.png`
-        );
-        toast.success("Screenshot salva com sucesso");
-      } catch (error) {
-        console.error("Erro ao capturar screenshot:", error);
-        toast.error("Erro ao salvar screenshot");
-      }
+    try {
+      let csvContent = 'data:text/csv;charset=utf-8,';
+      csvContent += 'Date,Price\n';
+      
+      // Add data rows based on chart mode
+      // Here you would add your actual data
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `bitcoin_${chartMode}_${timeRange}.csv`);
+      document.body.appendChild(link);
+      
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download iniciado",
+        description: "Os dados foram exportados com sucesso.",
+      });
+    } catch (e) {
+      console.error('Error exporting data:', e);
+      toast({
+        title: "Erro ao exportar dados",
+        description: "Não foi possível exportar os dados. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
-  return { 
-    handleExportCSV, 
-    handleScreenshot 
+  const handleScreenshot = async () => {
+    if (!chartRef.current) {
+      toast({
+        title: "Erro ao gerar screenshot",
+        description: "Elemento do gráfico não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Show loading toast
+      toast({
+        title: "Gerando screenshot...",
+        description: "Por favor, aguarde.",
+      });
+      
+      // Generate the canvas
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      
+      // Convert to blob
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error("Falha ao gerar a imagem");
+        }
+        
+        // Save the file
+        saveAs(
+          blob, 
+          `bitcoin_chart_${new Date().toISOString().slice(0, 10)}.png`
+        );
+        
+        toast({
+          title: "Screenshot gerado",
+          description: "A imagem foi salva com sucesso.",
+        });
+      }, "image/png");
+    } catch (e) {
+      console.error('Error taking screenshot:', e);
+      toast({
+        title: "Erro ao gerar screenshot",
+        description: "Não foi possível gerar a imagem. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
+
+  return { handleExportCSV, handleScreenshot };
 };

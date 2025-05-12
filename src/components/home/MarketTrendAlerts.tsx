@@ -1,59 +1,83 @@
 
 import React from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
+import { TrendingUp, TrendingDown, AlertTriangle, Volume2 } from 'lucide-react';
 
 interface MarketTrendAlertsProps {
   bitcoinData: BitcoinPriceData;
 }
 
-const MarketTrendAlerts = ({ bitcoinData }: MarketTrendAlertsProps) => {
-  if (!bitcoinData) return null;
+const MarketTrendAlerts: React.FC<MarketTrendAlertsProps> = ({ bitcoinData }) => {
+  // Generate dynamic alerts based on market data
+  const getAlerts = () => {
+    const alerts = [];
+    
+    // Price change alert
+    if (Math.abs(bitcoinData.price_change_percentage_24h) >= 3) {
+      const isPositive = bitcoinData.price_change_percentage_24h > 0;
+      alerts.push({
+        icon: isPositive ? TrendingUp : TrendingDown,
+        text: `${isPositive ? 'Alta' : 'Queda'} de ${Math.abs(bitcoinData.price_change_percentage_24h).toFixed(1)}% nas últimas 24h`,
+        color: isPositive ? 'green' : 'red',
+      });
+    }
+    
+    // Volume alert - high volume day
+    if (bitcoinData.volume_24h_usd > 20000000000) { // $20 billion threshold
+      alerts.push({
+        icon: Volume2,
+        text: 'Volume de negociação elevado nas últimas 24h',
+        color: 'blue',
+      });
+    }
+    
+    // Market trend alert
+    if (bitcoinData.market_trend) {
+      alerts.push({
+        icon: bitcoinData.market_trend === 'bullish' ? TrendingUp : TrendingDown,
+        text: bitcoinData.market_trend === 'bullish' 
+              ? 'Tendência de mercado altista' 
+              : 'Tendência de mercado baixista',
+        color: bitcoinData.market_trend === 'bullish' ? 'green' : 'red',
+      });
+    }
+    
+    return alerts;
+  };
+  
+  const alerts = getAlerts();
+  
+  if (alerts.length === 0) {
+    return null;
+  }
   
   return (
-    <>
-      {bitcoinData.market_trend === 'bullish' && (
-        <div className="bg-gradient-to-r from-satotrack-neon/10 to-transparent border border-satotrack-neon/20 rounded-lg p-4 flex items-center gap-3 mb-6 backdrop-blur-sm">
-          <div className="p-2 rounded-full bg-satotrack-neon/20">
-            <TrendingUp className="h-5 w-5 text-satotrack-neon" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+      {alerts.map((alert, index) => {
+        const Icon = alert.icon;
+        const bgColorClass = alert.color === 'green' ? 'bg-green-500/10' :
+                             alert.color === 'red' ? 'bg-red-500/10' : 
+                             'bg-blue-500/10';
+                             
+        const textColorClass = alert.color === 'green' ? 'text-green-500' :
+                             alert.color === 'red' ? 'text-red-500' : 
+                             'text-blue-500';
+                             
+        const borderColorClass = alert.color === 'green' ? 'border-green-500/30' :
+                               alert.color === 'red' ? 'border-red-500/30' : 
+                               'border-blue-500/30';
+        
+        return (
+          <div 
+            key={index} 
+            className={`flex items-center gap-3 p-3 rounded-lg border ${borderColorClass} ${bgColorClass}`}
+          >
+            <Icon className={`h-5 w-5 ${textColorClass}`} />
+            <span className={`text-sm font-medium ${textColorClass}`}>{alert.text}</span>
           </div>
-          <div>
-            <h4 className="text-satotrack-neon font-medium">Mercado em Alta</h4>
-            <p className="text-satotrack-text text-sm">
-              O Bitcoin está em tendência de alta com variação positiva significativa nas últimas 24h.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {bitcoinData.market_trend === 'bearish' && (
-        <div className="bg-gradient-to-r from-satotrack-alert/10 to-transparent border border-satotrack-alert/20 rounded-lg p-4 flex items-center gap-3 mb-6 backdrop-blur-sm">
-          <div className="p-2 rounded-full bg-satotrack-alert/20">
-            <TrendingDown className="h-5 w-5 text-satotrack-alert" />
-          </div>
-          <div>
-            <h4 className="text-satotrack-alert font-medium">Mercado em Baixa</h4>
-            <p className="text-satotrack-text text-sm">
-              O Bitcoin está em tendência de queda com variação negativa significativa nas últimas 24h.
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {bitcoinData.market_trend === 'neutral' && (
-        <div className="bg-gradient-to-r from-gray-500/10 to-transparent border border-gray-500/20 rounded-lg p-4 flex items-center gap-3 mb-6 backdrop-blur-sm">
-          <div className="p-2 rounded-full bg-gray-500/20">
-            <AlertTriangle className="h-5 w-5 text-gray-400" />
-          </div>
-          <div>
-            <h4 className="text-gray-400 font-medium">Mercado Estável</h4>
-            <p className="text-satotrack-text text-sm">
-              O Bitcoin está em período de estabilidade sem variações significativas nas últimas 24h.
-            </p>
-          </div>
-        </div>
-      )}
-    </>
+        );
+      })}
+    </div>
   );
 };
 

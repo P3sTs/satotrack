@@ -2,15 +2,15 @@
 import React from 'react';
 
 interface ChartContainerProps {
+  chartRef?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
-  chartRef: React.RefObject<HTMLDivElement>;
 }
 
-const ChartContainer: React.FC<ChartContainerProps> = ({ children, chartRef }) => {
+const ChartContainer: React.FC<ChartContainerProps> = ({ chartRef, children }) => {
   return (
     <div 
       ref={chartRef} 
-      className="w-full bg-dashboard-medium/10 rounded-lg p-4 min-h-[300px] flex items-center justify-center"
+      className="w-full h-full p-1 border border-border/30 rounded-md bg-card/50 backdrop-blur-sm shadow-sm relative"
     >
       {children}
     </div>

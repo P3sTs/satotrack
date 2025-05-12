@@ -1,58 +1,51 @@
 
-// Format X-axis date based on time range
-export const formatXAxis = (timestamp: number, timeRange: string): string => {
+import { format } from 'date-fns';
+
+/**
+ * Format X-axis values based on time range
+ */
+export const formatXAxis = (timestamp: number, timeRange: '7D' | '30D' | '6M' | '1Y'): string => {
   const date = new Date(timestamp);
   
-  // Different formatting based on time range
   switch (timeRange) {
-    case '1D':
-      return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
     case '7D':
-      return `${date.getDate()}/${date.getMonth() + 1}`;
+      return format(date, 'dd MMM HH:mm');
     case '30D':
-      return `${date.getDate()}/${date.getMonth() + 1}`;
+      return format(date, 'dd MMM');
     case '6M':
     case '1Y':
-      return `${date.getDate()}/${date.getMonth() + 1}/${String(date.getFullYear()).slice(2)}`;
+      return format(date, 'MMM yyyy');
     default:
-      return `${date.getDate()}/${date.getMonth() + 1}`;
+      return format(date, 'dd MMM');
   }
 };
 
-// Format currency values (USD)
+/**
+ * Format currency values for chart axes
+ */
 export const formatCurrencyValue = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  if (value >= 1000000000) {
+    return `$${(value / 1000000000).toFixed(1)}B`;
+  }
+  
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  }
+  
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(1)}K`;
+  }
+  
+  return `$${value.toFixed(0)}`;
 };
 
-// Format Bitcoin values
+/**
+ * Format Bitcoin values for chart axes
+ */
 export const formatBitcoinValue = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 8,
-  }).format(value);
-};
-
-// Format date and time
-export const formatDateTime = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-};
-
-// Format BRL currency
-export const formatBRL = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
+  if (value < 0.001) {
+    return `${(value * 1000000).toFixed(2)} sats`;
+  }
+  
+  return `₿ ${value.toFixed(8)}`;
 };

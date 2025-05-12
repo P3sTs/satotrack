@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import {
   Card,
@@ -8,9 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import InteractiveChart from '@/components/charts/InteractiveChart';
+import { TimeRange } from '@/components/charts/selectors/TimeRangeSelector';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
+import MarketTrendAlerts from '@/components/home/MarketTrendAlerts';
 
 const Mercado = () => {
-  const { data: bitcoinData, isLoading, isRefreshing } = useBitcoinPrice();
+  const { data: bitcoinData, isLoading, isRefreshing, refresh } = useBitcoinPrice();
+  const [timeRange, setTimeRange] = useState<TimeRange>('7D');
   
   if (isLoading) {
     return (
@@ -30,7 +36,20 @@ const Mercado = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Mercado Bitcoin</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <h1 className="text-2xl font-bold">Mercado Bitcoin</h1>
+        <Button 
+          variant="outline" 
+          onClick={refresh} 
+          disabled={isRefreshing}
+          className="flex items-center gap-2 mt-2 sm:mt-0"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Atualizar Dados
+        </Button>
+      </div>
+      
+      <MarketTrendAlerts bitcoinData={bitcoinData} />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
@@ -84,10 +103,7 @@ const Mercado = () => {
             <CardDescription>Histórico de preços do Bitcoin</CardDescription>
           </CardHeader>
           <CardContent className="h-96">
-            {/* Chart component would go here */}
-            <div className="h-full w-full flex items-center justify-center bg-dashboard-medium/20 rounded-lg">
-              <p className="text-gray-400">Gráfico de preço do Bitcoin será exibido aqui</p>
-            </div>
+            <InteractiveChart bitcoinData={bitcoinData} />
           </CardContent>
         </Card>
       </div>
