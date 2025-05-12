@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCarteiras } from '@/contexts/CarteirasContext';
 import { useAuth } from '@/contexts/auth';
-import { TransacaoBTC } from '@/types/types';
-import { ViewModeProvider } from '@/contexts/ViewModeContext';
+import { TransacaoBTC } from '@/contexts/types/CarteirasTypes';
 import ViewModeSelector from '@/components/wallet/ViewModeSelector';
 import ViewController from '@/components/wallet/ViewController';
 import WalletHeader from '@/components/wallet/WalletHeader';
@@ -65,44 +64,42 @@ const CarteiraDetalhes: React.FC = () => {
   }
 
   return (
-    <ViewModeProvider>
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Link to="/carteiras">
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <WalletHeader 
-            carteira={carteira} 
-            extraElement={
-              <ViewModeSelector />
-            }
-          />
-        </div>
-
-        <WalletBalanceSummary
-          carteira={carteira}
-          bitcoinData={bitcoinData}
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="flex items-center gap-2 mb-6">
+        <Link to="/carteiras">
+          <Button variant="outline" size="icon" className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <WalletHeader 
+          carteira={carteira} 
+          extraElement={
+            <ViewModeSelector />
+          }
         />
-
-        <div className="mt-8">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-bitcoin"></div>
-            </div>
-          ) : transacoes.length === 0 ? (
-            <EmptyWalletState onAddWallet={() => {}} />
-          ) : (
-            <ViewController 
-              wallet={carteira}
-              transacoes={transacoes}
-              bitcoinData={bitcoinData}
-            />
-          )}
-        </div>
       </div>
-    </ViewModeProvider>
+
+      <WalletBalanceSummary
+        carteira={carteira}
+        bitcoinData={bitcoinData}
+      />
+
+      <div className="mt-8">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-bitcoin"></div>
+          </div>
+        ) : transacoes.length === 0 ? (
+          <EmptyWalletState onAddWallet={() => {}} />
+        ) : (
+          <ViewController 
+            wallet={carteira}
+            transacoes={transacoes}
+            bitcoinData={bitcoinData}
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

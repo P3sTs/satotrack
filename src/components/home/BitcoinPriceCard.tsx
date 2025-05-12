@@ -61,7 +61,7 @@ const BitcoinPriceCard = ({
             animate === 'increase' ? 'text-green-500' : 
             animate === 'decrease' ? 'text-red-500' : ''
           }`}>
-            {formatCurrency(price, currency, digits)}
+            {formatCurrency(price, currency)}
           </div>
           {showChange && changePercentage !== undefined && (
             <div className={`flex items-center font-medium ${isNegative ? 'text-red-500' : 'text-green-500'}`}>

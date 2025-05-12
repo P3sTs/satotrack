@@ -1,6 +1,7 @@
+
 import React, { createContext, useState, ReactNode, useCallback, useEffect, useContext } from 'react';
-import { CarteiraBTC, TransacaoBTC, SortOption, SortDirection } from '../types/types';
-import { CarteirasContextType, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
+import { SortOption, SortDirection } from '../types/types';
+import { CarteiraContextType, CarteiraBTC, TransacaoBTC, STORAGE_KEY_PRIMARY } from './types/CarteirasTypes';
 import { 
   loadCarteiras, 
   addCarteira, 
@@ -10,10 +11,10 @@ import {
   updateWalletName 
 } from '../services/carteiras';
 
-export const CarteirasContext = createContext<CarteirasContextType | undefined>(undefined);
+export const CarteirasContext = createContext<CarteiraContextType | undefined>(undefined);
 
 // Define useCarteiras hook directly in this file to avoid circular dependencies
-export const useCarteiras = (): CarteirasContextType => {
+export const useCarteiras = (): CarteiraContextType => {
   const context = useContext(CarteirasContext);
   if (!context) {
     throw new Error('useCarteiras deve ser usado dentro de CarteirasProvider');

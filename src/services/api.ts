@@ -72,9 +72,11 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
 
     return data.map(tx => ({
       hash: tx.hash,
+      txid: tx.hash, // Using hash as txid for compatibility
       valor: tx.amount,
       tipo: tx.transaction_type as 'entrada' | 'saida',
-      data: tx.transaction_date
+      data: tx.transaction_date,
+      endereco: tx.hash.substring(0, 12) + '...' // Placeholder, since we don't have actual address
     }));
   } catch (error) {
     console.error('Erro ao buscar transações:', error);

@@ -1,3 +1,4 @@
+
 export interface CarteiraContextType {
   carteiras: CarteiraBTC[];
   carteiraPrincipal: string | null;
@@ -5,12 +6,14 @@ export interface CarteiraContextType {
   isUpdating: { [walletId: string]: boolean };
   sortOption: string;
   sortDirection: 'asc' | 'desc';
-  adicionarCarteira: (carteira: Omit<CarteiraBTC, 'id'>) => Promise<void>;
+  adicionarCarteira: (nome: string, endereco: string) => Promise<void>;
   removerCarteira: (id: string) => Promise<void>;
   atualizarNomeCarteira: (id: string, novoNome: string) => Promise<void>;
   atualizarCarteira: (id: string) => Promise<void>;
   definirCarteiraPrincipal: (id: string | null) => void;
-  ordenarCarteiras: (option: string) => void;
+  ordenarCarteiras: (option: string, direcao: 'asc' | 'desc') => void;
+  transacoes: Record<string, TransacaoBTC[]>;
+  carregarTransacoes: (id: string) => Promise<TransacaoBTC[]>;
 }
 
 // Export the CarteiraBTC interface
@@ -25,6 +28,18 @@ export interface CarteiraBTC {
   ultimo_update: Date | string;
 }
 
+export interface TransacaoBTC {
+  hash: string; // Transaction hash
+  txid: string; // Same as hash, needed for compatibility
+  valor: number; // Value in BTC
+  tipo: 'entrada' | 'saida'; // Type: received or sent
+  data: Date | string; // Date of the transaction
+  endereco: string; // Address involved in the transaction
+}
+
 export interface CarteiraProviderProps {
   children: React.ReactNode;
 }
+
+// Adding the missing constant
+export const STORAGE_KEY_PRIMARY = 'satotrack_carteira_principal';

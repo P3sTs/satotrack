@@ -32,49 +32,51 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <CarteirasProvider>
-            <NavBar />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/sobre" element={<Sobre />} />
-              <Route path="/privacidade" element={<Privacidade />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/carteiras"
-                element={
-                  <ProtectedRoute>
-                    <WalletsManager />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/carteira/:id"
-                element={
-                  <ProtectedRoute>
-                    <CarteiraDetalhes />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/nova-carteira"
-                element={
-                  <ProtectedRoute>
-                    <NovaCarteira />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Footer />
-            <Toaster />
+            <ViewModeProvider>
+              <NavBar />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/sobre" element={<Sobre />} />
+                <Route path="/privacidade" element={<Privacidade />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/carteiras"
+                  element={
+                    <ProtectedRoute>
+                      <WalletsManager />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/carteira/:id"
+                  element={
+                    <ProtectedRoute>
+                      <CarteiraDetalhes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/nova-carteira"
+                  element={
+                    <ProtectedRoute>
+                      <NovaCarteira />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Footer />
+              <Toaster />
+            </ViewModeProvider>
           </CarteirasProvider>
         </AuthProvider>
       </QueryClientProvider>

@@ -1,12 +1,12 @@
 
 import { useContext } from 'react';
 import { CarteirasContext } from '../CarteirasContext';
-import { CarteirasContextType } from '../types/CarteirasTypes';
+import { CarteiraContextType } from '../types/CarteirasTypes';
 
 /**
  * Custom hook to use the carteiras context
  */
-export const useCarteiras = (): CarteirasContextType => {
+export const useCarteiras = (): CarteiraContextType => {
   const context = useContext(CarteirasContext);
   if (!context) {
     throw new Error('useCarteiras deve ser usado dentro de CarteirasProvider');
