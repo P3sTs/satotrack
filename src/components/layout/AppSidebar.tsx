@@ -1,175 +1,112 @@
 
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  History, 
-  BarChart, 
-  Settings, 
-  Award,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger
-} from "@/components/ui/sidebar";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { PlanBadge } from '../monetization/PlanDisplay';
+import { 
+  Home, 
+  Wallet, 
+  PlusCircle, 
+  History, 
+  BarChart3, 
+  Settings, 
+  Code, 
+  Bell 
+} from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
-import { Button } from '../ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-interface ModuleItem {
-  title: string;
-  path: string;
-  icon: React.ElementType;
-  requiresAuth: boolean;
-}
 
 const AppSidebar = () => {
-  const location = useLocation();
   const { user, userPlan } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
-
-  const modules: ModuleItem[] = [
-    {
-      title: 'Dashboard',
-      path: '/dashboard',
-      icon: LayoutDashboard,
-      requiresAuth: true
+  
+  const navigationItems = [
+    { 
+      label: 'Dashboard', 
+      icon: <Home className="h-5 w-5" />, 
+      href: '/dashboard' 
     },
-    {
-      title: 'Carteiras',
-      path: '/carteiras',
-      icon: Wallet,
-      requiresAuth: true
+    { 
+      label: 'Minhas Carteiras', 
+      icon: <Wallet className="h-5 w-5" />, 
+      href: '/carteiras' 
     },
-    {
-      title: 'Histórico',
-      path: '/historico',
-      icon: History,
-      requiresAuth: true
+    { 
+      label: 'Adicionar Carteira', 
+      icon: <PlusCircle className="h-5 w-5" />, 
+      href: '/nova-carteira' 
     },
-    {
-      title: 'Mercado',
-      path: '/mercado',
-      icon: BarChart,
-      requiresAuth: false
+    { 
+      label: 'Histórico', 
+      icon: <History className="h-5 w-5" />, 
+      href: '/historico' 
     },
-    {
-      title: 'Configurações',
-      path: '/configuracoes',
-      icon: Settings,
-      requiresAuth: true
+    { 
+      label: 'Mercado', 
+      icon: <BarChart3 className="h-5 w-5" />, 
+      href: '/mercado' 
     },
-    {
-      title: 'Premium',
-      path: '/planos',
-      icon: Award,
-      requiresAuth: false
+    { 
+      label: 'Notificações', 
+      icon: <Bell className="h-5 w-5" />, 
+      href: '/notificacoes' 
+    },
+    { 
+      label: 'Configurações', 
+      icon: <Settings className="h-5 w-5" />, 
+      href: '/configuracoes' 
     }
   ];
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  const visibleModules = modules.filter(module => 
-    !module.requiresAuth || (module.requiresAuth && user)
-  );
+  
+  // Only show API link for premium users
+  if (userPlan === 'premium') {
+    navigationItems.push({
+      label: 'API',
+      icon: <Code className="h-5 w-5" />,
+      href: '/api'
+    });
+  }
 
   return (
-    <SidebarProvider defaultOpen={!collapsed}>
-      <Sidebar className="border-r border-dashboard-medium/30 bg-dashboard-dark" collapsible="icon">
-        <SidebarHeader className="flex items-center justify-between p-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
-              alt="SatoTrack Logo" 
-              className="h-6 w-6 md:h-8 md:w-8" 
-            />
-            <span className="font-orbitron text-lg font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
-              SatoTrack
-            </span>
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setCollapsed(!collapsed)} 
-            className="text-white"
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </Button>
-        </SidebarHeader>
-
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Navegação</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <TooltipProvider>
-                  {visibleModules.map((module) => (
-                    <SidebarMenuItem key={module.path}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <SidebarMenuButton 
-                            asChild 
-                            isActive={isActive(module.path)} 
-                            tooltip={module.title}
-                          >
-                            <Link to={module.path} className="flex items-center gap-3">
-                              <module.icon className="h-5 w-5" />
-                              <span>{module.title}</span>
-                              {module.path === '/planos' && userPlan === 'free' && (
-                                <span className="bg-satotrack-neon text-xs px-1.5 py-0.5 rounded text-black">
-                                  Upgrade
-                                </span>
-                              )}
-                            </Link>
-                          </SidebarMenuButton>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          {module.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    </SidebarMenuItem>
-                  ))}
-                </TooltipProvider>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        <SidebarFooter className="p-4">
-          {user && userPlan && (
-            <div className={cn(
-              "transition-all duration-200 flex items-center gap-2",
-              collapsed ? "flex-col justify-center" : "justify-between"
-            )}>
-              <PlanBadge />
-              <span className="text-xs text-satotrack-text">{collapsed ? '' : 'SatoTrack'}</span>
-            </div>
-          )}
-        </SidebarFooter>
-      </Sidebar>
-    </SidebarProvider>
+    <div className="h-screen flex flex-col w-64 bg-dashboard-dark border-r border-dashboard-medium">
+      <div className="p-4 border-b border-dashboard-medium">
+        <NavLink to="/dashboard" className="flex items-center">
+          <img
+            src="/favicon.ico"
+            alt="Logo"
+            className="h-8 w-8 mr-2"
+          />
+          <span className="text-xl font-bold text-white">SatoTrack</span>
+        </NavLink>
+      </div>
+      
+      <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <ul className="space-y-1">
+          {navigationItems.map((item) => (
+            <li key={item.href}>
+              <NavLink
+                to={item.href}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-dashboard-medium",
+                    isActive 
+                      ? "bg-dashboard-medium text-white font-medium" 
+                      : "text-white/70 hover:text-white"
+                  )
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      
+      <div className="p-4 border-t border-dashboard-medium">
+        <div className="text-xs text-white/50 mb-2">
+          {user ? `Logado como ${user.email}` : 'Não logado'}
+        </div>
+      </div>
+    </div>
   );
 };
 

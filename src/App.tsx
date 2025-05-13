@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth";
-import { CarteirasProvider } from "@/contexts/CarteirasContext";
+import { CarteirasProvider } from "@/contexts/carteiras";
 import { ViewModeProvider } from "@/contexts/ViewModeContext";
 
 // Pages
@@ -22,6 +22,7 @@ import PlanosPage from "@/pages/PlanosPage";
 import Historico from "@/pages/Historico";
 import Mercado from "@/pages/Mercado";
 import Configuracoes from "@/pages/Configuracoes";
+import Notificacoes from "@/pages/Notificacoes";
 
 // Components
 import AppLayout from "@/components/layout/AppLayout";
@@ -104,6 +105,12 @@ function AppContent() {
           <Route path="/historico" element={
             <ProtectedRoute>
               <Historico />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/notificacoes" element={
+            <ProtectedRoute>
+              <Notificacoes />
             </ProtectedRoute>
           } />
           

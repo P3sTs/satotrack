@@ -3,3 +3,10 @@ project_id = "cwmzzdwoagtmxdmgtfzj"
 
 [functions.fetch-wallet-data]
 verify_jwt = true
+
+[functions.send-telegram]
+verify_jwt = true
+
+[functions.send-email-summary]
+verify_jwt = true
+
