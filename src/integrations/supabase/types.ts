@@ -369,24 +369,39 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          balance_alert_threshold: number | null
           created_at: string | null
+          email_daily_summary: boolean | null
+          email_weekly_summary: boolean | null
           id: string
+          price_alert_threshold: number | null
+          push_notifications_enabled: boolean | null
           telegram_chat_id: string | null
           telegram_notifications_enabled: boolean | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          balance_alert_threshold?: number | null
           created_at?: string | null
+          email_daily_summary?: boolean | null
+          email_weekly_summary?: boolean | null
           id?: string
+          price_alert_threshold?: number | null
+          push_notifications_enabled?: boolean | null
           telegram_chat_id?: string | null
           telegram_notifications_enabled?: boolean | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          balance_alert_threshold?: number | null
           created_at?: string | null
+          email_daily_summary?: boolean | null
+          email_weekly_summary?: boolean | null
           id?: string
+          price_alert_threshold?: number | null
+          push_notifications_enabled?: boolean | null
           telegram_chat_id?: string | null
           telegram_notifications_enabled?: boolean | null
           updated_at?: string | null
