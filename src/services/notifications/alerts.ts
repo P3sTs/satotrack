@@ -1,101 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/sonner';
+import { sendPushNotification } from './push';
+import { sendTelegramNotification } from './telegram';
+import { logNotification } from './logger';
 
-// Function to check if push notifications are supported and enabled
-export const checkPushNotificationsSupport = () => {
-  return 'Notification' in window && 'serviceWorker' in navigator;
-};
-
-// Function to request push notification permission
-export const requestPushPermission = async (): Promise<boolean> => {
-  if (!checkPushNotificationsSupport()) {
-    toast.error('Este navegador não suporta notificações push');
-    return false;
-  }
-
-  try {
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return false;
-  }
-};
-
-// Function to send a browser notification
-export const sendPushNotification = (
-  title: string,
-  options: NotificationOptions = {}
-) => {
-  if (Notification.permission === 'granted') {
-    try {
-      const notification = new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...options
-      });
-
-      notification.onclick = function() {
-        window.focus();
-        notification.close();
-      };
-
-      return true;
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      return false;
-    }
-  }
-  
-  return false;
-};
-
-// Function to log notification in the database
-export const logNotification = async (
-  userId: string,
-  notificationType: string,
-  status: 'sent' | 'failed' | 'skipped',
-  details: any = {}
-) => {
-  try {
-    await supabase.from('notification_logs').insert({
-      user_id: userId,
-      notification_type: notificationType,
-      status,
-      details
-    });
-    return true;
-  } catch (error) {
-    console.error('Error logging notification:', error);
-    return false;
-  }
-};
-
-// Function to send a Telegram notification via Edge Function
-export const sendTelegramNotification = async (
-  userId: string,
-  message: string,
-  notificationType: string,
-  details: any = {}
-) => {
-  try {
-    const { data, error } = await supabase.functions.invoke('send-telegram', {
-      body: {
-        user_id: userId,
-        message,
-        notification_type: notificationType,
-        details
-      }
-    });
-
-    if (error) throw error;
-    return data.success;
-  } catch (error) {
-    console.error('Error sending Telegram notification:', error);
-    return false;
-  }
-};
+// Re-export the logNotification function so it's available from alerts.ts
+export { logNotification };
 
 // Function to handle price alert notifications
 export const sendPriceAlert = async (

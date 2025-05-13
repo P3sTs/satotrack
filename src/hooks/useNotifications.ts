@@ -2,7 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { requestPushPermission, checkPushNotificationsSupport } from '@/services/notifications';
+import { 
+  requestPushPermission, 
+  checkPushNotificationsSupport 
+} from '@/services/notifications';
 import { toast } from '@/components/ui/sonner';
 
 interface NotificationSettings {
