@@ -6,7 +6,7 @@ import {
   requestPushPermission, 
   checkPushNotificationsSupport 
 } from '@/services/notifications';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 
 interface NotificationSettings {
   telegram_chat_id: string | null;
@@ -27,86 +27,94 @@ export const useNotifications = () => {
   
   // Check notification permission status
   useEffect(() => {
-    const checkPermissions = () => {
-      const isSupported = checkPushNotificationsSupport();
-      setPushSupported(isSupported);
-      
-      if (isSupported && 'Notification' in window) {
-        setPushPermission(Notification.permission);
-      }
-    };
+    const isSupported = checkPushNotificationsSupport();
+    setPushSupported(isSupported);
     
-    checkPermissions();
+    if (isSupported && 'Notification' in window) {
+      setPushPermission(Notification.permission);
+    }
   }, []);
   
   // Load user notification settings
   useEffect(() => {
-    const loadSettings = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
+    loadUserSettings(user.id);
+  }, [user]);
+  
+  const loadUserSettings = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw error;
       }
       
-      try {
-        const { data, error } = await supabase
-          .from('user_settings')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') { // PGRST116 means no rows returned
-          throw error;
-        }
-        
-        if (data) {
-          setSettings({
-            telegram_chat_id: data.telegram_chat_id,
-            telegram_notifications_enabled: data.telegram_notifications_enabled || false,
-            email_daily_summary: data.email_daily_summary || false,
-            email_weekly_summary: data.email_weekly_summary || false,
-            push_notifications_enabled: data.push_notifications_enabled || false,
-            price_alert_threshold: data.price_alert_threshold || 5,
-            balance_alert_threshold: data.balance_alert_threshold || 0
-          });
-        } else {
-          // Create default settings
-          const defaultSettings = {
-            telegram_chat_id: null,
-            telegram_notifications_enabled: false,
-            email_daily_summary: false,
-            email_weekly_summary: false,
-            push_notifications_enabled: false,
-            price_alert_threshold: 5,
-            balance_alert_threshold: 0
-          };
-          
-          setSettings(defaultSettings);
-          
-          // Save default settings to database
-          if (user) {
-            await supabase
-              .from('user_settings')
-              .upsert({
-                user_id: user.id,
-                ...defaultSettings
-              });
-          }
-        }
-      } catch (error) {
-        console.error('Error loading notification settings:', error);
-        toast.error('Não foi possível carregar suas configurações de notificação');
-      } finally {
-        setLoading(false);
+      if (data) {
+        setSettings({
+          telegram_chat_id: data.telegram_chat_id,
+          telegram_notifications_enabled: data.telegram_notifications_enabled || false,
+          email_daily_summary: data.email_daily_summary || false,
+          email_weekly_summary: data.email_weekly_summary || false,
+          push_notifications_enabled: data.push_notifications_enabled || false,
+          price_alert_threshold: data.price_alert_threshold || 5,
+          balance_alert_threshold: data.balance_alert_threshold || 0
+        });
+      } else {
+        createDefaultSettings(userId);
       }
+    } catch (error) {
+      console.error('Error loading notification settings:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar suas configurações de notificação",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const createDefaultSettings = async (userId: string) => {
+    const defaultSettings = {
+      telegram_chat_id: null,
+      telegram_notifications_enabled: false,
+      email_daily_summary: false,
+      email_weekly_summary: false,
+      push_notifications_enabled: false,
+      price_alert_threshold: 5,
+      balance_alert_threshold: 0
     };
     
-    loadSettings();
-  }, [user]);
+    setSettings(defaultSettings);
+    
+    try {
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: userId,
+          ...defaultSettings
+        });
+    } catch (error) {
+      console.error('Error creating default notification settings:', error);
+    }
+  };
   
   // Request push permission
   const requestPermission = async (): Promise<boolean> => {
     if (!pushSupported) {
-      toast.error('Este navegador não suporta notificações push');
+      toast({
+        title: "Não suportado",
+        description: "Este navegador não suporta notificações push",
+        variant: "destructive"
+      });
       return false;
     }
     
@@ -115,19 +123,7 @@ export const useNotifications = () => {
       setPushPermission(granted ? 'granted' : 'denied');
       
       if (granted && user && settings) {
-        // Update user settings
-        await supabase
-          .from('user_settings')
-          .upsert({
-            user_id: user.id,
-            push_notifications_enabled: true,
-            ...settings
-          });
-        
-        setSettings({
-          ...settings,
-          push_notifications_enabled: true
-        });
+        await updateSettings({ push_notifications_enabled: true });
       }
       
       return granted;
