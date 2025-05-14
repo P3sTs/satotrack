@@ -10,7 +10,7 @@ const AuthRedirect = () => {
   useEffect(() => {
     if (!loading && user) {
       // Se o usuário já estiver autenticado, redireciona para o dashboard
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, loading, navigate]);
 

@@ -11,10 +11,10 @@ const Index = () => {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        navigate('/home');
+        navigate('/home', { replace: true });
       } else {
         updateLastActivity();
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [user, loading, navigate, updateLastActivity]);
