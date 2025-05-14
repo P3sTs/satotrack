@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // Get the Telegram bot token from environment variables
-const TELEGRAM_BOT_TOKEN = Deno.env.get("7826526912:AAG-7hTgiBjGc_kWG7ev4ik96RmRnBORwesKf7yZPrpn7XsIuXVX9Ft1CN7oHUmrqszRKTl1jlERewYvWzWwhpQ8KBPaTwNWdFD");
+const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "7982791283:AAHDf-tcsG3iezhBRVEc1gYyDvlIOg9WfqE";
 
 interface TelegramMessage {
   chat_id: string;
@@ -94,6 +94,9 @@ serve(async (req) => {
       parse_mode: "Markdown",
     };
 
+    console.log("Sending Telegram message:", JSON.stringify(telegramMessage));
+    console.log("Using bot token:", TELEGRAM_BOT_TOKEN);
+
     const telegramResponse = await fetch(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
       {
@@ -104,6 +107,7 @@ serve(async (req) => {
     );
 
     const telegramData = await telegramResponse.json();
+    console.log("Telegram API response:", telegramData);
 
     // Log the notification in the database
     await supabaseClient.from("notification_logs").insert({
