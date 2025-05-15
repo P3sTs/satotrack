@@ -11,7 +11,7 @@ import { PlanBadge } from '../monetization/PlanDisplay';
 interface UserMenuProps {
   user: AuthUser | null;
   getUserInitials: () => string;
-  handleLogout: () => Promise<void>;
+  handleLogout: () => void; // Updated to match NavBar
   navigate: (path: string) => void;
 }
 

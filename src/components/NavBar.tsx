@@ -17,11 +17,11 @@ const NavBar: React.FC = () => {
   const location = useLocation();
   const isPremium = userPlan === 'premium';
   
-  const handleLogout = async () => {
+  const handleLogout = () => { // Removed async
     try {
-      await signOut();
+      signOut(); // Now we're not awaiting this
       navigate('/');
-      setIsMobileMenuOpen(false); // Close mobile menu after logout
+      setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -126,6 +126,8 @@ const NavBar: React.FC = () => {
             handleLogout={handleLogout}
             getUserInitials={getUserInitials}
             trigger={mobileMenuTrigger}
+            isPremium={isPremium}
+            onPremiumClick={handlePremiumClick}
           />
         </div>
       </div>

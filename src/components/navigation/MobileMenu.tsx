@@ -2,16 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Info, Shield } from 'lucide-react';
-import { AuthUser } from '@/contexts/auth';
+import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Info, Shield, Star } from 'lucide-react';
+import { AuthUser } from '@/contexts/auth/types';
 
 interface MobileMenuProps {
   user: AuthUser | null;
   isActive: (path: string) => boolean;
   handleNavigation: (path: string) => void;
-  handleLogout: () => Promise<void>;
+  handleLogout: () => void; // Updated to match MobileMenuContainer
   getUserInitials: () => string;
-  setIsMobileMenuOpen: (isOpen: boolean) => void;
+  onClose: () => void;
+  isPremium?: boolean;
+  onPremiumClick?: () => void;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -20,11 +22,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   handleNavigation,
   handleLogout,
   getUserInitials,
-  setIsMobileMenuOpen
+  onClose,
+  isPremium = false,
+  onPremiumClick
 }) => {
   const navigate = (path: string) => {
     handleNavigation(path);
-    setIsMobileMenuOpen(false);
+    onClose();
   };
 
   return (
@@ -38,7 +42,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </Avatar>
           <div className="text-center">
             <p className="text-sm font-medium">{user.email}</p>
-            <p className="text-xs text-satotrack-text mt-1">Usuário SatoTrack</p>
+            <p className="text-xs text-satotrack-text mt-1">
+              {isPremium ? (
+                <span className="flex items-center justify-center text-bitcoin">
+                  <Star className="h-3 w-3 mr-1 fill-bitcoin" /> Usuário Premium
+                </span>
+              ) : (
+                "Usuário SatoTrack"
+              )}
+            </p>
           </div>
         </div>
       )}
@@ -100,6 +112,21 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <Settings className="h-4 w-4 mr-2" />
             Configurações
           </button>
+          
+          {/* Premium Button */}
+          {onPremiumClick && (
+            <button 
+              onClick={onPremiumClick}
+              className={`flex w-full items-center py-2 px-4 rounded-md mt-2 ${
+                isPremium 
+                  ? 'bg-bitcoin/20 text-bitcoin' 
+                  : 'border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10'
+              }`}
+            >
+              <Star className={`h-4 w-4 mr-2 ${isPremium ? 'fill-bitcoin' : ''}`} />
+              {isPremium ? 'Painel Premium' : 'Quero ser Premium'}
+            </button>
+          )}
         </>
       )}
       
@@ -126,7 +153,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             className="w-full justify-start" 
             onClick={() => {
               handleLogout();
-              setIsMobileMenuOpen(false);
+              onClose();
             }}
           >
             <LogOut className="h-4 w-4 mr-2" />

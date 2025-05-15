@@ -51,12 +51,12 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
   };
   
   // Show extended time ranges for premium users
-  const extendedTimeRanges = isPremium 
-    ? ['7D', '30D', '90D', '6M', '1Y'] as TimeRange[] 
-    : ['24H', '7D'] as TimeRange[];
+  const availableTimeRanges: TimeRange[] = isPremium 
+    ? ['24H', '7D', '30D', '90D', '6M', '1Y'] 
+    : ['24H', '7D'];
     
   // Filter time ranges based on premium status
-  const availableTimeRanges = extendedTimeRanges.map(range => ({
+  const timeRangeOptions = availableTimeRanges.map(range => ({
     value: range,
     label: range,
     disabled: !isPremium && (range === '30D' || range === '90D' || range === '6M' || range === '1Y')
