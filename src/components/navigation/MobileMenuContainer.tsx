@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/drawer";
 import MobileMenu from './MobileMenu';
 import { AuthUser } from '@/contexts/auth';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileMenuContainerProps {
   isMobileMenuOpen: boolean;
@@ -37,8 +36,8 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
   getUserInitials,
   trigger
 }) => {
-  // Use the isMobile hook directly in the component
-  const isMobile = useIsMobile();
+  // Using window.innerWidth to determine if mobile without the hook
+  const isMobile = window.innerWidth < 768;
   
   const mobileMenuProps = {
     user,

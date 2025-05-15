@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 // Timeout de inatividade em minutos
 const INACTIVITY_TIMEOUT = 30;

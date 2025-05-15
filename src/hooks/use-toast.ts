@@ -1,13 +1,17 @@
 
 import { toast as toastOriginal } from "sonner";
-import { useToast as useToastHook } from "@/components/ui/use-toast";
+import { type ToastProps as ToastPropsOriginal } from "@/components/ui/toast";
+import {
+  useToast as useToastOriginal,
+  type ToastActionElement,
+} from "@/components/ui/use-toast";
 
-export const useToast = useToastHook;
+export const useToast = useToastOriginal;
 export const toast = toastOriginal;
 
-export type ToastProps = {
+export type ToastProps = ToastPropsOriginal & {
   title?: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: ToastActionElement;
   variant?: "default" | "destructive" | "success";
 };

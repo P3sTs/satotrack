@@ -82,7 +82,6 @@ const NavBar: React.FC = () => {
           
           {/* Mobile menu */}
           <MobileMenuContainer
-            isMobile={isMobile}
             isMobileMenuOpen={isMobileMenuOpen}
             setIsMobileMenuOpen={setIsMobileMenuOpen}
             user={user}
