@@ -1,13 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
+import { TimeRange } from '@/components/charts/selectors/TimeRangeSelector';
 
 export interface PriceDataPoint {
   timestamp: number;
   price: number;
 }
-
-type TimeRange = '24H' | '7D' | '30D' | '90D' | '6M' | '1Y';
 
 export function usePriceChartData(bitcoinData: BitcoinPriceData | null | undefined, timeRange: TimeRange) {
   const [chartData, setChartData] = useState<PriceDataPoint[]>([]);
