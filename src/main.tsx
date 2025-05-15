@@ -5,6 +5,7 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/auth'
 import { CarteirasProvider } from './contexts/CarteirasContext'
+import { ViewModeProvider } from './contexts/ViewModeContext'
 
 // Usar createRoot para renderização moderna do React
 const root = createRoot(document.getElementById("root")!);
@@ -12,7 +13,9 @@ root.render(
   <BrowserRouter>
     <AuthProvider>
       <CarteirasProvider>
-        <App />
+        <ViewModeProvider>
+          <App />
+        </ViewModeProvider>
       </CarteirasProvider>
     </AuthProvider>
   </BrowserRouter>
