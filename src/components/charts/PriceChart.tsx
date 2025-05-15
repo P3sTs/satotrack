@@ -3,10 +3,11 @@ import React from 'react';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 import { usePriceChartData } from '@/hooks/usePriceChartData';
 import PriceAreaChart from './price/PriceAreaChart';
+import { TimeRange } from '@/components/charts/selectors/TimeRangeSelector';
 
 interface PriceChartProps {
   bitcoinData: BitcoinPriceData | null | undefined;
-  timeRange: '7D' | '30D' | '6M' | '1Y';
+  timeRange: TimeRange;
 }
 
 const PriceChart: React.FC<PriceChartProps> = ({ bitcoinData, timeRange }) => {
