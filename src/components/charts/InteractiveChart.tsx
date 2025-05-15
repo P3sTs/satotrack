@@ -52,7 +52,7 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
   
   // Show extended time ranges for premium users
   const availableTimeRanges = isPremium 
-    ? ['24H', '7D', '30D', '90D', '6M', '1Y'] as TimeRange[] 
+    ? ['24H', '7D', '30D', '90D', '6M', '1Y'] as TimeRange[]
     : ['24H', '7D'] as TimeRange[];
     
   // Create TimeRangeOption objects for each range
