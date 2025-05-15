@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
 import { Menu } from 'lucide-react';
 import MainNav from './MainNav';
-import { useIsMobile } from "@/hooks/use-mobile";
 import MobileMenuContainer from './navigation/MobileMenuContainer';
 import UserMenu from './navigation/UserMenu';
 import { PlanBadge } from './monetization/PlanDisplay';
@@ -15,7 +14,6 @@ const NavBar: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useIsMobile();
   
   const handleLogout = async () => {
     try {

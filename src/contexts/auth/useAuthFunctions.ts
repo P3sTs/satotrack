@@ -17,7 +17,7 @@ export const useAuthFunctions = (
     if (checkFailedLoginAttempts(email)) {
       toast({
         title: "Conta bloqueada",
-        description: `Muitas tentativas de login. Tente novamente em 15 minutos.`,
+        description: "Muitas tentativas de login. Tente novamente em 15 minutos.",
         variant: "destructive"
       });
       throw new Error("Conta temporariamente bloqueada por muitas tentativas");

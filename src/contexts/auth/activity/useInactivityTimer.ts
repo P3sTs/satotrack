@@ -22,8 +22,10 @@ export const useInactivityTimer = (
         // Conversão para minutos
         if (inactiveTime > INACTIVITY_TIMEOUT * 60 * 1000) {
           // Auto logout por inatividade
-          toast.error("Sessão expirada", {
+          toast({
+            title: "Sessão expirada",
             description: "Você foi desconectado por inatividade",
+            variant: "destructive"
           });
           onTimeout();
         } else if (inactiveTime > (INACTIVITY_TIMEOUT * 60 * 1000) / 2) {
