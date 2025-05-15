@@ -25,7 +25,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/auth" element={<AuthRedirect><Auth /></AuthRedirect>} />
+      <Route path="/auth" element={<AuthRedirect />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/carteiras" element={<ProtectedRoute><WalletsManager /></ProtectedRoute>} />
       <Route path="/carteiras/:id" element={<ProtectedRoute><CarteiraDetalhes /></ProtectedRoute>} />
