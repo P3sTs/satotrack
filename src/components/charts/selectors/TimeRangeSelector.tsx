@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export type TimeRange = '24H' | '7D' | '30D' | '90D' | '6M' | '1Y';
 
-interface TimeRangeOption {
+export interface TimeRangeOption {
   value: TimeRange;
   label: string;
   disabled?: boolean;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,9 +16,9 @@ const NavBar: React.FC = () => {
   const location = useLocation();
   const isPremium = userPlan === 'premium';
   
-  const handleLogout = () => { // Removed async
+  const handleLogout = () => {
     try {
-      signOut(); // Now we're not awaiting this
+      signOut();
       navigate('/');
       setIsMobileMenuOpen(false);
     } catch (error) {

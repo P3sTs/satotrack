@@ -55,7 +55,7 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
     ? ['24H', '7D', '30D', '90D', '6M', '1Y'] 
     : ['24H', '7D'];
     
-  // Filter time ranges based on premium status
+  // Create TimeRangeOption objects for each range
   const timeRangeOptions = availableTimeRanges.map(range => ({
     value: range,
     label: range,
@@ -87,14 +87,14 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
                   }
                   setTimeRange(range);
                 }}
-                availableRanges={availableTimeRanges.slice(0, 2)}
+                availableRanges={timeRangeOptions.slice(0, 2)}
               />
             }
           >
             <TimeRangeSelector 
               timeRange={timeRange} 
               onChange={setTimeRange}
-              availableRanges={availableTimeRanges}
+              availableRanges={timeRangeOptions}
             />
           </PremiumFeatureGate>
           

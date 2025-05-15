@@ -11,7 +11,7 @@ export interface MobileMenuContainerProps {
   user: AuthUser | null;
   isActive: (path: string) => boolean;
   handleNavigation: (path: string) => void;
-  handleLogout: () => void; // Changed from Promise<void> to void
+  handleLogout: () => void;
   getUserInitials: () => string;
   trigger: React.ReactNode;
   isPremium?: boolean;
