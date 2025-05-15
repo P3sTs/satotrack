@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/drawer";
 import MobileMenu from './MobileMenu';
 import { AuthUser } from '@/contexts/auth';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileMenuContainerProps {
-  isMobile: boolean;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   user: AuthUser | null;
@@ -28,7 +28,6 @@ interface MobileMenuContainerProps {
 }
 
 const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
-  isMobile,
   isMobileMenuOpen,
   setIsMobileMenuOpen,
   user,
@@ -38,6 +37,9 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
   getUserInitials,
   trigger
 }) => {
+  // Use the isMobile hook directly in the component
+  const isMobile = useIsMobile();
+  
   const mobileMenuProps = {
     user,
     isActive,
@@ -80,8 +82,10 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
       <DrawerTrigger asChild>
         {trigger}
       </DrawerTrigger>
-      <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white z-50">
-        <MobileMenu {...mobileMenuProps} />
+      <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white z-50 max-h-[80vh] overflow-y-auto">
+        <div className="p-4">
+          <MobileMenu {...mobileMenuProps} />
+        </div>
       </DrawerContent>
     </Drawer>
   );

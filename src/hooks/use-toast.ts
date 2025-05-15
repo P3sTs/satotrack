@@ -1,7 +1,8 @@
 
-import { useToast as useToastOriginal, toast as toastOriginal } from "sonner";
+import { toast as toastOriginal } from "sonner";
+import { useToast as useToastHook } from "@/components/ui/use-toast";
 
-export const useToast = useToastOriginal;
+export const useToast = useToastHook;
 export const toast = toastOriginal;
 
 export type ToastProps = {

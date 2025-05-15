@@ -8,9 +8,11 @@ import { LoginSecurityAlert } from '@/components/auth/LoginSecurityAlert';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import AuthRedirect from '@/components/auth/AuthRedirect';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Auth = () => {
   const { failedLoginAttempts, securityStatus, resetFailedLoginAttempts } = useAuth();
+  const isMobile = useIsMobile();
 
   // Reset login attempt counter after 15 minutes
   React.useEffect(() => {
@@ -32,8 +34,8 @@ const Auth = () => {
         <div className="w-full max-w-sm md:max-w-md">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
-              <Bitcoin size={28} className="text-bitcoin" />
-              <h1 className="text-xl md:text-2xl font-bold">Bitcoin Wallet Monitor</h1>
+              <Bitcoin size={isMobile ? 24 : 28} className="text-bitcoin" />
+              <h1 className="text-lg md:text-2xl font-bold">Bitcoin Wallet Monitor</h1>
             </div>
           </div>
           

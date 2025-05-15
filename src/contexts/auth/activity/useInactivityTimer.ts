@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 
 // Timeout de inatividade em minutos
 const INACTIVITY_TIMEOUT = 30;
@@ -22,10 +22,8 @@ export const useInactivityTimer = (
         // Conversão para minutos
         if (inactiveTime > INACTIVITY_TIMEOUT * 60 * 1000) {
           // Auto logout por inatividade
-          toast({
-            title: "Sessão expirada",
+          toast.error("Sessão expirada", {
             description: "Você foi desconectado por inatividade",
-            variant: "destructive",
           });
           onTimeout();
         } else if (inactiveTime > (INACTIVITY_TIMEOUT * 60 * 1000) / 2) {

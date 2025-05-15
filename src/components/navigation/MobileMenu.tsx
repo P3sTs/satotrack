@@ -1,8 +1,8 @@
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Wallet, Mail } from 'lucide-react';
+import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Info, Shield } from 'lucide-react';
 import { AuthUser } from '@/contexts/auth';
 
 interface MobileMenuProps {
@@ -22,6 +22,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   getUserInitials,
   setIsMobileMenuOpen
 }) => {
+  const navigate = (path: string) => {
+    handleNavigation(path);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="space-y-3 py-3">
       {user && (
@@ -39,7 +44,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       )}
       
       <button 
-        onClick={() => handleNavigation('/')}
+        onClick={() => navigate('/')}
         className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
         <User className="h-4 w-4 mr-2" />
@@ -49,42 +54,68 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       {user && (
         <>
           <button 
-            onClick={() => handleNavigation('/dashboard')}
+            onClick={() => navigate('/dashboard')}
             className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
           >
             <Mail className="h-4 w-4 mr-2" />
             Dashboard
           </button>
+          
           <button 
-            onClick={() => handleNavigation('/carteiras')}
+            onClick={() => navigate('/carteiras')}
             className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
           >
             <Wallet className="h-4 w-4 mr-2" />
             Gerenciar Carteiras
           </button>
+          
           <button 
-            onClick={() => handleNavigation('/nova-carteira')}
+            onClick={() => navigate('/nova-carteira')}
             className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
           >
             <Wallet className="h-4 w-4 mr-2" />
             Nova Carteira
           </button>
+          
+          <button 
+            onClick={() => navigate('/mercado')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/mercado') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Mercado
+          </button>
+          
+          <button 
+            onClick={() => navigate('/notificacoes')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/notificacoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+          </button>
+          
+          <button 
+            onClick={() => navigate('/configuracoes')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/configuracoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Configurações
+          </button>
         </>
       )}
       
       <button 
-        onClick={() => handleNavigation('/sobre')}
+        onClick={() => navigate('/sobre')}
         className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
-        <User className="h-4 w-4 mr-2" />
+        <Info className="h-4 w-4 mr-2" />
         Sobre
       </button>
 
       <button 
-        onClick={() => handleNavigation('/privacidade')}
+        onClick={() => navigate('/privacidade')}
         className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
       >
-        <User className="h-4 w-4 mr-2" />
+        <Shield className="h-4 w-4 mr-2" />
         Privacidade
       </button>
       
@@ -93,7 +124,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <Button 
             variant="outline" 
             className="w-full justify-start" 
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              setIsMobileMenuOpen(false);
+            }}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sair
@@ -103,8 +137,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             variant="neon" 
             className="w-full justify-start" 
             onClick={() => {
-              handleNavigation('/auth');
-              setIsMobileMenuOpen(false);
+              navigate('/auth');
             }}
           >
             <User className="h-4 w-4 mr-2" />
