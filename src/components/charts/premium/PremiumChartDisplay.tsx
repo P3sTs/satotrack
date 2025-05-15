@@ -40,7 +40,7 @@ const PremiumChartDisplay: React.FC = () => {
             {currentWallet ? currentWallet.nome : 'Análise de Mercado'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {bitcoinData ? `BTC: $${bitcoinData.current_price.toLocaleString()}` : 'Carregando...'}
+            {bitcoinData ? `BTC: $${bitcoinData.price_usd.toLocaleString()}` : 'Carregando...'}
           </p>
         </div>
         

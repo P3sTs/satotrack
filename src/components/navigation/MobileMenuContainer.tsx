@@ -1,29 +1,21 @@
 
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import { AuthUser } from '@/contexts/auth/types';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import MobileMenu from './MobileMenu';
-import { AuthUser } from '@/contexts/auth';
 
-interface MobileMenuContainerProps {
+export interface MobileMenuContainerProps {
   isMobileMenuOpen: boolean;
-  setIsMobileMenuOpen: (isOpen: boolean) => void;
+  setIsMobileMenuOpen: Dispatch<SetStateAction<boolean>>;
   user: AuthUser | null;
   isActive: (path: string) => boolean;
   handleNavigation: (path: string) => void;
-  handleLogout: () => Promise<void>;
+  handleLogout: () => void;
   getUserInitials: () => string;
   trigger: React.ReactNode;
+  isPremium?: boolean;
+  onPremiumClick?: () => void;
 }
 
 const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
@@ -34,59 +26,28 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
   handleNavigation,
   handleLogout,
   getUserInitials,
-  trigger
+  trigger,
+  isPremium = false,
+  onPremiumClick,
 }) => {
-  // Using window.innerWidth to determine if mobile without the hook
-  const isMobile = window.innerWidth < 768;
-  
-  const mobileMenuProps = {
-    user,
-    isActive,
-    handleNavigation,
-    handleLogout,
-    getUserInitials,
-    setIsMobileMenuOpen
-  };
-
-  if (isMobile) {
-    return (
-      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetTrigger asChild>
-          {trigger}
-        </SheetTrigger>
-        <SheetContent side="right" className="w-[85%] sm:w-[350px] bg-dashboard-dark border-dashboard-medium/30 z-50">
-          <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between py-4 border-b border-dashboard-medium/30">
-              <div className="flex items-center gap-2">
-                <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="SatoTrack Logo" className="h-6 w-6" />
-                <span className="font-orbitron text-lg font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
-                  SatoTrack
-                </span>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <MobileMenu {...mobileMenuProps} />
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
+    <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
         {trigger}
-      </DrawerTrigger>
-      <DrawerContent className="bg-dashboard-dark border-dashboard-medium/30 text-white z-50 max-h-[80vh] overflow-y-auto">
-        <div className="p-4">
-          <MobileMenu {...mobileMenuProps} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </Button>
+      <SheetContent side="right" className="w-full max-w-xs p-0">
+        <MobileMenu
+          user={user}
+          isActive={isActive}
+          handleNavigation={handleNavigation}
+          handleLogout={handleLogout}
+          getUserInitials={getUserInitials}
+          onClose={() => setIsMobileMenuOpen(false)}
+          isPremium={isPremium}
+          onPremiumClick={onPremiumClick}
+        />
+      </SheetContent>
+    </Sheet>
   );
 };
 

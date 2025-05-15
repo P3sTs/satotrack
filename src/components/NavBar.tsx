@@ -90,7 +90,7 @@ const NavBar: React.FC = () => {
           
           {/* Premium Button for all users */}
           <Button 
-            variant={isPremium ? "premium" : "outline"} 
+            variant={isPremium ? "bitcoin" : "outline"} 
             size="sm"
             className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
             onClick={handlePremiumClick}
@@ -111,6 +111,12 @@ const NavBar: React.FC = () => {
           </div>
           
           {/* Mobile menu */}
+          <div className="md:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+          
           <MobileMenuContainer
             isMobileMenuOpen={isMobileMenuOpen}
             setIsMobileMenuOpen={setIsMobileMenuOpen}
@@ -120,8 +126,6 @@ const NavBar: React.FC = () => {
             handleLogout={handleLogout}
             getUserInitials={getUserInitials}
             trigger={mobileMenuTrigger}
-            isPremium={isPremium}
-            onPremiumClick={handlePremiumClick}
           />
         </div>
       </div>

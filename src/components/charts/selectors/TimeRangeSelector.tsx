@@ -20,6 +20,7 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   timeRange, 
   onChange,
   availableRanges = [
+    { value: '24H', label: '24H' },
     { value: '7D', label: '7D' },
     { value: '30D', label: '30D' },
     { value: '6M', label: '6M' },

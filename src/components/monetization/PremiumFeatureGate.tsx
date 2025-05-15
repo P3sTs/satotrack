@@ -58,7 +58,7 @@ const PremiumFeatureGate: React.FC<PremiumFeatureGateProps> = ({
         
         {showUpgradeButton && (
           <Button 
-            variant="premium"
+            variant="bitcoin"
             className="bg-bitcoin hover:bg-bitcoin/90 text-white w-full sm:w-auto"
             onClick={handleUpgradeClick}
           >
@@ -85,7 +85,7 @@ const PremiumFeatureGate: React.FC<PremiumFeatureGateProps> = ({
           
           {showUpgradeButton && (
             <Button 
-              variant="premium"
+              variant="bitcoin"
               className="bg-bitcoin hover:bg-bitcoin/90 text-white"
               onClick={handleUpgradeClick}
             >

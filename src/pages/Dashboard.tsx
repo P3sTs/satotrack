@@ -49,7 +49,6 @@ const Dashboard: React.FC = () => {
       <DashboardHeader 
         onNewWallet={() => setIsNewWalletModalOpen(true)} 
         reachedLimit={reachedLimit}
-        isPremium={isPremium}
       />
       
       {/* Free plan limitation notice */}
