@@ -13,10 +13,11 @@ import { ChartContainer } from "@/components/ui/chart";
 import { PriceDataPoint } from '@/hooks/usePriceChartData';
 import { formatXAxis, formatCurrencyValue } from '../utils/ChartFormatters';
 import PriceTooltip from '../tooltips/PriceTooltip';
+import { TimeRange } from '@/components/charts/selectors/TimeRangeSelector';
 
 interface PriceAreaChartProps {
   data: PriceDataPoint[];
-  timeRange: '7D' | '30D' | '6M' | '1Y';
+  timeRange: TimeRange;
 }
 
 const PriceAreaChart: React.FC<PriceAreaChartProps> = ({ data, timeRange }) => {

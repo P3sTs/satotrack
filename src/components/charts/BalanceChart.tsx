@@ -4,10 +4,11 @@ import { CarteiraBTC } from '@/types/types';
 import { useBalanceChartData } from '@/hooks/useBalanceChartData';
 import BalanceAreaChart from './balance/BalanceAreaChart';
 import TransactionBarChart from './balance/TransactionBarChart';
+import { TimeRange } from './selectors/TimeRangeSelector';
 
 interface BalanceChartProps {
   wallet: CarteiraBTC | undefined;
-  timeRange: '7D' | '30D' | '6M' | '1Y';
+  timeRange: TimeRange;
 }
 
 const BalanceChart: React.FC<BalanceChartProps> = ({ wallet, timeRange }) => {
