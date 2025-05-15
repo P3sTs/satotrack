@@ -10,6 +10,7 @@ import ChartModeSelector, { ChartMode } from './selectors/ChartModeSelector';
 import ChartContainer from './containers/ChartContainer';
 import PremiumChartModal from './modals/PremiumChartModal';
 import { ExportCSVButton, ScreenshotButton, useExportActions } from './actions/ExportActions';
+import PremiumFeatureGate from '../monetization/PremiumFeatureGate';
 
 interface InteractiveChartProps {
   bitcoinData?: BitcoinPriceData | null;
@@ -48,6 +49,18 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
     
     handleExportCSV();
   };
+  
+  // Show extended time ranges for premium users
+  const extendedTimeRanges = isPremium 
+    ? ['7D', '30D', '90D', '6M', '1Y'] as TimeRange[] 
+    : ['24H', '7D'] as TimeRange[];
+    
+  // Filter time ranges based on premium status
+  const availableTimeRanges = extendedTimeRanges.map(range => ({
+    value: range,
+    label: range,
+    disabled: !isPremium && (range === '30D' || range === '90D' || range === '6M' || range === '1Y')
+  }));
 
   return (
     <div className="w-full space-y-4 bg-dashboard-dark">
@@ -63,8 +76,39 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
         </div>
         
         <div className="flex items-center gap-3">
-          <TimeRangeSelector timeRange={timeRange} onChange={setTimeRange} />
-          <ScreenshotButton onClick={handleScreenshot} />
+          <PremiumFeatureGate
+            fallback={
+              <TimeRangeSelector 
+                timeRange={timeRange} 
+                onChange={(range) => {
+                  if (!isPremium && (range === '30D' || range === '90D' || range === '6M' || range === '1Y')) {
+                    setShowPremiumModal(true);
+                    return;
+                  }
+                  setTimeRange(range);
+                }}
+                availableRanges={availableTimeRanges.slice(0, 2)}
+              />
+            }
+          >
+            <TimeRangeSelector 
+              timeRange={timeRange} 
+              onChange={setTimeRange}
+              availableRanges={availableTimeRanges}
+            />
+          </PremiumFeatureGate>
+          
+          <PremiumFeatureGate 
+            fallback={
+              <ScreenshotButton 
+                onClick={() => setShowPremiumModal(true)}
+                disabled={!isPremium}
+                title="Disponível no Premium"
+              />
+            }
+          >
+            <ScreenshotButton onClick={handleScreenshot} />
+          </PremiumFeatureGate>
         </div>
       </div>
 
@@ -86,6 +130,17 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({ bitcoinData, wallet
         open={showPremiumModal} 
         onOpenChange={setShowPremiumModal} 
       />
+      
+      {!isPremium && (
+        <div className="flex justify-center mt-2">
+          <span className="text-xs text-muted-foreground">
+            Acesse gráficos de 30D, 90D e anuais com o{" "}
+            <a href="/planos" className="text-bitcoin hover:underline">
+              SatoTrack Premium
+            </a>
+          </span>
+        </div>
+      )}
     </div>
   );
 };

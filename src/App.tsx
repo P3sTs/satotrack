@@ -84,6 +84,12 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
+          <Route path="/premium-dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/carteiras" element={
             <ProtectedRoute>
               <WalletsManager />

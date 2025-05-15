@@ -3,8 +3,9 @@ import React from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Lock } from 'lucide-react';
+import { CheckCircle, XCircle, Lock, Star } from 'lucide-react';
 import { Advertisement } from '@/components/monetization/Advertisement';
+import { toast } from '@/hooks/use-toast';
 
 interface PlanFeatureProps {
   text: string;
@@ -25,6 +26,25 @@ const PlanFeature: React.FC<PlanFeatureProps> = ({ text, included }) => (
 const PlanosPage: React.FC = () => {
   const { userPlan, upgradeUserPlan } = useAuth();
   const isPremium = userPlan === 'premium';
+  
+  const handleUpgrade = async () => {
+    if (upgradeUserPlan) {
+      try {
+        await upgradeUserPlan();
+        toast({
+          title: "Plano atualizado",
+          description: "Você agora é um usuário Premium! Aproveite todos os recursos.",
+          variant: "success"
+        });
+      } catch (error) {
+        toast({
+          title: "Erro ao atualizar plano",
+          description: "Não foi possível atualizar para o plano Premium. Tente novamente.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
   
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -53,12 +73,16 @@ const PlanosPage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             <PlanFeature text="1 carteira monitorada" included={true} />
-            <PlanFeature text="Dados de mercado básicos" included={true} />
+            <PlanFeature text="Dados de mercado básicos (24h e 7d)" included={true} />
             <PlanFeature text="Monitoramento de saldo" included={true} />
+            <PlanFeature text="Gráficos interativos básicos" included={true} />
             <PlanFeature text="Carteiras múltiplas" included={false} />
+            <PlanFeature text="Gráficos avançados (30d, 90d, YTD)" included={false} />
+            <PlanFeature text="Exportação de dados em PDF/CSV" included={false} />
             <PlanFeature text="Alertas por Telegram/Email" included={false} />
+            <PlanFeature text="Comparação de carteiras" included={false} />
+            <PlanFeature text="Screenshot de gráficos" included={false} />
             <PlanFeature text="Relatórios mensais" included={false} />
-            <PlanFeature text="Gráficos interativos avançados" included={false} />
             <PlanFeature text="Acesso à API de dados" included={false} />
             <PlanFeature text="Sem anúncios" included={false} />
           </CardContent>
@@ -80,7 +104,7 @@ const PlanosPage: React.FC = () => {
             <CardTitle>Plano Premium</CardTitle>
             <CardDescription>Para usuários avançados</CardDescription>
             <div className="mt-4">
-              <span className="text-3xl font-bold">R$ 29,90</span>
+              <span className="text-3xl font-bold">R$ 9,90</span>
               <span className="text-muted-foreground">/mês</span>
             </div>
           </CardHeader>
@@ -88,22 +112,27 @@ const PlanosPage: React.FC = () => {
             <PlanFeature text="Carteiras ilimitadas" included={true} />
             <PlanFeature text="Dados de mercado completos" included={true} />
             <PlanFeature text="Monitoramento avançado" included={true} />
-            <PlanFeature text="Relatórios personalizados" included={true} />
+            <PlanFeature text="Gráficos interativos avançados (30d, 90d, YTD)" included={true} />
+            <PlanFeature text="Exportação de dados em PDF/CSV" included={true} />
             <PlanFeature text="Alertas por Telegram/Email" included={true} />
+            <PlanFeature text="Comparação de carteiras" included={true} />
+            <PlanFeature text="Screenshot de gráficos" included={true} />
             <PlanFeature text="Relatórios mensais completos" included={true} />
-            <PlanFeature text="Gráficos interativos avançados" included={true} />
+            <PlanFeature text="Painel exclusivo Premium" included={true} />
             <PlanFeature text="Acesso à API de dados" included={true} />
+            <PlanFeature text="Suporte prioritário" included={true} />
             <PlanFeature text="Sem anúncios" included={true} />
           </CardContent>
           <CardFooter>
             {isPremium ? (
               <Button disabled className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white">
+                <Star className="h-4 w-4 mr-2 fill-white" />
                 Plano Atual
               </Button>
             ) : (
               <Button 
                 className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white" 
-                onClick={upgradeUserPlan}
+                onClick={handleUpgrade}
               >
                 <Lock className="h-4 w-4 mr-2" />
                 Fazer upgrade
@@ -126,7 +155,8 @@ const PlanosPage: React.FC = () => {
           <div>
             <h3 className="font-medium">Como funciona o upgrade para Premium?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Ao clicar em "Fazer upgrade", você será redirecionado para nosso sistema de pagamento seguro. Após a confirmação, seu plano será atualizado automaticamente.
+              Ao clicar em "Fazer upgrade", seu plano será atualizado automaticamente. Para esta versão demo,
+              o upgrade é instantâneo sem necessidade de pagamento.
             </p>
           </div>
           
@@ -138,16 +168,16 @@ const PlanosPage: React.FC = () => {
           </div>
           
           <div>
-            <h3 className="font-medium">Como funciona o acesso à API?</h3>
+            <h3 className="font-medium">Como funciona a exportação de relatórios?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Assinantes Premium recebem um token de API exclusivo com até 1000 requisições por mês, permitindo integrar dados em suas aplicações.
+              Assinantes Premium podem exportar dados em formato PDF e CSV de qualquer período, incluindo relatórios completos para declaração de impostos.
             </p>
           </div>
           
           <div>
-            <h3 className="font-medium">É possível comprar relatórios sem ser Premium?</h3>
+            <h3 className="font-medium">Posso utilizar o Premium em múltiplos dispositivos?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Sim! Usuários do plano gratuito podem comprar relatórios avulsos por R$9,90 cada, enquanto assinantes Premium têm acesso ilimitado a relatórios.
+              Sim! Sua assinatura Premium está vinculada à sua conta e pode ser utilizada em qualquer dispositivo em que você fizer login.
             </p>
           </div>
         </div>

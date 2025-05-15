@@ -3,17 +3,19 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Menu } from 'lucide-react';
+import { Menu, Star } from 'lucide-react';
 import MainNav from './MainNav';
 import MobileMenuContainer from './navigation/MobileMenuContainer';
 import UserMenu from './navigation/UserMenu';
 import { PlanBadge } from './monetization/PlanDisplay';
+import { toast } from '@/hooks/use-toast';
 
 const NavBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, userPlan } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isPremium = userPlan === 'premium';
   
   const handleLogout = async () => {
     try {
@@ -48,6 +50,25 @@ const NavBar: React.FC = () => {
     </Button>
   );
 
+  // Handle premium button click
+  const handlePremiumClick = () => {
+    if (isPremium) {
+      navigate('/premium-dashboard');
+      toast({
+        title: "Painel Premium",
+        description: "Bem-vindo ao seu painel exclusivo premium!",
+        variant: "default"
+      });
+    } else {
+      navigate('/planos');
+      toast({
+        title: "Upgrade disponível",
+        description: "Conheça os benefícios do plano Premium!",
+        variant: "default"
+      });
+    }
+  };
+
   return (
     <header className="bg-dashboard-dark text-white sticky top-0 z-50 border-b border-dashboard-medium/30">
       <div className="container mx-auto px-4">
@@ -66,6 +87,17 @@ const NavBar: React.FC = () => {
           <div className="hidden md:flex items-center justify-center flex-1 px-4">
             <MainNav />
           </div>
+          
+          {/* Premium Button for all users */}
+          <Button 
+            variant={isPremium ? "premium" : "outline"} 
+            size="sm"
+            className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
+            onClick={handlePremiumClick}
+          >
+            <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
+            {isPremium ? 'Premium' : 'Quero ser Premium'}
+          </Button>
           
           {/* Auth actions */}
           <div className="hidden md:flex items-center gap-2">
@@ -88,6 +120,8 @@ const NavBar: React.FC = () => {
             handleLogout={handleLogout}
             getUserInitials={getUserInitials}
             trigger={mobileMenuTrigger}
+            isPremium={isPremium}
+            onPremiumClick={handlePremiumClick}
           />
         </div>
       </div>

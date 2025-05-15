@@ -10,6 +10,8 @@ import FreePlanNotice from '@/components/dashboard/FreePlanNotice';
 import PrimaryWallet from '@/components/dashboard/PrimaryWallet';
 import PremiumFeatures from '@/components/dashboard/PremiumFeatures';
 import WalletsList from '@/components/dashboard/WalletsList';
+import PremiumDashboard from '@/components/dashboard/PremiumDashboard';
+import WalletComparison from '@/components/wallet/WalletComparison';
 
 const Dashboard: React.FC = () => {
   const { 
@@ -47,6 +49,7 @@ const Dashboard: React.FC = () => {
       <DashboardHeader 
         onNewWallet={() => setIsNewWalletModalOpen(true)} 
         reachedLimit={reachedLimit}
+        isPremium={isPremium}
       />
       
       {/* Free plan limitation notice */}
@@ -61,6 +64,16 @@ const Dashboard: React.FC = () => {
       
       {/* Carteira Principal */}
       <PrimaryWallet wallet={principalCarteira} />
+      
+      {/* Premium Dashboard for all users (feature gated) */}
+      <div className="mb-6">
+        <PremiumDashboard />
+      </div>
+      
+      {/* Premium Wallet Comparison */}
+      <div className="mb-6">
+        <WalletComparison />
+      </div>
       
       {/* Premium Features with locks for free users */}
       {!isPremium && <PremiumFeatures />}
@@ -78,6 +91,23 @@ const Dashboard: React.FC = () => {
         reachedLimit={reachedLimit}
         onNewWallet={() => setIsNewWalletModalOpen(true)}
       />
+      
+      {/* Final CTA for free users */}
+      {!isPremium && (
+        <div className="bg-dashboard-medium text-center p-6 rounded-lg border border-dashboard-medium/50 mt-8">
+          <h3 className="text-lg font-medium mb-3">Desbloqueie Todo o Potencial do SatoTrack</h3>
+          <p className="text-muted-foreground mb-4 max-w-lg mx-auto">
+            Desbloqueie gráficos avançados, alertas automáticos, filtros detalhados e muito mais 
+            com apenas R$9,90/mês.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/planos'} 
+            className="bg-bitcoin hover:bg-bitcoin/90 text-white px-6 py-2 rounded-md font-medium"
+          >
+            Assinar Premium
+          </button>
+        </div>
+      )}
       
       <NewWalletModal 
         isOpen={isNewWalletModalOpen}
