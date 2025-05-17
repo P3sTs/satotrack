@@ -25,8 +25,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout
     );
   }
 
-  // Use the global securityStatus from context or fallback to 'secure'
-  // Fix: Safely access securityStatus with optional chaining and default value
+  // Fix: Acesso seguro ao securityStatus com verificação de tipo e valor padrão
   const securityStatus = user?.securityStatus || 'secure';
 
   return (

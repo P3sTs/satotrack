@@ -18,14 +18,15 @@ import ApiDocs from './pages/ApiDocs';
 import Crypto from './pages/Crypto';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
-import AuthRedirect from './components/auth/AuthRedirect';
 import './App.css';
+import Index from './pages/Index';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/auth" element={<AuthRedirect />} />
+      <Route path="/" element={<Index />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/carteiras" element={<ProtectedRoute><WalletsManager /></ProtectedRoute>} />
       <Route path="/carteiras/:id" element={<ProtectedRoute><CarteiraDetalhes /></ProtectedRoute>} />

@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Lock } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
+import { toast } from '@/hooks/use-toast';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +24,9 @@ export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     setError(null);
     setIsLoading(true);
     
@@ -39,7 +42,15 @@ export const LoginForm = () => {
       }
       
       await signIn(email, password);
+      
+      // Feedback visual do processo
+      toast({
+        title: "Login realizado",
+        description: "Você foi autenticado com sucesso.",
+      });
+      
     } catch (err) {
+      console.error("Erro de login:", err);
       setError(err instanceof Error ? err.message : 'Ocorreu um erro na autenticação');
     } finally {
       setIsLoading(false);
@@ -73,30 +84,34 @@ export const LoginForm = () => {
           </Alert>
         )}
         
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input 
-            id="email" 
-            type="email" 
-            placeholder="seu@email.com" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border-input focus-visible:ring-bitcoin"
-            aria-invalid={error ? 'true' : 'false'}
-            autoComplete="email"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
-          <PasswordInput 
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!error}
-            autoComplete="current-password"
-          />
-        </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              placeholder="seu@email.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border-input focus-visible:ring-bitcoin"
+              aria-invalid={error ? 'true' : 'false'}
+              autoComplete="email"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password">Senha</Label>
+            <PasswordInput 
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!error}
+              autoComplete="current-password"
+              disabled={isLoading}
+            />
+          </div>
+        </form>
       </CardContent>
       <CardFooter>
         <Button 

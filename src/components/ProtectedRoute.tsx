@@ -14,12 +14,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading, isAuthenticated, updateLastActivity, securityStatus } = useAuth();
   const location = useLocation();
   
-  // Fix: Add proper dependency array and only update when path changes
+  // Fix: Atualiza apenas na montagem inicial e quando a rota ou isAuthenticated mudar
   useEffect(() => {
     if (isAuthenticated) {
       updateLastActivity();
     }
-  }, [isAuthenticated, location.pathname]); // Only run when these values change
+  }, [isAuthenticated, location.pathname, updateLastActivity]); // Adicionando updateLastActivity como dependência para evitar warnings
   
   if (loading) {
     return (
