@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
@@ -11,18 +12,32 @@ import { toast } from '@/hooks/use-toast';
 
 const NavBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut, userPlan } = useAuth();
+  const { user, signOut, userPlan, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isPremium = userPlan === 'premium';
+  
+  // Debug log to track authentication status
+  useEffect(() => {
+    console.log("NavBar: Authentication status =", isAuthenticated, "User =", !!user);
+  }, [isAuthenticated, user]);
   
   const handleLogout = () => {
     try {
       signOut();
       navigate('/');
       setIsMobileMenuOpen(false);
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso",
+      });
     } catch (error) {
       console.error('Logout error:', error);
+      toast({
+        title: "Erro ao sair",
+        description: "Não foi possível realizar o logout",
+        variant: "destructive"
+      });
     }
   };
 

@@ -14,13 +14,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading, isAuthenticated, updateLastActivity, securityStatus } = useAuth();
   const location = useLocation();
   
-  // Fix: Atualiza apenas na montagem inicial e quando a rota ou isAuthenticated mudar
+  // Update activity when route changes
   useEffect(() => {
     if (isAuthenticated) {
       updateLastActivity();
+      console.log("Activity updated in protected route, user:", !!user);
     }
-  }, [isAuthenticated, location.pathname, updateLastActivity]); // Adicionando updateLastActivity como dependência para evitar warnings
+  }, [isAuthenticated, location.pathname, updateLastActivity]);
   
+  // Show loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -33,12 +35,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // Redireciona para autenticação se não houver usuário
+  // Redirect to authentication if no user
   if (!user) {
+    console.log("No user found in protected route, redirecting to auth");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Aviso de segurança quando apropriado  
+  console.log("Protected route rendering content with user:", !!user);
+  
+  // Render content with security alert if needed
   return (
     <>
       {securityStatus !== 'secure' && (

@@ -11,7 +11,7 @@ export const useAuthSession = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fix: Separar a lógica de redirecionamento para evitar loops
+  // Fix: Separate the redirection logic to avoid loops
   const handleAuthRedirect = useCallback((event: string, currentSession: Session | null) => {
     if (event === 'SIGNED_IN' && currentSession) {
       // Redirect to dashboard on sign in, unless there's a specific redirect path
@@ -23,7 +23,7 @@ export const useAuthSession = () => {
     }
   }, [navigate, location.state]);
 
-  // Fix: Separar a verificação de sessão inicial
+  // Fix: Check initial session only once on component mount
   const checkInitialSession = useCallback(async () => {
     try {
       const { data: { session: initialSession } } = await supabase.auth.getSession();
@@ -32,7 +32,7 @@ export const useAuthSession = () => {
       setUser(initialSession?.user ?? null);
       setLoading(false);
       
-      // Handle redirects based on current path if needed
+      // Important: Only redirect on initial page load in specific conditions
       if (initialSession && location.pathname === '/auth') {
         navigate('/dashboard', { replace: true });
       } else if (!initialSession && 
@@ -41,7 +41,9 @@ export const useAuthSession = () => {
                 location.pathname !== '/auth' && 
                 location.pathname !== '/sobre' && 
                 location.pathname !== '/privacidade' &&
-                location.pathname !== '/planos') {
+                location.pathname !== '/planos' &&
+                location.pathname !== '/mercado' &&
+                location.pathname !== '/crypto') {
         // Save the current location to redirect back after authentication
         navigate('/auth', { 
           replace: true,
@@ -55,19 +57,19 @@ export const useAuthSession = () => {
   }, [navigate, location]);
 
   useEffect(() => {
-    // Define o listener de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, !!session);
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Set up auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log("Auth state changed:", event, !!currentSession);
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
       
-      // Redirecionar apenas em eventos específicos de autenticação
+      // Only redirect on specific auth events
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        handleAuthRedirect(event, session);
+        handleAuthRedirect(event, currentSession);
       }
     });
 
-    // Verifica sessão inicial
+    // Check initial session
     checkInitialSession();
 
     return () => {

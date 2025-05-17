@@ -55,6 +55,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     checkFailedLoginAttempts
   );
 
+  // Debug log to track authentication status
+  useEffect(() => {
+    console.log("AuthProvider: User changed =", !!supabaseUser, "Session =", !!session);
+  }, [supabaseUser, session]);
+
   // Atualizar estado do usuário quando supabaseUser muda
   useEffect(() => {
     const authUser = convertToAuthUser(supabaseUser);
