@@ -25,7 +25,7 @@ export interface AuthContextType {
   resetFailedLoginAttempts: () => void;
   upgradeUserPlan?: () => Promise<void>;
   userPlan: PlanType;
-  canAddMoreWallets: boolean;
+  canAddMoreWallets: (currentWallets: number) => boolean;
   generateApiToken?: () => Promise<string>;
   apiToken?: string | null;
   apiRequestsRemaining?: number;
