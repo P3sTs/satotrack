@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ChartBar, List, LayoutGrid, Smartphone } from 'lucide-react';
 import { useViewMode, ViewMode } from '@/contexts/ViewModeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,7 +22,7 @@ interface ViewModeButtonProps {
   isMobile: boolean;
 }
 
-const ViewModeButton: React.FC<ViewModeButtonProps> = ({
+const ViewModeButton = memo<ViewModeButtonProps>(({
   mode,
   label,
   icon: Icon,
@@ -39,14 +39,18 @@ const ViewModeButton: React.FC<ViewModeButtonProps> = ({
         active ? "bg-satotrack-neon text-dashboard-dark hover:bg-satotrack-neon/90" : ""
       )}
       onClick={onClick}
+      aria-label={`Visualização em ${label}`}
+      aria-pressed={active}
     >
       <Icon className="h-4 w-4" />
       {!isMobile && <span>{label}</span>}
     </Button>
   );
-};
+});
 
-const ViewModeSelectorDesktop: React.FC = () => {
+ViewModeButton.displayName = 'ViewModeButton';
+
+const ViewModeSelectorDesktop = memo(() => {
   const { viewMode, setViewMode } = useViewMode();
   const isMobile = useIsMobile();
 
@@ -58,7 +62,7 @@ const ViewModeSelectorDesktop: React.FC = () => {
   ];
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 animate-in slide-in-from-right">
       {viewModes.map((item) => (
         <ViewModeButton
           key={item.mode}
@@ -72,9 +76,11 @@ const ViewModeSelectorDesktop: React.FC = () => {
       ))}
     </div>
   );
-};
+});
 
-const ViewModeSelectorMobile: React.FC = () => {
+ViewModeSelectorDesktop.displayName = 'ViewModeSelectorDesktop';
+
+const ViewModeSelectorMobile = memo(() => {
   const { viewMode, setViewMode } = useViewMode();
 
   const viewModes = [
@@ -84,7 +90,7 @@ const ViewModeSelectorMobile: React.FC = () => {
     { mode: 'compact' as ViewMode, label: 'Compacto', icon: Smartphone },
   ];
 
-  // Find the current active mode
+  // Encontrar o modo ativo atual
   const activeMode = viewModes.find(item => item.mode === viewMode) || viewModes[0];
 
   return (
@@ -92,11 +98,12 @@ const ViewModeSelectorMobile: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 min-w-[120px]"
           size="sm"
+          aria-label="Escolher modo de visualização"
         >
           <activeMode.icon className="h-4 w-4" />
-          <span>Visualização</span>
+          <span className="truncate">Visualização</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48">
@@ -118,16 +125,14 @@ const ViewModeSelectorMobile: React.FC = () => {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+});
+
+ViewModeSelectorMobile.displayName = 'ViewModeSelectorMobile';
 
 const ViewModeSelector: React.FC = () => {
   const isMobile = useIsMobile();
   
-  if (isMobile) {
-    return <ViewModeSelectorMobile />;
-  }
-  
-  return <ViewModeSelectorDesktop />;
+  return isMobile ? <ViewModeSelectorMobile /> : <ViewModeSelectorDesktop />;
 };
 
-export default ViewModeSelector;
+export default memo(ViewModeSelector);

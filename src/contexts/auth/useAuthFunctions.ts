@@ -14,17 +14,28 @@ export const useAuthFunctions = (
 
   // Login com email e senha
   const signIn = async (email: string, password: string) => {
-    if (checkFailedLoginAttempts(email)) {
+    if (!email || !password) {
       toast({
-        title: "Conta bloqueada",
-        description: "Muitas tentativas de login. Tente novamente em 15 minutos.",
+        title: "Campos obrigatórios",
+        description: "Email e senha são obrigatórios.",
         variant: "destructive"
       });
-      throw new Error("Conta temporariamente bloqueada por muitas tentativas");
+      throw new Error("Email e senha são obrigatórios");
     }
-
+    
     try {
+      setLoading(true);
       const sanitizedEmail = email.trim().toLowerCase();
+      
+      if (checkFailedLoginAttempts(sanitizedEmail)) {
+        toast({
+          title: "Conta bloqueada",
+          description: "Muitas tentativas de login. Tente novamente em 15 minutos.",
+          variant: "destructive"
+        });
+        throw new Error("Conta temporariamente bloqueada por muitas tentativas");
+      }
+
       const { error } = await supabase.auth.signInWithPassword({ 
         email: sanitizedEmail, 
         password 
@@ -38,48 +49,72 @@ export const useAuthFunctions = (
       saveLoginAttempt(sanitizedEmail, true);
       updateLastActivity();
       
+      // Sem toast de sucesso para não atrapalhar a experiência
+      
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao entrar:", authError);
       
       // Msg de erro amigável
-      if (authError.message.includes('Invalid login')) {
+      if (authError.message?.includes('Invalid login')) {
         throw new Error("Email ou senha incorretos");
       } else {
         throw new Error(`Erro ao entrar: ${authError.message}`);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   // Logout
   const signOut = async () => {
     try {
+      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Limpar atividade de usuário
       localStorage.removeItem('lastActivity');
+      
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao sair:", authError);
       throw new Error(`Erro ao sair: ${authError.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Registro com validação de senha
   const signUp = async (email: string, password: string, fullName: string) => {
-    // Verifica força da senha
-    const { score, feedback } = checkPasswordStrength(password);
-    if (score < 3) {
-      throw new Error(`Senha insegura: ${feedback}`);
+    if (!email || !password || !fullName) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome completo, email e senha são obrigatórios.",
+        variant: "destructive"
+      });
+      throw new Error("Todos os campos são obrigatórios");
     }
-
+    
     try {
+      setLoading(true);
+      
+      // Verifica força da senha
+      const { score, feedback } = checkPasswordStrength(password);
+      if (score < 3) {
+        throw new Error(`Senha insegura: ${feedback}`);
+      }
+
       const sanitizedEmail = email.trim().toLowerCase();
+      const sanitizedName = fullName.trim();
+      
       const { error } = await supabase.auth.signUp({ 
         email: sanitizedEmail, 
         password,
         options: {
           data: {
-            full_name: fullName
+            full_name: sanitizedName,
+            created_at: new Date().toISOString()
           }
         }
       });
@@ -91,18 +126,22 @@ export const useAuthFunctions = (
         description: "Verifique seu email para ativar sua conta.",
       });
       
+      return true;
+      
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao registrar:", authError);
       
       // Melhor tratamento de erros
-      if (authError.message.includes('already registered')) {
+      if (authError.message?.includes('already registered')) {
         throw new Error("Este email já está registrado");
-      } else if (authError.message.includes('password')) {
+      } else if (authError.message?.includes('password')) {
         throw new Error("A senha não atende aos requisitos de segurança");
       } else {
         throw new Error(`Erro ao criar conta: ${authError.message}`);
       }
+    } finally {
+      setLoading(false);
     }
   };
 

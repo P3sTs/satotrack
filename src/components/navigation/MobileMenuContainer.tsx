@@ -1,9 +1,10 @@
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { AuthUser } from '@/contexts/auth/types';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import MobileMenu from './MobileMenu';
+import { useLocation } from 'react-router-dom';
 
 export interface MobileMenuContainerProps {
   isMobileMenuOpen: boolean;
@@ -30,9 +31,16 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
   isPremium = false,
   onPremiumClick,
 }) => {
+  const location = useLocation();
+  
+  // Fecha o menu quando a rota mudar
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, setIsMobileMenuOpen]);
+  
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
+      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)} aria-label="Menu">
         {trigger}
       </Button>
       <SheetContent side="right" className="w-full max-w-xs p-0">

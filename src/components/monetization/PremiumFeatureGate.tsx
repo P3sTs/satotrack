@@ -31,12 +31,17 @@ const PremiumFeatureGate: React.FC<PremiumFeatureGateProps> = ({
   messageText = "Este recurso está disponível apenas para usuários Premium.",
   blockType = 'overlay'
 }) => {
-  const { userPlan } = useAuth();
+  const { userPlan, isAuthenticated } = useAuth();
   const isPremium = userPlan === 'premium';
   const navigate = useNavigate();
   
   const handleUpgradeClick = () => {
-    navigate('/planos');
+    // Redireciona para login primeiro se não estiver autenticado
+    if (!isAuthenticated) {
+      navigate('/auth', { state: { redirectTo: '/planos' } });
+    } else {
+      navigate('/planos');
+    }
   };
 
   if (isPremium) {

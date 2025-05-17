@@ -15,13 +15,17 @@ const PremiumChartModal: React.FC<PremiumChartModalProps> = ({ open, onOpenChang
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-card text-card-foreground">
+      <DialogContent 
+        className="sm:max-w-[425px] bg-card text-card-foreground" 
+        aria-labelledby="premium-modal-title"
+        aria-describedby="premium-modal-description"
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle id="premium-modal-title" className="flex items-center gap-2">
             <Lock className="h-5 w-5 text-satotrack-neon" />
             Recurso Premium
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="premium-modal-description">
             Este recurso está disponível apenas para usuários com plano Premium.
           </DialogDescription>
         </DialogHeader>
@@ -53,7 +57,10 @@ const PremiumChartModal: React.FC<PremiumChartModalProps> = ({ open, onOpenChang
             Cancelar
           </Button>
           <Button
-            onClick={() => navigate('/planos')}
+            onClick={() => {
+              onOpenChange(false);
+              navigate('/planos');
+            }}
             className="sm:w-auto w-full"
           >
             Conhecer Planos

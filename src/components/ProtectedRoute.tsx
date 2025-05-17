@@ -1,10 +1,10 @@
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useAuth } from '../contexts/auth';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -24,7 +24,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-bitcoin"></div>
+        <div className="space-y-4 w-4/5 max-w-md">
+          <Skeleton className="h-10 w-10 rounded-full mx-auto" />
+          <Skeleton className="h-4 w-3/4 mx-auto" />
+          <Skeleton className="h-20 w-full" />
+        </div>
       </div>
     );
   }
@@ -38,15 +42,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   return (
     <>
       {securityStatus !== 'secure' && (
-        <Alert variant={securityStatus === 'danger' ? 'destructive' : 'default'} className="mb-4 mx-4 mt-4">
+        <Alert 
+          variant={securityStatus === 'danger' ? 'destructive' : 'default'} 
+          className="mb-4 mx-4 mt-4 animate-fade-in"
+        >
           {securityStatus === 'danger' ? <ShieldAlert className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-          <AlertTitle>
+          <AlertTitle className="font-medium">
             {securityStatus === 'danger' ? 'Alerta de Segurança' : 'Atenção'}
           </AlertTitle>
           <AlertDescription>
             {securityStatus === 'danger' 
-              ? 'Detectamos atividade suspeita em sua conta. Considere alterar sua senha.' 
-              : 'Sua sessão está próxima de expirar por inatividade.'}
+              ? 'Detectamos atividade suspeita em sua conta. Considere alterar sua senha imediatamente.' 
+              : 'Sua sessão está próxima de expirar por inatividade. Por favor, continue navegando para manter sua sessão ativa.'}
           </AlertDescription>
         </Alert>
       )}

@@ -9,16 +9,16 @@ import { convertToAuthUser } from './userUtils';
 import { useAuthPlans } from './useAuthPlans';
 import { useAuthFunctions } from './useAuthFunctions';
 
-// Create the authentication context
+// Criar o contexto de autenticação
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider component for the authentication context
+// Componente Provider para o contexto de autenticação
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Use the session hook to manage authentication state
+  // Usar o hook de sessão para gerenciar o estado de autenticação
   const { session, user: supabaseUser, loading, setSession } = useAuthSession();
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  // Initialize login attempts monitoring
+  // Inicializar monitoramento de tentativas de login
   const { 
     loginAttempts, 
     checkFailedLoginAttempts, 
@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     securityStatus: loginSecurityStatus 
   } = useLoginAttempts();
 
-  // Activity monitoring for security
+  // Monitoramento de atividade para segurança
   const { 
     lastActivity, 
     updateLastActivity, 
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLastActivity
   } = useActivityMonitor(user, async () => await authFunctions.signOut());
 
-  // User plans and premium features
+  // Planos de usuário e recursos premium
   const {
     userPlan,
     apiToken,
@@ -44,28 +44,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchUserPlan,
     upgradeUserPlan,
     generateApiToken,
-    canAddMoreWallets
+    canAddMoreWallets,
+    isLoading: plansLoading
   } = useAuthPlans(user);
 
-  // Authentication functions
+  // Funções de autenticação
   const authFunctions = useAuthFunctions(
     updateLastActivity,
     saveLoginAttempt,
     checkFailedLoginAttempts
   );
 
-  // Update user state when supabaseUser changes
+  // Atualizar estado do usuário quando supabaseUser muda
   useEffect(() => {
     const authUser = convertToAuthUser(supabaseUser);
-    setUser(authUser);
     
-    // Fetch user plan if user exists
-    if (authUser?.id) {
-      fetchUserPlan(authUser.id);
+    if (authUser) {
+      // Adicionar informações de segurança ao usuário
+      const enhancedUser = {
+        ...authUser,
+        securityStatus: determineSecurityStatus()
+      };
+      
+      setUser(enhancedUser);
+      
+      // Buscar plano do usuário se o usuário existir
+      if (enhancedUser.id) {
+        fetchUserPlan(enhancedUser.id);
+      }
+    } else {
+      setUser(null);
     }
-  }, [supabaseUser]);
+  }, [supabaseUser, loginSecurityStatus, activitySecurityStatus]);
 
-  // Combine security statuses from different sources
+  // Combinar status de segurança de diferentes fontes
   const determineSecurityStatus = (): 'secure' | 'warning' | 'danger' => {
     if (loginSecurityStatus === 'danger' || activitySecurityStatus === 'danger') {
       return 'danger';
@@ -78,14 +90,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const securityStatus = determineSecurityStatus();
 
-  // Combine all context values
+  // Efeito para atualizar atividade periodicamente quando autenticado
+  useEffect(() => {
+    if (!user) return;
+    
+    const interval = setInterval(() => {
+      updateLastActivity();
+    }, 300000); // 5 minutos
+    
+    return () => clearInterval(interval);
+  }, [user, updateLastActivity]);
+
+  // Combinar todos os valores do contexto
   const contextValue: AuthContextType = {
     session,
     user,
     signIn: authFunctions.signIn,
     signUp: authFunctions.signUp,
     signOut: authFunctions.signOut,
-    loading: authFunctions.loading,
+    loading: loading || plansLoading,
     isAuthenticated: !!user,
     passwordStrength: checkPasswordStrength,
     lastActivity,
@@ -108,5 +131,5 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Export the context for use in other components
+// Exportar o contexto para uso em outros componentes
 export { AuthContext };

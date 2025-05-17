@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -11,12 +11,16 @@ import {
   BarChart3, 
   Settings, 
   Code, 
-  Bell 
+  Bell,
+  Star 
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const AppSidebar = () => {
   const { user, userPlan } = useAuth();
+  const isMobile = useIsMobile();
+  const isPremium = userPlan === 'premium';
   
   const navigationItems = [
     { 
@@ -32,12 +36,14 @@ const AppSidebar = () => {
     { 
       label: 'Adicionar Carteira', 
       icon: <PlusCircle className="h-5 w-5" />, 
-      href: '/nova-carteira' 
+      href: '/nova-carteira',
+      requiresAuth: true
     },
     { 
       label: 'Histórico', 
       icon: <History className="h-5 w-5" />, 
-      href: '/historico' 
+      href: '/historico',
+      requiresAuth: true 
     },
     { 
       label: 'Mercado', 
@@ -47,21 +53,24 @@ const AppSidebar = () => {
     { 
       label: 'Notificações', 
       icon: <Bell className="h-5 w-5" />, 
-      href: '/notificacoes' 
+      href: '/notificacoes',
+      requiresAuth: true 
     },
     { 
       label: 'Configurações', 
       icon: <Settings className="h-5 w-5" />, 
-      href: '/configuracoes' 
+      href: '/configuracoes',
+      requiresAuth: true 
     }
   ];
   
-  // Only show API link for premium users
-  if (userPlan === 'premium') {
+  // Mostrar link da API apenas para usuários premium
+  if (isPremium) {
     navigationItems.push({
       label: 'API',
       icon: <Code className="h-5 w-5" />,
-      href: '/api'
+      href: '/api',
+      requiresAuth: true
     });
   }
 
@@ -73,12 +82,13 @@ const AppSidebar = () => {
             src="/favicon.ico"
             alt="Logo"
             className="h-8 w-8 mr-2"
+            loading="eager"
           />
           <span className="text-xl font-bold text-white">SatoTrack</span>
         </NavLink>
       </div>
       
-      <nav className="flex-1 overflow-y-auto py-4 px-3">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin scrollbar-thumb-dashboard-medium">
         <ul className="space-y-1">
           {navigationItems.map((item) => (
             <li key={item.href}>
@@ -92,9 +102,11 @@ const AppSidebar = () => {
                       : "text-white/70 hover:text-white"
                   )
                 }
+                aria-label={item.label}
               >
                 {item.icon}
                 {item.label}
+                {item.label === 'API' && <Star className="h-3 w-3 ml-1 fill-bitcoin" />}
               </NavLink>
             </li>
           ))}
@@ -110,4 +122,4 @@ const AppSidebar = () => {
   );
 };
 
-export default AppSidebar;
+export default memo(AppSidebar);

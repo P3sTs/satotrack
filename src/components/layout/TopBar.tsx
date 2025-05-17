@@ -35,19 +35,21 @@ const TopBar = () => {
   };
   
   const handleScreenshot = () => {
-    // Screenshot functionality would go here
+    // Funcionalidade de screenshot iria aqui
+    window.dispatchEvent(new CustomEvent('app:screenshot'));
     console.log('Screenshot feature clicked');
   };
   
   const handleRefresh = () => {
-    // Refresh data functionality would go here
+    // Funcionalidade de atualização iria aqui
     console.log('Refresh data clicked');
     window.location.reload();
   };
   
   const handleTimeRangeChange = (range: string) => {
-    // Time range functionality would go here
+    // Funcionalidade de período iria aqui
     console.log('Selected time range:', range);
+    window.dispatchEvent(new CustomEvent('app:timerange-change', { detail: range }));
   };
   
   const handleLogout = async () => {
@@ -66,29 +68,29 @@ const TopBar = () => {
   
   return (
     <div className="border-b border-dashboard-medium/30 py-2 px-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hidden flex-wrap gap-2">
           <Button onClick={handleNewWallet} size="sm" variant="outline" className="flex items-center">
             <Plus className="h-4 w-4 mr-2" />
             Nova Carteira
           </Button>
           
-          <Button onClick={handleScreenshot} size="sm" variant="outline">
+          <Button onClick={handleScreenshot} size="sm" variant="outline" aria-label="Capturar tela">
             <ScreenShare className="h-4 w-4 mr-2" />
-            Screenshot
+            <span className="hidden sm:inline">Screenshot</span>
           </Button>
           
-          <Button onClick={handleRefresh} size="sm" variant="outline">
+          <Button onClick={handleRefresh} size="sm" variant="outline" aria-label="Atualizar dados">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
+            <span className="hidden sm:inline">Atualizar</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center">
-                <Clock className="h-4 w-4 mr-2" />
-                Período
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <Clock className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Período</span>
+                <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>

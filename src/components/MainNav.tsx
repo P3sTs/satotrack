@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const MainNav: React.FC = () => {
   const location = useLocation();
@@ -18,16 +19,18 @@ const MainNav: React.FC = () => {
   ];
   
   return (
-    <nav className="flex space-x-2 md:space-x-4">
+    <nav className="flex space-x-1 md:space-x-2 overflow-x-auto scrollbar-hidden">
       {navItems.map(({ path, label }) => (
         <Link
           key={path}
           to={path}
-          className={`px-2 py-1 text-sm font-medium rounded-md transition-colors
-            ${isActive(path)
+          className={cn(
+            "px-2 py-1 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+            isActive(path)
               ? 'text-satotrack-neon bg-dashboard-light'
               : 'text-muted-foreground hover:text-white hover:bg-dashboard-light/50'
-            }`}
+          )}
+          aria-current={isActive(path) ? 'page' : undefined}
         >
           {label}
         </Link>

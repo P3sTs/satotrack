@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Shield, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
 
 interface SecurityStatusProps {
   securityStatus: 'secure' | 'warning' | 'danger';
 }
 
-export const SecurityStatus: React.FC<SecurityStatusProps> = ({ securityStatus }) => {
+export const SecurityStatus: React.FC<SecurityStatusProps> = memo(({ securityStatus }) => {
   const SecurityIcon = () => {
     switch (securityStatus) {
       case 'secure':
@@ -21,7 +21,7 @@ export const SecurityStatus: React.FC<SecurityStatusProps> = ({ securityStatus }
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center" data-testid="security-status">
       <SecurityIcon />
       <span className="ml-1 text-xs md:text-sm">
         {securityStatus === 'secure' && 'Conexão segura'}
@@ -30,4 +30,6 @@ export const SecurityStatus: React.FC<SecurityStatusProps> = ({ securityStatus }
       </span>
     </div>
   );
-};
+});
+
+SecurityStatus.displayName = 'SecurityStatus';

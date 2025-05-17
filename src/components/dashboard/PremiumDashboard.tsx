@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import PremiumChartDisplay from '../charts/premium/PremiumChartDisplay';
 import PremiumFeatureGate from '../monetization/PremiumFeatureGate';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PremiumDashboard: React.FC = () => {
   const { userPlan } = useAuth();
@@ -26,7 +27,7 @@ const PremiumDashboard: React.FC = () => {
             </div>
             <p className="text-muted-foreground mb-4 max-w-xl">
               Você está usando a versão gratuita. Desbloqueie recursos avançados como comparações de carteiras, 
-              relatórios PDF, alertas em tempo real e acesso a todas as moedas com o SatoTrack Premium.
+              relatórios PDF, alertas em tempo real e acesso a todas as moedas.
             </p>
             <Button 
               onClick={() => navigate('/planos')}
@@ -39,7 +40,7 @@ const PremiumDashboard: React.FC = () => {
       )}
       
       <Tabs defaultValue="graphs" className="w-full">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 overflow-x-auto flex-nowrap">
           <TabsTrigger value="graphs">Gráficos Avançados</TabsTrigger>
           <TabsTrigger value="alerts">Alertas Personalizados</TabsTrigger>
           <TabsTrigger value="reports">Relatórios</TabsTrigger>
@@ -58,7 +59,19 @@ const PremiumDashboard: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <PremiumChartDisplay />
+                <React.Suspense fallback={
+                  <div className="space-y-4">
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-32 w-full" />
+                    <div className="grid grid-cols-3 gap-4">
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  </div>
+                }>
+                  <PremiumChartDisplay />
+                </React.Suspense>
               </CardContent>
             </Card>
           </PremiumFeatureGate>
@@ -98,6 +111,7 @@ const PremiumDashboard: React.FC = () => {
                           min={1}
                           max={20}
                           className="w-16 bg-dashboard-medium border-dashboard-medium rounded p-1 text-center"
+                          aria-label="Percentual de variação"
                         />
                         <span>% em 24h</span>
                       </div>
@@ -115,6 +129,7 @@ const PremiumDashboard: React.FC = () => {
                           step={0.001}
                           min={0.001}
                           className="w-24 bg-dashboard-medium border-dashboard-medium rounded p-1 text-center"
+                          aria-label="Valor mínimo para alerta"
                         />
                         <span>BTC</span>
                       </div>

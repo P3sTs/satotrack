@@ -31,23 +31,22 @@ export const formatCurrencyValue = (value: number): string => {
   }).format(value);
 };
 
-// Add the missing formatter functions
 export const formatBitcoinValue = (value: number): string => {
   if (value === 0) return '0 BTC';
   if (value < 0.00000001) return '< 0.00000001 BTC';
   
-  // For small amounts, show all required decimals
+  // Para valores pequenos, mostrar todos os decimais necessários
   if (value < 0.0001) {
-    return `${value.toFixed(8)} BTC`.replace(/\.?0+$/, '');
+    return `${value.toFixed(8)} BTC`.replace(/\.?0+$/, ' BTC');
   }
   
-  // For medium amounts, limit to 6 decimals
+  // Para valores médios, limitar a 6 decimais
   if (value < 0.1) {
-    return `${value.toFixed(6)} BTC`.replace(/\.?0+$/, '');
+    return `${value.toFixed(6)} BTC`.replace(/\.?0+$/, ' BTC');
   }
   
-  // For larger amounts, limit to 4 decimals
-  return `${value.toFixed(4)} BTC`.replace(/\.?0+$/, '');
+  // Para valores maiores, limitar a 4 decimais
+  return `${value.toFixed(4)} BTC`.replace(/\.?0+$/, ' BTC');
 };
 
 export const formatDateTime = (timestamp: number): string => {
