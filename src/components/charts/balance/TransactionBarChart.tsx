@@ -14,10 +14,11 @@ import {
 import { TransactionDataPoint } from '@/hooks/useBalanceChartData';
 import { formatXAxis, formatBitcoinValue } from '../utils/ChartFormatters';
 import TransactionTooltip from '../tooltips/TransactionTooltip';
+import { TimeRange } from '../selectors/TimeRangeSelector';
 
 interface TransactionBarChartProps {
   data: TransactionDataPoint[];
-  timeRange: '7D' | '30D' | '6M' | '1Y';
+  timeRange: TimeRange;
 }
 
 const TransactionBarChart: React.FC<TransactionBarChartProps> = ({ data, timeRange }) => {
@@ -45,11 +46,11 @@ const TransactionBarChart: React.FC<TransactionBarChartProps> = ({ data, timeRan
         <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" opacity={0.3} />
         <ReferenceLine y={0} stroke="#525252" />
         <Tooltip content={<TransactionTooltip />} />
-        <Bar dataKey="valor" animationDuration={1000} animationEasing="ease-out">
+        <Bar dataKey="amount" animationDuration={1000} animationEasing="ease-out">
           {data.map((entry, index) => (
             <Cell 
               key={`cell-${index}`} 
-              fill={entry.tipo === 'entrada' ? '#10B981' : '#EF4444'} 
+              fill={entry.type === 'received' ? '#10B981' : '#EF4444'} 
             />
           ))}
         </Bar>

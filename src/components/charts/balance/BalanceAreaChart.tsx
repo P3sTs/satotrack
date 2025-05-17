@@ -13,10 +13,11 @@ import { ChartContainer } from "@/components/ui/chart";
 import { BalanceDataPoint } from '@/hooks/useBalanceChartData';
 import { formatXAxis, formatBitcoinValue } from '../utils/ChartFormatters';
 import BalanceTooltip from '../tooltips/BalanceTooltip';
+import { TimeRange } from '../selectors/TimeRangeSelector';
 
 interface BalanceAreaChartProps {
   data: BalanceDataPoint[];
-  timeRange: '7D' | '30D' | '6M' | '1Y';
+  timeRange: TimeRange;
 }
 
 const BalanceAreaChart: React.FC<BalanceAreaChartProps> = ({ data, timeRange }) => {
