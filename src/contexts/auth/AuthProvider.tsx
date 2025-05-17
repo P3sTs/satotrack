@@ -101,13 +101,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => clearInterval(interval);
   }, [user, updateLastActivity]);
 
+  // Wrap functions to match the expected return types in AuthContextType
+  const signInWrapper = async (email: string, password: string): Promise<void> => {
+    await authFunctions.signIn(email, password);
+  };
+
+  const signUpWrapper = async (email: string, password: string, fullName: string): Promise<void> => {
+    await authFunctions.signUp(email, password, fullName);
+  };
+
+  const signOutWrapper = async (): Promise<void> => {
+    await authFunctions.signOut();
+  };
+
+  const upgradeUserPlanWrapper = async (): Promise<void> => {
+    await upgradeUserPlan();
+  };
+
   // Combinar todos os valores do contexto
   const contextValue: AuthContextType = {
     session,
     user,
-    signIn: authFunctions.signIn,
-    signUp: authFunctions.signUp,
-    signOut: authFunctions.signOut,
+    signIn: signInWrapper,
+    signUp: signUpWrapper,
+    signOut: signOutWrapper,
     loading: loading || plansLoading,
     isAuthenticated: !!user,
     passwordStrength: checkPasswordStrength,
@@ -116,7 +133,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     securityStatus,
     failedLoginAttempts: getFailedLoginAttempts(),
     resetFailedLoginAttempts,
-    upgradeUserPlan,
+    upgradeUserPlan: upgradeUserPlanWrapper,
     userPlan,
     canAddMoreWallets,
     generateApiToken,

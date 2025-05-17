@@ -6,6 +6,7 @@ export type PlanType = 'free' | 'premium';
 export interface AuthUser extends User {
   email: string;
   plan?: PlanType;
+  securityStatus?: 'secure' | 'warning' | 'danger';
 }
 
 export interface AuthContextType {

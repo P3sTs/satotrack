@@ -25,9 +25,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout
     );
   }
 
+  // Use the global securityStatus from context or fallback to 'secure'
+  const securityStatus = user.securityStatus || 'secure';
+
   return (
     <div className="flex items-center gap-3">
-      <SecurityStatus securityStatus={user.securityStatus || 'secure'} />
+      <SecurityStatus securityStatus={securityStatus} />
       <div className="flex items-center gap-2 border-l border-dashboard-medium/30 pl-3">
         <Avatar className="h-8 w-8">
           <AvatarFallback className="bg-satotrack-neon/20 text-satotrack-neon">

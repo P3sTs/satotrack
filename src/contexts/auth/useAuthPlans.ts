@@ -62,7 +62,6 @@ export const useAuthPlans = (user: AuthUser | null) => {
         variant: "default"
       });
 
-      return true;
     } catch (error) {
       console.error('Erro ao atualizar plano do usuário:', error);
       
@@ -79,8 +78,6 @@ export const useAuthPlans = (user: AuthUser | null) => {
         description: errorMessage,
         variant: "destructive"
       });
-      
-      return false;
     } finally {
       setIsLoading(false);
     }

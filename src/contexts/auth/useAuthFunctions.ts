@@ -126,8 +126,6 @@ export const useAuthFunctions = (
         description: "Verifique seu email para ativar sua conta.",
       });
       
-      return true;
-      
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao registrar:", authError);
