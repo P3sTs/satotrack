@@ -11,6 +11,7 @@ interface PasswordInputProps {
   error?: boolean;
   autoComplete?: string;
   className?: string;
+  disabled?: boolean; // Added disabled prop
 }
 
 export const PasswordInput = ({ 
@@ -20,7 +21,8 @@ export const PasswordInput = ({
   placeholder, 
   error, 
   autoComplete,
-  className 
+  className,
+  disabled 
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,12 +37,14 @@ export const PasswordInput = ({
         aria-invalid={error ? 'true' : 'false'}
         autoComplete={autoComplete}
         placeholder={placeholder}
+        disabled={disabled}
       />
       <button
         type="button"
         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
         onClick={() => setShowPassword(!showPassword)}
         aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+        disabled={disabled}
       >
         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>
