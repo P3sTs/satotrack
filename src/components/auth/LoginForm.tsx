@@ -59,9 +59,7 @@ export const LoginForm = () => {
       });
       
       // Forçar navegação para o dashboard após o login bem-sucedido
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
+      navigate('/dashboard', { replace: true });
       
     } catch (err) {
       console.error("Erro de login:", err);

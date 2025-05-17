@@ -20,27 +20,30 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import Index from './pages/Index';
+import AppLayout from './components/layout/AppLayout';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/carteiras" element={<ProtectedRoute><WalletsManager /></ProtectedRoute>} />
-      <Route path="/carteiras/:id" element={<ProtectedRoute><CarteiraDetalhes /></ProtectedRoute>} />
-      <Route path="/nova-carteira" element={<ProtectedRoute><NovaCarteira /></ProtectedRoute>} />
-      <Route path="/mercado" element={<Mercado />} />
-      <Route path="/crypto" element={<Crypto />} />
-      <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
-      <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
-      <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
-      <Route path="/planos" element={<PlanosPage />} />
-      <Route path="/privacidade" element={<Privacidade />} />
-      <Route path="/sobre" element={<Sobre />} />
-      <Route path="/api" element={<ApiDocs />} />
-      <Route path="*" element={<NotFound />} />
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/carteiras" element={<ProtectedRoute><WalletsManager /></ProtectedRoute>} />
+        <Route path="/carteiras/:id" element={<ProtectedRoute><CarteiraDetalhes /></ProtectedRoute>} />
+        <Route path="/nova-carteira" element={<ProtectedRoute><NovaCarteira /></ProtectedRoute>} />
+        <Route path="/mercado" element={<Mercado />} />
+        <Route path="/crypto" element={<Crypto />} />
+        <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
+        <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+        <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+        <Route path="/planos" element={<PlanosPage />} />
+        <Route path="/privacidade" element={<Privacidade />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/api" element={<ApiDocs />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
     </Routes>
   );
 }

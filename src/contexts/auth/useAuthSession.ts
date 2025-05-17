@@ -26,37 +26,42 @@ export const useAuthSession = () => {
   // Fix: Check initial session only once on component mount
   const checkInitialSession = useCallback(async () => {
     try {
+      // Get the current session
       const { data: { session: initialSession } } = await supabase.auth.getSession();
       
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
-      setLoading(false);
       
-      // Important: Only redirect on initial page load in specific conditions
+      console.log("Initial session check:", !!initialSession, "Path:", location.pathname);
+      
+      // Only redirect on specific conditions
       if (initialSession && location.pathname === '/auth') {
         navigate('/dashboard', { replace: true });
       } else if (!initialSession && 
-                location.pathname !== '/' && 
-                location.pathname !== '/home' && 
-                location.pathname !== '/auth' && 
-                location.pathname !== '/sobre' && 
-                location.pathname !== '/privacidade' &&
-                location.pathname !== '/planos' &&
-                location.pathname !== '/mercado' &&
-                location.pathname !== '/crypto') {
+                 !isPublicRoute(location.pathname)) {
         // Save the current location to redirect back after authentication
         navigate('/auth', { 
           replace: true,
           state: { from: location }
         });
       }
+      
+      setLoading(false);
     } catch (error) {
       console.error("Erro ao verificar sessão:", error);
       setLoading(false);
     }
   }, [navigate, location]);
 
+  // Helper function to check if a route is public
+  const isPublicRoute = (path: string): boolean => {
+    const publicRoutes = ['/', '/home', '/auth', '/sobre', '/privacidade', '/planos', '/mercado', '/crypto'];
+    return publicRoutes.some(route => path === route);
+  };
+
   useEffect(() => {
+    console.log("Setting up auth listener");
+    
     // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.log("Auth state changed:", event, !!currentSession);

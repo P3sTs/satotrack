@@ -1,53 +1,61 @@
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface PasswordInputProps {
-  id: string;
+export interface PasswordInputProps {
+  id?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
   error?: boolean;
   autoComplete?: string;
-  className?: string;
   disabled?: boolean; // Added disabled prop
 }
 
-export const PasswordInput = ({ 
-  id, 
-  value, 
-  onChange, 
-  placeholder, 
-  error, 
-  autoComplete,
-  className,
-  disabled 
-}: PasswordInputProps) => {
+export const PasswordInput: React.FC<PasswordInputProps> = ({
+  id = 'password',
+  value,
+  onChange,
+  error = false,
+  autoComplete = 'current-password',
+  disabled = false // Default to false
+}) => {
   const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
+  };
 
   return (
     <div className="relative">
-      <Input 
-        id={id} 
-        type={showPassword ? "text" : "password"}
+      <Input
+        type={showPassword ? 'text' : 'password'}
+        id={id}
         value={value}
         onChange={onChange}
-        className={`pr-10 border-input focus-visible:ring-bitcoin ${className}`}
-        aria-invalid={error ? 'true' : 'false'}
+        className={`pr-10 ${error ? 'border-red-500 focus:ring-red-500' : 'border-input focus-visible:ring-bitcoin'}`}
         autoComplete={autoComplete}
-        placeholder={placeholder}
         disabled={disabled}
       />
-      <button
+      <Button
         type="button"
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-        onClick={() => setShowPassword(!showPassword)}
-        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+        variant="ghost"
+        size="icon"
+        className="absolute right-0 top-0 h-full px-3 py-2"
+        onClick={togglePasswordVisibility}
+        tabIndex={-1}
         disabled={disabled}
       >
-        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </button>
+        {showPassword ? (
+          <EyeOff className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className="sr-only">
+          {showPassword ? 'Esconder senha' : 'Mostrar senha'}
+        </span>
+      </Button>
     </div>
   );
 };

@@ -25,7 +25,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Show loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-[50vh]">
         <div className="space-y-4 w-4/5 max-w-md">
           <Skeleton className="h-10 w-10 rounded-full mx-auto" />
           <Skeleton className="h-4 w-3/4 mx-auto" />
@@ -49,7 +49,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       {securityStatus !== 'secure' && (
         <Alert 
           variant={securityStatus === 'danger' ? 'destructive' : 'default'} 
-          className="mb-4 mx-4 mt-4 animate-fade-in"
+          className="mb-4 mx-4 animate-fade-in"
         >
           {securityStatus === 'danger' ? <ShieldAlert className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           <AlertTitle className="font-medium">
