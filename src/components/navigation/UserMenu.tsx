@@ -26,7 +26,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout
   }
 
   // Use the global securityStatus from context or fallback to 'secure'
-  const securityStatus = user.securityStatus || 'secure';
+  // Fix: Safely access securityStatus with optional chaining and default value
+  const securityStatus = user?.securityStatus || 'secure';
 
   return (
     <div className="flex items-center gap-3">
