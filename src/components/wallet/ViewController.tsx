@@ -6,7 +6,7 @@ import { TransacaoBTC } from '@/types/types';
 import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Importação lazy para componentes de visualização
+// Lazy loading for view components
 const ChartView = lazy(() => import('./views/ChartView'));
 const ListView = lazy(() => import('./views/ListView'));
 const CardView = lazy(() => import('./views/CardView'));

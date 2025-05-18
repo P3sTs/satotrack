@@ -90,7 +90,7 @@ const ViewModeSelectorMobile = memo(() => {
     { mode: 'compact' as ViewMode, label: 'Compacto', icon: Smartphone },
   ];
 
-  // Encontrar o modo ativo atual
+  // Find current active mode
   const activeMode = viewModes.find(item => item.mode === viewMode) || viewModes[0];
 
   return (

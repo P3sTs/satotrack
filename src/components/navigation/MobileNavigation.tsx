@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Wallet, BarChart3, Bell, Settings, User } from 'lucide-react';
+import { Menu, X, Home, Wallet, BarChart3, Bell, Settings, User, Shield, Info, Star } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -66,6 +66,13 @@ const MobileNavigation: React.FC = () => {
       requiresAuth: true
     },
     {
+      label: 'Nova Carteira',
+      icon: <Wallet className="h-5 w-5" />,
+      href: '/nova-carteira',
+      requiresAuth: true,
+      isSubmenu: true
+    },
+    {
       label: 'Mercado',
       icon: <BarChart3 className="h-5 w-5" />,
       href: '/mercado',
@@ -82,6 +89,18 @@ const MobileNavigation: React.FC = () => {
       icon: <Settings className="h-5 w-5" />,
       href: '/configuracoes',
       requiresAuth: true
+    },
+    {
+      label: 'Sobre',
+      icon: <Info className="h-5 w-5" />,
+      href: '/sobre',
+      requiresAuth: false
+    },
+    {
+      label: 'Privacidade',
+      icon: <Shield className="h-5 w-5" />,
+      href: '/privacidade',
+      requiresAuth: false
     }
   ];
 
@@ -93,6 +112,24 @@ const MobileNavigation: React.FC = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
     setIsOpen(false);
+  };
+  
+  const handlePremiumClick = () => {
+    if (isPremium) {
+      handleNavigation('/premium-dashboard');
+      toast({
+        title: "Painel Premium",
+        description: "Bem-vindo ao seu painel exclusivo premium!",
+        variant: "default"
+      });
+    } else {
+      handleNavigation('/planos');
+      toast({
+        title: "Upgrade disponível",
+        description: "Conheça os benefícios do plano Premium!",
+        variant: "default"
+      });
+    }
   };
 
   return (
@@ -114,7 +151,7 @@ const MobileNavigation: React.FC = () => {
               <span className="sr-only">Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[80%] max-w-xs border-dashboard-medium bg-dashboard-dark p-0">
+          <SheetContent side="right" className="w-[85%] max-w-xs border-dashboard-medium bg-dashboard-dark p-0">
             <div className="flex flex-col h-full">
               {/* Close button and user info */}
               <div className="flex justify-between items-center p-4 border-b border-dashboard-medium/30">
@@ -158,6 +195,7 @@ const MobileNavigation: React.FC = () => {
                       onClick={() => handleNavigation(item.href)}
                       className={cn(
                         "flex items-center w-full px-3 py-2 rounded-md text-sm",
+                        item.isSubmenu ? "pl-6" : "",
                         isActive(item.href)
                           ? "bg-dashboard-medium/30 text-satotrack-neon"
                           : "text-white hover:bg-dashboard-medium/20"
@@ -167,6 +205,20 @@ const MobileNavigation: React.FC = () => {
                       {item.label}
                     </button>
                   ))}
+                  
+                  {/* Premium Button */}
+                  <button
+                    onClick={handlePremiumClick}
+                    className={cn(
+                      "flex items-center w-full px-3 py-2 mt-2 rounded-md text-sm",
+                      isPremium 
+                        ? "bg-bitcoin/20 text-bitcoin" 
+                        : "border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10"
+                    )}
+                  >
+                    <Star className={`h-5 w-5 mr-3 ${isPremium ? 'fill-bitcoin' : ''}`} />
+                    {isPremium ? 'Painel Premium' : 'Quero ser Premium'}
+                  </button>
                 </nav>
               </div>
               

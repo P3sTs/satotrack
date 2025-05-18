@@ -2,7 +2,6 @@
 import React, { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import TopBar from './TopBar';
-import NavBar from '../NavBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Footer from '../Footer';
 import { useAuth } from '@/contexts/auth';
@@ -34,7 +33,7 @@ const AppLayout = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex flex-col min-h-screen w-full">
-        {/* Only show mobile navigation bar on mobile */}
+        {/* Show mobile navigation bar on mobile */}
         {isMobile && <MobileNavigation />}
         
         <div className="flex flex-1 relative w-full">
@@ -52,7 +51,7 @@ const AppLayout = () => {
               </div>
             )}
             
-            <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-4">
+            <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
               <Suspense fallback={<LoadingFallback />}>
                 <Outlet />
               </Suspense>
