@@ -3,19 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Menu, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import MainNav from './MainNav';
-import MobileMenuContainer from './navigation/MobileMenuContainer';
 import UserMenu from './navigation/UserMenu';
 import { PlanBadge } from './monetization/PlanDisplay';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const NavBar: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, userPlan, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isPremium = userPlan === 'premium';
+  const isMobile = useIsMobile();
   
   // Debug log to track authentication status
   useEffect(() => {
@@ -26,7 +26,6 @@ const NavBar: React.FC = () => {
     try {
       signOut();
       navigate('/');
-      setIsMobileMenuOpen(false);
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso",
@@ -47,23 +46,6 @@ const NavBar: React.FC = () => {
     return user.email.substring(0, 1).toUpperCase();
   };
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-  
-  // Handle navigation in mobile menu
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setIsMobileMenuOpen(false);
-  };
-
-  // Mobile menu trigger button
-  const mobileMenuTrigger = (
-    <Button variant="ghost" size="icon" className="md:hidden">
-      <Menu className="h-5 w-5" />
-    </Button>
-  );
-
   // Handle premium button click
   const handlePremiumClick = () => {
     if (isPremium) {
@@ -82,6 +64,11 @@ const NavBar: React.FC = () => {
       });
     }
   };
+
+  // Don't render on mobile as we have MobileNavigation
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <header className="bg-dashboard-dark text-white sticky top-0 z-50 border-b border-dashboard-medium/30">
@@ -123,26 +110,6 @@ const NavBar: React.FC = () => {
               navigate={navigate} 
             />
           </div>
-          
-          {/* Mobile menu */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          <MobileMenuContainer
-            isMobileMenuOpen={isMobileMenuOpen}
-            setIsMobileMenuOpen={setIsMobileMenuOpen}
-            user={user}
-            isActive={isActive}
-            handleNavigation={handleNavigation}
-            handleLogout={handleLogout}
-            getUserInitials={getUserInitials}
-            trigger={mobileMenuTrigger}
-            isPremium={isPremium}
-            onPremiumClick={handlePremiumClick}
-          />
         </div>
       </div>
     </header>

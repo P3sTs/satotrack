@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -34,6 +33,7 @@ import { PlanBadge } from '../monetization/PlanDisplay';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { SecurityStatus } from '../auth/SecurityStatus';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Define the interface for navigation items to include the optional isPremium property
 interface NavigationItem {
@@ -49,6 +49,7 @@ const NewAppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isPremium = userPlan === 'premium';
+  const isMobile = useIsMobile();
 
   // Debug to track auth status
   React.useEffect(() => {
@@ -164,6 +165,11 @@ const NewAppSidebar = () => {
   };
 
   const navigationItems = getNavigationItems();
+
+  // Don't render on mobile
+  if (isMobile) {
+    return null;
+  }
 
   // Sidebar header with logo
   const renderSidebarHeader = () => (

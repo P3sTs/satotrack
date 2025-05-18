@@ -10,6 +10,7 @@ import { Advertisement } from '../monetization/Advertisement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarProvider, SidebarRail, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import NewAppSidebar from './NewAppSidebar';
+import MobileNavigation from '../navigation/MobileNavigation';
 
 const LoadingFallback = () => (
   <div className="p-4">
@@ -31,14 +32,17 @@ const AppLayout = () => {
   const showAds = userPlan === 'free';
   
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex flex-col min-h-screen w-full">
-        {isMobile && <NavBar />}
+        {/* Only show mobile navigation bar on mobile */}
+        {isMobile && <MobileNavigation />}
         
         <div className="flex flex-1 relative w-full">
-          {/* Always show sidebar */}
-          <NewAppSidebar />
-          <SidebarRail />
+          {/* Desktop sidebar, hidden on mobile */}
+          <div className={isMobile ? "hidden" : "block"}>
+            <NewAppSidebar />
+          </div>
+          <SidebarRail className={isMobile ? "hidden" : "block"} />
           
           <SidebarInset className="bg-dashboard-dark text-white">
             {!isMobile && (
