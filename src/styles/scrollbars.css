@@ -1,0 +1,26 @@
+
+/* Customizing scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dashboard-medium;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-satotrack-neon/30;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-satotrack-neon/50;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--secondary));
+}

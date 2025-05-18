@@ -1,0 +1,59 @@
+
+@layer utilities {
+  .page-transition {
+    @apply animate-fade-in;
+  }
+  
+  .view-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .view-enter {
+    @apply opacity-0 transform scale-95;
+  }
+  
+  .view-enter-active {
+    @apply opacity-100 transform scale-100;
+  }
+  
+  .view-exit {
+    @apply opacity-100 transform scale-100;
+  }
+  
+  .view-exit-active {
+    @apply opacity-0 transform scale-95;
+  }
+
+  /* Mobile specific classes */
+  .mobile-card {
+    @apply p-2 sm:p-4 text-sm sm:text-base;
+  }
+  
+  .mobile-card-title {
+    @apply text-base sm:text-lg font-medium;
+  }
+  
+  .mobile-text {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .mobile-container {
+    @apply px-2 py-2 sm:px-4 sm:py-4;
+  }
+  
+  /* Responsive grid utilities */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4;
+  }
+}
+
+/* Mobile-specific media queries */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hide-on-mobile {
+    display: none;
+  }
+}
