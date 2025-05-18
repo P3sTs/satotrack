@@ -35,6 +35,15 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { SecurityStatus } from '../auth/SecurityStatus';
 
+// Define the interface for navigation items to include the optional isPremium property
+interface NavigationItem {
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  requiresAuth: boolean;
+  isPremium?: boolean;
+}
+
 const NewAppSidebar = () => {
   const { user, signOut, userPlan, isAuthenticated } = useAuth();
   const location = useLocation();
@@ -71,8 +80,8 @@ const NewAppSidebar = () => {
   };
 
   // Determine menu items based on auth state
-  const getNavigationItems = () => {
-    const baseItems = [
+  const getNavigationItems = (): NavigationItem[] => {
+    const baseItems: NavigationItem[] = [
       { 
         label: 'Dashboard', 
         icon: <Home className="h-5 w-5" />, 
@@ -87,7 +96,7 @@ const NewAppSidebar = () => {
       }
     ];
     
-    const authRequiredItems = [
+    const authRequiredItems: NavigationItem[] = [
       { 
         label: 'Adicionar Carteira', 
         icon: <PlusCircle className="h-5 w-5" />, 
@@ -114,7 +123,7 @@ const NewAppSidebar = () => {
       }
     ];
     
-    const publicItems = [
+    const publicItems: NavigationItem[] = [
       { 
         label: 'Início', 
         icon: <Home className="h-5 w-5" />, 
@@ -136,7 +145,7 @@ const NewAppSidebar = () => {
     ];
     
     // Show premium API feature if user has premium plan
-    const premiumItems = isPremium ? [
+    const premiumItems: NavigationItem[] = isPremium ? [
       {
         label: 'API',
         icon: <Code className="h-5 w-5" />,
