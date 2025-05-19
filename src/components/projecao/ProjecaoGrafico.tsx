@@ -64,17 +64,31 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
        projectionData[0].projecao) * 100
     : 0;
   
-  const config = {
-    positive: {
-      color: "hsl(143, 85%, 42%)",
-      theme: { dark: "hsl(143, 80%, 44%)", light: "hsl(143, 70%, 50%)" },
-      label: "Projeção"
-    },
-    negative: {
-      color: "hsl(3, 100%, 59%)",
-      theme: { dark: "hsl(3, 90%, 60%)", light: "hsl(3, 85%, 64%)" },
-      label: "Projeção"
-    },
+  // Fix the ChartConfig structure to match the expected format
+  const chartConfig = isProfit ? {
+    primaryKey: 'projecao',
+    series: {
+      projecao: {
+        label: "Projeção",
+        color: "hsl(143, 85%, 42%)",
+        theme: { 
+          dark: "hsl(143, 80%, 44%)", 
+          light: "hsl(143, 70%, 50%)" 
+        }
+      }
+    }
+  } : {
+    primaryKey: 'projecao',
+    series: {
+      projecao: {
+        label: "Projeção",
+        color: "hsl(3, 100%, 59%)",
+        theme: { 
+          dark: "hsl(3, 90%, 60%)", 
+          light: "hsl(3, 85%, 64%)" 
+        }
+      }
+    }
   };
   
   return (
@@ -140,7 +154,7 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
       <CardContent className="p-0">
         <div className="h-[300px] w-full pt-4 px-4">
           <ChartContainer 
-            config={isProfit ? { positive: config.positive } : { negative: config.negative }}
+            config={chartConfig}
             className="h-full w-full"
           >
             <ResponsiveContainer width="100%" height="100%">
@@ -172,7 +186,7 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
                 <Area 
                   type="monotone" 
                   dataKey="projecao" 
-                  stroke={isProfit ? config.positive.color : config.negative.color}
+                  stroke={isProfit ? "hsl(143, 85%, 42%)" : "hsl(3, 100%, 59%)"}
                   fillOpacity={1}
                   fill={isProfit ? "url(#colorProfit)" : "url(#colorLoss)"}
                   activeDot={{ r: 6 }}

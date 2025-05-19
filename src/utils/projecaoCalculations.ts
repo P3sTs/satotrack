@@ -125,11 +125,11 @@ export const calcularAlertas = (carteira: CarteiraBTC, bitcoinData: BitcoinPrice
   }
   
   // Alert 4: Opportunity for accumulating if price drops
-  if (bitcoinData.price_change_percentage_7d < -5) {
+  if (bitcoinData.price_change_percentage_24h < -5) {
     alertas.push({
       tipo: 'oportunidade',
       mensagem: 'Queda recente de preço pode ser uma oportunidade de acumulação conforme padrões históricos',
-      porcentagem: Math.abs(bitcoinData.price_change_percentage_7d).toFixed(1),
+      porcentagem: Math.abs(bitcoinData.price_change_percentage_24h).toFixed(1),
       periodo: 7
     });
   }

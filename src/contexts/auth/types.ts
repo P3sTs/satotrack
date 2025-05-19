@@ -3,6 +3,13 @@ import { Session, User } from '@supabase/supabase-js';
 
 export type PlanType = 'free' | 'premium';
 
+export interface SecuritySettings {
+  twoFactorEnabled?: boolean;
+  lastPasswordChange?: Date;
+  securityQuestionEnabled?: boolean;
+  loginNotificationsEnabled?: boolean;
+}
+
 export interface AuthUser extends User {
   email: string;
   plan?: PlanType;
@@ -23,6 +30,13 @@ export interface AuthContextType {
   securityStatus: 'secure' | 'warning' | 'danger';
   failedLoginAttempts: number;
   resetFailedLoginAttempts: () => void;
+  forgotPassword?: (email: string) => Promise<void>;
+  resetPassword?: (password: string) => Promise<void>;
+  updateUserProfile?: (profileData: Partial<AuthUser>) => Promise<void>;
+  updateSecuritySettings?: (settings: Partial<SecuritySettings>) => Promise<void>;
+  securitySettings?: SecuritySettings;
+  isLockedOut?: boolean;
+  lockoutEnd?: Date | null;
   upgradeUserPlan?: () => Promise<void>;
   userPlan: PlanType;
   canAddMoreWallets: (currentWallets: number) => boolean;

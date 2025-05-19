@@ -1,7 +1,7 @@
 
 import { LoginAttempt } from './types';
 import { useLoginStorage } from './login/useLoginStorage';
-import { useLoginSecurity, LOGIN_COOLDOWN_PERIOD } from './login/useLoginSecurity';
+import { useLoginSecurity } from './login/useLoginSecurity';
 
 export const useLoginAttempts = () => {
   const { loginAttempts, saveLoginAttempts, resetLoginAttempts } = useLoginStorage();
@@ -14,17 +14,17 @@ export const useLoginAttempts = () => {
     saveLoginAttempts(newAttempts);
   };
 
-  // Correctly reference resetLoginAttempts from useLoginStorage
+  // Reset failed login attempts
   const resetFailedLoginAttempts = () => {
     resetLoginAttempts();
   };
 
   return {
     loginAttempts,
+    securityStatus,
     checkFailedLoginAttempts,
     getFailedLoginAttempts,
     resetFailedLoginAttempts,
-    saveLoginAttempt,
-    securityStatus
+    saveLoginAttempt
   };
 };
