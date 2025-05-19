@@ -7,7 +7,7 @@ import { useInactivityTimer } from './activity/useInactivityTimer';
 
 export const useActivityMonitor = (
   user: User | null = null, 
-  signOut: () => Promise<void> = async () => {}
+  signOut: (() => Promise<void>) = async () => {}
 ) => {
   const [lastActivity, setLastActivity] = useState<number | null>(null);
   const { saveToLocalStorage, loadFromLocalStorage } = useLocalStorage();

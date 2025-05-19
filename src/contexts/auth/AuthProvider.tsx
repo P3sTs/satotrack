@@ -1,5 +1,5 @@
 
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { useAuthSession } from './useAuthSession';
 import { useAuthFunctions } from './useAuthFunctions';
@@ -16,6 +16,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Get session and user state from useAuthSession hook
   const { session, user, loading, setSession, setUser } = useAuthSession();
   
+  // Additional auth-related state/functions
+  const isAuthenticated = !!session && !!user;
+  
+  // Create a signOut stub function that will be replaced by the actual function from useAuthFunctions
+  const [signOutFn, setSignOutFn] = useState<() => Promise<void>>(async () => {});
+  
   // Get login security functionality
   const {
     loginAttempts,
@@ -26,10 +32,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     saveLoginAttempt
   } = useLoginAttempts();
   
-  // Get activity monitoring functionality - Fix: Pass required parameters
-  const { lastActivity, updateLastActivity } = useActivityMonitor(user, signOut);
+  // Get activity monitoring functionality with the signOut stub
+  const { lastActivity, updateLastActivity } = useActivityMonitor(user, signOutFn);
   
-  // Get Auth-related functionality - Fix: Pass the required parameters
+  // Get Auth-related functionality
   const {
     signIn,
     signUp,
@@ -40,12 +46,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkFailedLoginAttempts
   );
   
-  // Additional auth-related state/functions
-  const isAuthenticated = !!session && !!user;
+  // Update the signOut function once it's available
+  useEffect(() => {
+    setSignOutFn(() => signOut);
+  }, [signOut]);
   
   const failedLoginAttempts = getFailedLoginAttempts();
   
-  // Get plan-related functionality - Fix: Pass the correct user parameter
+  // Get plan-related functionality
   const {
     userPlan,
     apiToken,
@@ -60,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (isAuthenticated) {
       updateLastActivity();
     }
-  }, [isAuthenticated, updateLastActivity]);
+  }, [isAuthenticated, location.pathname, updateLastActivity]);
 
   // Provide context value
   const contextValue: AuthContextType = {
