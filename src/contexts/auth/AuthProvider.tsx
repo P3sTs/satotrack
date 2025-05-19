@@ -16,16 +16,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Get session and user state from useAuthSession hook
   const { session, user, loading, setSession, setUser } = useAuthSession();
   
-  // Get Auth-related functionality
-  const {
-    signIn,
-    signUp,
-    signOut,
-  } = useAuthFunctions({ session, user, setSession, setUser });
-  
-  // Additional auth-related state/functions
-  const isAuthenticated = !!session && !!user;
-  
   // Get login security functionality
   const {
     loginAttempts,
@@ -36,10 +26,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     saveLoginAttempt
   } = useLoginAttempts();
   
-  const failedLoginAttempts = getFailedLoginAttempts();
-  
   // Get activity monitoring functionality - Fix: Pass required parameters
   const { lastActivity, updateLastActivity } = useActivityMonitor(user, signOut);
+  
+  // Get Auth-related functionality - Fix: Pass the required parameters
+  const {
+    signIn,
+    signUp,
+    signOut,
+  } = useAuthFunctions(
+    updateLastActivity, 
+    saveLoginAttempt,
+    checkFailedLoginAttempts
+  );
+  
+  // Additional auth-related state/functions
+  const isAuthenticated = !!session && !!user;
+  
+  const failedLoginAttempts = getFailedLoginAttempts();
   
   // Get plan-related functionality - Fix: Pass the correct user parameter
   const {
