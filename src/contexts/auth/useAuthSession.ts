@@ -11,76 +11,76 @@ export const useAuthSession = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fix: Separate the redirection logic to avoid loops
+  // Função para gerenciar redirecionamentos após eventos de autenticação
   const handleAuthRedirect = useCallback((event: string, currentSession: Session | null) => {
+    console.log("Auth event handler:", event, !!currentSession);
+    
     if (event === 'SIGNED_IN' && currentSession) {
-      // Redirect to dashboard on sign in, unless there's a specific redirect path
+      // Redirecionar para dashboard quando logado
       const redirectTo = location.state?.from?.pathname || '/dashboard';
       navigate(redirectTo, { replace: true });
     } else if (event === 'SIGNED_OUT') {
-      // On sign out, redirect to auth page
+      // Redirecionar para página de autenticação quando deslogado
       navigate('/auth', { replace: true });
     }
   }, [navigate, location.state]);
 
-  // Fix: Check initial session only once on component mount
-  const checkInitialSession = useCallback(async () => {
-    try {
-      // Get the current session
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      
-      console.log("Initial session check:", !!initialSession, "Path:", location.pathname);
-      
-      // Only redirect on specific conditions
-      if (initialSession && location.pathname === '/auth') {
-        navigate('/dashboard', { replace: true });
-      } else if (!initialSession && 
-                 !isPublicRoute(location.pathname)) {
-        // Save the current location to redirect back after authentication
-        navigate('/auth', { 
-          replace: true,
-          state: { from: location }
-        });
-      }
-      
-      setLoading(false);
-    } catch (error) {
-      console.error("Erro ao verificar sessão:", error);
-      setLoading(false);
-    }
-  }, [navigate, location]);
-
-  // Helper function to check if a route is public
+  // Verificar se rota atual é pública (não requer autenticação)
   const isPublicRoute = (path: string): boolean => {
     const publicRoutes = ['/', '/home', '/auth', '/sobre', '/privacidade', '/planos', '/mercado', '/crypto'];
     return publicRoutes.some(route => path === route);
   };
 
+  // Verificar a sessão inicial ao montar o componente
   useEffect(() => {
-    console.log("Setting up auth listener");
+    console.log("Verificando sessão inicial no useAuthSession...");
     
-    // Set up auth listener
+    // Primeiro, configurar o listener de eventos de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.log("Auth state changed:", event, !!currentSession);
+      
+      // Atualizar o estado local com a sessão e usuário
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
-      // Only redirect on specific auth events
+      // Tratar eventos específicos de autenticação
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         handleAuthRedirect(event, currentSession);
       }
     });
 
-    // Check initial session
-    checkInitialSession();
+    // Depois, verificar se há uma sessão ativa
+    const checkSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        console.log("Sessão inicial:", !!initialSession);
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        // Redirecionamentos baseados na sessão inicial
+        if (initialSession && location.pathname === '/auth') {
+          navigate('/dashboard', { replace: true });
+        } else if (!initialSession && !isPublicRoute(location.pathname)) {
+          navigate('/auth', { 
+            replace: true,
+            state: { from: location }
+          });
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+        setLoading(false);
+      }
+    };
+
+    checkSession();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [checkInitialSession, handleAuthRedirect]);
+  }, [handleAuthRedirect, navigate, location]);
 
   return { session, user, loading, setSession, setUser };
 };

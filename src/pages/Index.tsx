@@ -8,17 +8,25 @@ const Index = () => {
   const { user, loading, updateLastActivity } = useAuth();
   const navigate = useNavigate();
 
+  // Efeito para redirecionamento com base no estado de autenticação
   useEffect(() => {
+    console.log("Index - Auth state:", !!user, "Loading:", loading);
+    
     if (!loading) {
       if (!user) {
+        // Se não estiver autenticado, redirecionar para home
+        console.log("Redirecionando para /home (não autenticado)");
         navigate('/home', { replace: true });
       } else {
+        // Se estiver autenticado, registrar atividade e ir para dashboard
+        console.log("Redirecionando para /dashboard (autenticado)");
         updateLastActivity();
         navigate('/dashboard', { replace: true });
       }
     }
   }, [user, loading, navigate, updateLastActivity]);
 
+  // Tela de carregamento durante a verificação de autenticação
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-dashboard-dark">
