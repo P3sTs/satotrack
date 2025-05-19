@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -6,10 +7,14 @@ export interface BitcoinPriceData {
   price_usd: number;
   price_brl: number;
   price_change_percentage_24h: number;
-  price_change_percentage_7d: number; // Add this property
+  price_change_percentage_7d: number;
   volume_24h: number;
   market_cap: number;
   updated_at: string;
+  
+  // Add missing properties referenced in components
+  last_updated: string;
+  market_trend?: 'bullish' | 'bearish' | 'neutral';
 }
 
 // Custom hook to fetch Bitcoin price
@@ -34,6 +39,14 @@ export const useBitcoinPrice = () => {
           volume_24h: response.data.market_data.total_volume.usd,
           market_cap: response.data.market_data.market_cap.usd,
           updated_at: response.data.market_data.last_updated,
+          last_updated: response.data.market_data.last_updated,
+          
+          // Determine market trend based on 24h price change
+          market_trend: response.data.market_data.price_change_percentage_24h > 1 
+            ? 'bullish' 
+            : response.data.market_data.price_change_percentage_24h < -1 
+              ? 'bearish' 
+              : 'neutral'
         };
 
         setData(bitcoinData);

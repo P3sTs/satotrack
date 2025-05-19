@@ -1,3 +1,4 @@
+
 export interface CarteiraContextType {
   carteiras: CarteiraBTC[];
   carteiraPrincipal: string | null;
@@ -28,6 +29,12 @@ export interface CarteiraBTC {
   ultima_atualizacao?: string;
   preco_medio_compra?: number;
   isPrimary?: boolean;
+  
+  // Add properties to match the CarteiraBTC in types/types.ts
+  total_entradas: number;
+  total_saidas: number;
+  qtde_transacoes: number;
+  ultimo_update: Date | string;
 }
 
 export interface TransacaoBTC {

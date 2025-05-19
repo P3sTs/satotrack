@@ -2,164 +2,154 @@
 import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 
-// Generate projection data for graph based on wallet and time range
+// Define the projection data structure
+interface ProjecaoData {
+  date: string;
+  projecao: number;
+}
+
+/**
+ * Calculate projection data for a wallet based on time range and bitcoin price data
+ * 
+ * @param carteira The bitcoin wallet
+ * @param timeRange The time range for the projection
+ * @param bitcoinData The bitcoin price data
+ * @returns Array of projection data points
+ */
 export const calculateProjecaoData = (
-  carteira: CarteiraBTC, 
-  timeRange: '7D' | '30D' | '3M' | '6M' | '1Y',
+  carteira: CarteiraBTC,
+  timeRange: string,
   bitcoinData?: BitcoinPriceData | null
-) => {
-  // Determine number of days based on time range
-  const days = getNumberOfDays(timeRange);
+): ProjecaoData[] => {
+  // Default projection data if we can't calculate
+  if (!bitcoinData) {
+    return generateDefaultProjection(timeRange);
+  }
   
-  // If no bitcoin data, return empty array
-  if (!bitcoinData) return [];
+  // Determine number of data points based on time range
+  const numPoints = getNumPointsFromTimeRange(timeRange);
   
-  // Calculate average daily variation based on historical data (simplified for demo)
-  // In a real app, this would use more sophisticated analysis of historical data
-  const variationRate = 0.02; // 2% daily variation for random walk
-  
-  // Get current value in USD
+  // Current wallet value in USD
   const currentValueUSD = carteira.saldo * bitcoinData.price_usd;
   
-  // Generate projection data points
-  const data = [];
-  let currentDate = new Date();
-  let currentValue = 100; // Base value as percentage (100%)
+  // Get growth rate based on time range and bitcoin data
+  const dailyGrowthRate = getGrowthRate(timeRange, bitcoinData);
   
-  for (let i = 0; i <= days; i++) {
-    // Add data point for current day
+  const data: ProjecaoData[] = [];
+  let currentDate = new Date();
+  let currentValue = currentValueUSD;
+  
+  // Generate data points
+  for (let i = 0; i < numPoints; i++) {
+    // Add current point to data
     data.push({
-      date: formatDateForDisplay(currentDate),
+      date: formatDate(currentDate),
       projecao: currentValue,
     });
     
-    // Update for next day
-    currentDate.setDate(currentDate.getDate() + 1);
-    
-    // Generate random walk with slight upward bias for projection
-    // This is a simplified model - in a real app, you'd use more sophisticated models
-    const randomFactor = (Math.random() - 0.48) * variationRate;
-    currentValue = currentValue * (1 + randomFactor);
+    // Advance to next data point
+    currentDate = advanceDate(currentDate, timeRange);
+    currentValue = currentValue * (1 + dailyGrowthRate);
   }
   
   return data;
 };
 
-// Function to simulate profit/loss projection
-export const simularProjecaoLucro = (
-  valorBTC: number,
-  precoBitcoinUSD: number,
-  periodoDias: number,
-  valorizacaoPct: number
-) => {
-  // Calculate daily rate from total expected appreciation
-  const taxaDiaria = Math.pow(1 + valorizacaoPct / 100, 1 / periodoDias) - 1;
-  
-  // Calculate projected final value
-  const valorFinal = valorBTC * Math.pow(1 + taxaDiaria, periodoDias);
-  
-  // Calculate profit/loss
-  const lucroPerdaBTC = valorFinal - valorBTC;
-  const lucroPerdaUsd = lucroPerdaBTC * precoBitcoinUSD;
-  
-  // Calculate rendimento percentual
-  const rendimentoPct = (valorFinal / valorBTC - 1) * 100;
-  
-  // Estimate risk level based on volatility and percentage
-  let risco = 'Médio';
-  if (Math.abs(valorizacaoPct) > 20) {
-    risco = 'Alto';
-  } else if (Math.abs(valorizacaoPct) < 10) {
-    risco = 'Baixo';
-  }
-  
-  return {
-    valorFinal,
-    lucroPerdaBTC,
-    lucroPerdaUsd,
-    rendimentoPct,
-    risco
-  };
+/**
+ * Format a date to display in chart
+ */
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+  });
 };
 
-// Generate strategic alerts based on wallet data and market conditions
-export const calcularAlertas = (carteira: CarteiraBTC, bitcoinData: BitcoinPriceData) => {
-  const alertas = [];
+/**
+ * Advance date based on time range
+ */
+const advanceDate = (date: Date, timeRange: string): Date => {
+  const newDate = new Date(date);
   
-  // Current values
-  const valorUSD = carteira.saldo * bitcoinData.price_usd;
-  const mediaCompra = carteira.preco_medio_compra || 0;
-  const precoAtual = bitcoinData.price_usd;
-  
-  // Alert 1: Warning about potential loss if negative trend continues
-  if (bitcoinData.price_change_percentage_24h < -2) {
-    const perdaPotencial = Math.abs(bitcoinData.price_change_percentage_24h * 3).toFixed(1);
-    alertas.push({
-      tipo: 'perigo',
-      mensagem: `Atenção: risco de perda de ${perdaPotencial}% nos próximos 90 dias se a tendência se mantiver`,
-      porcentagem: perdaPotencial,
-      periodo: 90
-    });
+  switch (timeRange) {
+    case '7D':
+      newDate.setDate(newDate.getDate() + 1);
+      break;
+    case '30D':
+      newDate.setDate(newDate.getDate() + 5);
+      break;
+    case '3M':
+      newDate.setDate(newDate.getDate() + 15);
+      break;
+    case '6M':
+      newDate.setDate(newDate.getDate() + 30);
+      break;
+    case '1Y':
+      newDate.setDate(newDate.getDate() + 60);
+      break;
+    default:
+      newDate.setDate(newDate.getDate() + 1);
   }
   
-  // Alert 2: Opportunity for profit based on pattern
-  if (bitcoinData.price_change_percentage_24h > 0) {
-    const lucroProjetado = (5 + Math.random() * 10).toFixed(1);
-    alertas.push({
-      tipo: 'oportunidade',
-      mensagem: `Possível valorização de ${lucroProjetado}% com base no último padrão de comportamento`,
-      porcentagem: lucroProjetado,
-      periodo: 30
-    });
-  }
-  
-  // Alert 3: Average purchase price relation to current price
-  if (mediaCompra > 0 && precoAtual < mediaCompra) {
-    const diferencaPct = ((mediaCompra - precoAtual) / mediaCompra * 100).toFixed(1);
-    alertas.push({
-      tipo: 'atencao',
-      mensagem: `Seu preço médio de compra está ${diferencaPct}% acima do valor atual. Considere estratégias de DCA.`,
-      porcentagem: diferencaPct,
-      periodo: null
-    });
-  }
-  
-  // Alert 4: Opportunity for accumulating if price drops
-  if (bitcoinData.price_change_percentage_24h < -5) {
-    alertas.push({
-      tipo: 'oportunidade',
-      mensagem: 'Queda recente de preço pode ser uma oportunidade de acumulação conforme padrões históricos',
-      porcentagem: Math.abs(bitcoinData.price_change_percentage_24h).toFixed(1),
-      periodo: 7
-    });
-  }
-  
-  // Shuffle and return only 3 alerts maximum
-  return shuffleArray(alertas).slice(0, 3);
+  return newDate;
 };
 
-// Helper functions
-
-const getNumberOfDays = (timeRange: string): number => {
+/**
+ * Get number of data points based on time range
+ */
+const getNumPointsFromTimeRange = (timeRange: string): number => {
   switch (timeRange) {
     case '7D': return 7;
-    case '30D': return 30;
-    case '3M': return 90;
-    case '6M': return 180;
-    case '1Y': return 365;
+    case '30D': return 6;
+    case '3M': return 6;
+    case '6M': return 6;
+    case '1Y': return 6;
     default: return 7;
   }
 };
 
-const formatDateForDisplay = (date: Date): string => {
-  return `${date.getDate()}/${date.getMonth() + 1}`;
+/**
+ * Calculate growth rate based on historical data and average purchase price
+ */
+const getGrowthRate = (timeRange: string, bitcoinData: BitcoinPriceData): number => {
+  // Use 24h change percentage as base growth rate
+  let baseRate = bitcoinData.price_change_percentage_24h / 100;
+  
+  // Adjust growth rate based on time range
+  switch (timeRange) {
+    case '7D':
+      // Use 7d change if available, otherwise estimate from 24h
+      return bitcoinData.price_change_percentage_7d 
+        ? bitcoinData.price_change_percentage_7d / 700 
+        : baseRate / 7;
+    case '30D':
+      return baseRate / 6;
+    case '3M':
+      return baseRate / 18;
+    case '6M':
+      return baseRate / 30;
+    case '1Y':
+      return baseRate / 60;
+    default:
+      return baseRate / 7;
+  }
 };
 
-const shuffleArray = (array: any[]) => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+/**
+ * Generate default projection data when bitcoin price data is unavailable
+ */
+const generateDefaultProjection = (timeRange: string): ProjecaoData[] => {
+  const numPoints = getNumPointsFromTimeRange(timeRange);
+  const data: ProjecaoData[] = [];
+  let currentDate = new Date();
+  
+  for (let i = 0; i < numPoints; i++) {
+    data.push({
+      date: formatDate(currentDate),
+      projecao: 100 + (i * 5), // Simple linear projection
+    });
+    currentDate = advanceDate(currentDate, timeRange);
   }
-  return newArray;
+  
+  return data;
 };

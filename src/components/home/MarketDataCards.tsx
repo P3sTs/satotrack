@@ -22,7 +22,7 @@ const MarketDataCards = ({ bitcoinData }: MarketDataCardsProps) => {
               currency: 'USD',
               notation: 'compact',
               compactDisplay: 'short',
-            }).format(bitcoinData.market_cap_usd)}
+            }).format(bitcoinData.market_cap)}
           </p>
         </CardContent>
       </Card>

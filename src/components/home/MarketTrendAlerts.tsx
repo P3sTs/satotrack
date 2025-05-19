@@ -23,7 +23,7 @@ const MarketTrendAlerts: React.FC<MarketTrendAlertsProps> = ({ bitcoinData }) =>
     }
     
     // Volume alert - high volume day
-    if (bitcoinData.volume_24h_usd > 20000000000) { // $20 billion threshold
+    if (bitcoinData.volume_24h > 20000000000) { // $20 billion threshold
       alerts.push({
         icon: Volume2,
         text: 'Volume de negociação elevado nas últimas 24h',

@@ -44,7 +44,7 @@ const BitcoinChartGrid = ({ bitcoinData, previousPrice }: BitcoinChartGridProps)
         {/* Volume 24h */}
         <BitcoinPriceCard
           title="Volume 24h"
-          price={bitcoinData.volume_24h_usd}
+          price={bitcoinData.volume_24h}
           currency="USD"
           showChange={false}
           digits={0}
