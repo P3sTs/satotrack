@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 import { toast } from '@/hooks/use-toast';
+import axios from 'axios';
 
 /**
  * Hook personalizado para buscar dados em tempo real com intervalo configurável
@@ -93,15 +94,15 @@ export function useValueChange(
 export function useRealtimeBitcoinPrice(interval = 30000) {
   return useRealtimeData<BitcoinPriceData>(
     async () => {
-      const response = await fetch(
+      const response = await axios.get(
         'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false'
       );
       
-      if (!response.ok) {
+      if (!response.status || response.status !== 200) {
         throw new Error('Falha ao carregar dados do Bitcoin');
       }
       
-      const apiData = await response.json();
+      const apiData = response.data;
       
       // Determinar a tendência do mercado
       const changePercentage = apiData.market_data.price_change_percentage_24h;
@@ -117,8 +118,10 @@ export function useRealtimeBitcoinPrice(interval = 30000) {
         price_usd: apiData.market_data.current_price.usd,
         price_brl: apiData.market_data.current_price.brl,
         price_change_percentage_24h: apiData.market_data.price_change_percentage_24h,
-        market_cap_usd: apiData.market_data.market_cap.usd,
-        volume_24h_usd: apiData.market_data.total_volume.usd,
+        price_change_percentage_7d: apiData.market_data.price_change_percentage_7d || 0,
+        volume_24h: apiData.market_data.total_volume.usd,
+        market_cap: apiData.market_data.market_cap.usd,
+        updated_at: apiData.market_data.last_updated,
         last_updated: apiData.market_data.last_updated,
         market_trend: marketTrend
       };

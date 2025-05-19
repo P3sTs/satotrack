@@ -15,10 +15,10 @@ import { RefreshCw } from 'lucide-react';
 import MarketTrendAlerts from '@/components/home/MarketTrendAlerts';
 
 const Mercado = () => {
-  const { data: bitcoinData, isLoading, isRefreshing, refresh } = useBitcoinPrice();
+  const { data: bitcoinData, loading, isRefreshing, refresh } = useBitcoinPrice();
   const [timeRange, setTimeRange] = useState<TimeRange>('7D');
   
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <p>Carregando dados do mercado...</p>
@@ -86,7 +86,7 @@ const Mercado = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {bitcoinData.volume_24h_usd.toLocaleString('en-US', {
+              {bitcoinData.volume_24h.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD',
                 maximumFractionDigits: 0

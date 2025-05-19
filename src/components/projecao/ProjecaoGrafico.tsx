@@ -64,16 +64,14 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
        projectionData[0].projecao) * 100
     : 0;
   
-  // Fix the chart configuration structure
+  // Fix the chart configuration structure - use the correct format for the ChartConfig
   const chartConfig = {
-    series: {
-      projecao: {
-        label: "Projeção",
-        color: isProfit ? "hsl(143, 85%, 42%)" : "hsl(3, 100%, 59%)",
-        theme: { 
-          dark: isProfit ? "hsl(143, 80%, 44%)" : "hsl(3, 90%, 60%)", 
-          light: isProfit ? "hsl(143, 70%, 50%)" : "hsl(3, 85%, 64%)" 
-        }
+    projecao: {
+      label: "Projeção",
+      color: isProfit ? "hsl(143, 85%, 42%)" : "hsl(3, 100%, 59%)",
+      theme: { 
+        dark: isProfit ? "hsl(143, 80%, 44%)" : "hsl(3, 90%, 60%)", 
+        light: isProfit ? "hsl(143, 70%, 50%)" : "hsl(3, 85%, 64%)" 
       }
     }
   };

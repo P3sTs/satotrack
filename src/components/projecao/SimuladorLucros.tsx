@@ -1,211 +1,170 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { useCarteiras } from '@/contexts/CarteirasContext';
+import { SliderCheck, Calculator, Info } from 'lucide-react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
-import { Calculator, ArrowUp, ArrowDown, Percent } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { formatBitcoinValue } from '@/utils/formatters';
 import { simularProjecaoLucro } from '@/utils/projecaoCalculations';
+import { useAuth } from '@/contexts/auth';
+import PremiumFeatureGate from '@/components/monetization/PremiumFeatureGate';
 
 interface SimuladorLucrosProps {
-  walletId: string;
+  saldoInicial?: number;
 }
 
-const SimuladorLucros: React.FC<SimuladorLucrosProps> = ({ walletId }) => {
-  const { carteiras } = useCarteiras();
+const SimuladorLucros: React.FC<SimuladorLucrosProps> = ({ saldoInicial = 0 }) => {
+  const [saldoBTC, setSaldoBTC] = useState(saldoInicial || 0.1);
+  const [periodoSimulacao, setPeriodoSimulacao] = useState(30);
+  const [expectativaValorizacao, setExpectativaValorizacao] = useState(5);
+  const [resultado, setResultado] = useState<{
+    lucroProjetado: number;
+    percentualRendimento: number;
+    riscoEstimado: number;
+  } | null>(null);
+  
   const { data: bitcoinData } = useBitcoinPrice();
-  const carteira = carteiras.find(c => c.id === walletId);
+  const { userPlan } = useAuth();
+  const isPremium = userPlan === 'premium';
   
-  const [valorBTC, setValorBTC] = useState<number>(carteira?.saldo || 0);
-  const [periodo, setPeriodo] = useState<number>(30);
-  const [tipoPeríodo, setTipoPeriodo] = useState<'dias' | 'meses'>('dias');
-  const [valorizacao, setValorizacao] = useState<number>(5);
-  const [simulacaoResultado, setSimulacaoResultado] = useState<any>(null);
-  
-  if (!carteira || !bitcoinData) {
-    return <div>Carregando dados...</div>;
-  }
-  
-  const handleSimular = () => {
-    // Convert months to days if needed for the calculation
-    const periodoDias = tipoPeríodo === 'meses' ? periodo * 30 : periodo;
+  const simular = () => {
+    if (!bitcoinData) return;
     
-    // Call the simulator function
-    const resultado = simularProjecaoLucro(
-      valorBTC,
-      bitcoinData.price_usd,
-      periodoDias,
-      valorizacao
+    const resultadoSimulacao = simularProjecaoLucro(
+      saldoBTC,
+      periodoSimulacao,
+      expectativaValorizacao,
+      bitcoinData.price_usd
     );
     
-    setSimulacaoResultado(resultado);
+    setResultado(resultadoSimulacao);
   };
   
   return (
-    <Card>
-      <CardHeader>
+    <Card className="w-full">
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5 text-satotrack-neon" />
-          Simulador Interativo
+          <Calculator className="text-satotrack-neon h-5 w-5" />
+          Simulador de Projeção
         </CardTitle>
       </CardHeader>
+      
       <CardContent>
-        <div className="space-y-5">
-          <div>
-            <Label htmlFor="valor-btc">Valor investido (BTC)</Label>
-            <div className="flex items-center gap-2 mt-1.5">
-              <Input
-                id="valor-btc"
-                type="number"
-                step="0.00000001"
-                min="0"
-                value={valorBTC}
-                onChange={(e) => setValorBTC(parseFloat(e.target.value) || 0)}
-                className="flex-1"
-              />
-              <Button 
-                variant="outline" 
-                className="whitespace-nowrap"
-                onClick={() => setValorBTC(carteira.saldo)}
-              >
-                Usar Saldo
-              </Button>
-            </div>
+        <div className="grid grid-cols-1 gap-4 mb-6">
+          {/* Valor em BTC */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-1">
+              Quantidade de Bitcoin
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </label>
+            <Input
+              type="number"
+              value={saldoBTC}
+              onChange={(e) => setSaldoBTC(parseFloat(e.target.value) || 0)}
+              step="0.001"
+              min="0"
+              className="bg-background/50"
+            />
           </div>
           
-          <div>
-            <Label>Período de simulação</Label>
-            <div className="flex items-center gap-4 mt-1.5">
-              <div className="flex-1">
-                <Slider
-                  value={[periodo]}
-                  min={tipoPeríodo === 'dias' ? 1 : 1}
-                  max={tipoPeríodo === 'dias' ? 90 : 12}
-                  step={1}
-                  onValueChange={(values) => setPeriodo(values[0])}
-                />
-              </div>
-              <div className="w-16">
-                <Input
-                  type="number"
-                  min={1}
-                  value={periodo}
-                  onChange={(e) => setPeriodo(parseInt(e.target.value) || 1)}
-                  className="text-center"
-                />
-              </div>
-            </div>
-            
-            <RadioGroup 
-              className="flex mt-2" 
-              defaultValue="dias" 
-              value={tipoPeríodo}
-              onValueChange={(value) => setTipoPeriodo(value as 'dias' | 'meses')}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="dias" id="dias" />
-                <Label htmlFor="dias">Dias</Label>
-              </div>
-              <div className="flex items-center space-x-2 ml-4">
-                <RadioGroupItem value="meses" id="meses" />
-                <Label htmlFor="meses">Meses</Label>
-              </div>
-            </RadioGroup>
+          {/* Período de simulação */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex justify-between">
+              <span className="flex items-center gap-1">
+                Período (dias)
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </span>
+              <span className="text-satotrack-neon">{periodoSimulacao} dias</span>
+            </label>
+            <Slider
+              value={[periodoSimulacao]}
+              min={7}
+              max={isPremium ? 365 : 90}
+              step={1}
+              onValueChange={(value) => setPeriodoSimulacao(value[0])}
+            />
+            {!isPremium && periodoSimulacao > 30 && (
+              <p className="text-xs text-amber-500 mt-1">
+                Períodos maiores que 90 dias disponíveis apenas para Premium
+              </p>
+            )}
           </div>
           
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <Label htmlFor="valorizacao">
-                Expectativa de valorização (%)
-              </Label>
-              <span className="text-sm font-mono">{valorizacao}%</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <Slider
-                  value={[valorizacao]}
-                  min={-30}
-                  max={50}
-                  step={1}
-                  onValueChange={(values) => setValorizacao(values[0])}
-                />
-              </div>
-              <div className="w-16">
-                <Input
-                  type="number"
-                  min={-30}
-                  max={50}
-                  value={valorizacao}
-                  onChange={(e) => setValorizacao(parseInt(e.target.value) || 0)}
-                  className="text-center"
-                />
-              </div>
-            </div>
+          {/* Expectativa de valorização */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex justify-between">
+              <span className="flex items-center gap-1">
+                Expectativa de valorização
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </span>
+              <span className="text-satotrack-neon">{expectativaValorizacao}%</span>
+            </label>
+            <Slider
+              value={[expectativaValorizacao]}
+              min={-20}
+              max={20}
+              step={1}
+              onValueChange={(value) => setExpectativaValorizacao(value[0])}
+            />
           </div>
           
           <Button 
-            variant="bitcoin"
-            className="w-full mt-6"
-            onClick={handleSimular}
+            onClick={simular} 
+            className="w-full mt-2"
+            variant="default"
           >
-            Simular Cenário
+            Simular Projeção
           </Button>
-          
-          {simulacaoResultado && (
-            <div className="p-4 bg-muted/30 rounded-lg mt-4 border border-border">
-              <h4 className="text-sm font-medium mb-3">Resultado da Simulação</h4>
+        </div>
+        
+        {resultado && (
+          <div className="mt-6 space-y-4 p-4 border rounded-lg bg-card/50">
+            <h3 className="text-lg font-semibold text-center">Resultado da Simulação</h3>
+            
+            <div className="grid grid-cols-1 gap-3">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Lucro Projetado</p>
+                <p className={`text-lg font-bold ${resultado.lucroProjetado >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {resultado.lucroProjetado.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  })}
+                </p>
+              </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Valor Projetado</p>
-                  <div className="flex items-center">
-                    <span className="text-lg font-medium">{formatBitcoinValue(simulacaoResultado.valorFinal)} BTC</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Rendimento</p>
-                  <div className="flex items-center">
-                    <span className={`text-lg font-medium ${simulacaoResultado.rendimentoPct > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {simulacaoResultado.rendimentoPct > 0 ? '+' : ''}
-                      {simulacaoResultado.rendimentoPct.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Lucro/Perda (USD)</p>
-                  <div className="flex items-center">
-                    <span className={`text-lg font-medium ${simulacaoResultado.lucroPerdaUsd > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {simulacaoResultado.lucroPerdaUsd > 0 ? '+' : ''}
-                      ${Math.abs(simulacaoResultado.lucroPerdaUsd).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Risco Estimado</p>
-                  <div className="flex items-center">
-                    <span className="text-lg font-medium">
-                      {simulacaoResultado.risco === 'Alto' ? (
-                        <span className="text-red-500">Alto</span>
-                      ) : simulacaoResultado.risco === 'Médio' ? (
-                        <span className="text-yellow-500">Médio</span>
-                      ) : (
-                        <span className="text-green-500">Baixo</span>
-                      )}
-                    </span>
-                  </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Rendimento</p>
+                <p className={`text-lg font-bold ${resultado.percentualRendimento >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {resultado.percentualRendimento.toFixed(2)}%
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Risco Estimado</p>
+                <div className="flex items-center justify-center">
+                  <SliderCheck className="h-4 w-4 mr-1 text-amber-500" />
+                  <p className="text-amber-500 font-medium">
+                    {resultado.riscoEstimado.toFixed(1)}%
+                  </p>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+            
+            <PremiumFeatureGate
+              fallback={
+                <div className="text-xs text-center text-muted-foreground mt-4">
+                  <p>Desbloqueie simulações avançadas com o plano Premium</p>
+                </div>
+              }
+            >
+              <div className="text-xs text-center text-muted-foreground mt-4">
+                <p>Esta simulação considera fatores históricos e tendências de mercado</p>
+                <p>Os resultados são estimativas e não garantem retornos futuros</p>
+              </div>
+            </PremiumFeatureGate>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
