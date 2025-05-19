@@ -1,6 +1,6 @@
 
 import { useAuth } from '../auth';
-import { useCarteirasContext } from './useCarteirasContext';
+import { useCarteirasContext } from '../hooks/useCarteirasContext';
 import { CarteiraContextType } from './types';
 
 /**
