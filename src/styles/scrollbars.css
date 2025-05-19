@@ -1,5 +1,7 @@
 
-/* Customizing scrollbar */
+/* Customização de scrollbars para o SatoTrack */
+
+/* Scrollbar base para navegadores WebKit */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -19,8 +21,64 @@
   @apply bg-satotrack-neon/50;
 }
 
-/* For Firefox */
+/* Para Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--secondary));
+}
+
+/* Scrollbar específicas para componentes */
+
+.chart-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.transaction-list::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Classe para desativar scrollbar visualmente */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Suavizar o scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ajuste para componentes específicos */
+.code-block {
+  @apply scrollbar-thin scrollbar-thumb-satotrack-neon/30;
+}
+
+.transaction-history {
+  @apply scrollbar-thin scrollbar-thumb-satotrack-neon/30;
+}
+
+/* Personalização para modo claro */
+.light ::-webkit-scrollbar-track {
+  @apply bg-gray-200;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  @apply bg-satotrack-neon/50;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  @apply bg-satotrack-neon/70;
 }

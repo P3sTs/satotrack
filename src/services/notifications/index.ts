@@ -2,18 +2,23 @@
 import { checkPushNotificationsSupport, requestPushPermission, sendPushNotification } from './push';
 import { sendTelegramNotification } from './telegram';
 import { logNotification, sendPriceAlert, sendTransactionNotification } from './alerts';
+import { sendEmailSummary } from './email';
 
+// Sistema de notificações aprimorado
 export {
-  // Push notification functions
+  // Funções de notificação push
   checkPushNotificationsSupport,
   requestPushPermission,
   sendPushNotification,
   
-  // Telegram notification functions
+  // Funções de notificação Telegram
   sendTelegramNotification,
   
-  // Notification logging and alert functions
+  // Registro de notificações e funções de alerta
   logNotification,
   sendPriceAlert,
-  sendTransactionNotification
+  sendTransactionNotification,
+  
+  // Relatórios e sumários automáticos
+  sendEmailSummary
 };

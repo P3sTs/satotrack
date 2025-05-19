@@ -1,5 +1,8 @@
 
+/* Componentes estilizados do SatoTrack */
+
 @layer components {
+  /* Cards */
   .bitcoin-card {
     @apply bg-card rounded-lg shadow-md border border-border/20 overflow-hidden transition-all hover:border-satotrack-neon/30 hover:shadow-lg w-full;
   }
@@ -42,6 +45,7 @@
     animation: scan 2s linear infinite;
   }
   
+  /* Preço indicadores */
   .price-up {
     @apply text-green-400;
   }
@@ -49,10 +53,136 @@
   .price-down {
     @apply text-satotrack-alert;
   }
+
+  /* Botões */
+  .btn-neon {
+    @apply bg-satotrack-neon text-black font-medium py-2 px-4 rounded-md
+    hover:bg-satotrack-neon/90 active:bg-satotrack-neon/80 transition-colors;
+  }
+  
+  .btn-bitcoin {
+    @apply bg-bitcoin text-white font-medium py-2 px-4 rounded-md
+    hover:bg-bitcoin/90 active:bg-bitcoin/80 transition-colors;
+  }
+  
+  .btn-outline-neon {
+    @apply border border-satotrack-neon text-satotrack-neon font-medium py-2 px-4 rounded-md
+    hover:bg-satotrack-neon/10 active:bg-satotrack-neon/20 transition-colors;
+  }
+  
+  /* Formulários */
+  .form-control {
+    @apply bg-dashboard-medium border border-dashboard-light rounded-md px-4 py-2
+    focus:outline-none focus:ring-2 focus:ring-satotrack-neon/50 focus:border-transparent;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium mb-1 text-satotrack-text;
+  }
+  
+  .form-group {
+    @apply mb-4;
+  }
+  
+  /* Badges */
+  .badge-premium {
+    @apply inline-flex items-center bg-bitcoin/20 text-bitcoin text-xs px-2 py-1 rounded-full;
+  }
+  
+  .badge-free {
+    @apply inline-flex items-center bg-dashboard-light text-satotrack-text text-xs px-2 py-1 rounded-full;
+  }
+  
+  /* Alertas */
+  .alert-info {
+    @apply border-l-4 border-blue-500 bg-blue-500/10 p-4 rounded-r-md;
+  }
+  
+  .alert-success {
+    @apply border-l-4 border-satotrack-success bg-satotrack-success/10 p-4 rounded-r-md;
+  }
+  
+  .alert-warning {
+    @apply border-l-4 border-yellow-500 bg-yellow-500/10 p-4 rounded-r-md;
+  }
+  
+  .alert-danger {
+    @apply border-l-4 border-satotrack-alert bg-satotrack-alert/10 p-4 rounded-r-md;
+  }
   
   /* Focus styles for accessibility */
   .focus-visible-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-satotrack-neon/70 
     focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  
+  /* Transições de página */
+  .page-transition {
+    @apply animate-fade-in;
+  }
+  
+  /* Transições entre views */
+  .view-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .view-enter {
+    @apply opacity-0 transform scale-95;
+  }
+  
+  .view-enter-active {
+    @apply opacity-100 transform scale-100;
+  }
+  
+  .view-exit {
+    @apply opacity-100 transform scale-100;
+  }
+  
+  .view-exit-active {
+    @apply opacity-0 transform scale-95;
+  }
+
+  /* Mobile specific classes */
+  .mobile-card {
+    @apply p-2 sm:p-4 text-sm sm:text-base;
+  }
+  
+  .mobile-card-title {
+    @apply text-base sm:text-lg font-medium;
+  }
+  
+  .mobile-text {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .mobile-container {
+    @apply px-2 py-2 sm:px-4 sm:py-4;
+  }
+  
+  /* Placeholders e skeletons */
+  .skeleton {
+    @apply bg-dashboard-light animate-pulse rounded;
+  }
+  
+  /* Navegação */
+  .nav-link {
+    @apply px-2 py-1 text-sm font-medium rounded-md transition-colors whitespace-nowrap;
+  }
+  
+  .nav-link-active {
+    @apply text-satotrack-neon bg-dashboard-light;
+  }
+  
+  .nav-link-inactive {
+    @apply text-muted-foreground hover:text-white hover:bg-dashboard-light/50;
+  }
+  
+  /* Layouts */
+  .main-layout {
+    @apply flex flex-col min-h-screen;
+  }
+  
+  .content-container {
+    @apply flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
   }
 }

@@ -27,7 +27,7 @@ const MobileNavigation: React.FC = () => {
         description: "Você foi desconectado com sucesso",
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Erro de logout:', error);
       toast({
         title: "Erro ao sair",
         description: "Não foi possível realizar o logout",
@@ -36,16 +36,16 @@ const MobileNavigation: React.FC = () => {
     }
   };
   
-  // Get user initials for avatar
+  // Obter iniciais do usuário para avatar
   const getUserInitials = () => {
     if (!user?.email) return 'U';
     return user.email.substring(0, 1).toUpperCase();
   };
 
-  // Check if route is active
+  // Verificar se a rota está ativa
   const isActive = (path: string) => location.pathname === path;
 
-  // Navigation items based on authentication state
+  // Itens de navegação com base no estado de autenticação
   const navigationItems = [
     {
       label: 'Início',
@@ -104,7 +104,7 @@ const MobileNavigation: React.FC = () => {
     }
   ];
 
-  // Filter items based on authentication
+  // Filtrar itens com base na autenticação
   const filteredItems = navigationItems.filter(
     item => !item.requiresAuth || (item.requiresAuth && isAuthenticated)
   );
@@ -143,7 +143,7 @@ const MobileNavigation: React.FC = () => {
           </button>
         </div>
         
-        {/* Mobile menu trigger */}
+        {/* Gatilho do menu mobile */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-white">
@@ -153,7 +153,7 @@ const MobileNavigation: React.FC = () => {
           </SheetTrigger>
           <SheetContent side="right" className="w-[85%] max-w-xs border-dashboard-medium bg-dashboard-dark p-0">
             <div className="flex flex-col h-full">
-              {/* Close button and user info */}
+              {/* Botão fechar e informações do usuário */}
               <div className="flex justify-between items-center p-4 border-b border-dashboard-medium/30">
                 <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
                   <X className="h-5 w-5" />
@@ -186,7 +186,7 @@ const MobileNavigation: React.FC = () => {
                 )}
               </div>
               
-              {/* Navigation links */}
+              {/* Links de navegação */}
               <div className="flex-1 overflow-y-auto py-4">
                 <nav className="space-y-1 px-2">
                   {filteredItems.map((item) => (
@@ -206,7 +206,7 @@ const MobileNavigation: React.FC = () => {
                     </button>
                   ))}
                   
-                  {/* Premium Button */}
+                  {/* Botão Premium */}
                   <button
                     onClick={handlePremiumClick}
                     className={cn(
@@ -222,7 +222,7 @@ const MobileNavigation: React.FC = () => {
                 </nav>
               </div>
               
-              {/* Footer actions */}
+              {/* Ações de rodapé */}
               {isAuthenticated && (
                 <div className="p-4 border-t border-dashboard-medium/30">
                   <Button 

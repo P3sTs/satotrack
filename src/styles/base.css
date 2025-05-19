@@ -1,11 +1,9 @@
 
+/* Base styles for the SatoTrack application */
+
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
- 
 @layer base {
   :root {
     --background: 0 0% 6%;         /* #0F0F0F */
@@ -37,6 +35,21 @@
     --ring: 162 100% 50%;          /* #00FFC2 */
  
     --radius: 0.5rem;
+    
+    /* Dashboard-specific colors */
+    --dashboard-dark: 0 0% 8%;     /* #141414 */
+    --dashboard-medium: 0 0% 14%;  /* #242424 */
+    --dashboard-light: 0 0% 18%;   /* #2E2E2E */
+
+    /* Bitcoin-specific colors */
+    --bitcoin: 37 95% 58%;         /* #F7931A */
+    --bitcoin-dark: 36 85% 48%;     /* #E67F06 */
+
+    /* SatoTrack specific colors */
+    --satotrack-neon: 162 100% 50%;      /* #00FFC2 */
+    --satotrack-text: 0 0% 90%;          /* #E6E6E6 */
+    --satotrack-alert: 0 91% 71%;        /* #FB4B4B */
+    --satotrack-success: 142 76% 36%;    /* #1DB954 */
   }
  
   .light {
@@ -67,27 +80,98 @@
     --border: 0 0% 80%;
     --input: 0 0% 80%;
     --ring: 162 100% 40%;
+    
+    /* Dashboard-specific colors for light mode */
+    --dashboard-dark: 0 0% 98%;
+    --dashboard-medium: 0 0% 94%;
+    --dashboard-light: 0 0% 90%;
+    
+    /* Bitcoin-specific colors remain the same */
+    --bitcoin: 37 95% 58%;
+    --bitcoin-dark: 36 85% 48%;
+    
+    /* SatoTrack specific colors for light mode */
+    --satotrack-neon: 162 100% 40%;
+    --satotrack-text: 0 0% 10%;
+    --satotrack-alert: 0 91% 65%;
+    --satotrack-success: 142 76% 30%;
   }
-}
- 
-@layer base {
+
   * {
     @apply border-border;
   }
+
+  html {
+    @apply scroll-smooth;
+  }
+  
   body {
     @apply bg-background text-foreground font-inter;
   }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-orbitron font-bold;
   }
-}
-
-html, body {
-  @apply bg-dashboard-dark;
-}
-
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  
+  /* Tipografia personalizada */
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  /* Cores personalizadas do tema para facilitar uso no Tailwind */
+  .bg-dashboard-dark {
+    @apply bg-[hsl(var(--dashboard-dark))];
+  }
+  
+  .bg-dashboard-medium {
+    @apply bg-[hsl(var(--dashboard-medium))];
+  }
+  
+  .bg-dashboard-light {
+    @apply bg-[hsl(var(--dashboard-light))];
+  }
+  
+  .bg-bitcoin {
+    @apply bg-[hsl(var(--bitcoin))];
+  }
+  
+  .bg-bitcoin-dark {
+    @apply bg-[hsl(var(--bitcoin-dark))];
+  }
+  
+  .bg-satotrack-neon {
+    @apply bg-[hsl(var(--satotrack-neon))];
+  }
+  
+  .text-satotrack-neon {
+    @apply text-[hsl(var(--satotrack-neon))];
+  }
+  
+  .text-satotrack-text {
+    @apply text-[hsl(var(--satotrack-text))];
+  }
+  
+  .text-satotrack-alert {
+    @apply text-[hsl(var(--satotrack-alert))];
+  }
+  
+  .text-satotrack-success {
+    @apply text-[hsl(var(--satotrack-success))];
+  }
+  
+  .text-bitcoin {
+    @apply text-[hsl(var(--bitcoin))];
+  }
+  
+  .border-satotrack-neon {
+    @apply border-[hsl(var(--satotrack-neon))];
+  }
+  
+  .border-bitcoin {
+    @apply border-[hsl(var(--bitcoin))];
+  }
 }
