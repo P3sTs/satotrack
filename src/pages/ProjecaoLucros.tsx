@@ -78,7 +78,10 @@ const ProjecaoLucros: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <SimuladorLucros walletId={selectedWalletId} />
+            <SimuladorLucros 
+              walletId={selectedWalletId}
+              saldoInicial={carteiras.find(c => c.id === selectedWalletId)?.saldo || 0} 
+            />
             
             <PremiumFeatureGate
               messageTitle="Alertas Estratégicos"

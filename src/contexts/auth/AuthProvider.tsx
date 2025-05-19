@@ -6,7 +6,7 @@ import { useAuthFunctions } from './useAuthFunctions';
 import { useLoginAttempts } from './useLoginAttempts';
 import { useActivityMonitor } from './useActivityMonitor';
 import { useAuthPlans } from './useAuthPlans';
-import { AuthUser, PlanType, SecuritySettings, AuthContextType } from './types';
+import { AuthUser, PlanType, AuthContextType } from './types';
 
 // Create the auth context
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     upgradeUserPlan,
     generateApiToken,
     canAddMoreWallets,
-  } = useAuthPlans(user as AuthUser);
+  } = useAuthPlans(user ? user as AuthUser : null);
   
   // Update user's last activity when they interact with the app
   useEffect(() => {

@@ -64,9 +64,9 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
        projectionData[0].projecao) * 100
     : 0;
   
-  // Fix the chart configuration structure - use the correct format for the ChartConfig
+  // Fix the chart configuration structure to match ChartConfig type
   const chartConfig = {
-    projecao: {
+    projecaoConfig: {
       label: "Projeção",
       color: isProfit ? "hsl(143, 85%, 42%)" : "hsl(3, 100%, 59%)",
       theme: { 
@@ -138,10 +138,8 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
       
       <CardContent className="p-0">
         <div className="h-[300px] w-full pt-4 px-4">
-          <ChartContainer 
-            config={chartConfig}
-            className="h-full w-full"
-          >
+          {/* Fix: Use a div instead of ChartContainer since we're using recharts directly */}
+          <div className="h-full w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={projectionData}
@@ -178,7 +176,7 @@ const ProjecaoGrafico: React.FC<ProjecaoGraficoProps> = ({ walletId }) => {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </ChartContainer>
+          </div>
         </div>
       </CardContent>
       

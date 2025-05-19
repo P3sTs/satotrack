@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { SliderCheck, Calculator, Info } from 'lucide-react';
+import { Gauge, Calculator, Info } from 'lucide-react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { simularProjecaoLucro } from '@/utils/projecaoCalculations';
 import { useAuth } from '@/contexts/auth';
@@ -12,9 +12,10 @@ import PremiumFeatureGate from '@/components/monetization/PremiumFeatureGate';
 
 interface SimuladorLucrosProps {
   saldoInicial?: number;
+  walletId?: string;
 }
 
-const SimuladorLucros: React.FC<SimuladorLucrosProps> = ({ saldoInicial = 0 }) => {
+const SimuladorLucros: React.FC<SimuladorLucrosProps> = ({ saldoInicial = 0, walletId }) => {
   const [saldoBTC, setSaldoBTC] = useState(saldoInicial || 0.1);
   const [periodoSimulacao, setPeriodoSimulacao] = useState(30);
   const [expectativaValorizacao, setExpectativaValorizacao] = useState(5);
@@ -143,7 +144,7 @@ const SimuladorLucros: React.FC<SimuladorLucrosProps> = ({ saldoInicial = 0 }) =
               <div className="text-center">
                 <p className="text-xs text-muted-foreground mb-1">Risco Estimado</p>
                 <div className="flex items-center justify-center">
-                  <SliderCheck className="h-4 w-4 mr-1 text-amber-500" />
+                  <Gauge className="h-4 w-4 mr-1 text-amber-500" />
                   <p className="text-amber-500 font-medium">
                     {resultado.riscoEstimado.toFixed(1)}%
                   </p>
