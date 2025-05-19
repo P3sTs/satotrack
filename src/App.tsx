@@ -18,7 +18,6 @@ import ApiDocs from './pages/ApiDocs';
 import Crypto from './pages/Crypto';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
-import './App.css';
 import Index from './pages/Index';
 import AppLayout from './components/layout/AppLayout';
 
