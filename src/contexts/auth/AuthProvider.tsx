@@ -38,10 +38,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   const failedLoginAttempts = getFailedLoginAttempts();
   
-  // Get activity monitoring functionality
-  const { lastActivity, updateLastActivity } = useActivityMonitor();
+  // Get activity monitoring functionality - Fix: Pass required parameters
+  const { lastActivity, updateLastActivity } = useActivityMonitor(user, signOut);
   
-  // Get plan-related functionality
+  // Get plan-related functionality - Fix: Pass the correct user parameter
   const {
     userPlan,
     apiToken,
