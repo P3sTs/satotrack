@@ -8,6 +8,7 @@ export interface NotificationEvent {
   status: 'created' | 'sent' | 'delivered' | 'read' | 'failed';
   details?: any;
   created_at?: string;
+  notification_type?: string; // Added for compatibility with database
 }
 
 /**
@@ -25,9 +26,9 @@ export const logNotification = async (
   details: any = {}
 ): Promise<string | null> => {
   try {
-    const event: NotificationEvent = {
+    const event = {
       user_id: userId,
-      type,
+      notification_type: type, // Map type to notification_type for database
       status,
       details,
       created_at: new Date().toISOString()
@@ -90,7 +91,7 @@ export const getNotificationHistory = async (
   userId: string,
   limit: number = 50,
   offset: number = 0
-): Promise<NotificationEvent[]> => {
+): Promise<any[]> => {
   try {
     const { data, error } = await supabase
       .from('notification_logs')

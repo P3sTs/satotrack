@@ -1,7 +1,15 @@
 
 import { checkPushNotificationsSupport, requestPushPermission, sendPushNotification } from './push';
 import { sendTelegramNotification } from './telegram';
-import { logNotification, sendPriceAlert, sendTransactionNotification } from './alerts';
+import { 
+  logNotification,
+  sendPriceAlert, 
+  sendTransactionNotification,
+  sendIntelligentAlert,
+  PriceAlertDetails,
+  TransactionAlertDetails,
+  IntelligentAlertType
+} from './alerts';
 import { sendEmailSummary } from './email';
 
 // Sistema de notificações aprimorado
@@ -18,6 +26,12 @@ export {
   logNotification,
   sendPriceAlert,
   sendTransactionNotification,
+  sendIntelligentAlert,
+  
+  // Tipos de alertas
+  PriceAlertDetails,
+  TransactionAlertDetails,
+  IntelligentAlertType,
   
   // Relatórios e sumários automáticos
   sendEmailSummary
