@@ -1,6 +1,37 @@
 
-/* Animações para o SatoTrack */
+/* Animações do SatoTrack */
 
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 3s infinite;
+  }
+  
+  .animate-terminal-typing {
+    overflow: hidden;
+    border-right: 2px solid #00FFC2;
+    white-space: nowrap;
+    animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+    max-width: fit-content;
+  }
+  
+  .animate-glow {
+    animation: glow 3s infinite;
+  }
+}
+
+/* Keyframes para animações */
 @keyframes scan {
   0% {
     transform: translateX(-100%);
@@ -74,109 +105,5 @@
   }
   50% {
     filter: drop-shadow(0 0 6px #00FFC2);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes rotate360 {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  .animate-slide-in {
-    animation: slideIn 0.4s ease-out;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulseSlow 3s infinite;
-  }
-  
-  .animate-glow {
-    animation: glow 2s infinite;
-  }
-  
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-  
-  .animate-rotate {
-    animation: rotate360 2s linear infinite;
-  }
-  
-  .animate-bounce-slow {
-    animation: bounce 2s ease-in-out infinite;
-  }
-  
-  .animate-appear {
-    animation: appear 0.5s ease-out forwards;
-  }
-  
-  .animate-terminal-typing {
-    overflow: hidden;
-    border-right: 2px solid #00FFC2;
-    white-space: nowrap;
-    animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
-    max-width: fit-content;
-  }
-  
-  .delay-100 {
-    animation-delay: 100ms;
-  }
-  
-  .delay-200 {
-    animation-delay: 200ms;
-  }
-  
-  .delay-300 {
-    animation-delay: 300ms;
-  }
-  
-  .delay-500 {
-    animation-delay: 500ms;
-  }
-  
-  .delay-1000 {
-    animation-delay: 1000ms;
   }
 }

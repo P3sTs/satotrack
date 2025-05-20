@@ -1,336 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* SatoTrack - Sistema de rastreamento de carteiras Bitcoin
+ * Main stylesheet - Importa todos os outros estilos
+ */
+
+/* Importa as diretivas do Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
-@layer base {
-  :root {
-    --background: 0 0% 6%;         /* #0F0F0F */
-    --foreground: 0 0% 98%;        /* quase branco */
- 
-    --card: 0 0% 10%;              /* #1A1A1A */
-    --card-foreground: 0 0% 98%;
- 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
- 
-    --primary: 162 100% 50%;       /* #00FFC2 */
-    --primary-foreground: 0 0% 6%; /* #0F0F0F */
- 
-    --secondary: 0 0% 17%;         /* #2B2B2B */
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 0 0% 17%;
-    --muted-foreground: 0 0% 45%;  /* #727272 */
- 
-    --accent: 0 0% 17%;
-    --accent-foreground: 0 0% 98%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
- 
-    --border: 0 0% 17%;
-    --input: 0 0% 17%;
-    --ring: 162 100% 50%;          /* #00FFC2 */
- 
-    --radius: 0.5rem;
-  }
- 
-  .light {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 10%;        /* ajustado para maior contraste */
- 
-    --card: 0 0% 96%;
-    --card-foreground: 0 0% 10%;   /* ajustado para maior contraste */
- 
-    --popover: 0 0% 98%;
-    --popover-foreground: 0 0% 10%; /* ajustado para maior contraste */
- 
-    --primary: 162 100% 40%;       /* #00CC9B - mais escuro para contraste */
-    --primary-foreground: 0 0% 6%;
- 
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 15%; /* ajustado para maior contraste */
- 
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 35%;    /* ajustado para maior contraste */
- 
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 15%;   /* ajustado para maior contraste */
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
- 
-    --border: 0 0% 80%;
-    --input: 0 0% 80%;
-    --ring: 162 100% 40%;
-  }
-}
- 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-inter;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-orbitron font-bold;
-  }
-  
-  /* Adicionar proteção para texto em fundos claros em modo light */
-  .light .text-black {
-    @apply text-foreground;
-  }
-  
-  /* Forçar texto a ser visível sempre */
-  .light button {
-    @apply text-foreground;
-  }
-  
-  /* Corrigir problemas de contraste em componentes específicos */
-  .light .input,
-  .light .select,
-  .light .textarea {
-    @apply text-foreground border-input bg-background;
-  }
-}
 
-@layer components {
-  .bitcoin-card {
-    @apply bg-card rounded-lg shadow-md border border-border/20 overflow-hidden transition-all hover:border-satotrack-neon/30 hover:shadow-lg w-full;
-  }
-  
-  .bitcoin-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-bitcoin to-bitcoin-dark;
-  }
+/* Importa estilos base (variáveis, reset, tipografia) */
+@import './styles/base.css';
 
-  .satotrack-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-satotrack-neon to-satotrack-neon/80;
-  }
-  
-  .cyberpunk-card {
-    @apply bg-dashboard-medium border border-satotrack-neon/20 rounded-lg shadow-lg overflow-hidden transition-all duration-300
-    hover:border-satotrack-neon/50 hover:shadow-satotrack-neon/20 w-full;
-  }
-  
-  .tech-outline {
-    @apply border border-satotrack-neon/30 shadow-sm transition-all duration-300
-    hover:border-satotrack-neon/50 hover:shadow-[0_0_10px_rgba(0,255,194,0.2)];
-  }
-  
-  .neon-glow {
-    @apply animate-glow;
-  }
+/* Importa estilos de componentes */
+@import './styles/components.css';
 
-  .terminal-text {
-    @apply font-mono text-satotrack-neon tracking-wide;
-  }
-  
-  .hacker-card {
-    @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-satotrack-neon/30 rounded-lg 
-    shadow-[0_4px_15px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300
-    hover:shadow-[0_8px_25px_rgba(0,0,0,0.5)] hover:border-satotrack-neon/60 w-full;
-  }
-  
-  .hacker-card::before {
-    content: '';
-    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-satotrack-neon/60 to-transparent;
-    animation: scan 2s linear infinite;
-  }
-  
-  .price-up {
-    @apply text-green-400;
-  }
-  
-  .price-down {
-    @apply text-satotrack-alert;
-  }
-  
-  /* Focus styles for accessibility */
-  .focus-visible-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-satotrack-neon/70 
-    focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-  }
-  
-  .page-transition {
-    @apply animate-fade-in;
-  }
-  
-  .view-transition {
-    @apply transition-all duration-300 ease-in-out;
-  }
-  
-  .view-enter {
-    @apply opacity-0 transform scale-95;
-  }
-  
-  .view-enter-active {
-    @apply opacity-100 transform scale-100;
-  }
-  
-  .view-exit {
-    @apply opacity-100 transform scale-100;
-  }
-  
-  .view-exit-active {
-    @apply opacity-0 transform scale-95;
-  }
+/* Importa animações */
+@import './styles/animations.css';
 
-  /* Mobile specific classes */
-  .mobile-card {
-    @apply p-2 sm:p-4 text-sm sm:text-base;
-  }
-  
-  .mobile-card-title {
-    @apply text-base sm:text-lg font-medium;
-  }
-  
-  .mobile-text {
-    @apply text-xs sm:text-sm;
-  }
-  
-  .mobile-container {
-    @apply px-2 py-2 sm:px-4 sm:py-4;
-  }
-}
+/* Importa classes utilitárias */
+@import './styles/utilities.css';
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  .animate-slide-in {
-    animation: slideIn 0.4s ease-out;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulseSlow 3s infinite;
-  }
-  
-  .animate-terminal-typing {
-    overflow: hidden;
-    border-right: 2px solid #00FFC2;
-    white-space: nowrap;
-    animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
-    max-width: fit-content;
-  }
-  
-  /* Responsive grid utilities */
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4;
-  }
-}
+/* Importa estilos de scrollbar */
+@import './styles/scrollbars.css';
 
-/* Keyframes for animations */
-@keyframes scan {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  0% {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  0% {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes pulseSlow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-@keyframes blink-caret {
-  from, to {
-    border-color: transparent;
-  }
-  50% {
-    border-color: #00FFC2;
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 2px #00FFC2);
-  }
-  50% {
-    filter: drop-shadow(0 0 6px #00FFC2);
-  }
-}
-
-/* Customizing scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-dashboard-medium;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-satotrack-neon/30;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-satotrack-neon/50;
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--secondary));
-}
-
+/* Configurações globais que não se encaixam em outras categorias */
 html, body {
   @apply bg-dashboard-dark;
 }
@@ -341,7 +34,7 @@ html, body {
   flex-direction: column;
 }
 
-/* Mobile-specific media queries */
+/* Media queries específicas */
 @media (max-width: 640px) {
   .card-grid {
     grid-template-columns: 1fr;

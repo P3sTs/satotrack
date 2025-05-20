@@ -1,4 +1,8 @@
 
+/* SatoTrack - Sistema de rastreamento de carteiras Bitcoin
+ * Main stylesheet - Importa todos os outros estilos
+ */
+
 /* Tailwind directives */
 @tailwind base;
 @tailwind components;

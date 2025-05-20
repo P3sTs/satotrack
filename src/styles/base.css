@@ -112,6 +112,23 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-orbitron font-bold;
   }
+
+  /* Adicionar proteção para texto em fundos claros em modo light */
+  .light .text-black {
+    @apply text-foreground;
+  }
+  
+  /* Forçar texto a ser visível sempre */
+  .light button {
+    @apply text-foreground;
+  }
+  
+  /* Corrigir problemas de contraste em componentes específicos */
+  .light .input,
+  .light .select,
+  .light .textarea {
+    @apply text-foreground border-input bg-background;
+  }
   
   /* Tipografia personalizada */
   .font-inter {
