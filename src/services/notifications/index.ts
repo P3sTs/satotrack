@@ -6,11 +6,15 @@ import {
   sendPriceAlert, 
   sendTransactionNotification,
   sendIntelligentAlert,
+} from './alerts';
+import { sendEmailSummary } from './email';
+
+// Type imports
+import type { 
   PriceAlertDetails,
   TransactionAlertDetails,
   IntelligentAlertType
 } from './alerts';
-import { sendEmailSummary } from './email';
 
 // Sistema de notificações aprimorado
 export {
@@ -28,11 +32,9 @@ export {
   sendTransactionNotification,
   sendIntelligentAlert,
   
-  // Tipos de alertas
-  PriceAlertDetails,
-  TransactionAlertDetails,
-  IntelligentAlertType,
-  
   // Relatórios e sumários automáticos
   sendEmailSummary
 };
+
+// Re-export types with explicit type syntax
+export type { PriceAlertDetails, TransactionAlertDetails, IntelligentAlertType };

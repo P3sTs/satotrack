@@ -95,7 +95,6 @@ export const sendPriceAlert = async (
     
     // Enviar email se habilitado
     if (settings.email_daily_summary || settings.email_weekly_summary) {
-      const subject = `${priceChange > 0 ? '📈' : '📉'} Alerta de Preço Bitcoin - ${Math.abs(priceChange).toFixed(2)}%`;
       await sendEmailSummary(userId, 'daily', {
         includeTransactions: false,
         includeMarketAnalysis: includeAI && isPremium,
