@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -59,28 +58,28 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+					DEFAULT: 'hsl(var(--sidebar-background, var(--card)))',
+					foreground: 'hsl(var(--sidebar-foreground, var(--card-foreground)))',
+					primary: 'hsl(var(--sidebar-primary, var(--primary)))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground, var(--primary-foreground)))',
+					accent: 'hsl(var(--sidebar-accent, var(--accent)))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground, var(--accent-foreground)))',
+					border: 'hsl(var(--sidebar-border, var(--border)))',
+					ring: 'hsl(var(--sidebar-ring, var(--ring)))'
 				},
 				bitcoin: {
 					DEFAULT: '#F7931A',
 					dark: '#D97C0B'
 				},
 				dashboard: {
-					dark: '#0F0F0F',   // Preto profundo
-					medium: '#1A1A1A',  // Base neutra 1
-					light: '#2B2B2B'    // Base neutra 2
+					dark: 'hsl(var(--dashboard-dark))',
+					medium: 'hsl(var(--dashboard-medium))',
+					light: 'hsl(var(--dashboard-light))'
 				},
 				satotrack: {
-					neon: '#00FFC2',    // Verde neon para destaques
-					alert: '#FF6F00',   // Laranja queimado para alertas
-					text: '#727272'     // Cinza médio para textos secundários
+					neon: 'hsl(var(--satotrack-neon))',
+					alert: 'hsl(var(--satotrack-alert))',
+					text: 'hsl(var(--satotrack-text))'
 				}
 			},
 			borderRadius: {

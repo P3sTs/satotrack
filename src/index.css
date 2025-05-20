@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -41,25 +40,25 @@
  
   .light {
     --background: 0 0% 98%;
-    --foreground: 0 0% 6%;
+    --foreground: 0 0% 10%;        /* ajustado para maior contraste */
  
     --card: 0 0% 96%;
-    --card-foreground: 0 0% 6%;
+    --card-foreground: 0 0% 10%;   /* ajustado para maior contraste */
  
     --popover: 0 0% 98%;
-    --popover-foreground: 0 0% 6%;
+    --popover-foreground: 0 0% 10%; /* ajustado para maior contraste */
  
-    --primary: 162 100% 50%;       /* #00FFC2 com texto escuro */
+    --primary: 162 100% 40%;       /* #00CC9B - mais escuro para contraste */
     --primary-foreground: 0 0% 6%;
  
     --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 6%;
+    --secondary-foreground: 0 0% 15%; /* ajustado para maior contraste */
  
     --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 0 0% 35%;    /* ajustado para maior contraste */
  
     --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 6%;
+    --accent-foreground: 0 0% 15%;   /* ajustado para maior contraste */
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -79,6 +78,23 @@
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-orbitron font-bold;
+  }
+  
+  /* Adicionar proteção para texto em fundos claros em modo light */
+  .light .text-black {
+    @apply text-foreground;
+  }
+  
+  /* Forçar texto a ser visível sempre */
+  .light button {
+    @apply text-foreground;
+  }
+  
+  /* Corrigir problemas de contraste em componentes específicos */
+  .light .input,
+  .light .select,
+  .light .textarea {
+    @apply text-foreground border-input bg-background;
   }
 }
 
