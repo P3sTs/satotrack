@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/auth';
 import { useCarteiras } from '@/contexts/CarteirasContext';
-import { ArrowUp, ArrowDown, ChartLine, Calculator, Info, BrainCircuit, Target, TrendingUp } from 'lucide-react';
+import { ArrowUp, ArrowDown, ChartLine, Calculator, Info, BrainCircuit, Target, TrendingUp, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

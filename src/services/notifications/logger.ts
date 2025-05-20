@@ -34,7 +34,7 @@ export const logNotification = async (
     };
 
     const { data, error } = await supabase
-      .from('notification_history')
+      .from('notification_logs')
       .insert(event)
       .select('id')
       .single();
@@ -63,7 +63,7 @@ export const markNotificationAsRead = async (
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('notification_history')
+      .from('notification_logs')
       .update({ status: 'read' })
       .match({ id: notificationId, user_id: userId });
 
@@ -93,7 +93,7 @@ export const getNotificationHistory = async (
 ): Promise<NotificationEvent[]> => {
   try {
     const { data, error } = await supabase
-      .from('notification_history')
+      .from('notification_logs')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -122,7 +122,7 @@ export const cleanupOldNotifications = async (userId: string): Promise<number> =
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
     const { data, error } = await supabase
-      .from('notification_history')
+      .from('notification_logs')
       .delete()
       .eq('user_id', userId)
       .lt('created_at', thirtyDaysAgo.toISOString())

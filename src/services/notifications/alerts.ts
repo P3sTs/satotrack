@@ -57,8 +57,17 @@ export const sendPriceAlert = async (
       current_price: currentPrice
     };
     
+    // Get user plan to check if they are premium
+    const { data: userPlan } = await supabase
+      .from('user_plans')
+      .select('plan_type')
+      .eq('user_id', userId)
+      .single();
+      
+    const isPremium = userPlan?.plan_type === 'premium';
+    
     // Adicionar análise de IA se solicitado e o usuário for premium
-    if (includeAI && settings.is_premium) {
+    if (includeAI && isPremium) {
       try {
         const { data: aiData } = await supabase.functions.invoke('analyze-price-movement', {
           body: { price_change: priceChange, current_price: currentPrice }
@@ -98,11 +107,11 @@ export const sendPriceAlert = async (
     }
     
     // Enviar email se habilitado
-    if (settings.email_notifications_enabled) {
+    if (settings.email_daily_summary || settings.email_weekly_summary) {
       const subject = `${priceChange > 0 ? '📈' : '📉'} Alerta de Preço Bitcoin - ${Math.abs(priceChange).toFixed(2)}%`;
       await sendEmailSummary(userId, 'daily', {
         includeTransactions: false,
-        includeMarketAnalysis: includeAI && settings.is_premium,
+        includeMarketAnalysis: includeAI && isPremium,
         includePriceAlerts: true
       });
     }
@@ -168,12 +177,16 @@ export const sendTransactionNotification = async (
     }
     
     // Enviar email se habilitado para transações grandes
-    if (settings.email_notifications_enabled && amount >= (settings.large_transaction_threshold || 0.1)) {
-      await sendEmailSummary(userId, 'daily', {
-        includeTransactions: true,
-        includeMarketAnalysis: false,
-        includePriceAlerts: false
-      });
+    if (settings.email_daily_summary || settings.email_weekly_summary) {
+      // Consider transactions over 0.1 BTC as large (adjust as needed)
+      const largeTransactionThreshold = 0.1;
+      if (amount >= largeTransactionThreshold) {
+        await sendEmailSummary(userId, 'daily', {
+          includeTransactions: true,
+          includeMarketAnalysis: false,
+          includePriceAlerts: false
+        });
+      }
     }
     
     return true;
@@ -192,30 +205,39 @@ export const sendIntelligentAlert = async (
 ) => {
   try {
     // Verificar se o usuário é premium
-    const { data: user } = await supabase
-      .from('user_settings')
-      .select('is_premium, push_notifications_enabled, telegram_notifications_enabled, email_notifications_enabled')
+    const { data: userPlan } = await supabase
+      .from('user_plans')
+      .select('plan_type')
       .eq('user_id', userId)
       .single();
     
-    if (!user?.is_premium) return false; // Somente para usuários premium
+    if (!userPlan || userPlan.plan_type !== 'premium') return false; // Somente para usuários premium
+    
+    // Obter configurações de notificação do usuário
+    const { data: settings } = await supabase
+      .from('user_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+      
+    if (!settings) return false;
     
     // Registrar alerta
     await logNotification(userId, `intelligent_${alertType}`, 'created', details);
     
     // Enviar por todos os canais configurados
-    if (user.push_notifications_enabled && Notification.permission === 'granted') {
+    if (settings.push_notifications_enabled && Notification.permission === 'granted') {
       sendPushNotification(`🧠 Insight Inteligente SatoTrack`, {
         body: message,
         tag: `intelligent-${alertType}`
       });
     }
     
-    if (user.telegram_notifications_enabled) {
+    if (settings.telegram_notifications_enabled && settings.telegram_chat_id) {
       await sendTelegramNotification(userId, message, `intelligent_${alertType}`, details);
     }
     
-    if (user.email_notifications_enabled) {
+    if (settings.email_daily_summary || settings.email_weekly_summary) {
       // Incluir no próximo relatório
       // Opcionalmente, enviar email imediato para insights importantes
       if (alertType === 'opportunity' || alertType === 'risk') {

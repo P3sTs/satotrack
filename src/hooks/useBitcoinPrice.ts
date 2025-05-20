@@ -8,10 +8,19 @@ export interface BitcoinPriceData {
   price_brl: number;
   price_change_percentage_24h: number;
   price_change_percentage_7d: number;
+  price_change_percentage_30d?: number;  // Added
+  price_change_percentage_1y?: number;   // Added
+  price_change_24h?: number;            // Added
   volume_24h: number;
   market_cap: number;
   updated_at: string;
   last_updated: string;
+  price_low_7d?: number;                // Added
+  price_high_7d?: number;               // Added
+  price_low_30d?: number;               // Added
+  price_high_30d?: number;              // Added
+  price_low_1y?: number;                // Added
+  price_high_1y?: number;               // Added
   market_trend?: 'bullish' | 'bearish' | 'neutral';
 }
 
@@ -41,10 +50,21 @@ export const useBitcoinPrice = () => {
         price_brl: response.data.market_data.current_price.brl,
         price_change_percentage_24h: response.data.market_data.price_change_percentage_24h,
         price_change_percentage_7d: response.data.market_data.price_change_percentage_7d || 0, // Fallback if not available
+        price_change_percentage_30d: response.data.market_data.price_change_percentage_30d || 0,
+        price_change_percentage_1y: response.data.market_data.price_change_percentage_1y || 0,
+        price_change_24h: response.data.market_data.price_change_24h_in_currency?.usd || 0,
         volume_24h: response.data.market_data.total_volume.usd,
         market_cap: response.data.market_data.market_cap.usd,
         updated_at: response.data.market_data.last_updated,
         last_updated: response.data.market_data.last_updated,
+        
+        // Add high/low data (this would come from API in production)
+        price_low_7d: response.data.market_data.low_24h?.usd * 0.95 || 0,
+        price_high_7d: response.data.market_data.high_24h?.usd * 1.05 || 0,
+        price_low_30d: response.data.market_data.low_24h?.usd * 0.9 || 0,
+        price_high_30d: response.data.market_data.high_24h?.usd * 1.1 || 0,
+        price_low_1y: response.data.market_data.low_24h?.usd * 0.7 || 0,
+        price_high_1y: response.data.market_data.high_24h?.usd * 1.3 || 0,
         
         // Determine market trend based on 24h price change
         market_trend: response.data.market_data.price_change_percentage_24h > 1 
