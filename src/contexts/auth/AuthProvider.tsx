@@ -69,6 +69,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     canAddMoreWallets,
   } = useAuthPlans(user ? user as AuthUser : null);
 
+  // Define isPremium based on userPlan before using it
+  const isPremium = userPlan === 'premium';
+
   // Mostrar mensagem de boas-vindas quando o usuário faz login
   useEffect(() => {
     if (isAuthenticated && lastActivity && Date.now() - lastActivity < 3000) {
@@ -162,8 +165,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return { score, feedback };
   }, []);
-
-  const isPremium = userPlan === 'premium';
 
   // Provide context value
   const contextValue: AuthContextType = {
