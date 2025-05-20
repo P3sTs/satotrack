@@ -3,6 +3,7 @@ import React from 'react';
 import BitcoinCandlestickChart from './BitcoinCandlestickChart';
 import BitcoinPriceCard from './BitcoinPriceCard';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BitcoinChartGridProps {
   bitcoinData: BitcoinPriceData;
@@ -10,6 +11,8 @@ interface BitcoinChartGridProps {
 }
 
 const BitcoinChartGrid = ({ bitcoinData, previousPrice }: BitcoinChartGridProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
       <div className="col-span-1 lg:col-span-2">
@@ -43,7 +46,7 @@ const BitcoinChartGrid = ({ bitcoinData, previousPrice }: BitcoinChartGridProps)
         
         {/* Volume 24h */}
         <BitcoinPriceCard
-          title="Volume 24h"
+          title={isMobile ? "Volume" : "Volume 24h"}
           price={bitcoinData.volume_24h}
           currency="USD"
           showChange={false}

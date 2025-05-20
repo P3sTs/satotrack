@@ -40,29 +40,29 @@ const BitcoinPriceCard = ({
   const changeState = getChangeState();
   
   return (
-    <Card className="bitcoin-card overflow-hidden border-none shadow-md transition-all duration-300">
-      <CardHeader className="pb-2 bg-muted/30">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+    <Card className="bitcoin-card overflow-hidden border-border/20 dark:border-none shadow-md transition-all duration-300">
+      <CardHeader className="pb-2 bg-muted/30 dark:bg-muted/30">
+        <CardTitle className="text-base sm:text-lg font-medium">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
-        <div className="flex items-baseline justify-between">
+      <CardContent className="pt-3 sm:pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-0">
           <DynamicValue
             value={price}
             previousValue={previousPrice}
             formatFunc={(val) => formatCurrency(val, currency)}
             changeState={changeState}
             showAnimation={animateChanges}
-            className="text-2xl md:text-3xl font-bold"
-            iconClassName="h-4 w-4 ml-1"
+            className="text-xl sm:text-2xl md:text-3xl font-bold"
+            iconClassName="h-3 w-3 sm:h-4 sm:w-4 ml-1"
             showIcon={false}
           />
           
           {showChange && changePercentage !== undefined && (
-            <div className={`flex items-center font-medium ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
+            <div className={`flex items-center font-medium text-sm sm:text-base ${isNegative ? 'text-satotrack-alert dark:text-red-500' : 'text-satotrack-success dark:text-green-500'}`}>
               {isNegative ? (
-                <TrendingDown className="h-4 w-4 mr-1" />
+                <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               ) : (
-                <TrendingUp className="h-4 w-4 mr-1" />
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               )}
               <span>{Math.abs(changePercentage).toFixed(2)}%</span>
             </div>
