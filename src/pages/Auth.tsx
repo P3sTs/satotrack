@@ -14,12 +14,12 @@ const Auth = () => {
   const { failedLoginAttempts, securityStatus, resetFailedLoginAttempts } = useAuth();
   const isMobile = useIsMobile();
 
-  // Reset login attempt counter after 15 minutes
+  // Resetar contador de tentativas de login após 15 minutos
   React.useEffect(() => {
     if (failedLoginAttempts > 0) {
       const timer = setTimeout(() => {
         resetFailedLoginAttempts();
-      }, 15 * 60 * 1000); // 15 minutes
+      }, 15 * 60 * 1000); // 15 minutos
 
       return () => clearTimeout(timer);
     }
@@ -27,7 +27,7 @@ const Auth = () => {
 
   return (
     <>
-      {/* Redirect logged in users */}
+      {/* Redirecionar usuários logados */}
       <AuthRedirect />
       
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-background px-4 py-8 md:py-12">

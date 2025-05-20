@@ -20,6 +20,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { session, user, loading, setSession, setUser } = useAuthSession();
   const location = useLocation();
   
+  // Controle para exibir a mensagem de boas-vindas apenas uma vez
+  const [welcomeToastShown, setWelcomeToastShown] = useState(false);
+  
   // Additional auth-related state/functions
   const isAuthenticated = !!session && !!user;
   
@@ -74,8 +77,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Mostrar mensagem de boas-vindas quando o usuário faz login
   useEffect(() => {
-    if (isAuthenticated && lastActivity && Date.now() - lastActivity < 3000) {
+    if (isAuthenticated && lastActivity && Date.now() - lastActivity < 3000 && !welcomeToastShown) {
       const displayName = user?.email?.split('@')[0] || 'usuário';
+      
+      // Atualizar o estado para indicar que o toast foi exibido
+      setWelcomeToastShown(true);
       
       // Mostrar toast de boas-vindas
       toast({
@@ -103,7 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         checkImportantAlerts();
       }
     }
-  }, [isAuthenticated, lastActivity, user, isPremium]);
+  }, [isAuthenticated, lastActivity, user, isPremium, welcomeToastShown]);
   
   // Update user's last activity when they interact with the app
   useEffect(() => {

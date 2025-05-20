@@ -51,12 +51,12 @@ const Dashboard: React.FC = () => {
         reachedLimit={reachedLimit}
       />
       
-      {/* Free plan limitation notice */}
+      {/* Aviso de limitação do plano gratuito */}
       {!isPremium && (
         <FreePlanNotice walletLimit={walletLimit} usedWallets={carteiras.length} />
       )}
       
-      {/* Premium Banner for free users */}
+      {/* Banner Premium para usuários gratuitos */}
       {!isPremium && (
         <PremiumBanner className="mb-6 animate-fade-in" />
       )}
@@ -64,20 +64,20 @@ const Dashboard: React.FC = () => {
       {/* Carteira Principal */}
       <PrimaryWallet wallet={principalCarteira} />
       
-      {/* Premium Dashboard for all users (feature gated) */}
+      {/* Dashboard Premium para todos os usuários (com funcionalidades limitadas) */}
       <div className="mb-6">
         <PremiumDashboard />
       </div>
       
-      {/* Premium Wallet Comparison */}
+      {/* Comparação de Carteiras Premium */}
       <div className="mb-6">
         <WalletComparison />
       </div>
       
-      {/* Premium Features with locks for free users */}
+      {/* Recursos Premium com bloqueios para usuários gratuitos */}
       {!isPremium && <PremiumFeatures />}
       
-      {/* Advertisement for free users */}
+      {/* Anúncios para usuários gratuitos */}
       {!isPremium && (
         <Advertisement position="panel" className="mb-6" />
       )}
@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
         onNewWallet={() => setIsNewWalletModalOpen(true)}
       />
       
-      {/* Final CTA for free users */}
+      {/* CTA final para usuários gratuitos */}
       {!isPremium && (
         <div className="bg-dashboard-medium text-center p-6 rounded-lg border border-dashboard-medium/50 mt-8">
           <h3 className="text-lg font-medium mb-3">Desbloqueie Todo o Potencial do SatoTrack</h3>

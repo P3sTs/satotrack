@@ -17,9 +17,9 @@ const NavBar: React.FC = () => {
   const isPremium = userPlan === 'premium';
   const isMobile = useIsMobile();
   
-  // Debug log to track authentication status
+  // Debug log para acompanhar o status de autenticação
   useEffect(() => {
-    console.log("NavBar: Authentication status =", isAuthenticated, "User =", !!user);
+    console.log("NavBar: Status de autenticação =", isAuthenticated, "Usuário =", !!user);
   }, [isAuthenticated, user]);
   
   const handleLogout = () => {
@@ -31,7 +31,7 @@ const NavBar: React.FC = () => {
         description: "Você foi desconectado com sucesso",
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Erro ao sair:', error);
       toast({
         title: "Erro ao sair",
         description: "Não foi possível realizar o logout",
@@ -40,13 +40,13 @@ const NavBar: React.FC = () => {
     }
   };
 
-  // Get user initials for avatar
+  // Obter iniciais do usuário para o avatar
   const getUserInitials = () => {
     if (!user?.email) return 'U';
     return user.email.substring(0, 1).toUpperCase();
   };
 
-  // Handle premium button click
+  // Lidar com o clique no botão premium
   const handlePremiumClick = () => {
     if (isPremium) {
       navigate('/premium-dashboard');
@@ -65,7 +65,7 @@ const NavBar: React.FC = () => {
     }
   };
 
-  // Don't render on mobile as we have MobileNavigation
+  // Não renderizar em dispositivos móveis, pois temos o MobileNavigation
   if (isMobile) {
     return null;
   }
@@ -77,19 +77,19 @@ const NavBar: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="SatoTrack Logo" className="h-6 w-6 md:h-8 md:w-8" />
+              <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-8 md:w-8" />
               <span className="font-orbitron text-lg md:text-xl font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
                 SatoTrack
               </span>
             </Link>
           </div>
           
-          {/* Desktop Navigation - Centered */}
+          {/* Navegação Desktop - Centralizada */}
           <div className="hidden md:flex items-center justify-center flex-1 px-4">
             <MainNav />
           </div>
           
-          {/* Premium Button for all users */}
+          {/* Botão Premium para todos os usuários */}
           <Button 
             variant={isPremium ? "bitcoin" : "outline"} 
             size="sm"
@@ -100,7 +100,7 @@ const NavBar: React.FC = () => {
             {isPremium ? 'Premium' : 'Quero ser Premium'}
           </Button>
           
-          {/* Auth actions */}
+          {/* Ações de autenticação */}
           <div className="hidden md:flex items-center gap-2">
             {user && <PlanBadge />}
             <UserMenu 

@@ -10,7 +10,7 @@ const Index = () => {
 
   // Efeito para redirecionamento com base no estado de autenticação
   useEffect(() => {
-    console.log("Index - Auth state:", !!user, "Loading:", loading);
+    console.log("Index - Estado de autenticação:", !!user, "Carregando:", loading);
     
     if (!loading) {
       if (!user) {
