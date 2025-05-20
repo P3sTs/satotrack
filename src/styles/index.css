@@ -1,5 +1,10 @@
 
-/* Import base styles with Tailwind directives */
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import base styles */
 @import './base.css';
 
 /* Import component-specific styles */
