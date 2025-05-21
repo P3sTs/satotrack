@@ -59,14 +59,7 @@ const AppLayout = () => {
             )}
             
             {/* Main Content Area */}
-            <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
-              <Suspense fallback={<LoadingFallback />}>
-                <Outlet />
-              </Suspense>
-            </div>
-            
-            <Footer />
-            {showAds && <Advertisement position="footer" />}
+            <AppContent showAds={showAds} />
           </SidebarInset>
         </div>
       </div>
