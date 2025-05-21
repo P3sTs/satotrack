@@ -30,9 +30,18 @@ const Index = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-dashboard-dark">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-bitcoin mb-4"></div>
-        <div className="text-white flex items-center">
-          <ShieldCheck className="h-5 w-5 mr-2 text-green-500" />
+        <div className="relative h-16 w-16 mb-4">
+          <div className="absolute inset-0 rounded-full border-2 border-t-satotrack-neon border-x-transparent border-b-transparent animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" 
+              alt="SatoTrack" 
+              className="h-8 w-8 opacity-70"
+            />
+          </div>
+        </div>
+        <div className="text-satotrack-text flex items-center">
+          <ShieldCheck className="h-5 w-5 mr-2 text-satotrack-neon" />
           <span>Verificando sessão segura...</span>
         </div>
       </div>

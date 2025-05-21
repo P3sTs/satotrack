@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bitcoin } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { SecurityStatus } from '@/components/auth/SecurityStatus';
 import { LoginSecurityAlert } from '@/components/auth/LoginSecurityAlert';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -34,8 +34,13 @@ const Auth = () => {
         <div className="w-full max-w-sm md:max-w-md">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
-              <Bitcoin size={isMobile ? 24 : 28} className="text-bitcoin" />
-              <h1 className="text-lg md:text-2xl font-bold">Bitcoin Wallet Monitor</h1>
+              <div className="relative h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-7 md:w-7 opacity-80" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
+              </div>
+              <h1 className="text-lg md:text-2xl font-bold text-satotrack-text">Monitoramento Bitcoin</h1>
             </div>
           </div>
           

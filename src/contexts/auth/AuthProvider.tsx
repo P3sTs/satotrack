@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { session, user, loading, setSession, setUser } = useAuthSession();
   const location = useLocation();
   
-  // Controle para exibir a mensagem de boas-vindas apenas uma vez
+  // Controle para exibir a mensagem de boas-vindas apenas uma vez por sessão
   const [welcomeToastShown, setWelcomeToastShown] = useState(false);
   
   // Additional auth-related state/functions
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Define isPremium based on userPlan before using it
   const isPremium = userPlan === 'premium';
 
-  // Mostrar mensagem de boas-vindas quando o usuário faz login
+  // Mostrar mensagem de boas-vindas apenas quando o usuário faz login e ainda não mostrou
   useEffect(() => {
     if (isAuthenticated && lastActivity && Date.now() - lastActivity < 3000 && !welcomeToastShown) {
       const displayName = user?.email?.split('@')[0] || 'usuário';

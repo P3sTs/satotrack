@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Lock } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PremiumBannerProps {
@@ -18,10 +18,10 @@ const PremiumBanner: React.FC<PremiumBannerProps> = ({ className }) => {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="relative z-10 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="flex items-center gap-2 text-lg font-medium">
-            <Lock className="h-4 w-4 text-satotrack-neon" />
+          <h3 className="flex items-center gap-2 text-lg font-medium text-satotrack-text">
+            <Star className="h-4 w-4 text-bitcoin" />
             <span>Liberte o poder do SatoTrack Premium</span>
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -29,7 +29,7 @@ const PremiumBanner: React.FC<PremiumBannerProps> = ({ className }) => {
           </p>
         </div>
         <Link to="/planos">
-          <Button variant="neon">
+          <Button variant="bitcoin" className="text-white border-none bg-bitcoin hover:bg-bitcoin-dark">
             Conheça o Premium
           </Button>
         </Link>

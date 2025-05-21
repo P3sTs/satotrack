@@ -71,14 +71,19 @@ const NavBar: React.FC = () => {
   }
 
   return (
-    <header className="bg-dashboard-dark text-white sticky top-0 z-50 border-b border-dashboard-medium/30">
+    <header className="bg-dashboard-dark text-satotrack-text sticky top-0 z-50 border-b border-dashboard-medium/30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-14 md:h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-8 md:w-8" />
-              <span className="font-orbitron text-lg md:text-xl font-bold text-transparent bg-clip-text bg-satotrack-logo-gradient">
+              <div className="relative h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-7 md:w-7 opacity-80" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
+              </div>
+              <span className="font-orbitron text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-300">
                 SatoTrack
               </span>
             </Link>

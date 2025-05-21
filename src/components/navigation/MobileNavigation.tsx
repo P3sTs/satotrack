@@ -133,20 +133,25 @@ const MobileNavigation: React.FC = () => {
   };
 
   return (
-    <div className="bg-dashboard-dark border-b border-dashboard-medium/30 sticky top-0 z-50">
+    <div className="bg-dashboard-dark border-b border-dashboard-light/10 sticky top-0 z-50">
       <div className="flex justify-between items-center h-14 px-4">
         {/* Logo */}
         <div className="flex items-center">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <img src="/favicon.ico" alt="SatoTrack Logo" className="h-6 w-6" />
-            <span className="font-bold text-lg text-white">SatoTrack</span>
+            <div className="relative h-7 w-7 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" alt="Logo SatoTrack" className="h-5 w-5 opacity-80" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
+            </div>
+            <span className="font-orbitron font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-300">SatoTrack</span>
           </button>
         </div>
         
         {/* Gatilho do menu mobile */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button variant="ghost" size="icon" className="text-satotrack-text">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
             </Button>
@@ -156,7 +161,7 @@ const MobileNavigation: React.FC = () => {
               {/* Botão fechar e informações do usuário */}
               <div className="flex justify-between items-center p-4 border-b border-dashboard-medium/30">
                 <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5 text-satotrack-text" />
                 </Button>
                 
                 {isAuthenticated ? (
@@ -167,7 +172,7 @@ const MobileNavigation: React.FC = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm truncate max-w-[120px]">{user?.email}</p>
+                      <p className="text-sm truncate max-w-[120px] text-satotrack-text">{user?.email}</p>
                       <PlanBadge />
                     </div>
                   </div>
@@ -197,8 +202,8 @@ const MobileNavigation: React.FC = () => {
                         "flex items-center w-full px-3 py-2 rounded-md text-sm",
                         item.isSubmenu ? "pl-6" : "",
                         isActive(item.href)
-                          ? "bg-dashboard-medium/30 text-satotrack-neon"
-                          : "text-white hover:bg-dashboard-medium/20"
+                          ? "bg-dashboard-medium/60 text-satotrack-neon"
+                          : "text-satotrack-text hover:bg-dashboard-medium/40"
                       )}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -227,7 +232,7 @@ const MobileNavigation: React.FC = () => {
                 <div className="p-4 border-t border-dashboard-medium/30">
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start text-white border-dashboard-medium"
+                    className="w-full justify-start text-satotrack-text border-dashboard-medium"
                     onClick={handleLogout}
                   >
                     Sair

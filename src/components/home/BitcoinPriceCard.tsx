@@ -40,9 +40,9 @@ const BitcoinPriceCard = ({
   const changeState = getChangeState();
   
   return (
-    <Card className="bitcoin-card overflow-hidden border-border/20 dark:border-none shadow-md transition-all duration-300">
-      <CardHeader className="pb-2 bg-muted/30 dark:bg-muted/30">
-        <CardTitle className="text-base sm:text-lg font-medium">{title}</CardTitle>
+    <Card className="bitcoin-card overflow-hidden border-border/40 dark:border-none shadow-md transition-all duration-300 bg-card/95">
+      <CardHeader className="pb-2 bg-muted/50 dark:bg-muted/30">
+        <CardTitle className="text-base sm:text-lg font-medium text-card-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent className="pt-3 sm:pt-4">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-0">
@@ -52,7 +52,7 @@ const BitcoinPriceCard = ({
             formatFunc={(val) => formatCurrency(val, currency)}
             changeState={changeState}
             showAnimation={animateChanges}
-            className="text-xl sm:text-2xl md:text-3xl font-bold"
+            className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground"
             iconClassName="h-3 w-3 sm:h-4 sm:w-4 ml-1"
             showIcon={false}
           />

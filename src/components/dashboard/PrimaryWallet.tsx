@@ -12,7 +12,7 @@ const PrimaryWallet: React.FC<PrimaryWalletProps> = ({ wallet }) => {
   
   return (
     <div className="mb-6 md:mb-8">
-      <h2 className="text-xl font-medium mb-3 md:mb-4">Carteira Principal</h2>
+      <h2 className="text-xl font-medium mb-3 md:mb-4 text-satotrack-text">Carteira Principal</h2>
       <div className="max-w-full lg:max-w-2xl">
         <CarteiraCard
           carteira={wallet}

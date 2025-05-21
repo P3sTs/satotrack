@@ -93,8 +93,8 @@ const Dashboard: React.FC = () => {
       
       {/* CTA final para usuários gratuitos */}
       {!isPremium && (
-        <div className="bg-dashboard-medium text-center p-6 rounded-lg border border-dashboard-medium/50 mt-8">
-          <h3 className="text-lg font-medium mb-3">Desbloqueie Todo o Potencial do SatoTrack</h3>
+        <div className="bg-dashboard-medium text-center p-6 rounded-lg border border-dashboard-light/50 mt-8">
+          <h3 className="text-lg font-medium mb-3 text-satotrack-text">Desbloqueie Todo o Potencial do SatoTrack</h3>
           <p className="text-muted-foreground mb-4 max-w-lg mx-auto">
             Desbloqueie gráficos avançados, alertas automáticos, filtros detalhados e muito mais 
             com apenas R$9,90/mês.
