@@ -2,7 +2,6 @@
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { AuthUser } from '@/contexts/auth/types';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
 import MobileMenu from './MobileMenu';
 import { useLocation } from 'react-router-dom';
 
@@ -40,10 +39,16 @@ const MobileMenuContainer: React.FC<MobileMenuContainerProps> = ({
   
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(true)} aria-label="Menu">
-        {trigger}
-      </Button>
-      <SheetContent side="right" className="w-full max-w-xs p-0">
+      <div className="md:hidden">
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)} 
+          className="text-satotrack-text"
+          aria-label="Menu"
+        >
+          {trigger}
+        </button>
+      </div>
+      <SheetContent side="right" className="w-[85%] max-w-xs border-dashboard-medium bg-dashboard-dark p-0">
         <MobileMenu
           user={user}
           isActive={isActive}

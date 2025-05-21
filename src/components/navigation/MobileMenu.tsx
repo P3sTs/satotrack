@@ -2,14 +2,15 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Info, Shield, Star } from 'lucide-react';
+import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Info, Shield, Star, X } from 'lucide-react';
 import { AuthUser } from '@/contexts/auth/types';
+import { PlanBadge } from '../monetization/PlanDisplay';
 
 interface MobileMenuProps {
   user: AuthUser | null;
   isActive: (path: string) => boolean;
   handleNavigation: (path: string) => void;
-  handleLogout: () => void; // Updated to match MobileMenuContainer
+  handleLogout: () => void;
   getUserInitials: () => string;
   onClose: () => void;
   isPremium?: boolean;
@@ -32,129 +33,140 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   };
 
   return (
-    <div className="space-y-3 py-3">
-      {user && (
-        <div className="flex flex-col items-center py-4 mb-2 border-b border-dashboard-medium/30">
-          <Avatar className="h-16 w-16 mb-2">
-            <AvatarFallback className="bg-satotrack-neon/20 text-satotrack-neon text-lg">
-              {getUserInitials()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-center">
-            <p className="text-sm font-medium">{user.email}</p>
-            <p className="text-xs text-satotrack-text mt-1">
-              {isPremium ? (
-                <span className="flex items-center justify-center text-bitcoin">
-                  <Star className="h-3 w-3 mr-1 fill-bitcoin" /> Usuário Premium
-                </span>
-              ) : (
-                "Usuário SatoTrack"
-              )}
-            </p>
+    <div className="flex flex-col h-full">
+      {/* Botão fechar e informações do usuário */}
+      <div className="flex justify-between items-center p-4 border-b border-dashboard-medium/30">
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-5 w-5 text-satotrack-text" />
+        </Button>
+        
+        {user ? (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-satotrack-neon/20 text-satotrack-neon">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm truncate max-w-[120px] text-satotrack-text">{user.email}</p>
+              <PlanBadge />
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <Button 
+            variant="neon" 
+            size="sm" 
+            onClick={() => navigate('/auth')}
+          >
+            <User className="h-4 w-4 mr-2" />
+            Entrar
+          </Button>
+        )}
+      </div>
       
-      <button 
-        onClick={() => navigate('/')}
-        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-      >
-        <User className="h-4 w-4 mr-2" />
-        Início
-      </button>
-      
-      {user && (
-        <>
+      {/* Links de navegação */}
+      <div className="flex-1 overflow-y-auto py-4">
+        <nav className="space-y-1 px-2">
           <button 
-            onClick={() => navigate('/dashboard')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+            onClick={() => navigate('/')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
           >
-            <Mail className="h-4 w-4 mr-2" />
-            Dashboard
+            <User className="h-4 w-4 mr-2" />
+            Início
           </button>
           
-          <button 
-            onClick={() => navigate('/carteiras')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-          >
-            <Wallet className="h-4 w-4 mr-2" />
-            Gerenciar Carteiras
-          </button>
-          
-          <button 
-            onClick={() => navigate('/nova-carteira')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
-          >
-            <Wallet className="h-4 w-4 mr-2" />
-            Nova Carteira
-          </button>
-          
-          <button 
-            onClick={() => navigate('/mercado')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/mercado') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Mercado
-          </button>
-          
-          <button 
-            onClick={() => navigate('/notificacoes')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/notificacoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-          >
-            <Bell className="h-4 w-4 mr-2" />
-            Notificações
-          </button>
-          
-          <button 
-            onClick={() => navigate('/configuracoes')}
-            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/configuracoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Configurações
-          </button>
-          
-          {/* Premium Button */}
-          {onPremiumClick && (
-            <button 
-              onClick={onPremiumClick}
-              className={`flex w-full items-center py-2 px-4 rounded-md mt-2 ${
-                isPremium 
-                  ? 'bg-bitcoin/20 text-bitcoin' 
-                  : 'border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10'
-              }`}
-            >
-              <Star className={`h-4 w-4 mr-2 ${isPremium ? 'fill-bitcoin' : ''}`} />
-              {isPremium ? 'Painel Premium' : 'Quero ser Premium'}
-            </button>
+          {user && (
+            <>
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/dashboard') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Dashboard
+              </button>
+              
+              <button 
+                onClick={() => navigate('/carteiras')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/carteiras') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+              >
+                <Wallet className="h-4 w-4 mr-2" />
+                Gerenciar Carteiras
+              </button>
+              
+              <button 
+                onClick={() => navigate('/nova-carteira')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/nova-carteira') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'} ml-6`}
+              >
+                <Wallet className="h-4 w-4 mr-2" />
+                Nova Carteira
+              </button>
+              
+              <button 
+                onClick={() => navigate('/mercado')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/mercado') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Mercado
+              </button>
+              
+              <button 
+                onClick={() => navigate('/notificacoes')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/notificacoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                Notificações
+              </button>
+              
+              <button 
+                onClick={() => navigate('/configuracoes')}
+                className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/configuracoes') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Configurações
+              </button>
+              
+              {/* Premium Button */}
+              {onPremiumClick && (
+                <button 
+                  onClick={onPremiumClick}
+                  className={`flex w-full items-center py-2 px-4 rounded-md mt-2 ${
+                    isPremium 
+                      ? 'bg-bitcoin/20 text-bitcoin' 
+                      : 'border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10'
+                  }`}
+                >
+                  <Star className={`h-4 w-4 mr-2 ${isPremium ? 'fill-bitcoin' : ''}`} />
+                  {isPremium ? 'Painel Premium' : 'Quero ser Premium'}
+                </button>
+              )}
+            </>
           )}
-        </>
-      )}
-      
-      <button 
-        onClick={() => navigate('/sobre')}
-        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-      >
-        <Info className="h-4 w-4 mr-2" />
-        Sobre
-      </button>
+          
+          <button 
+            onClick={() => navigate('/sobre')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/sobre') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+          >
+            <Info className="h-4 w-4 mr-2" />
+            Sobre
+          </button>
 
-      <button 
-        onClick={() => navigate('/privacidade')}
-        className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
-      >
-        <Shield className="h-4 w-4 mr-2" />
-        Privacidade
-      </button>
+          <button 
+            onClick={() => navigate('/privacidade')}
+            className={`flex w-full items-center py-2 px-4 rounded-md ${isActive('/privacidade') ? 'bg-dashboard-medium/30 text-satotrack-neon' : 'hover:bg-dashboard-medium/20'}`}
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Privacidade
+          </button>
+        </nav>
+      </div>
       
-      <div className="pt-2 border-t border-dashboard-medium/30 mt-2">
+      {/* Ações de rodapé */}
+      <div className="p-4 border-t border-dashboard-medium/30">
         {user ? (
           <Button 
             variant="outline" 
-            className="w-full justify-start" 
-            onClick={() => {
-              handleLogout();
-              onClose();
-            }}
+            className="w-full justify-start text-satotrack-text border-dashboard-medium"
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sair
@@ -162,10 +174,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         ) : (
           <Button 
             variant="neon" 
-            className="w-full justify-start" 
-            onClick={() => {
-              navigate('/auth');
-            }}
+            className="w-full justify-start"
+            onClick={() => navigate('/auth')}
           >
             <User className="h-4 w-4 mr-2" />
             Entrar
