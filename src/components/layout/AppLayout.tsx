@@ -10,7 +10,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarProvider, SidebarRail, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import NewAppSidebar from './NewAppSidebar';
 import MobileNavigation from '../navigation/MobileNavigation';
+import AppContent from './AppContent';
 
+/**
+ * Loading fallback component for suspense
+ */
 const LoadingFallback = () => (
   <div className="p-4">
     <div className="space-y-4">
@@ -25,6 +29,10 @@ const LoadingFallback = () => (
   </div>
 );
 
+/**
+ * Main application layout component
+ * Handles responsive layout with sidebar and mobile navigation
+ */
 const AppLayout = () => {
   const { userPlan } = useAuth();
   const isMobile = useIsMobile();
@@ -33,17 +41,16 @@ const AppLayout = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex flex-col min-h-screen w-full">
-        {/* Show mobile navigation bar on mobile */}
+        {/* Mobile Navigation - only shown on mobile devices */}
         {isMobile && <MobileNavigation />}
         
         <div className="flex flex-1 relative w-full">
-          {/* Desktop sidebar, hidden on mobile */}
-          <div className={isMobile ? "hidden" : "block"}>
-            <NewAppSidebar />
-          </div>
+          {/* Desktop sidebar - hidden on mobile */}
+          {!isMobile && <NewAppSidebar />}
           <SidebarRail className={isMobile ? "hidden" : "block"} />
           
           <SidebarInset className="bg-dashboard-dark text-white">
+            {/* Desktop TopBar */}
             {!isMobile && (
               <div className="flex items-center p-2 border-b border-dashboard-medium">
                 <SidebarTrigger />
@@ -51,6 +58,7 @@ const AppLayout = () => {
               </div>
             )}
             
+            {/* Main Content Area */}
             <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
               <Suspense fallback={<LoadingFallback />}>
                 <Outlet />
