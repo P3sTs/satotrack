@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -79,7 +80,8 @@ export default {
 				satotrack: {
 					neon: 'hsl(var(--satotrack-neon))',
 					alert: 'hsl(var(--satotrack-alert))',
-					text: 'hsl(var(--satotrack-text))'
+					text: 'hsl(var(--satotrack-text))',
+					success: 'hsl(var(--satotrack-success))'
 				}
 			},
 			borderRadius: {
@@ -114,10 +116,10 @@ export default {
 				},
 				'glow': {
 					'0%, 100%': {
-						filter: 'drop-shadow(0 0 2px #00FFC2)'
+						filter: 'drop-shadow(0 0 2px hsl(var(--primary)))'
 					},
 					'50%': {
-						filter: 'drop-shadow(0 0 6px #00FFC2)'
+						filter: 'drop-shadow(0 0 6px hsl(var(--primary)))'
 					}
 				},
 				'scan-line': {
@@ -158,9 +160,9 @@ export default {
 				'terminal-cursor': 'terminal-cursor 0.7s step-end infinite'
 			},
 			boxShadow: {
-				'neon-sm': '0 0 5px rgba(0, 255, 194, 0.3)',
-				'neon': '0 0 10px rgba(0, 255, 194, 0.5)',
-				'neon-lg': '0 0 15px rgba(0, 255, 194, 0.7)'
+				'neon-sm': '0 0 5px rgba(0, 225, 160, 0.3)',
+				'neon': '0 0 10px rgba(0, 225, 160, 0.5)',
+				'neon-lg': '0 0 15px rgba(0, 225, 160, 0.7)'
 			}
 		}
 	},

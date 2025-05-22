@@ -10,16 +10,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_8px_rgba(0,255,194,0.5)] transition-all duration-300",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_8px_rgba(0,225,160,0.5)] transition-all duration-300",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-satotrack-neon/50 hover:shadow-[0_0_8px_rgba(0,255,194,0.3)] transition-all duration-300",
+          "border border-input bg-background hover:bg-accent/10 hover:text-accent-foreground hover:border-primary/50 hover:shadow-[0_0_8px_rgba(0,225,160,0.3)] transition-all duration-300",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent/10 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        neon: "bg-transparent border border-satotrack-neon text-satotrack-neon hover:bg-satotrack-neon/10 hover:shadow-[0_0_12px_rgba(0,255,194,0.6)] transition-all duration-300",
+        neon: "bg-transparent border border-primary text-primary hover:bg-primary/10 hover:shadow-[0_0_12px_rgba(0,225,160,0.6)] transition-all duration-300",
         bitcoin: "bg-bitcoin hover:bg-bitcoin-dark text-white hover:shadow-[0_0_10px_rgba(247,147,26,0.5)] transition-all duration-300"
       },
       size: {
