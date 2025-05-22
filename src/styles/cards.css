@@ -1,0 +1,26 @@
+
+/* Card component styles for SatoTrack */
+
+@layer base {
+  /* Glassmorphism and 3D card effects with enhanced contrast borders */
+  .card-3d-fluid {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/10 rounded-[20px] shadow-neon-xl transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+
+  /* Glass card styles */
+  .glass-card {
+    @apply bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg;
+  }
+  
+  /* Gradient backgrounds */
+  .primary-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/80;
+  }
+  
+  .accent-gradient {
+    @apply bg-gradient-to-r from-accent to-accent/80;
+  }
+}

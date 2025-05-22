@@ -1,0 +1,64 @@
+
+/* Typography styles for SatoTrack application */
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-orbitron font-bold;
+  }
+
+  /* Tipografia personalizada */
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* Enhanced text glow effects */
+  .text-glow-strong {
+    text-shadow: 0 0 15px rgba(0, 249, 166, 0.9);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
+  }
+
+  .text-glow-subtle {
+    text-shadow: 0 0 5px rgba(0, 249, 166, 0.5);
+  }
+  
+  /* Enhanced text styles */
+  .heading-primary {
+    @apply text-white font-bold text-glow-primary;
+  }
+  
+  .heading-secondary {
+    @apply text-white/90 font-semibold;
+  }
+  
+  .text-body {
+    @apply text-white/85;
+  }
+  
+  .text-body-muted {
+    @apply text-white/70;
+  }
+
+  /* Text glow effects with stronger glow */
+  .text-glow-primary {
+    text-shadow: 0 0 12px rgba(0, 249, 166, 0.8);
+  }
+  
+  .text-glow-accent {
+    text-shadow: 0 0 12px rgba(255, 110, 199, 0.8);
+  }
+  
+  .text-glow-secondary {
+    text-shadow: 0 0 12px rgba(15, 240, 252, 0.8);
+  }
+}

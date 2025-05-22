@@ -1,0 +1,99 @@
+
+/* SatoTrack - Color Variables and Theme Settings */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 222 33% 6%;      /* #070B16 - Preto azulado profundo */
+    --foreground: 210 40% 98%;     /* #F9FAFB - Texto principal branco - aumentado contraste */
+ 
+    --card: 220 30% 10%;           /* #0E1424 - Cards em 3D */
+    --card-foreground: 210 40% 98%; /* #F9FAFB - Texto para cards - aumentado contraste */
+ 
+    --popover: 220 30% 10%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 158 100% 49%;       /* #00F9A6 - Neon verde água */
+    --primary-foreground: 222 33% 6%;
+ 
+    --secondary: 183 91% 52%;      /* #0FF0FC - Neon azul ciano */
+    --secondary-foreground: 222 33% 6%;
+ 
+    --muted: 220 14% 33%;
+    --muted-foreground: 220 15% 85%;  /* Aumentado contraste do texto secundário */
+ 
+    --accent: 326 100% 71%;        /* #FF6EC7 - Neon rosa */
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 352 100% 65%;   /* #FF4C61 - Vermelho neon para erro */
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 220 14% 20%;
+    --input: 220 14% 20%;
+    --ring: 158 100% 49%;          /* #00F9A6 - Verde neon para focus */
+ 
+    --radius: 1rem;
+    
+    /* Dashboard-specific colors */
+    --dashboard-dark: 222 33% 6%;      /* #070B16 - Fundo absoluto */
+    --dashboard-medium: 220 30% 10%;   /* #0E1424 - Cards em 3D */
+    --dashboard-light: 220 25% 15%;    /* #141B2D - Lighter elements */
+
+    /* Bitcoin-specific colors */
+    --bitcoin: 37 95% 58%;         /* #F7931A */
+    --bitcoin-dark: 36 85% 48%;    /* #E67F06 */
+
+    /* SatoTrack specific colors - Enhanced contrast */
+    --satotrack-neon: 158 100% 49%;    /* #00F9A6 - Neon green */
+    --satotrack-text: 210 40% 98%;     /* #F9FAFB - High contrast text - aumentado */
+    --satotrack-alert: 352 100% 65%;   /* #FF4C61 - Alert red */
+    --satotrack-success: 152 100% 50%; /* #00FF88 - Success green */
+  }
+ 
+  .light {
+    --background: 210 33% 96%;     /* Light background */
+    --foreground: 222 33% 10%;     /* Texto mais escuro para melhor contraste no modo claro */
+ 
+    --card: 200 30% 96%;
+    --card-foreground: 222 33% 10%;
+ 
+    --popover: 200 30% 96%;
+    --popover-foreground: 222 33% 10%;
+ 
+    --primary: 158 84% 33%;        /* Darker neon green for light mode */
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 183 84% 33%;      /* Darker cyan for light mode */
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 200 15% 88%;
+    --muted-foreground: 220 25% 25%;  /* Texto secundário mais escuro no modo claro */
+ 
+    --accent: 326 84% 55%;         /* Darker pink for light mode */
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 352 84% 55%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 200 15% 80%;
+    --input: 200 15% 80%;
+    --ring: 158 84% 33%;           /* Matching primary for focus */
+    
+    /* Dashboard-specific colors for light mode */
+    --dashboard-dark: 210 33% 96%; 
+    --dashboard-medium: 210 25% 92%;
+    --dashboard-light: 210 20% 88%;
+    
+    /* Bitcoin-specific colors remain the same */
+    --bitcoin: 37 95% 58%;
+    --bitcoin-dark: 36 85% 48%;
+    
+    /* SatoTrack specific colors for light mode - enhanced contrast */
+    --satotrack-neon: 158 84% 33%;    /* Darker green for contrast */
+    --satotrack-text: 222 33% 10%;    /* Dark text for contrast */
+    --satotrack-alert: 352 84% 55%;   /* Alert red */
+    --satotrack-success: 152 76% 33%; /* Darker success green */
+  }
+}
