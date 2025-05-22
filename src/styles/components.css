@@ -2,42 +2,42 @@
 /* Componentes estilizados do SatoTrack */
 
 @layer components {
-  /* Cards */
+  /* Cards com bordas mais visíveis */
   .bitcoin-card {
-    @apply bg-card rounded-lg shadow-md border border-border/20 overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg w-full;
+    @apply bg-card rounded-lg shadow-md border border-border/40 overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg w-full;
   }
   
   .bitcoin-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-bitcoin to-bitcoin-dark;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-bitcoin to-bitcoin-dark font-bold;
   }
 
   .satotrack-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80 font-bold;
   }
   
   /* 3D Fluid Cards */
   .card-3d-fluid {
     @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
-    border border-white/5 rounded-[20px] shadow-neon-xl transition-all duration-300
+    border border-white/10 rounded-[20px] shadow-neon-xl transition-all duration-300
     hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
     backdrop-filter: blur(20px);
   }
   
   .card-3d-fluid-accent {
     @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
-    border border-white/5 rounded-[20px] shadow-neon-pink transition-all duration-300
+    border border-white/10 rounded-[20px] shadow-neon-pink transition-all duration-300
     hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
     backdrop-filter: blur(20px);
   }
   
   .cyberpunk-card {
-    @apply bg-dashboard-medium border border-primary/20 rounded-lg shadow-lg overflow-hidden transition-all duration-300
-    hover:border-primary/50 hover:shadow-neon-sm w-full;
+    @apply bg-dashboard-medium border border-primary/30 rounded-lg shadow-lg overflow-hidden transition-all duration-300
+    hover:border-primary/70 hover:shadow-neon-sm w-full;
   }
   
   .tech-outline {
-    @apply border border-primary/30 shadow-sm transition-all duration-300
-    hover:border-primary/50 hover:shadow-neon;
+    @apply border border-primary/40 shadow-sm transition-all duration-300
+    hover:border-primary/70 hover:shadow-neon;
   }
   
   .neon-glow {
@@ -49,24 +49,24 @@
   }
   
   .hacker-card {
-    @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-primary/30 rounded-lg 
+    @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-primary/40 rounded-lg 
     shadow-[0_4px_15px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300
-    hover:shadow-neon-sm hover:border-primary/60 w-full;
+    hover:shadow-neon-sm hover:border-primary/80 w-full;
   }
   
   .hacker-card::before {
     content: '';
-    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent;
+    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/70 to-transparent;
     animation: scan 2s linear infinite;
   }
   
-  /* Preço indicadores */
+  /* Preço indicadores com melhor contraste */
   .price-up {
-    @apply text-satotrack-success;
+    @apply text-satotrack-success font-medium;
   }
   
   .price-down {
-    @apply text-satotrack-alert;
+    @apply text-satotrack-alert font-medium;
   }
 
   /* Botões */
@@ -81,14 +81,14 @@
   }
   
   .btn-outline-neon {
-    @apply border border-primary text-primary font-medium py-2 px-4 rounded-md
+    @apply border-2 border-primary text-primary font-medium py-2 px-4 rounded-md
     hover:bg-primary/10 hover:shadow-neon active:bg-primary/20 transition-all;
   }
   
-  /* Formulários */
+  /* Formulários com melhor contraste */
   .form-control {
-    @apply bg-dashboard-medium border border-dashboard-light rounded-md px-4 py-2
-    focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent;
+    @apply bg-dashboard-medium border-2 border-dashboard-light rounded-md px-4 py-2
+    focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-transparent;
   }
   
   .form-label {
@@ -101,33 +101,33 @@
   
   /* Badges */
   .badge-premium {
-    @apply inline-flex items-center bg-accent/20 text-accent text-xs px-2 py-1 rounded-full;
+    @apply inline-flex items-center bg-accent/30 text-accent text-xs px-2 py-1 rounded-full font-medium;
   }
   
   .badge-free {
-    @apply inline-flex items-center bg-dashboard-light text-satotrack-text text-xs px-2 py-1 rounded-full;
+    @apply inline-flex items-center bg-dashboard-light text-satotrack-text text-xs px-2 py-1 rounded-full font-medium;
   }
   
-  /* Alertas */
+  /* Alertas com melhor visibilidade */
   .alert-info {
-    @apply border-l-4 border-blue-500 bg-blue-500/10 p-4 rounded-r-md;
+    @apply border-l-4 border-blue-500 bg-blue-500/20 p-4 rounded-r-md;
   }
   
   .alert-success {
-    @apply border-l-4 border-satotrack-success bg-satotrack-success/10 p-4 rounded-r-md;
+    @apply border-l-4 border-satotrack-success bg-satotrack-success/20 p-4 rounded-r-md;
   }
   
   .alert-warning {
-    @apply border-l-4 border-yellow-500 bg-yellow-500/10 p-4 rounded-r-md;
+    @apply border-l-4 border-yellow-500 bg-yellow-500/20 p-4 rounded-r-md;
   }
   
   .alert-danger {
-    @apply border-l-4 border-satotrack-alert bg-satotrack-alert/10 p-4 rounded-r-md;
+    @apply border-l-4 border-satotrack-alert bg-satotrack-alert/20 p-4 rounded-r-md;
   }
   
   /* Focus styles for accessibility */
   .focus-visible-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 
     focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
   
@@ -201,42 +201,59 @@
     @apply flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
   }
   
-  /* New gradient classes */
+  /* New gradient classes with improved contrast */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-white/5 rounded-lg;
+    @apply bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg;
   }
   
   .primary-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/70;
+    @apply bg-gradient-to-r from-primary to-primary/80;
   }
   
   .accent-gradient {
-    @apply bg-gradient-to-r from-accent to-accent/70;
+    @apply bg-gradient-to-r from-accent to-accent/80;
   }
   
-  /* Neon text effects */
+  /* Neon text effects with stronger glow */
   .text-glow-primary {
-    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
+    text-shadow: 0 0 12px rgba(0, 249, 166, 0.8);
   }
   
   .text-glow-accent {
-    text-shadow: 0 0 10px rgba(255, 110, 199, 0.7);
+    text-shadow: 0 0 12px rgba(255, 110, 199, 0.8);
   }
   
   .text-glow-secondary {
-    text-shadow: 0 0 10px rgba(15, 240, 252, 0.7);
+    text-shadow: 0 0 12px rgba(15, 240, 252, 0.8);
   }
   
-  /* 3D Background elements */
+  /* 3D Background elements with increased visibility */
   .bg-mesh {
-    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
     background-size: 30px 30px;
   }
   
   .bg-grid-lines {
     background-image: 
-      linear-gradient(to right, rgba(0, 249, 166, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 249, 166, 0.1) 1px, transparent 1px);
+      linear-gradient(to right, rgba(0, 249, 166, 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 249, 166, 0.15) 1px, transparent 1px);
     background-size: 40px 40px;
+  }
+
+  /* Enhanced text styles */
+  .heading-primary {
+    @apply text-white font-bold text-glow-primary;
+  }
+  
+  .heading-secondary {
+    @apply text-white/90 font-semibold;
+  }
+  
+  .text-body {
+    @apply text-white/85;
+  }
+  
+  .text-body-muted {
+    @apply text-white/70;
   }
 }

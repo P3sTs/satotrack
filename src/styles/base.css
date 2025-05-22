@@ -7,13 +7,13 @@
 @layer base {
   :root {
     --background: 222 33% 6%;      /* #070B16 - Preto azulado profundo */
-    --foreground: 210 20% 98%;     /* #F9FAFB - Texto principal branco */
+    --foreground: 210 40% 98%;     /* #F9FAFB - Texto principal branco - aumentado contraste */
  
     --card: 220 30% 10%;           /* #0E1424 - Cards em 3D */
-    --card-foreground: 210 20% 98%; /* #F9FAFB - Texto para cards */
+    --card-foreground: 210 40% 98%; /* #F9FAFB - Texto para cards - aumentado contraste */
  
     --popover: 220 30% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover-foreground: 210 40% 98%;
  
     --primary: 158 100% 49%;       /* #00F9A6 - Neon verde água */
     --primary-foreground: 222 33% 6%;
@@ -22,13 +22,13 @@
     --secondary-foreground: 222 33% 6%;
  
     --muted: 220 14% 33%;
-    --muted-foreground: 220 8% 65%;
+    --muted-foreground: 220 15% 85%;  /* Aumentado contraste do texto secundário */
  
     --accent: 326 100% 71%;        /* #FF6EC7 - Neon rosa */
-    --accent-foreground: 210 20% 98%;
+    --accent-foreground: 210 40% 98%;
  
     --destructive: 352 100% 65%;   /* #FF4C61 - Vermelho neon para erro */
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
  
     --border: 220 14% 20%;
     --input: 220 14% 20%;
@@ -45,37 +45,37 @@
     --bitcoin: 37 95% 58%;         /* #F7931A */
     --bitcoin-dark: 36 85% 48%;    /* #E67F06 */
 
-    /* SatoTrack specific colors - Updated to match new palette */
+    /* SatoTrack specific colors - Enhanced contrast */
     --satotrack-neon: 158 100% 49%;    /* #00F9A6 - Neon green */
-    --satotrack-text: 210 20% 98%;     /* #F9FAFB - High contrast text */
+    --satotrack-text: 210 40% 98%;     /* #F9FAFB - High contrast text - aumentado */
     --satotrack-alert: 352 100% 65%;   /* #FF4C61 - Alert red */
     --satotrack-success: 152 100% 50%; /* #00FF88 - Success green */
   }
  
   .light {
     --background: 210 33% 96%;     /* Light background */
-    --foreground: 222 33% 20%;     /* Dark text */
+    --foreground: 222 33% 10%;     /* Texto mais escuro para melhor contraste no modo claro */
  
     --card: 200 30% 96%;
-    --card-foreground: 222 33% 20%;
+    --card-foreground: 222 33% 10%;
  
     --popover: 200 30% 96%;
-    --popover-foreground: 222 33% 20%;
+    --popover-foreground: 222 33% 10%;
  
     --primary: 158 84% 33%;        /* Darker neon green for light mode */
-    --primary-foreground: 210 33% 96%;
+    --primary-foreground: 210 40% 98%;
  
     --secondary: 183 84% 33%;      /* Darker cyan for light mode */
-    --secondary-foreground: 210 33% 96%;
+    --secondary-foreground: 210 40% 98%;
  
     --muted: 200 15% 88%;
-    --muted-foreground: 220 15% 35%;
+    --muted-foreground: 220 25% 25%;  /* Texto secundário mais escuro no modo claro */
  
     --accent: 326 84% 55%;         /* Darker pink for light mode */
-    --accent-foreground: 210 33% 96%;
+    --accent-foreground: 210 40% 98%;
  
     --destructive: 352 84% 55%;
-    --destructive-foreground: 210 33% 96%;
+    --destructive-foreground: 210 40% 98%;
  
     --border: 200 15% 80%;
     --input: 200 15% 80%;
@@ -90,9 +90,9 @@
     --bitcoin: 37 95% 58%;
     --bitcoin-dark: 36 85% 48%;
     
-    /* SatoTrack specific colors for light mode */
+    /* SatoTrack specific colors for light mode - enhanced contrast */
     --satotrack-neon: 158 84% 33%;    /* Darker green for contrast */
-    --satotrack-text: 222 33% 20%;    /* Dark text for contrast */
+    --satotrack-text: 222 33% 10%;    /* Dark text for contrast */
     --satotrack-alert: 352 84% 55%;   /* Alert red */
     --satotrack-success: 152 76% 33%; /* Darker success green */
   }
@@ -139,7 +139,7 @@
     font-family: 'Orbitron', sans-serif;
   }
   
-  /* Cores personalizadas do tema para facilitar uso no Tailwind */
+  /* Cores personalizadas do tema para facilitar uso no Tailwind - melhorado contraste */
   .bg-dashboard-dark {
     @apply bg-[hsl(var(--dashboard-dark))];
   }
@@ -191,11 +191,24 @@
   .border-bitcoin {
     @apply border-[hsl(var(--bitcoin))];
   }
+
+  /* Enhanced text glow effects */
+  .text-glow-strong {
+    text-shadow: 0 0 15px rgba(0, 249, 166, 0.9);
+  }
   
-  /* Glassmorphism and 3D card effects */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
+  }
+
+  .text-glow-subtle {
+    text-shadow: 0 0 5px rgba(0, 249, 166, 0.5);
+  }
+  
+  /* Glassmorphism and 3D card effects with enhanced contrast borders */
   .card-3d-fluid {
     @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
-    border border-white/5 rounded-[20px] shadow-neon-xl transition-all duration-300
+    border border-white/10 rounded-[20px] shadow-neon-xl transition-all duration-300
     hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
     backdrop-filter: blur(20px);
   }
@@ -203,9 +216,5 @@
   /* Logo gradient para textos */
   .bg-satotrack-logo-gradient {
     @apply bg-gradient-to-r from-[hsl(var(--satotrack-neon))] to-[hsl(var(--satotrack-neon)_/_80%)];
-  }
-  
-  .text-glow {
-    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
   }
 }
