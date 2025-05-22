@@ -9,11 +9,12 @@ import {
 } from './alerts';
 import { sendEmailSummary } from './email';
 
-// Type imports
+// Type exports
 import type { 
   PriceAlertDetails,
   TransactionAlertDetails,
-  IntelligentAlertType
+  IntelligentAlertType,
+  IntelligentAlertDetails
 } from './alerts';
 
 // Sistema de notificações aprimorado
@@ -37,4 +38,9 @@ export {
 };
 
 // Re-export types with explicit type syntax
-export type { PriceAlertDetails, TransactionAlertDetails, IntelligentAlertType };
+export type { 
+  PriceAlertDetails, 
+  TransactionAlertDetails, 
+  IntelligentAlertType,
+  IntelligentAlertDetails 
+};
