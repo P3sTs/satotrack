@@ -138,6 +138,10 @@ export default {
 					'0%': { transform: 'scale(0.95)', opacity: '0' },
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
+				},
 				'terminal-typing': {
 					'0%': { width: '0' },
 					'100%': { width: '100%' }
@@ -156,13 +160,18 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-up': 'scale-up 0.2s ease-out',
+				'float': 'float 4s ease-in-out infinite',
 				'terminal-typing': 'terminal-typing 3.5s steps(40, end)',
 				'terminal-cursor': 'terminal-cursor 0.7s step-end infinite'
 			},
 			boxShadow: {
-				'neon-sm': '0 0 5px rgba(0, 225, 160, 0.3)',
-				'neon': '0 0 10px rgba(0, 225, 160, 0.5)',
-				'neon-lg': '0 0 15px rgba(0, 225, 160, 0.7)'
+				'neon-sm': '0 0 5px rgba(0, 249, 166, 0.3)',
+				'neon': '0 0 10px rgba(0, 249, 166, 0.5)',
+				'neon-lg': '0 0 15px rgba(0, 249, 166, 0.7)',
+				'neon-xl': '0 0 20px rgba(0, 249, 166, 0.4), 0 0 40px rgba(255, 110, 199, 0.2)',
+				'neon-hover': '0 0 30px rgba(0, 249, 166, 0.6), 0 0 60px rgba(255, 110, 199, 0.4)',
+				'neon-pink': '0 0 15px rgba(255, 110, 199, 0.7)',
+				'neon-blue': '0 0 15px rgba(15, 240, 252, 0.7)',
 			}
 		}
 	},

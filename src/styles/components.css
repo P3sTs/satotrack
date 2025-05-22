@@ -15,14 +15,29 @@
     @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80;
   }
   
+  /* 3D Fluid Cards */
+  .card-3d-fluid {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/5 rounded-[20px] shadow-neon-xl transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+  
+  .card-3d-fluid-accent {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/5 rounded-[20px] shadow-neon-pink transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+  
   .cyberpunk-card {
     @apply bg-dashboard-medium border border-primary/20 rounded-lg shadow-lg overflow-hidden transition-all duration-300
-    hover:border-primary/50 hover:shadow-primary/20 w-full;
+    hover:border-primary/50 hover:shadow-neon-sm w-full;
   }
   
   .tech-outline {
     @apply border border-primary/30 shadow-sm transition-all duration-300
-    hover:border-primary/50 hover:shadow-[0_0_10px_rgba(0,225,160,0.2)];
+    hover:border-primary/50 hover:shadow-neon;
   }
   
   .neon-glow {
@@ -36,7 +51,7 @@
   .hacker-card {
     @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-primary/30 rounded-lg 
     shadow-[0_4px_15px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300
-    hover:shadow-[0_8px_25px_rgba(0,0,0,0.5)] hover:border-primary/60 w-full;
+    hover:shadow-neon-sm hover:border-primary/60 w-full;
   }
   
   .hacker-card::before {
@@ -57,17 +72,17 @@
   /* Botões */
   .btn-neon {
     @apply bg-primary text-black font-medium py-2 px-4 rounded-md
-    hover:bg-primary/90 active:bg-primary/80 transition-colors;
+    shadow-neon hover:bg-primary/90 hover:shadow-neon-lg active:bg-primary/80 transition-all;
   }
   
   .btn-bitcoin {
     @apply bg-bitcoin text-white font-medium py-2 px-4 rounded-md
-    hover:bg-bitcoin/90 active:bg-bitcoin/80 transition-colors;
+    hover:bg-bitcoin/90 active:bg-bitcoin/80 transition-colors shadow-bitcoin;
   }
   
   .btn-outline-neon {
     @apply border border-primary text-primary font-medium py-2 px-4 rounded-md
-    hover:bg-primary/10 active:bg-primary/20 transition-colors;
+    hover:bg-primary/10 hover:shadow-neon active:bg-primary/20 transition-all;
   }
   
   /* Formulários */
@@ -197,5 +212,31 @@
   
   .accent-gradient {
     @apply bg-gradient-to-r from-accent to-accent/70;
+  }
+  
+  /* Neon text effects */
+  .text-glow-primary {
+    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
+  }
+  
+  .text-glow-accent {
+    text-shadow: 0 0 10px rgba(255, 110, 199, 0.7);
+  }
+  
+  .text-glow-secondary {
+    text-shadow: 0 0 10px rgba(15, 240, 252, 0.7);
+  }
+  
+  /* 3D Background elements */
+  .bg-mesh {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-size: 30px 30px;
+  }
+  
+  .bg-grid-lines {
+    background-image: 
+      linear-gradient(to right, rgba(0, 249, 166, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 249, 166, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 }

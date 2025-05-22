@@ -29,7 +29,7 @@ const PremiumBanner: React.FC<PremiumBannerProps> = ({ className }) => {
           </p>
         </div>
         <Link to="/planos">
-          <Button variant="accent" className="text-accent-foreground border-none bg-accent hover:bg-accent/80">
+          <Button variant="neon" className="text-primary border-none hover:shadow-neon-lg">
             Conheça o Premium
           </Button>
         </Link>

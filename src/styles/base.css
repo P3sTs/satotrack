@@ -6,95 +6,95 @@
 
 @layer base {
   :root {
-    --background: 220 20% 4%;      /* #060A0F - Darker background */
-    --foreground: 0 0% 98%;        /* quase branco */
+    --background: 222 33% 6%;      /* #070B16 - Preto azulado profundo */
+    --foreground: 210 20% 98%;     /* #F9FAFB - Texto principal branco */
  
-    --card: 220 15% 8%;            /* #111721 - Darker card background */
-    --card-foreground: 0 0% 98%;
+    --card: 220 30% 10%;           /* #0E1424 - Cards em 3D */
+    --card-foreground: 210 20% 98%; /* #F9FAFB - Texto para cards */
  
-    --popover: 220 15% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 30% 10%;
+    --popover-foreground: 210 20% 98%;
  
-    --primary: 170 100% 44%;       /* #00E1A0 - Neon green/teal */
-    --primary-foreground: 220 20% 4%;
+    --primary: 158 100% 49%;       /* #00F9A6 - Neon verde água */
+    --primary-foreground: 222 33% 6%;
  
-    --secondary: 220 15% 15%;      /* #1F2736 - Darker secondary */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 183 91% 52%;      /* #0FF0FC - Neon azul ciano */
+    --secondary-foreground: 222 33% 6%;
  
-    --muted: 220 15% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 14% 33%;
+    --muted-foreground: 220 8% 65%;
  
-    --accent: 45 100% 51%;         /* #FFC107 - Accent gold */
-    --accent-foreground: 220 20% 4%;
+    --accent: 326 100% 71%;        /* #FF6EC7 - Neon rosa */
+    --accent-foreground: 210 20% 98%;
  
-    --destructive: 0 84% 60%;      /* #FF4C61 - Error red */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 352 100% 65%;   /* #FF4C61 - Vermelho neon para erro */
+    --destructive-foreground: 210 20% 98%;
  
-    --border: 220 15% 15%;
-    --input: 220 15% 15%;
-    --ring: 170 100% 44%;          /* #00E1A0 - Matching primary for focus */
+    --border: 220 14% 20%;
+    --input: 220 14% 20%;
+    --ring: 158 100% 49%;          /* #00F9A6 - Verde neon para focus */
  
-    --radius: 0.5rem;
+    --radius: 1rem;
     
     /* Dashboard-specific colors */
-    --dashboard-dark: 220 20% 4%;     /* #060A0F - Dashboard background */
-    --dashboard-medium: 220 15% 10%;  /* #141B29 - Medium elements */
-    --dashboard-light: 220 15% 15%;   /* #1F2736 - Lighter elements */
+    --dashboard-dark: 222 33% 6%;      /* #070B16 - Fundo absoluto */
+    --dashboard-medium: 220 30% 10%;   /* #0E1424 - Cards em 3D */
+    --dashboard-light: 220 25% 15%;    /* #141B2D - Lighter elements */
 
     /* Bitcoin-specific colors */
     --bitcoin: 37 95% 58%;         /* #F7931A */
     --bitcoin-dark: 36 85% 48%;    /* #E67F06 */
 
     /* SatoTrack specific colors - Updated to match new palette */
-    --satotrack-neon: 170 100% 44%;    /* #00E1A0 - Neon teal */
-    --satotrack-text: 0 0% 95%;        /* #F2F2F2 - High contrast text */
-    --satotrack-alert: 0 91% 71%;      /* #FF4C61 - Alert red */
-    --satotrack-success: 142 76% 36%;  /* #1DB954 - Success green */
+    --satotrack-neon: 158 100% 49%;    /* #00F9A6 - Neon green */
+    --satotrack-text: 210 20% 98%;     /* #F9FAFB - High contrast text */
+    --satotrack-alert: 352 100% 65%;   /* #FF4C61 - Alert red */
+    --satotrack-success: 152 100% 50%; /* #00FF88 - Success green */
   }
  
   .light {
-    --background: 200 20% 98%;     /* #F5F9FC - Light background */
-    --foreground: 220 15% 10%;     /* #141B29 - Dark text */
+    --background: 210 33% 96%;     /* Light background */
+    --foreground: 222 33% 20%;     /* Dark text */
  
-    --card: 200 30% 96%;           /* #EDF4F9 - Light card */
-    --card-foreground: 220 15% 10%;
+    --card: 200 30% 96%;
+    --card-foreground: 222 33% 20%;
  
     --popover: 200 30% 96%;
-    --popover-foreground: 220 15% 10%;
+    --popover-foreground: 222 33% 20%;
  
-    --primary: 170 80% 35%;        /* #0AB382 - Darker teal for light mode */
-    --primary-foreground: 0 0% 98%;
+    --primary: 158 84% 33%;        /* Darker neon green for light mode */
+    --primary-foreground: 210 33% 96%;
  
-    --secondary: 200 15% 88%;      /* #DEE6EB - Light secondary */
-    --secondary-foreground: 220 15% 10%;
+    --secondary: 183 84% 33%;      /* Darker cyan for light mode */
+    --secondary-foreground: 210 33% 96%;
  
     --muted: 200 15% 88%;
     --muted-foreground: 220 15% 35%;
  
-    --accent: 36 85% 48%;          /* #E67F06 - Warmer accent for light mode */
-    --accent-foreground: 0 0% 98%;
+    --accent: 326 84% 55%;         /* Darker pink for light mode */
+    --accent-foreground: 210 33% 96%;
  
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 352 84% 55%;
+    --destructive-foreground: 210 33% 96%;
  
-    --border: 200 15% 80%;         /* #C4D1DA - Light border */
+    --border: 200 15% 80%;
     --input: 200 15% 80%;
-    --ring: 170 80% 35%;           /* #0AB382 - Matching primary for focus */
+    --ring: 158 84% 33%;           /* Matching primary for focus */
     
     /* Dashboard-specific colors for light mode */
-    --dashboard-dark: 200 20% 98%;
-    --dashboard-medium: 200 15% 94%;
-    --dashboard-light: 200 15% 90%;
+    --dashboard-dark: 210 33% 96%; 
+    --dashboard-medium: 210 25% 92%;
+    --dashboard-light: 210 20% 88%;
     
     /* Bitcoin-specific colors remain the same */
     --bitcoin: 37 95% 58%;
     --bitcoin-dark: 36 85% 48%;
     
     /* SatoTrack specific colors for light mode */
-    --satotrack-neon: 170 80% 35%;    /* #0AB382 - Darker teal for contrast */
-    --satotrack-text: 220 15% 10%;    /* #141B29 - Dark text for contrast */
-    --satotrack-alert: 0 84% 60%;     /* #FF4C61 - Alert red */
-    --satotrack-success: 142 76% 30%; /* #18A149 - Darker success green */
+    --satotrack-neon: 158 84% 33%;    /* Darker green for contrast */
+    --satotrack-text: 222 33% 20%;    /* Dark text for contrast */
+    --satotrack-alert: 352 84% 55%;   /* Alert red */
+    --satotrack-success: 152 76% 33%; /* Darker success green */
   }
 
   * {
@@ -191,9 +191,21 @@
   .border-bitcoin {
     @apply border-[hsl(var(--bitcoin))];
   }
-
+  
+  /* Glassmorphism and 3D card effects */
+  .card-3d-fluid {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/5 rounded-[20px] shadow-neon-xl transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+  
   /* Logo gradient para textos */
   .bg-satotrack-logo-gradient {
     @apply bg-gradient-to-r from-[hsl(var(--satotrack-neon))] to-[hsl(var(--satotrack-neon)_/_80%)];
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
   }
 }
