@@ -8,7 +8,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Importa estilos base (variáveis, reset, tipografia) */
+/* Importa variáveis de cor e configurações de tema */
+@import './styles/variables.css';
+
+/* Importa classes utilitárias de tema */
+@import './styles/theme-utils.css';
+
+/* Importa estilos de tipografia */
+@import './styles/typography.css';
+
+/* Importa estilos base (reset, tipografia) */
 @import './styles/base.css';
 
 /* Importa estilos de componentes */
@@ -25,13 +34,15 @@
 
 /* Configurações globais que não se encaixam em outras categorias */
 html, body {
-  @apply bg-dashboard-dark;
+  @apply bg-background text-foreground;
+  min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  @apply bg-background text-foreground;
 }
 
 /* Media queries específicas */
@@ -43,4 +54,9 @@ html, body {
   .hide-on-mobile {
     display: none;
   }
+}
+
+/* Garantir que todos os elementos herdem as cores corretas */
+* {
+  border-color: hsl(var(--border));
 }

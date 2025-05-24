@@ -10,24 +10,29 @@
     @apply scroll-smooth;
   }
   
-  /* Melhorar contraste para texto em fundos claros em modo light */
-  .light .text-black {
-    @apply text-foreground;
+  body {
+    @apply bg-background text-foreground;
   }
   
-  /* Forçar texto a ser visível sempre com melhor contraste */
-  .light button {
-    @apply text-foreground;
+  /* Garantir que o texto seja sempre visível */
+  .light * {
+    color: inherit;
   }
   
-  /* Corrigir problemas de contraste em componentes específicos */
-  .light .input,
-  .light .select,
-  .light .textarea {
-    @apply text-foreground border-input bg-background;
+  .dark * {
+    color: inherit;
   }
   
-  /* Cores personalizadas do tema para facilitar uso no Tailwind - melhorado contraste */
+  /* Forçar aplicação correta dos backgrounds */
+  .bg-background {
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  .text-foreground {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* Cores personalizadas do tema */
   .bg-dashboard-dark {
     @apply bg-[hsl(var(--dashboard-dark))];
   }
@@ -80,12 +85,12 @@
     @apply border-[hsl(var(--bitcoin))];
   }
 
-  /* Logo gradient para textos com melhor visibilidade */
+  /* Logo gradient */
   .bg-satotrack-logo-gradient {
     @apply bg-gradient-to-r from-[hsl(var(--satotrack-neon))] to-[hsl(var(--satotrack-neon)_/_80%)];
   }
 
-  /* 3D Background elements with increased visibility */
+  /* 3D Background elements */
   .bg-mesh {
     background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
     background-size: 30px 30px;
@@ -98,7 +103,7 @@
     background-size: 40px 40px;
   }
 
-  /* Garantir que textos sejam sempre visíveis */
+  /* Classes de contraste garantidas */
   .text-contrast {
     @apply text-foreground;
   }
@@ -107,8 +112,18 @@
     @apply bg-background;
   }
 
-  /* Melhorar contraste de cards */
+  /* Cards com contraste correto */
   .card-contrast {
-    @apply bg-card text-card-foreground border-border/60;
+    @apply bg-card text-card-foreground border-border;
+  }
+  
+  /* Componentes de formulário com contraste */
+  input, textarea, select {
+    @apply bg-input text-foreground border-border;
+  }
+  
+  /* Botões com contraste */
+  button {
+    @apply text-current;
   }
 }
