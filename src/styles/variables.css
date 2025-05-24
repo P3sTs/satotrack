@@ -7,13 +7,13 @@
 @layer base {
   :root {
     --background: 220 13% 9%;          /* #17171a - Fundo escuro mais visível */
-    --foreground: 0 0% 98%;         /* #FAFAFA - Texto branco contrastante */
+    --foreground: 0 0% 95%;            /* #F2F2F2 - Texto branco contrastante */
  
     --card: 220 13% 12%;               /* Cards mais visíveis */
-    --card-foreground: 0 0% 98%;    /* Texto dos cards */
+    --card-foreground: 0 0% 95%;       /* Texto dos cards */
  
     --popover: 220 13% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 0 0% 95%;
  
     --primary: 212 100% 35%;        /* #0D47A1 - Azul primário */
     --primary-foreground: 0 0% 98%;
@@ -22,7 +22,7 @@
     --secondary-foreground: 0 0% 98%;
  
     --muted: 220 13% 20%;            /* Elementos silenciados mais visíveis */
-    --muted-foreground: 0 0% 85%;
+    --muted-foreground: 0 0% 75%;    /* Texto silenciado mais visível */
  
     --accent: 258 100% 70%;         /* #7C4DFF - Roxo */
     --accent-foreground: 0 0% 98%;
@@ -54,7 +54,7 @@
 
     /* SatoTrack specific colors */
     --satotrack-primary: 212 100% 35%;    /* #0D47A1 - Azul primário */
-    --satotrack-text: 0 0% 98%;           /* #FAFAFA - Texto principal */
+    --satotrack-text: 0 0% 95%;           /* #F2F2F2 - Texto principal */
     --satotrack-secondary: 0 0% 75%;      /* Texto secundário */
     --satotrack-success: 140 100% 42%;    /* #00C853 - Verde sucesso */
     --satotrack-alert: 0 100% 45%;        /* #D50000 - Vermelho alerta */
@@ -63,57 +63,58 @@
   }
  
   .light {
-    --background: 0 0% 100%;         /* Fundo branco claro */
-    --foreground: 220 13% 9%;          /* Texto escuro no modo claro */
+    /* Forçar modo escuro mesmo no light mode */
+    --background: 220 13% 9%;          /* Fundo escuro forçado */
+    --foreground: 0 0% 95%;            /* Texto claro forçado */
  
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 9%;
+    --card: 220 13% 12%;
+    --card-foreground: 0 0% 95%;
  
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 9%;
+    --popover: 220 13% 12%;
+    --popover-foreground: 0 0% 95%;
  
-    --primary: 212 100% 32%;        /* Azul primário */
+    --primary: 212 100% 35%;        
     --primary-foreground: 0 0% 98%;
  
-    --secondary: 186 100% 35%;      /* Ciano */
+    --secondary: 186 100% 40%;      
     --secondary-foreground: 0 0% 98%;
  
-    --muted: 220 13% 96%;
-    --muted-foreground: 220 13% 45%;
+    --muted: 220 13% 20%;
+    --muted-foreground: 0 0% 75%;
  
-    --accent: 258 100% 66%;         /* Roxo */
+    --accent: 258 100% 70%;         
     --accent-foreground: 0 0% 98%;
  
-    --destructive: 0 100% 42%;      /* Vermelho */
+    --destructive: 0 100% 45%;      
     --destructive-foreground: 0 0% 98%;
  
-    --border: 220 13% 82%;
-    --input: 220 13% 82%;
-    --ring: 212 100% 32%;
+    --border: 220 13% 25%;
+    --input: 220 13% 18%;
+    --ring: 212 100% 35%;
     
-    /* Dashboard colors for light mode */
-    --dashboard-dark: 0 0% 100%; 
-    --dashboard-medium: 0 0% 96%;
-    --dashboard-light: 0 0% 92%;
+    /* Dashboard colors forçado escuro */
+    --dashboard-dark: 220 13% 9%; 
+    --dashboard-medium: 220 13% 12%;
+    --dashboard-light: 220 13% 18%;
     
-    /* Financial colors remain strong for consistency */
-    --profit-green: 140 100% 39%;
-    --loss-red: 0 100% 42%;
-    --warning-yellow: 51 100% 50%;
-    --data-cyan: 186 100% 35%;
-    --tech-purple: 258 100% 66%;
+    /* Financial colors mantidos */
+    --profit-green: 140 100% 42%;
+    --loss-red: 0 100% 45%;
+    --warning-yellow: 51 100% 55%;
+    --data-cyan: 186 100% 40%;
+    --tech-purple: 258 100% 70%;
     
-    /* Bitcoin colors remain the same */
+    /* Bitcoin colors mantidos */
     --bitcoin: 37 95% 58%;
     --bitcoin-dark: 36 85% 48%;
     
-    /* SatoTrack colors for light mode */
-    --satotrack-primary: 212 100% 32%;
-    --satotrack-text: 220 13% 9%;
-    --satotrack-secondary: 220 13% 45%;
-    --satotrack-success: 140 100% 39%;
-    --satotrack-alert: 0 100% 42%;
-    --satotrack-warning: 51 100% 50%;
-    --satotrack-neon: 140 100% 39%;
+    /* SatoTrack colors forçado escuro */
+    --satotrack-primary: 212 100% 35%;
+    --satotrack-text: 0 0% 95%;
+    --satotrack-secondary: 0 0% 75%;
+    --satotrack-success: 140 100% 42%;
+    --satotrack-alert: 0 100% 45%;
+    --satotrack-warning: 51 100% 55%;
+    --satotrack-neon: 140 100% 42%;
   }
 }

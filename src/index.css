@@ -34,7 +34,8 @@
 
 /* Configurações globais que não se encaixam em outras categorias */
 html, body {
-  @apply bg-background text-foreground;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
   min-height: 100vh;
 }
 
@@ -42,7 +43,8 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  @apply bg-background text-foreground;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Media queries específicas */
@@ -59,4 +61,39 @@ html, body {
 /* Garantir que todos os elementos herdem as cores corretas */
 * {
   border-color: hsl(var(--border));
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Forçar cores para elementos específicos */
+div, span, p, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, label {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Exceções para elementos com cores específicas */
+.text-bitcoin, .bitcoin {
+  color: hsl(var(--bitcoin)) !important;
+}
+
+.text-profit, .profit {
+  color: hsl(var(--profit-green)) !important;
+}
+
+.text-loss, .loss {
+  color: hsl(var(--loss-red)) !important;
+}
+
+.text-warning, .warning {
+  color: hsl(var(--warning-yellow)) !important;
+}
+
+.text-primary, .primary {
+  color: hsl(var(--primary)) !important;
+}
+
+.text-secondary, .secondary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
 }

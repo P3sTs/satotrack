@@ -4,23 +4,28 @@
 @layer base {
   * {
     @apply border-border;
+    color: hsl(var(--foreground)) !important;
   }
 
   html {
     @apply scroll-smooth;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   body {
     @apply bg-background text-foreground;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
-  /* Garantir que o texto seja sempre visível */
+  /* Forçar cores escuras para todos os elementos */
   .light * {
-    color: inherit;
+    color: hsl(var(--foreground)) !important;
   }
   
   .dark * {
-    color: inherit;
+    color: hsl(var(--foreground)) !important;
   }
   
   /* Forçar aplicação correta dos backgrounds */
@@ -62,7 +67,7 @@
   }
   
   .text-satotrack-text {
-    @apply text-[hsl(var(--satotrack-text))];
+    color: hsl(var(--satotrack-text)) !important;
   }
   
   .text-satotrack-alert {
@@ -103,27 +108,55 @@
     background-size: 40px 40px;
   }
 
-  /* Classes de contraste garantidas */
+  /* Classes de contraste garantidas com !important */
   .text-contrast {
-    @apply text-foreground;
+    color: hsl(var(--foreground)) !important;
   }
 
   .bg-contrast {
-    @apply bg-background;
+    background-color: hsl(var(--background)) !important;
   }
 
   /* Cards com contraste correto */
   .card-contrast {
     @apply bg-card text-card-foreground border-border;
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
   /* Componentes de formulário com contraste */
   input, textarea, select {
-    @apply bg-input text-foreground border-border;
+    @apply bg-input border-border;
+    background-color: hsl(var(--input)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   /* Botões com contraste */
   button {
-    @apply text-current;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Garantir que títulos sejam visíveis */
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Garantir que parágrafos sejam visíveis */
+  p, span, div {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Garantir que links sejam visíveis */
+  a {
+    color: hsl(var(--primary)) !important;
+  }
+
+  /* Classes específicas para forçar texto escuro */
+  .force-dark-text {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .force-dark-bg {
+    background-color: hsl(var(--background)) !important;
   }
 }
