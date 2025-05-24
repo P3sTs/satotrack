@@ -10,17 +10,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-neon transition-all duration-300 font-semibold",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary-glow transition-all duration-300 font-semibold",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold",
+          "bg-loss text-white hover:bg-loss/90 hover:shadow-loss-glow transition-all duration-300 font-semibold",
         outline:
-          "border-2 border-input bg-background hover:bg-accent/10 hover:text-accent-foreground hover:border-primary/70 hover:shadow-neon-sm transition-all duration-300",
+          "border-2 border-input bg-background hover:bg-primary/10 hover:text-primary hover:border-primary/70 hover:shadow-primary-glow transition-all duration-300",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-neon-blue transition-all duration-300 font-semibold",
-        ghost: "hover:bg-accent/15 hover:text-accent-foreground",
+          "bg-data-cyan text-white hover:bg-data-cyan/90 hover:shadow-data-glow transition-all duration-300 font-semibold",
+        ghost: "hover:bg-primary/15 hover:text-primary",
         link: "text-primary underline-offset-4 hover:underline font-semibold",
-        neon: "bg-transparent border-2 border-primary text-primary hover:bg-primary/15 hover:shadow-neon transition-all duration-300 font-semibold",
-        accent: "bg-accent text-accent-foreground hover:bg-accent/90 hover:shadow-neon-pink transition-all duration-300 font-semibold",
+        profit: "bg-profit text-white hover:bg-profit/90 hover:shadow-profit-glow transition-all duration-300 font-semibold",
+        warning: "bg-warning text-black hover:bg-warning/90 transition-all duration-300 font-semibold",
+        tech: "bg-tech-purple text-white hover:bg-tech-purple/90 hover:shadow-tech-glow transition-all duration-300 font-semibold",
         bitcoin: "bg-bitcoin hover:bg-bitcoin-dark text-white hover:shadow-[0_0_10px_rgba(247,147,26,0.5)] transition-all duration-300 font-semibold"
       },
       size: {

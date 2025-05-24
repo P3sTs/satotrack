@@ -2,19 +2,45 @@
 /* Button component styles for SatoTrack */
 
 @layer components {
-  /* Botões */
-  .btn-neon {
-    @apply bg-primary text-black font-medium py-2 px-4 rounded-md
-    shadow-neon hover:bg-primary/90 hover:shadow-neon-lg active:bg-primary/80 transition-all;
+  /* Botões principais com nova paleta */
+  .btn-primary {
+    @apply bg-primary text-white font-medium py-2 px-4 rounded-md
+    shadow-primary-glow hover:bg-primary/90 hover:shadow-primary-lg active:bg-primary/80 transition-all;
   }
   
-  .btn-bitcoin {
-    @apply bg-bitcoin text-white font-medium py-2 px-4 rounded-md
-    hover:bg-bitcoin/90 active:bg-bitcoin/80 transition-colors shadow-bitcoin;
+  .btn-profit {
+    @apply bg-profit text-white font-medium py-2 px-4 rounded-md
+    hover:bg-profit/90 active:bg-profit/80 transition-colors shadow-profit-glow;
   }
   
-  .btn-outline-neon {
+  .btn-loss {
+    @apply bg-loss text-white font-medium py-2 px-4 rounded-md
+    hover:bg-loss/90 active:bg-loss/80 transition-colors shadow-loss-glow;
+  }
+  
+  .btn-warning {
+    @apply bg-warning text-black font-medium py-2 px-4 rounded-md
+    hover:bg-warning/90 active:bg-warning/80 transition-colors;
+  }
+  
+  .btn-tech {
+    @apply bg-tech-purple text-white font-medium py-2 px-4 rounded-md
+    hover:bg-tech-purple/90 active:bg-tech-purple/80 transition-colors shadow-tech-glow;
+  }
+  
+  .btn-data {
+    @apply bg-data-cyan text-white font-medium py-2 px-4 rounded-md
+    hover:bg-data-cyan/90 active:bg-data-cyan/80 transition-colors shadow-data-glow;
+  }
+  
+  .btn-outline-primary {
     @apply border-2 border-primary text-primary font-medium py-2 px-4 rounded-md
-    hover:bg-primary/10 hover:shadow-neon active:bg-primary/20 transition-all;
+    hover:bg-primary/10 hover:shadow-primary-glow active:bg-primary/20 transition-all;
+  }
+  
+  /* Bitcoin button mantém cor tradicional */
+  .btn-bitcoin {
+    @apply bg-bitcoin hover:bg-bitcoin-dark text-white font-medium py-2 px-4 rounded-md
+    hover:shadow-[0_0_10px_rgba(247,147,26,0.5)] transition-all duration-300;
   }
 }

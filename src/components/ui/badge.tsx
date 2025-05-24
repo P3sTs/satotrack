@@ -12,13 +12,14 @@ const badgeVariants = cva(
         default:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-data-cyan text-white hover:bg-data-cyan/80",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+          "border-transparent bg-loss text-white hover:bg-loss/80",
         outline: "text-foreground border-foreground/30 hover:bg-foreground/10",
-        success: "border-transparent bg-satotrack-success text-primary-foreground hover:bg-satotrack-success/80",
-        warning: "border-transparent bg-yellow-500 text-primary-foreground hover:bg-yellow-500/80",
-        info: "border-transparent bg-blue-500 text-primary-foreground hover:bg-blue-500/80",
+        success: "border-transparent bg-profit text-white hover:bg-profit/80",
+        warning: "border-transparent bg-warning text-black hover:bg-warning/80",
+        info: "border-transparent bg-data-cyan text-white hover:bg-data-cyan/80",
+        tech: "border-transparent bg-tech-purple text-white hover:bg-tech-purple/80",
       },
     },
     defaultVariants: {

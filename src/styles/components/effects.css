@@ -2,43 +2,75 @@
 /* Visual effects and animations for SatoTrack */
 
 @layer components {
-  /* Gradient backgrounds */
+  /* Gradient backgrounds com nova paleta */
   .primary-gradient {
     @apply bg-gradient-to-r from-primary to-primary/80;
   }
   
-  .accent-gradient {
-    @apply bg-gradient-to-r from-accent to-accent/80;
+  .financial-gradient {
+    @apply bg-gradient-to-r from-profit to-data-cyan;
+  }
+  
+  .tech-gradient {
+    @apply bg-gradient-to-r from-tech-purple to-primary;
+  }
+  
+  .loss-gradient {
+    @apply bg-gradient-to-r from-loss to-warning;
   }
 
-  /* Neon text effects with stronger glow */
+  /* Text glow effects com novas cores */
   .text-glow-primary {
-    text-shadow: 0 0 12px rgba(0, 249, 166, 0.8);
+    text-shadow: 0 0 12px hsl(var(--primary) / 0.8);
   }
   
-  .text-glow-accent {
-    text-shadow: 0 0 12px rgba(255, 110, 199, 0.8);
+  .text-glow-profit {
+    text-shadow: 0 0 12px hsl(var(--profit-green) / 0.8);
   }
   
-  .text-glow-secondary {
-    text-shadow: 0 0 12px rgba(15, 240, 252, 0.8);
+  .text-glow-loss {
+    text-shadow: 0 0 12px hsl(var(--loss-red) / 0.8);
   }
   
-  /* 3D Background elements with increased visibility */
+  .text-glow-tech {
+    text-shadow: 0 0 12px hsl(var(--tech-purple) / 0.8);
+  }
+  
+  .text-glow-data {
+    text-shadow: 0 0 12px hsl(var(--data-cyan) / 0.8);
+  }
+  
+  /* 3D Background elements melhorados */
   .bg-mesh {
-    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
     background-size: 30px 30px;
   }
   
   .bg-grid-lines {
     background-image: 
-      linear-gradient(to right, rgba(0, 249, 166, 0.15) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 249, 166, 0.15) 1px, transparent 1px);
+      linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  
+  .bg-financial-grid {
+    background-image: 
+      linear-gradient(to right, hsl(var(--profit-green) / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--data-cyan) / 0.1) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
   /* Placeholders e skeletons */
   .skeleton {
     @apply bg-dashboard-light animate-pulse rounded;
+  }
+  
+  /* Interactive hover effects */
+  .financial-hover {
+    @apply transition-all duration-300 hover:shadow-profit-glow hover:scale-105;
+  }
+  
+  .tech-hover {
+    @apply transition-all duration-300 hover:shadow-tech-glow hover:scale-105;
   }
 }

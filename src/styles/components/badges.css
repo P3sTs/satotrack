@@ -2,29 +2,49 @@
 /* Badge and alert component styles for SatoTrack */
 
 @layer components {
-  /* Badges */
+  /* Badges com nova paleta financeira */
   .badge-premium {
-    @apply inline-flex items-center bg-accent/30 text-accent text-xs px-2 py-1 rounded-full font-medium;
+    @apply inline-flex items-center bg-tech-purple/30 text-tech-purple text-xs px-2 py-1 rounded-full font-medium;
   }
   
   .badge-free {
-    @apply inline-flex items-center bg-dashboard-light text-satotrack-text text-xs px-2 py-1 rounded-full font-medium;
+    @apply inline-flex items-center bg-dashboard-light text-satotrack-secondary text-xs px-2 py-1 rounded-full font-medium;
   }
   
-  /* Alertas com melhor visibilidade */
+  .badge-profit {
+    @apply inline-flex items-center bg-profit/20 text-profit text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  .badge-loss {
+    @apply inline-flex items-center bg-loss/20 text-loss text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  .badge-warning {
+    @apply inline-flex items-center bg-warning/20 text-warning text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  .badge-data {
+    @apply inline-flex items-center bg-data-cyan/20 text-data-cyan text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  /* Alertas com melhor visibilidade usando nova paleta */
   .alert-info {
-    @apply border-l-4 border-blue-500 bg-blue-500/20 p-4 rounded-r-md;
+    @apply border-l-4 border-data-cyan bg-data-cyan/20 p-4 rounded-r-md;
   }
   
   .alert-success {
-    @apply border-l-4 border-satotrack-success bg-satotrack-success/20 p-4 rounded-r-md;
+    @apply border-l-4 border-profit bg-profit/20 p-4 rounded-r-md;
   }
   
   .alert-warning {
-    @apply border-l-4 border-yellow-500 bg-yellow-500/20 p-4 rounded-r-md;
+    @apply border-l-4 border-warning bg-warning/20 p-4 rounded-r-md;
   }
   
   .alert-danger {
-    @apply border-l-4 border-satotrack-alert bg-satotrack-alert/20 p-4 rounded-r-md;
+    @apply border-l-4 border-loss bg-loss/20 p-4 rounded-r-md;
+  }
+  
+  .alert-tech {
+    @apply border-l-4 border-tech-purple bg-tech-purple/20 p-4 rounded-r-md;
   }
 }

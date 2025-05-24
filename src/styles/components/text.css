@@ -2,54 +2,72 @@
 /* Text and typography component styles for SatoTrack */
 
 @layer components {
-  .bitcoin-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-bitcoin to-bitcoin-dark font-bold;
+  .financial-gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-profit to-data-cyan font-bold;
   }
 
   .satotrack-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80 font-bold;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-bold;
   }
 
-  /* Preço indicadores com melhor contraste */
+  /* Indicadores de preço com novas cores financeiras */
   .price-up {
-    @apply text-satotrack-success font-medium;
+    @apply text-profit font-medium;
   }
   
   .price-down {
-    @apply text-satotrack-alert font-medium;
+    @apply text-loss font-medium;
   }
 
   .tech-outline {
     @apply border border-primary/40 shadow-sm transition-all duration-300
-    hover:border-primary/70 hover:shadow-neon;
+    hover:border-primary/70 hover:shadow-primary-glow;
   }
   
-  .neon-glow {
+  .financial-glow {
     @apply animate-glow;
   }
 
   .terminal-text {
-    @apply font-mono text-primary tracking-wide;
+    @apply font-mono text-data-cyan tracking-wide;
   }
 
-  /* Enhanced text styles */
+  /* Enhanced text styles with new palette */
   .heading-primary {
-    @apply text-white font-bold text-glow-primary;
+    @apply text-satotrack-text font-bold;
+    text-shadow: 0 0 8px hsl(var(--primary) / 0.3);
   }
   
   .heading-secondary {
-    @apply text-white/90 font-semibold;
+    @apply text-satotrack-text/90 font-semibold;
   }
   
   .text-body {
-    @apply text-white/85;
+    @apply text-satotrack-text/85;
   }
   
   .text-body-muted {
-    @apply text-white/70;
+    @apply text-satotrack-secondary;
   }
 
   .mobile-text {
     @apply text-xs sm:text-sm;
+  }
+  
+  /* Financial status indicators */
+  .profit-indicator {
+    @apply text-profit font-semibold;
+  }
+  
+  .loss-indicator {
+    @apply text-loss font-semibold;
+  }
+  
+  .warning-indicator {
+    @apply text-warning font-medium;
+  }
+  
+  .neutral-indicator {
+    @apply text-satotrack-secondary font-normal;
   }
 }

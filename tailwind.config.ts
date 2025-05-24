@@ -68,20 +68,41 @@ export default {
 					border: 'hsl(var(--sidebar-border, var(--border)))',
 					ring: 'hsl(var(--sidebar-ring, var(--ring)))'
 				},
+				// Financial colors
+				profit: {
+					DEFAULT: 'hsl(var(--profit-green))', // #00C853
+				},
+				loss: {
+					DEFAULT: 'hsl(var(--loss-red))', // #D50000
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning-yellow))', // #FFD600
+				},
+				'data-cyan': {
+					DEFAULT: 'hsl(var(--data-cyan))', // #00B8D4
+				},
+				'tech-purple': {
+					DEFAULT: 'hsl(var(--tech-purple))', // #7C4DFF
+				},
+				// Bitcoin colors
 				bitcoin: {
 					DEFAULT: '#F7931A',
 					dark: '#D97C0B'
 				},
+				// Dashboard colors
 				dashboard: {
 					dark: 'hsl(var(--dashboard-dark))',
 					medium: 'hsl(var(--dashboard-medium))',
 					light: 'hsl(var(--dashboard-light))'
 				},
+				// SatoTrack specific colors
 				satotrack: {
-					neon: 'hsl(var(--satotrack-neon))',
-					alert: 'hsl(var(--satotrack-alert))',
+					primary: 'hsl(var(--satotrack-primary))',
 					text: 'hsl(var(--satotrack-text))',
-					success: 'hsl(var(--satotrack-success))'
+					secondary: 'hsl(var(--satotrack-secondary))',
+					success: 'hsl(var(--satotrack-success))',
+					alert: 'hsl(var(--satotrack-alert))',
+					warning: 'hsl(var(--satotrack-warning))'
 				}
 			},
 			borderRadius: {
@@ -165,13 +186,12 @@ export default {
 				'terminal-cursor': 'terminal-cursor 0.7s step-end infinite'
 			},
 			boxShadow: {
-				'neon-sm': '0 0 5px rgba(0, 249, 166, 0.3)',
-				'neon': '0 0 10px rgba(0, 249, 166, 0.5)',
-				'neon-lg': '0 0 15px rgba(0, 249, 166, 0.7)',
-				'neon-xl': '0 0 20px rgba(0, 249, 166, 0.4), 0 0 40px rgba(255, 110, 199, 0.2)',
-				'neon-hover': '0 0 30px rgba(0, 249, 166, 0.6), 0 0 60px rgba(255, 110, 199, 0.4)',
-				'neon-pink': '0 0 15px rgba(255, 110, 199, 0.7)',
-				'neon-blue': '0 0 15px rgba(15, 240, 252, 0.7)',
+				'primary-glow': '0 0 10px hsl(var(--primary) / 0.5)',
+				'primary-lg': '0 0 15px hsl(var(--primary) / 0.7)',
+				'profit-glow': '0 0 10px hsl(var(--profit-green) / 0.5)',
+				'loss-glow': '0 0 10px hsl(var(--loss-red) / 0.5)',
+				'tech-glow': '0 0 15px hsl(var(--tech-purple) / 0.7)',
+				'data-glow': '0 0 15px hsl(var(--data-cyan) / 0.7)',
 			}
 		}
 	},

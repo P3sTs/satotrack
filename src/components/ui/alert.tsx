@@ -11,13 +11,15 @@ const alertVariants = cva(
       variant: {
         default: "bg-background/60 text-foreground border-border/60 backdrop-blur-sm",
         destructive:
-          "border-destructive/70 text-destructive bg-destructive/10 dark:border-destructive [&>svg]:text-destructive backdrop-blur-sm",
+          "border-loss/70 text-loss bg-loss/10 [&>svg]:text-loss backdrop-blur-sm",
         warning:
-          "border-yellow-500/70 text-yellow-400 bg-yellow-500/10 [&>svg]:text-yellow-400 backdrop-blur-sm",
+          "border-warning/70 text-warning bg-warning/10 [&>svg]:text-warning backdrop-blur-sm",
         success:
-          "border-satotrack-success/70 text-satotrack-success bg-satotrack-success/10 [&>svg]:text-satotrack-success backdrop-blur-sm",
+          "border-profit/70 text-profit bg-profit/10 [&>svg]:text-profit backdrop-blur-sm",
         info:
-          "border-blue-500/70 text-blue-400 bg-blue-500/10 [&>svg]:text-blue-400 backdrop-blur-sm",
+          "border-data-cyan/70 text-data-cyan bg-data-cyan/10 [&>svg]:text-data-cyan backdrop-blur-sm",
+        tech:
+          "border-tech-purple/70 text-tech-purple bg-tech-purple/10 [&>svg]:text-tech-purple backdrop-blur-sm",
       },
     },
     defaultVariants: {
