@@ -1,0 +1,55 @@
+
+/* Card component styles for SatoTrack */
+
+@layer components {
+  /* Cards com bordas mais visíveis */
+  .bitcoin-card {
+    @apply bg-card rounded-lg shadow-md border border-border/40 overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg w-full;
+  }
+  
+  /* 3D Fluid Cards */
+  .card-3d-fluid {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/10 rounded-[20px] shadow-neon-xl transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+  
+  .card-3d-fluid-accent {
+    @apply bg-gradient-to-br from-dashboard-medium to-dashboard-light 
+    border border-white/10 rounded-[20px] shadow-neon-pink transition-all duration-300
+    hover:shadow-neon-hover hover:translate-y-[-4px] hover:scale-[1.02];
+    backdrop-filter: blur(20px);
+  }
+  
+  .cyberpunk-card {
+    @apply bg-dashboard-medium border border-primary/30 rounded-lg shadow-lg overflow-hidden transition-all duration-300
+    hover:border-primary/70 hover:shadow-neon-sm w-full;
+  }
+  
+  .hacker-card {
+    @apply relative bg-dashboard-dark/80 backdrop-blur-sm border border-primary/40 rounded-lg 
+    shadow-[0_4px_15px_rgba(0,0,0,0.3)] overflow-hidden transition-all duration-300
+    hover:shadow-neon-sm hover:border-primary/80 w-full;
+  }
+  
+  .hacker-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/70 to-transparent;
+    animation: scan 2s linear infinite;
+  }
+
+  /* Glass card styles */
+  .glass-card {
+    @apply bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg;
+  }
+
+  /* Mobile specific classes */
+  .mobile-card {
+    @apply p-2 sm:p-4 text-sm sm:text-base;
+  }
+  
+  .mobile-card-title {
+    @apply text-base sm:text-lg font-medium;
+  }
+}

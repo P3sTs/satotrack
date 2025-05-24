@@ -1,0 +1,17 @@
+
+/* Navigation component styles for SatoTrack */
+
+@layer components {
+  /* Navegação */
+  .nav-link {
+    @apply px-2 py-1 text-sm font-medium rounded-md transition-colors whitespace-nowrap;
+  }
+  
+  .nav-link-active {
+    @apply text-primary bg-dashboard-light;
+  }
+  
+  .nav-link-inactive {
+    @apply text-muted-foreground hover:text-white hover:bg-dashboard-light/50;
+  }
+}

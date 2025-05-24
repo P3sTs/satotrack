@@ -1,0 +1,44 @@
+
+/* Visual effects and animations for SatoTrack */
+
+@layer components {
+  /* Gradient backgrounds */
+  .primary-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/80;
+  }
+  
+  .accent-gradient {
+    @apply bg-gradient-to-r from-accent to-accent/80;
+  }
+
+  /* Neon text effects with stronger glow */
+  .text-glow-primary {
+    text-shadow: 0 0 12px rgba(0, 249, 166, 0.8);
+  }
+  
+  .text-glow-accent {
+    text-shadow: 0 0 12px rgba(255, 110, 199, 0.8);
+  }
+  
+  .text-glow-secondary {
+    text-shadow: 0 0 12px rgba(15, 240, 252, 0.8);
+  }
+  
+  /* 3D Background elements with increased visibility */
+  .bg-mesh {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
+    background-size: 30px 30px;
+  }
+  
+  .bg-grid-lines {
+    background-image: 
+      linear-gradient(to right, rgba(0, 249, 166, 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 249, 166, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Placeholders e skeletons */
+  .skeleton {
+    @apply bg-dashboard-light animate-pulse rounded;
+  }
+}

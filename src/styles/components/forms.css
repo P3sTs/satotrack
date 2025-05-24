@@ -1,0 +1,24 @@
+
+/* Form component styles for SatoTrack */
+
+@layer components {
+  /* Formulários com melhor contraste */
+  .form-control {
+    @apply bg-dashboard-medium border-2 border-dashboard-light rounded-md px-4 py-2
+    focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-transparent;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium mb-1 text-satotrack-text;
+  }
+  
+  .form-group {
+    @apply mb-4;
+  }
+
+  /* Focus styles for accessibility */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 
+    focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}

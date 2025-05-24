@@ -1,0 +1,20 @@
+
+/* Button component styles for SatoTrack */
+
+@layer components {
+  /* Botões */
+  .btn-neon {
+    @apply bg-primary text-black font-medium py-2 px-4 rounded-md
+    shadow-neon hover:bg-primary/90 hover:shadow-neon-lg active:bg-primary/80 transition-all;
+  }
+  
+  .btn-bitcoin {
+    @apply bg-bitcoin text-white font-medium py-2 px-4 rounded-md
+    hover:bg-bitcoin/90 active:bg-bitcoin/80 transition-colors shadow-bitcoin;
+  }
+  
+  .btn-outline-neon {
+    @apply border-2 border-primary text-primary font-medium py-2 px-4 rounded-md
+    hover:bg-primary/10 hover:shadow-neon active:bg-primary/20 transition-all;
+  }
+}

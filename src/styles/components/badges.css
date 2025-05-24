@@ -1,0 +1,30 @@
+
+/* Badge and alert component styles for SatoTrack */
+
+@layer components {
+  /* Badges */
+  .badge-premium {
+    @apply inline-flex items-center bg-accent/30 text-accent text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  .badge-free {
+    @apply inline-flex items-center bg-dashboard-light text-satotrack-text text-xs px-2 py-1 rounded-full font-medium;
+  }
+  
+  /* Alertas com melhor visibilidade */
+  .alert-info {
+    @apply border-l-4 border-blue-500 bg-blue-500/20 p-4 rounded-r-md;
+  }
+  
+  .alert-success {
+    @apply border-l-4 border-satotrack-success bg-satotrack-success/20 p-4 rounded-r-md;
+  }
+  
+  .alert-warning {
+    @apply border-l-4 border-yellow-500 bg-yellow-500/20 p-4 rounded-r-md;
+  }
+  
+  .alert-danger {
+    @apply border-l-4 border-satotrack-alert bg-satotrack-alert/20 p-4 rounded-r-md;
+  }
+}
