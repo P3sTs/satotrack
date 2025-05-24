@@ -38,6 +38,11 @@
     hover:bg-primary/10 hover:shadow-primary-glow active:bg-primary/20 transition-all;
   }
   
+  .btn-neon {
+    @apply bg-primary/20 border-2 border-primary text-primary font-medium py-2 px-4 rounded-md
+    hover:bg-primary/30 hover:shadow-primary-glow active:bg-primary/40 transition-all;
+  }
+  
   /* Bitcoin button mantém cor tradicional */
   .btn-bitcoin {
     @apply bg-bitcoin hover:bg-bitcoin-dark text-white font-medium py-2 px-4 rounded-md

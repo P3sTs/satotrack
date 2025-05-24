@@ -22,7 +22,8 @@ const buttonVariants = cva(
         profit: "bg-profit text-white hover:bg-profit/90 hover:shadow-profit-glow transition-all duration-300 font-semibold",
         warning: "bg-warning text-black hover:bg-warning/90 transition-all duration-300 font-semibold",
         tech: "bg-tech-purple text-white hover:bg-tech-purple/90 hover:shadow-tech-glow transition-all duration-300 font-semibold",
-        bitcoin: "bg-bitcoin hover:bg-bitcoin-dark text-white hover:shadow-[0_0_10px_rgba(247,147,26,0.5)] transition-all duration-300 font-semibold"
+        bitcoin: "bg-bitcoin hover:bg-bitcoin-dark text-white hover:shadow-[0_0_10px_rgba(247,147,26,0.5)] transition-all duration-300 font-semibold",
+        neon: "bg-primary/20 border-2 border-primary text-primary hover:bg-primary/30 hover:shadow-primary-glow transition-all duration-300 font-semibold"
       },
       size: {
         default: "h-10 px-4 py-2",
