@@ -68,21 +68,21 @@ export default {
 					border: 'hsl(var(--sidebar-border, var(--border)))',
 					ring: 'hsl(var(--sidebar-ring, var(--ring)))'
 				},
-				// Financial colors
+				// Financial colors com melhor contraste
 				profit: {
-					DEFAULT: 'hsl(var(--profit-green))', // #00C853
+					DEFAULT: 'hsl(var(--profit-green))',
 				},
 				loss: {
-					DEFAULT: 'hsl(var(--loss-red))', // #D50000
+					DEFAULT: 'hsl(var(--loss-red))',
 				},
 				warning: {
-					DEFAULT: 'hsl(var(--warning-yellow))', // #FFD600
+					DEFAULT: 'hsl(var(--warning-yellow))',
 				},
 				'data-cyan': {
-					DEFAULT: 'hsl(var(--data-cyan))', // #00B8D4
+					DEFAULT: 'hsl(var(--data-cyan))',
 				},
 				'tech-purple': {
-					DEFAULT: 'hsl(var(--tech-purple))', // #7C4DFF
+					DEFAULT: 'hsl(var(--tech-purple))',
 				},
 				// Bitcoin colors
 				bitcoin: {
@@ -95,14 +95,15 @@ export default {
 					medium: 'hsl(var(--dashboard-medium))',
 					light: 'hsl(var(--dashboard-light))'
 				},
-				// SatoTrack specific colors
+				// SatoTrack specific colors com melhor contraste
 				satotrack: {
 					primary: 'hsl(var(--satotrack-primary))',
 					text: 'hsl(var(--satotrack-text))',
 					secondary: 'hsl(var(--satotrack-secondary))',
 					success: 'hsl(var(--satotrack-success))',
 					alert: 'hsl(var(--satotrack-alert))',
-					warning: 'hsl(var(--satotrack-warning))'
+					warning: 'hsl(var(--satotrack-warning))',
+					neon: 'hsl(var(--satotrack-neon))'
 				}
 			},
 			borderRadius: {
@@ -192,6 +193,7 @@ export default {
 				'loss-glow': '0 0 10px hsl(var(--loss-red) / 0.5)',
 				'tech-glow': '0 0 15px hsl(var(--tech-purple) / 0.7)',
 				'data-glow': '0 0 15px hsl(var(--data-cyan) / 0.7)',
+				'neon-lg': '0 0 20px hsl(var(--satotrack-neon) / 0.8)',
 			}
 		}
 	},

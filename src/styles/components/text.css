@@ -10,7 +10,7 @@
     @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-bold;
   }
 
-  /* Indicadores de preço com novas cores financeiras */
+  /* Indicadores de preço com novas cores e melhor contraste */
   .price-up {
     @apply text-profit font-medium;
   }
@@ -32,29 +32,29 @@
     @apply font-mono text-data-cyan tracking-wide;
   }
 
-  /* Enhanced text styles with new palette */
+  /* Enhanced text styles com melhor contraste */
   .heading-primary {
-    @apply text-satotrack-text font-bold;
+    @apply text-foreground font-bold;
     text-shadow: 0 0 8px hsl(var(--primary) / 0.3);
   }
   
   .heading-secondary {
-    @apply text-satotrack-text/90 font-semibold;
+    @apply text-foreground/90 font-semibold;
   }
   
   .text-body {
-    @apply text-satotrack-text/85;
+    @apply text-foreground/85;
   }
   
   .text-body-muted {
-    @apply text-satotrack-secondary;
+    @apply text-muted-foreground;
   }
 
   .mobile-text {
     @apply text-xs sm:text-sm;
   }
   
-  /* Financial status indicators */
+  /* Financial status indicators com melhor visibilidade */
   .profit-indicator {
     @apply text-profit font-semibold;
   }
@@ -68,6 +68,19 @@
   }
   
   .neutral-indicator {
-    @apply text-satotrack-secondary font-normal;
+    @apply text-muted-foreground font-normal;
+  }
+
+  /* Garantir legibilidade em todos os temas */
+  .text-high-contrast {
+    @apply text-foreground;
+  }
+
+  .text-medium-contrast {
+    @apply text-foreground/80;
+  }
+
+  .text-low-contrast {
+    @apply text-muted-foreground;
   }
 }

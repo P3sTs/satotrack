@@ -10,12 +10,12 @@
     @apply scroll-smooth;
   }
   
-  /* Adicionar proteção para texto em fundos claros em modo light */
+  /* Melhorar contraste para texto em fundos claros em modo light */
   .light .text-black {
     @apply text-foreground;
   }
   
-  /* Forçar texto a ser visível sempre */
+  /* Forçar texto a ser visível sempre com melhor contraste */
   .light button {
     @apply text-foreground;
   }
@@ -80,21 +80,35 @@
     @apply border-[hsl(var(--bitcoin))];
   }
 
-  /* Logo gradient para textos */
+  /* Logo gradient para textos com melhor visibilidade */
   .bg-satotrack-logo-gradient {
     @apply bg-gradient-to-r from-[hsl(var(--satotrack-neon))] to-[hsl(var(--satotrack-neon)_/_80%)];
   }
 
   /* 3D Background elements with increased visibility */
   .bg-mesh {
-    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.1) 1px, transparent 0);
     background-size: 30px 30px;
   }
   
   .bg-grid-lines {
     background-image: 
-      linear-gradient(to right, rgba(0, 249, 166, 0.15) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 249, 166, 0.15) 1px, transparent 1px);
+      linear-gradient(to right, hsl(var(--satotrack-neon) / 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--satotrack-neon) / 0.2) 1px, transparent 1px);
     background-size: 40px 40px;
+  }
+
+  /* Garantir que textos sejam sempre visíveis */
+  .text-contrast {
+    @apply text-foreground;
+  }
+
+  .bg-contrast {
+    @apply bg-background;
+  }
+
+  /* Melhorar contraste de cards */
+  .card-contrast {
+    @apply bg-card text-card-foreground border-border/60;
   }
 }

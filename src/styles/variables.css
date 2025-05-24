@@ -7,84 +7,85 @@
 @layer base {
   :root {
     --background: 0 0% 7%;          /* #121212 - Cinza escuro elegante */
-    --foreground: 0 0% 100%;        /* #FFFFFF - Branco para textos principais */
+    --foreground: 0 0% 98%;         /* #FAFAFA - Quase branco para melhor contraste */
  
     --card: 0 0% 10%;               /* Ligeiramente mais claro que o fundo */
-    --card-foreground: 0 0% 100%;   /* #FFFFFF - Texto principal dos cards */
+    --card-foreground: 0 0% 98%;    /* #FAFAFA - Texto principal dos cards */
  
     --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover-foreground: 0 0% 98%;
  
-    --primary: 212 100% 32%;        /* #0D47A1 - Azul primário confiança */
-    --primary-foreground: 0 0% 100%;
+    --primary: 212 100% 35%;        /* #0D47A1 - Azul primário mais claro para melhor contraste */
+    --primary-foreground: 0 0% 98%;
  
-    --secondary: 186 100% 35%;      /* #00B8D4 - Ciano para dados dinâmicos */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 186 100% 40%;      /* #00B8D4 - Ciano mais vibrante */
+    --secondary-foreground: 0 0% 98%;
  
-    --muted: 200 6% 70%;            /* #B0BEC5 - Cinza claro para textos secundários */
-    --muted-foreground: 200 6% 70%;
+    --muted: 200 6% 75%;            /* #B0BEC5 - Cinza mais claro */
+    --muted-foreground: 200 6% 75%;
  
-    --accent: 258 100% 66%;         /* #7C4DFF - Roxo tecnologia para premium */
-    --accent-foreground: 0 0% 100%;
+    --accent: 258 100% 70%;         /* #7C4DFF - Roxo mais claro */
+    --accent-foreground: 0 0% 98%;
  
-    --destructive: 0 100% 42%;      /* #D50000 - Vermelho prejuízo */
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 100% 45%;      /* #D50000 - Vermelho mais claro */
+    --destructive-foreground: 0 0% 98%;
  
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 212 100% 32%;           /* Azul primário para focus */
+    --border: 0 0% 20%;             /* Bordas mais visíveis */
+    --input: 0 0% 18%;              /* Inputs mais visíveis */
+    --ring: 212 100% 40%;           /* Azul primário para focus mais visível */
  
     --radius: 1rem;
     
     /* Dashboard-specific colors */
     --dashboard-dark: 0 0% 7%;      /* #121212 - Fundo principal */
-    --dashboard-medium: 0 0% 10%;   /* Cards em tons escuros */
-    --dashboard-light: 0 0% 15%;    /* Elementos mais claros */
+    --dashboard-medium: 0 0% 12%;   /* Cards em tons mais claros */
+    --dashboard-light: 0 0% 18%;    /* Elementos mais claros */
 
-    /* Financial-specific colors */
-    --profit-green: 140 100% 39%;   /* #00C853 - Verde lucro neon */
-    --loss-red: 0 100% 42%;         /* #D50000 - Vermelho prejuízo */
-    --warning-yellow: 51 100% 50%;  /* #FFD600 - Amarelo alerta */
-    --data-cyan: 186 100% 35%;      /* #00B8D4 - Ciano dados */
-    --tech-purple: 258 100% 66%;    /* #7C4DFF - Roxo tecnologia */
+    /* Financial-specific colors com melhor contraste */
+    --profit-green: 140 100% 42%;   /* #00C853 - Verde mais vibrante */
+    --loss-red: 0 100% 45%;         /* #D50000 - Vermelho mais claro */
+    --warning-yellow: 51 100% 55%;  /* #FFD600 - Amarelo mais vibrante */
+    --data-cyan: 186 100% 40%;      /* #00B8D4 - Ciano mais vibrante */
+    --tech-purple: 258 100% 70%;    /* #7C4DFF - Roxo mais claro */
 
     /* Bitcoin-specific colors */
     --bitcoin: 37 95% 58%;          /* #F7931A - Manter cor tradicional */
     --bitcoin-dark: 36 85% 48%;     /* #E67F06 */
 
-    /* SatoTrack specific colors */
-    --satotrack-primary: 212 100% 32%;    /* #0D47A1 - Azul primário */
-    --satotrack-text: 0 0% 100%;          /* #FFFFFF - Texto principal */
-    --satotrack-secondary: 200 6% 70%;    /* #B0BEC5 - Texto secundário */
-    --satotrack-success: 140 100% 39%;    /* #00C853 - Verde lucro */
-    --satotrack-alert: 0 100% 42%;        /* #D50000 - Vermelho alerta */
-    --satotrack-warning: 51 100% 50%;     /* #FFD600 - Amarelo aviso */
+    /* SatoTrack specific colors com melhor contraste */
+    --satotrack-primary: 212 100% 35%;    /* #0D47A1 - Azul primário */
+    --satotrack-text: 0 0% 98%;           /* #FAFAFA - Texto principal mais contrastante */
+    --satotrack-secondary: 200 6% 75%;    /* #B0BEC5 - Texto secundário mais claro */
+    --satotrack-success: 140 100% 42%;    /* #00C853 - Verde lucro */
+    --satotrack-alert: 0 100% 45%;        /* #D50000 - Vermelho alerta */
+    --satotrack-warning: 51 100% 55%;     /* #FFD600 - Amarelo aviso */
+    --satotrack-neon: 140 100% 42%;       /* Verde neon para elementos especiais */
   }
  
   .light {
     --background: 0 0% 98%;         /* Light background */
-    --foreground: 0 0% 7%;          /* Texto escuro no modo claro */
+    --foreground: 0 0% 5%;          /* Texto muito escuro no modo claro */
  
     --card: 0 0% 96%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 0 0% 5%;
  
     --popover: 0 0% 96%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 0 0% 5%;
  
     --primary: 212 100% 32%;        /* Mantém azul primário */
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 98%;
  
     --secondary: 186 100% 35%;      /* Mantém ciano */
-    --secondary-foreground: 0 0% 100%;
+    --secondary-foreground: 0 0% 98%;
  
-    --muted: 200 6% 90%;
-    --muted-foreground: 200 6% 40%;
+    --muted: 200 6% 92%;
+    --muted-foreground: 200 6% 35%;
  
     --accent: 258 100% 66%;         /* Mantém roxo tecnologia */
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 0 0% 98%;
  
     --destructive: 0 100% 42%;      /* Mantém vermelho */
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
  
     --border: 0 0% 85%;
     --input: 0 0% 85%;
@@ -95,7 +96,7 @@
     --dashboard-medium: 0 0% 94%;
     --dashboard-light: 0 0% 90%;
     
-    /* Financial colors remain the same for consistency */
+    /* Financial colors remain strong for consistency */
     --profit-green: 140 100% 39%;
     --loss-red: 0 100% 42%;
     --warning-yellow: 51 100% 50%;
@@ -106,12 +107,13 @@
     --bitcoin: 37 95% 58%;
     --bitcoin-dark: 36 85% 48%;
     
-    /* SatoTrack colors for light mode */
+    /* SatoTrack colors for light mode com melhor contraste */
     --satotrack-primary: 212 100% 32%;
-    --satotrack-text: 0 0% 7%;
-    --satotrack-secondary: 200 6% 40%;
+    --satotrack-text: 0 0% 5%;
+    --satotrack-secondary: 200 6% 35%;
     --satotrack-success: 140 100% 39%;
     --satotrack-alert: 0 100% 42%;
     --satotrack-warning: 51 100% 50%;
+    --satotrack-neon: 140 100% 39%;
   }
 }
