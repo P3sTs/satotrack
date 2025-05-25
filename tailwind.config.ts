@@ -2,7 +2,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-	darkMode: ["class"],
+	darkMode: "class",
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -25,64 +25,64 @@ export default {
 				mono: ['Courier New', 'monospace'],
 			},
 			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
+				border: '#404040',
+				input: '#262626',
+				ring: '#3b82f6',
+				background: '#17171a',
+				foreground: '#fafafa',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#3b82f6',
+					foreground: '#fafafa'
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					DEFAULT: '#404040',
+					foreground: '#fafafa'
 				},
 				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
+					DEFAULT: '#ef4444',
+					foreground: '#fafafa'
 				},
 				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
+					DEFAULT: '#262626',
+					foreground: '#d9d9d9'
 				},
 				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
+					DEFAULT: '#a855f7',
+					foreground: '#fafafa'
 				},
 				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
+					DEFAULT: '#1f1f23',
+					foreground: '#fafafa'
 				},
 				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					DEFAULT: '#1f1f23',
+					foreground: '#fafafa'
 				},
 				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background, var(--card)))',
-					foreground: 'hsl(var(--sidebar-foreground, var(--card-foreground)))',
-					primary: 'hsl(var(--sidebar-primary, var(--primary)))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground, var(--primary-foreground)))',
-					accent: 'hsl(var(--sidebar-accent, var(--accent)))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground, var(--accent-foreground)))',
-					border: 'hsl(var(--sidebar-border, var(--border)))',
-					ring: 'hsl(var(--sidebar-ring, var(--ring)))'
+					DEFAULT: '#1f1f23',
+					foreground: '#fafafa',
+					primary: '#3b82f6',
+					'primary-foreground': '#fafafa',
+					accent: '#a855f7',
+					'accent-foreground': '#fafafa',
+					border: '#404040',
+					ring: '#3b82f6'
 				},
-				// Financial colors com melhor contraste
+				// Financial colors
 				profit: {
-					DEFAULT: 'hsl(var(--profit-green))',
+					DEFAULT: '#22c55e',
 				},
 				loss: {
-					DEFAULT: 'hsl(var(--loss-red))',
+					DEFAULT: '#ef4444',
 				},
 				warning: {
-					DEFAULT: 'hsl(var(--warning-yellow))',
+					DEFAULT: '#eab308',
 				},
 				'data-cyan': {
-					DEFAULT: 'hsl(var(--data-cyan))',
+					DEFAULT: '#06b6d4',
 				},
 				'tech-purple': {
-					DEFAULT: 'hsl(var(--tech-purple))',
+					DEFAULT: '#a855f7',
 				},
 				// Bitcoin colors
 				bitcoin: {
@@ -91,25 +91,25 @@ export default {
 				},
 				// Dashboard colors
 				dashboard: {
-					dark: 'hsl(var(--dashboard-dark))',
-					medium: 'hsl(var(--dashboard-medium))',
-					light: 'hsl(var(--dashboard-light))'
+					dark: '#17171a',
+					medium: '#1f1f23',
+					light: '#404040'
 				},
-				// SatoTrack specific colors com melhor contraste
+				// SatoTrack specific colors
 				satotrack: {
-					primary: 'hsl(var(--satotrack-primary))',
-					text: 'hsl(var(--satotrack-text))',
-					secondary: 'hsl(var(--satotrack-secondary))',
-					success: 'hsl(var(--satotrack-success))',
-					alert: 'hsl(var(--satotrack-alert))',
-					warning: 'hsl(var(--satotrack-warning))',
-					neon: 'hsl(var(--satotrack-neon))'
+					primary: '#3b82f6',
+					text: '#fafafa',
+					secondary: '#cccccc',
+					success: '#22c55e',
+					alert: '#ef4444',
+					warning: '#eab308',
+					neon: '#22c55e'
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '1rem',
+				md: 'calc(1rem - 2px)',
+				sm: 'calc(1rem - 4px)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -138,10 +138,10 @@ export default {
 				},
 				'glow': {
 					'0%, 100%': {
-						filter: 'drop-shadow(0 0 2px hsl(var(--primary)))'
+						filter: 'drop-shadow(0 0 2px #3b82f6)'
 					},
 					'50%': {
-						filter: 'drop-shadow(0 0 6px hsl(var(--primary)))'
+						filter: 'drop-shadow(0 0 6px #3b82f6)'
 					}
 				},
 				'scan-line': {
@@ -187,13 +187,13 @@ export default {
 				'terminal-cursor': 'terminal-cursor 0.7s step-end infinite'
 			},
 			boxShadow: {
-				'primary-glow': '0 0 10px hsl(var(--primary) / 0.5)',
-				'primary-lg': '0 0 15px hsl(var(--primary) / 0.7)',
-				'profit-glow': '0 0 10px hsl(var(--profit-green) / 0.5)',
-				'loss-glow': '0 0 10px hsl(var(--loss-red) / 0.5)',
-				'tech-glow': '0 0 15px hsl(var(--tech-purple) / 0.7)',
-				'data-glow': '0 0 15px hsl(var(--data-cyan) / 0.7)',
-				'neon-lg': '0 0 20px hsl(var(--satotrack-neon) / 0.8)',
+				'primary-glow': '0 0 10px rgba(59, 130, 246, 0.5)',
+				'primary-lg': '0 0 15px rgba(59, 130, 246, 0.7)',
+				'profit-glow': '0 0 10px rgba(34, 197, 94, 0.5)',
+				'loss-glow': '0 0 10px rgba(239, 68, 68, 0.5)',
+				'tech-glow': '0 0 15px rgba(168, 85, 247, 0.7)',
+				'data-glow': '0 0 15px rgba(6, 182, 212, 0.7)',
+				'neon-lg': '0 0 20px rgba(34, 197, 94, 0.8)',
 			}
 		}
 	},

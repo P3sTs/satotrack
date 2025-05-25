@@ -1,13 +1,17 @@
 
-/* Typography styles for SatoTrack application */
+/* Typography styles for SatoTrack application - DARK MODE ONLY */
 
 @layer base {
   body {
-    @apply bg-background text-foreground font-inter;
+    background-color: #17171a !important;
+    color: #fafafa !important;
+    font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-orbitron font-bold;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    color: #fafafa !important;
   }
 
   /* Tipografia personalizada */
@@ -19,46 +23,49 @@
     font-family: 'Orbitron', sans-serif;
   }
 
-  /* Enhanced text glow effects */
+  /* Text glow effects */
   .text-glow-strong {
-    text-shadow: 0 0 15px rgba(0, 249, 166, 0.9);
+    text-shadow: 0 0 15px rgba(34, 197, 94, 0.9);
   }
   
   .text-glow {
-    text-shadow: 0 0 10px rgba(0, 249, 166, 0.7);
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
   }
 
   .text-glow-subtle {
-    text-shadow: 0 0 5px rgba(0, 249, 166, 0.5);
+    text-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
   }
   
   /* Enhanced text styles */
   .heading-primary {
-    @apply text-white font-bold text-glow-primary;
+    color: #fafafa !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
   }
   
   .heading-secondary {
-    @apply text-white/90 font-semibold;
+    color: rgba(250, 250, 250, 0.9) !important;
+    font-weight: 600;
   }
   
   .text-body {
-    @apply text-white/85;
+    color: rgba(250, 250, 250, 0.85) !important;
   }
   
   .text-body-muted {
-    @apply text-white/70;
+    color: rgba(250, 250, 250, 0.7) !important;
   }
 
-  /* Text glow effects with stronger glow */
+  /* Text glow effects with colors */
   .text-glow-primary {
-    text-shadow: 0 0 12px rgba(0, 249, 166, 0.8);
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
   }
   
   .text-glow-accent {
-    text-shadow: 0 0 12px rgba(255, 110, 199, 0.8);
+    text-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
   }
   
   .text-glow-secondary {
-    text-shadow: 0 0 12px rgba(15, 240, 252, 0.8);
+    text-shadow: 0 0 12px rgba(6, 182, 212, 0.8);
   }
 }

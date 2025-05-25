@@ -1,27 +1,37 @@
 
-/* Text and typography component styles for SatoTrack */
+/* Text and typography component styles for SatoTrack - DARK MODE ONLY */
 
 @layer components {
   .financial-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-profit to-data-cyan font-bold;
+    @apply text-transparent bg-clip-text bg-gradient-to-r font-bold;
+    background-image: linear-gradient(to right, hsl(142 76% 50%), hsl(186 100% 50%));
   }
 
   .satotrack-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-bold;
+    @apply text-transparent bg-clip-text bg-gradient-to-r font-bold;
+    background-image: linear-gradient(to right, hsl(212 100% 50%), hsl(0 0% 80%));
   }
 
-  /* Indicadores de preço com novas cores e melhor contraste */
+  /* Indicadores de preço */
   .price-up {
-    @apply text-profit font-medium;
+    color: hsl(142 76% 50%) !important;
+    font-weight: 500;
   }
   
   .price-down {
-    @apply text-loss font-medium;
+    color: hsl(0 84% 60%) !important;
+    font-weight: 500;
   }
 
   .tech-outline {
-    @apply border border-primary/40 shadow-sm transition-all duration-300
-    hover:border-primary/70 hover:shadow-primary-glow;
+    @apply border transition-all duration-300;
+    border-color: hsl(212 100% 50% / 0.4);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .tech-outline:hover {
+    border-color: hsl(212 100% 50% / 0.7);
+    box-shadow: 0 0 10px hsl(212 100% 50% / 0.5);
   }
   
   .financial-glow {
@@ -29,58 +39,65 @@
   }
 
   .terminal-text {
-    @apply font-mono text-data-cyan tracking-wide;
+    @apply font-mono tracking-wide;
+    color: hsl(186 100% 50%) !important;
   }
 
-  /* Enhanced text styles com melhor contraste */
+  /* Enhanced text styles */
   .heading-primary {
-    @apply text-foreground font-bold;
-    text-shadow: 0 0 8px hsl(var(--primary) / 0.3);
+    color: #fafafa !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px hsl(212 100% 50% / 0.3);
   }
   
   .heading-secondary {
-    @apply text-foreground/90 font-semibold;
+    color: rgba(250, 250, 250, 0.9) !important;
+    font-weight: 600;
   }
   
   .text-body {
-    @apply text-foreground/85;
+    color: rgba(250, 250, 250, 0.85) !important;
   }
   
   .text-body-muted {
-    @apply text-muted-foreground;
+    color: hsl(0 0% 85%) !important;
   }
 
   .mobile-text {
     @apply text-xs sm:text-sm;
   }
   
-  /* Financial status indicators com melhor visibilidade */
+  /* Financial status indicators */
   .profit-indicator {
-    @apply text-profit font-semibold;
+    color: hsl(142 76% 50%) !important;
+    font-weight: 600;
   }
   
   .loss-indicator {
-    @apply text-loss font-semibold;
+    color: hsl(0 84% 60%) !important;
+    font-weight: 600;
   }
   
   .warning-indicator {
-    @apply text-warning font-medium;
+    color: hsl(51 100% 60%) !important;
+    font-weight: 500;
   }
   
   .neutral-indicator {
-    @apply text-muted-foreground font-normal;
+    color: hsl(0 0% 85%) !important;
+    font-weight: normal;
   }
 
-  /* Garantir legibilidade em todos os temas */
+  /* Contrast classes */
   .text-high-contrast {
-    @apply text-foreground;
+    color: #fafafa !important;
   }
 
   .text-medium-contrast {
-    @apply text-foreground/80;
+    color: rgba(250, 250, 250, 0.8) !important;
   }
 
   .text-low-contrast {
-    @apply text-muted-foreground;
+    color: hsl(0 0% 85%) !important;
   }
 }
