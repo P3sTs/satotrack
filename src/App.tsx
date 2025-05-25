@@ -129,12 +129,22 @@ function App() {
           } 
         />
         <Route 
+          path="/crypto" 
+          element={
+            <ProtectedRoute>
+              <Crypto />
+            </ProtectedRoute>
+          }
+          
+        />
+        <Route 
           path="/projecao-lucros" 
           element={
             <ProtectedRoute>
               <ProjecaoLucros />
             </ProtectedRoute>
-          } 
+            
+          }
         />
       </Route>
       
