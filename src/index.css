@@ -32,7 +32,7 @@
 /* Importa estilos de scrollbar */
 @import './styles/scrollbars.css';
 
-/* Configurações globais que não se encaixam em outras categorias */
+/* Forçar configurações globais de tema escuro */
 html, body {
   background-color: hsl(var(--background)) !important;
   color: hsl(var(--foreground)) !important;
@@ -47,29 +47,24 @@ html, body {
   color: hsl(var(--foreground)) !important;
 }
 
-/* Media queries específicas */
-@media (max-width: 640px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .hide-on-mobile {
-    display: none;
-  }
-}
-
-/* Garantir que todos os elementos herdem as cores corretas */
+/* Forçar que todos os elementos herdem as cores corretas */
 * {
-  border-color: hsl(var(--border));
+  border-color: hsl(var(--border)) !important;
   color: hsl(var(--foreground)) !important;
 }
 
 /* Forçar cores para elementos específicos */
-div, span, p, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, label {
+div, span, p, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, label, li, td, th {
   color: hsl(var(--foreground)) !important;
 }
 
-/* Exceções para elementos com cores específicas */
+/* Forçar fundo escuro para componentes principais */
+.bg-card, [class*="card"], [class*="popover"], [class*="dropdown"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Exceções específicas para cores importantes */
 .text-bitcoin, .bitcoin {
   color: hsl(var(--bitcoin)) !important;
 }
@@ -91,9 +86,32 @@ div, span, p, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, label 
 }
 
 .text-secondary, .secondary {
-  color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
 }
 
 .text-muted-foreground {
   color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Garantir que inputs e forms sejam visíveis */
+input, textarea, select {
+  background-color: hsl(var(--input)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Garantir que botões sejam visíveis */
+button {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Media queries específicas */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hide-on-mobile {
+    display: none;
+  }
 }

@@ -20,12 +20,9 @@
   }
   
   /* Forçar cores escuras para todos os elementos */
-  .light * {
+  .light *, .dark * {
     color: hsl(var(--foreground)) !important;
-  }
-  
-  .dark * {
-    color: hsl(var(--foreground)) !important;
+    background-color: inherit;
   }
   
   /* Forçar aplicação correta dos backgrounds */
@@ -39,31 +36,31 @@
   
   /* Cores personalizadas do tema */
   .bg-dashboard-dark {
-    @apply bg-[hsl(var(--dashboard-dark))];
+    background-color: hsl(var(--dashboard-dark)) !important;
   }
   
   .bg-dashboard-medium {
-    @apply bg-[hsl(var(--dashboard-medium))];
+    background-color: hsl(var(--dashboard-medium)) !important;
   }
   
   .bg-dashboard-light {
-    @apply bg-[hsl(var(--dashboard-light))];
+    background-color: hsl(var(--dashboard-light)) !important;
   }
   
   .bg-bitcoin {
-    @apply bg-[hsl(var(--bitcoin))];
+    background-color: hsl(var(--bitcoin)) !important;
   }
   
   .bg-bitcoin-dark {
-    @apply bg-[hsl(var(--bitcoin-dark))];
+    background-color: hsl(var(--bitcoin-dark)) !important;
   }
   
   .bg-satotrack-neon {
-    @apply bg-[hsl(var(--satotrack-neon))];
+    background-color: hsl(var(--satotrack-neon)) !important;
   }
   
   .text-satotrack-neon {
-    @apply text-[hsl(var(--satotrack-neon))];
+    color: hsl(var(--satotrack-neon)) !important;
   }
   
   .text-satotrack-text {
@@ -71,28 +68,28 @@
   }
   
   .text-satotrack-alert {
-    @apply text-[hsl(var(--satotrack-alert))];
+    color: hsl(var(--satotrack-alert)) !important;
   }
   
   .text-satotrack-success {
-    @apply text-[hsl(var(--satotrack-success))];
+    color: hsl(var(--satotrack-success)) !important;
   }
   
   .text-bitcoin {
-    @apply text-[hsl(var(--bitcoin))];
+    color: hsl(var(--bitcoin)) !important;
   }
   
   .border-satotrack-neon {
-    @apply border-[hsl(var(--satotrack-neon))];
+    border-color: hsl(var(--satotrack-neon)) !important;
   }
   
   .border-bitcoin {
-    @apply border-[hsl(var(--bitcoin))];
+    border-color: hsl(var(--bitcoin)) !important;
   }
 
   /* Logo gradient */
   .bg-satotrack-logo-gradient {
-    @apply bg-gradient-to-r from-[hsl(var(--satotrack-neon))] to-[hsl(var(--satotrack-neon)_/_80%)];
+    background: linear-gradient(to right, hsl(var(--satotrack-neon)), hsl(var(--satotrack-neon) / 80%)) !important;
   }
 
   /* 3D Background elements */
@@ -108,8 +105,8 @@
     background-size: 40px 40px;
   }
 
-  /* Classes de contraste garantidas com !important */
-  .text-contrast {
+  /* Classes universais para forçar contraste */
+  .text-contrast, h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label {
     color: hsl(var(--foreground)) !important;
   }
 
@@ -119,40 +116,49 @@
 
   /* Cards com contraste correto */
   .card-contrast {
-    @apply bg-card text-card-foreground border-border;
     background-color: hsl(var(--card)) !important;
     color: hsl(var(--card-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
   }
   
   /* Componentes de formulário com contraste */
   input, textarea, select {
-    @apply bg-input border-border;
     background-color: hsl(var(--input)) !important;
     color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
   }
   
-  /* Botões com contraste */
-  button {
-    color: hsl(var(--foreground)) !important;
+  /* Exceções para cores específicas importantes */
+  .text-bitcoin, .bitcoin {
+    color: hsl(var(--bitcoin)) !important;
   }
 
-  /* Garantir que títulos sejam visíveis */
-  h1, h2, h3, h4, h5, h6 {
-    color: hsl(var(--foreground)) !important;
+  .text-profit, .profit {
+    color: hsl(var(--profit-green)) !important;
   }
 
-  /* Garantir que parágrafos sejam visíveis */
-  p, span, div {
-    color: hsl(var(--foreground)) !important;
+  .text-loss, .loss {
+    color: hsl(var(--loss-red)) !important;
   }
 
-  /* Garantir que links sejam visíveis */
-  a {
+  .text-warning, .warning {
+    color: hsl(var(--warning-yellow)) !important;
+  }
+
+  .text-primary, .primary {
     color: hsl(var(--primary)) !important;
   }
 
-  /* Classes específicas para forçar texto escuro */
-  .force-dark-text {
+  .text-secondary, .secondary {
+    color: hsl(var(--secondary-foreground)) !important;
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Forçar texto branco em todos os elementos de interface */
+  .force-white-text, .force-white-text * {
     color: hsl(var(--foreground)) !important;
   }
 

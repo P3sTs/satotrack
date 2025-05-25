@@ -6,115 +6,146 @@
 
 @layer base {
   :root {
-    --background: 220 13% 9%;          /* #17171a - Fundo escuro mais visível */
-    --foreground: 0 0% 95%;            /* #F2F2F2 - Texto branco contrastante */
+    --background: 220 13% 9%;          /* #17171a - Fundo escuro */
+    --foreground: 0 0% 98%;            /* #FAFAFA - Texto branco */
  
-    --card: 220 13% 12%;               /* Cards mais visíveis */
-    --card-foreground: 0 0% 95%;       /* Texto dos cards */
+    --card: 220 13% 12%;               /* Cards escuros */
+    --card-foreground: 0 0% 98%;       /* Texto dos cards branco */
  
     --popover: 220 13% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover-foreground: 0 0% 98%;
  
-    --primary: 212 100% 35%;        /* #0D47A1 - Azul primário */
+    --primary: 212 100% 50%;           /* Azul mais claro */
     --primary-foreground: 0 0% 98%;
  
-    --secondary: 186 100% 40%;      /* #00B8D4 - Ciano */
+    --secondary: 220 13% 18%;          /* Cinza escuro */
     --secondary-foreground: 0 0% 98%;
  
-    --muted: 220 13% 20%;            /* Elementos silenciados mais visíveis */
-    --muted-foreground: 0 0% 75%;    /* Texto silenciado mais visível */
+    --muted: 220 13% 15%;              /* Elementos silenciados escuros */
+    --muted-foreground: 0 0% 85%;      /* Texto silenciado claro */
  
-    --accent: 258 100% 70%;         /* #7C4DFF - Roxo */
+    --accent: 258 100% 70%;            /* Roxo */
     --accent-foreground: 0 0% 98%;
  
-    --destructive: 0 100% 45%;      /* #D50000 - Vermelho */
+    --destructive: 0 84% 60%;          /* Vermelho */
     --destructive-foreground: 0 0% 98%;
  
-    --border: 220 13% 25%;             /* Bordas mais visíveis */
-    --input: 220 13% 18%;              /* Inputs com contraste */
-    --ring: 212 100% 40%;           /* Azul primário para focus */
+    --border: 220 13% 25%;             /* Bordas visíveis */
+    --input: 220 13% 15%;              /* Inputs escuros */
+    --ring: 212 100% 50%;              /* Azul para focus */
  
     --radius: 1rem;
     
     /* Dashboard-specific colors */
-    --dashboard-dark: 220 13% 9%;      /* #17171a - Fundo principal */
+    --dashboard-dark: 220 13% 9%;      /* Fundo principal */
     --dashboard-medium: 220 13% 12%;   /* Cards */
     --dashboard-light: 220 13% 18%;    /* Elementos mais claros */
 
     /* Financial-specific colors */
-    --profit-green: 140 100% 42%;   /* #00C853 - Verde lucro */
-    --loss-red: 0 100% 45%;         /* #D50000 - Vermelho perda */
-    --warning-yellow: 51 100% 55%;  /* #FFD600 - Amarelo aviso */
-    --data-cyan: 186 100% 40%;      /* #00B8D4 - Ciano dados */
-    --tech-purple: 258 100% 70%;    /* #7C4DFF - Roxo tech */
+    --profit-green: 142 76% 50%;       /* Verde lucro mais claro */
+    --loss-red: 0 84% 60%;             /* Vermelho perda mais claro */
+    --warning-yellow: 51 100% 60%;     /* Amarelo aviso mais claro */
+    --data-cyan: 186 100% 50%;         /* Ciano dados mais claro */
+    --tech-purple: 258 100% 75%;       /* Roxo tech mais claro */
 
     /* Bitcoin-specific colors */
-    --bitcoin: 37 95% 58%;          /* #F7931A - Bitcoin laranja */
-    --bitcoin-dark: 36 85% 48%;     /* #E67F06 - Bitcoin escuro */
+    --bitcoin: 37 95% 58%;             /* Bitcoin laranja */
+    --bitcoin-dark: 36 85% 48%;        /* Bitcoin escuro */
 
     /* SatoTrack specific colors */
-    --satotrack-primary: 212 100% 35%;    /* #0D47A1 - Azul primário */
-    --satotrack-text: 0 0% 95%;           /* #F2F2F2 - Texto principal */
-    --satotrack-secondary: 0 0% 75%;      /* Texto secundário */
-    --satotrack-success: 140 100% 42%;    /* #00C853 - Verde sucesso */
-    --satotrack-alert: 0 100% 45%;        /* #D50000 - Vermelho alerta */
-    --satotrack-warning: 51 100% 55%;     /* #FFD600 - Amarelo aviso */
-    --satotrack-neon: 140 100% 42%;       /* Verde neon */
+    --satotrack-primary: 212 100% 50%;    /* Azul primário mais claro */
+    --satotrack-text: 0 0% 98%;           /* Texto principal branco */
+    --satotrack-secondary: 0 0% 80%;      /* Texto secundário claro */
+    --satotrack-success: 142 76% 50%;     /* Verde sucesso mais claro */
+    --satotrack-alert: 0 84% 60%;         /* Vermelho alerta mais claro */
+    --satotrack-warning: 51 100% 60%;     /* Amarelo aviso mais claro */
+    --satotrack-neon: 142 76% 50%;        /* Verde neon mais claro */
   }
  
   .light {
     /* Forçar modo escuro mesmo no light mode */
-    --background: 220 13% 9%;          /* Fundo escuro forçado */
-    --foreground: 0 0% 95%;            /* Texto claro forçado */
+    --background: 220 13% 9% !important;
+    --foreground: 0 0% 98% !important;
  
-    --card: 220 13% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 220 13% 12% !important;
+    --card-foreground: 0 0% 98% !important;
  
-    --popover: 220 13% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 220 13% 12% !important;
+    --popover-foreground: 0 0% 98% !important;
  
-    --primary: 212 100% 35%;        
-    --primary-foreground: 0 0% 98%;
+    --primary: 212 100% 50% !important;        
+    --primary-foreground: 0 0% 98% !important;
  
-    --secondary: 186 100% 40%;      
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 13% 18% !important;      
+    --secondary-foreground: 0 0% 98% !important;
  
-    --muted: 220 13% 20%;
-    --muted-foreground: 0 0% 75%;
+    --muted: 220 13% 15% !important;
+    --muted-foreground: 0 0% 85% !important;
  
-    --accent: 258 100% 70%;         
-    --accent-foreground: 0 0% 98%;
+    --accent: 258 100% 70% !important;         
+    --accent-foreground: 0 0% 98% !important;
  
-    --destructive: 0 100% 45%;      
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60% !important;      
+    --destructive-foreground: 0 0% 98% !important;
  
-    --border: 220 13% 25%;
-    --input: 220 13% 18%;
-    --ring: 212 100% 35%;
+    --border: 220 13% 25% !important;
+    --input: 220 13% 15% !important;
+    --ring: 212 100% 50% !important;
     
     /* Dashboard colors forçado escuro */
-    --dashboard-dark: 220 13% 9%; 
-    --dashboard-medium: 220 13% 12%;
-    --dashboard-light: 220 13% 18%;
+    --dashboard-dark: 220 13% 9% !important; 
+    --dashboard-medium: 220 13% 12% !important;
+    --dashboard-light: 220 13% 18% !important;
     
-    /* Financial colors mantidos */
-    --profit-green: 140 100% 42%;
-    --loss-red: 0 100% 45%;
-    --warning-yellow: 51 100% 55%;
-    --data-cyan: 186 100% 40%;
-    --tech-purple: 258 100% 70%;
+    /* Financial colors */
+    --profit-green: 142 76% 50% !important;
+    --loss-red: 0 84% 60% !important;
+    --warning-yellow: 51 100% 60% !important;
+    --data-cyan: 186 100% 50% !important;
+    --tech-purple: 258 100% 75% !important;
     
-    /* Bitcoin colors mantidos */
-    --bitcoin: 37 95% 58%;
-    --bitcoin-dark: 36 85% 48%;
+    /* Bitcoin colors */
+    --bitcoin: 37 95% 58% !important;
+    --bitcoin-dark: 36 85% 48% !important;
     
     /* SatoTrack colors forçado escuro */
-    --satotrack-primary: 212 100% 35%;
-    --satotrack-text: 0 0% 95%;
-    --satotrack-secondary: 0 0% 75%;
-    --satotrack-success: 140 100% 42%;
-    --satotrack-alert: 0 100% 45%;
-    --satotrack-warning: 51 100% 55%;
-    --satotrack-neon: 140 100% 42%;
+    --satotrack-primary: 212 100% 50% !important;
+    --satotrack-text: 0 0% 98% !important;
+    --satotrack-secondary: 0 0% 80% !important;
+    --satotrack-success: 142 76% 50% !important;
+    --satotrack-alert: 0 84% 60% !important;
+    --satotrack-warning: 51 100% 60% !important;
+    --satotrack-neon: 142 76% 50% !important;
+  }
+
+  .dark {
+    /* Garantir que o modo escuro tenha as cores corretas */
+    --background: 220 13% 9% !important;
+    --foreground: 0 0% 98% !important;
+ 
+    --card: 220 13% 12% !important;
+    --card-foreground: 0 0% 98% !important;
+ 
+    --popover: 220 13% 12% !important;
+    --popover-foreground: 0 0% 98% !important;
+ 
+    --primary: 212 100% 50% !important;        
+    --primary-foreground: 0 0% 98% !important;
+ 
+    --secondary: 220 13% 18% !important;      
+    --secondary-foreground: 0 0% 98% !important;
+ 
+    --muted: 220 13% 15% !important;
+    --muted-foreground: 0 0% 85% !important;
+ 
+    --accent: 258 100% 70% !important;         
+    --accent-foreground: 0 0% 98% !important;
+ 
+    --destructive: 0 84% 60% !important;      
+    --destructive-foreground: 0 0% 98% !important;
+ 
+    --border: 220 13% 25% !important;
+    --input: 220 13% 15% !important;
+    --ring: 212 100% 50% !important;
   }
 }
