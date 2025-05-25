@@ -8,8 +8,8 @@ const SidebarHeader: React.FC = () => {
     <BaseSidebarHeader>
       <NavLink to="/" className="flex items-center p-2">
         <img
-          src="/favicon.ico"
-          alt="Logo"
+          src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png"
+          alt="SatoTrack Logo"
           className="h-8 w-8 mr-2"
           loading="eager"
         />

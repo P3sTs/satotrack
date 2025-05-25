@@ -79,7 +79,7 @@ const NavBar: React.FC = () => {
             <Link to="/" className="flex items-center gap-2">
               <div className="relative h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <img src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-7 md:w-7 opacity-80" />
+                  <img src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-7 md:w-7 opacity-80" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
               </div>

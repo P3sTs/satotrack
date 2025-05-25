@@ -34,7 +34,7 @@ const Index = () => {
           <div className="absolute inset-0 rounded-full border-2 border-t-satotrack-neon border-x-transparent border-b-transparent animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <img 
-              src="/lovable-uploads/649570ea-d0b0-4784-a1f4-bb7771034ef5.png" 
+              src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
               alt="SatoTrack" 
               className="h-8 w-8 opacity-70"
             />

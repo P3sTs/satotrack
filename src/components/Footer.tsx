@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
             <img 
-              src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+              src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
               alt="SatoTrack Logo" 
               className="h-5 w-5 object-contain satotrack-logo"
             />
