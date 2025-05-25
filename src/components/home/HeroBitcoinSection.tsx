@@ -24,7 +24,7 @@ const HeroBitcoinSection = () => {
           <div className="flex items-center gap-3 mb-2">
             <div className="relative">
               <img 
-                src="/lovable-uploads/2546f1a5-747c-4fcb-a3e6-78c47d00982a.png" 
+                src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
                 alt="SatoTrack Logo" 
                 className="h-20 w-20 object-contain satotrack-logo animate-glow"
               />
