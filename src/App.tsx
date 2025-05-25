@@ -61,6 +61,8 @@ function App() {
       <Route path="/privacidade" element={<Privacidade />} />
       <Route path="/planos" element={<PlanosPage />} />
       <Route path="/mercado" element={<Mercado />} />
+      
+      {/* Crypto page - accessible to all users */}
       <Route path="/crypto" element={<Crypto />} />
       
       <Route path="/" element={<AppLayout />}>
@@ -127,15 +129,6 @@ function App() {
               <ApiDocs />
             </ProtectedRoute>
           } 
-        />
-        <Route 
-          path="/crypto" 
-          element={
-            <ProtectedRoute>
-              <Crypto />
-            </ProtectedRoute>
-          }
-          
         />
         <Route 
           path="/projecao-lucros" 
