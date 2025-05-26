@@ -149,9 +149,9 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     if (wallet_id) {
-      // Update wallet data in Supabase
+      // Update wallet data in Supabase using the correct table
       const { error: updateError } = await supabase
-        .from('bitcoin_wallets')
+        .from('crypto_wallets')
         .update({
           balance: processedData.balance,
           total_received: processedData.total_received,

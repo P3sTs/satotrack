@@ -1,38 +1,17 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define the available view modes
-export type ViewMode = 'chart' | 'list' | 'card' | 'compact';
+export type ViewMode = 'cards' | 'list' | 'chart' | 'compact';
 
 interface ViewModeContextType {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
 }
 
-const ViewModeContext = createContext<ViewModeContextType | null>(null);
+const ViewModeContext = createContext<ViewModeContextType | undefined>(undefined);
 
-export const ViewModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  const [viewMode, setViewModeState] = useState<ViewMode>('chart');
-
-  // Load saved preference from localStorage on mount
-  useEffect(() => {
-    if (user) {
-      const savedMode = localStorage.getItem('satotrack-view-mode');
-      if (savedMode && ['chart', 'list', 'card', 'compact'].includes(savedMode)) {
-        setViewModeState(savedMode as ViewMode);
-      }
-    }
-  }, [user]);
-
-  // Save preference to localStorage when it changes
-  const setViewMode = (mode: ViewMode) => {
-    setViewModeState(mode);
-    if (user) {
-      localStorage.setItem('satotrack-view-mode', mode);
-    }
-  };
+export const ViewModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
   return (
     <ViewModeContext.Provider value={{ viewMode, setViewMode }}>
