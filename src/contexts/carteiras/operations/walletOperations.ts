@@ -1,4 +1,3 @@
-
 import { SortOption, SortDirection } from '@/types/types';
 import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 import { 
@@ -25,7 +24,15 @@ export const loadUserWallets = async (
   
   try {
     const data = await loadCarteiras(sortOption, sortDirection);
-    return data;
+    
+    // Ensure tokensData is properly formatted as an array
+    const formattedData = data.map(wallet => ({
+      ...wallet,
+      tokensData: Array.isArray(wallet.tokensData) ? wallet.tokensData : 
+                  wallet.tokensData ? [wallet.tokensData] : []
+    }));
+    
+    return formattedData;
   } catch (error) {
     console.error('Error loading wallets:', error);
     return [];
@@ -44,7 +51,14 @@ export const addNewWallet = async (
     throw new Error('Usuário não autenticado');
   }
   
-  return await addCarteira(nome, endereco);
+  const newWallet = await addCarteira(nome, endereco);
+  
+  // Ensure tokensData is properly formatted
+  return {
+    ...newWallet,
+    tokensData: Array.isArray(newWallet.tokensData) ? newWallet.tokensData : 
+                newWallet.tokensData ? [newWallet.tokensData] : []
+  };
 };
 
 /**
@@ -58,7 +72,14 @@ export const updateWalletData = async (
     throw new Error('Usuário não autenticado');
   }
   
-  return await updateCarteira(carteira);
+  const updatedWallet = await updateCarteira(carteira);
+  
+  // Ensure tokensData is properly formatted
+  return {
+    ...updatedWallet,
+    tokensData: Array.isArray(updatedWallet.tokensData) ? updatedWallet.tokensData : 
+                updatedWallet.tokensData ? [updatedWallet.tokensData] : []
+  };
 };
 
 /**
@@ -103,4 +124,3 @@ export const updateWalletNameOp = async (
   
   await updateWalletName(id, nome);
 };
-
