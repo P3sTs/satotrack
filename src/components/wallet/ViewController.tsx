@@ -40,7 +40,7 @@ const ViewController: React.FC<ViewControllerProps> = ({
           case 'list':
             return <ListView transacoes={transacoes} />;
           
-          case 'card':
+          case 'cards':
             return <CardView transacoes={transacoes} />;
           
           case 'compact':

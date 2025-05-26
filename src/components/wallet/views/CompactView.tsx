@@ -115,7 +115,7 @@ const CompactView: React.FC<CompactViewProps> = ({ wallet, transacoes, bitcoinPr
         <Button 
           size="sm" 
           variant="outline"
-          onClick={() => setViewMode('card')}
+          onClick={() => setViewMode('cards')}
           className="flex-1"
         >
           Ver Cards

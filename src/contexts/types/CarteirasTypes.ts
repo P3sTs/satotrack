@@ -35,6 +35,12 @@ export interface CarteiraBTC {
   total_saidas: number;
   qtde_transacoes: number;
   ultimo_update: Date | string;
+  
+  // Multi-chain properties from updateService
+  network?: any;
+  addressType?: string;
+  nativeTokenBalance?: number;
+  tokensData?: any[];
 }
 
 export interface TransacaoBTC {

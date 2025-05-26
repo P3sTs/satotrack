@@ -1,3 +1,4 @@
+
 export interface CarteiraBTC {
   id: string;
   nome: string;
@@ -7,6 +8,12 @@ export interface CarteiraBTC {
   total_saidas: number;
   qtde_transacoes: number;
   ultimo_update: Date | string;
+  
+  // Multi-chain properties
+  network?: any;
+  addressType?: string;
+  nativeTokenBalance?: number;
+  tokensData?: any[];
 }
 
 export interface TransacaoBTC {
