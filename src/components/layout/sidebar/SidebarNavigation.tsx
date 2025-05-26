@@ -1,83 +1,126 @@
-
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Wallet,
-  History,
-  Settings,
-  CircleDollarSign,
-  Bell,
-  Code,
-  Lock,
-  TrendingUp,
-} from 'lucide-react';
+import { Home, Wallet, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
-import { cn } from '@/lib/utils';
 
-interface SidebarLinkProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  premiumOnly?: boolean;
+interface NavItemProps {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
-const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon, label, premiumOnly = false }) => {
-  const location = useLocation();
-  const { userPlan } = useAuth();
-  const isPremium = userPlan === 'premium';
-  
-  const active = location.pathname === to;
-  
+const SidebarNavigation: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
+  const navigationItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Carteiras', href: '/carteiras', icon: Wallet },
+    { name: 'Mercado', href: '/mercado', icon: TrendingUp },
+    { name: 'Análises', href: '/crypto', icon: BarChart3 },
+    { name: 'Projeções', href: '/projecao-lucros', icon: Target },
+    { name: 'Histórico', href: '/historico', icon: History },
+    { name: 'Notificações', href: '/notificacoes', icon: Bell },
+    { name: 'Programa Referência', href: '/referral', icon: Users },
+    { name: 'Growth Metrics', href: '/growth', icon: TrendingUp },
+    { name: 'Landing Page', href: '/landing', icon: ExternalLink },
+  ];
+
   return (
-    <NavLink
-      to={premiumOnly && !isPremium ? '/planos' : to}
-      className={({ isActive }) =>
-        cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-white',
-          {
-            'bg-dashboard-medium text-white': isActive,
-            'hover:bg-dashboard-medium/50': !isActive,
-            'relative': premiumOnly && !isPremium
-          }
-        )
-      }
-    >
-      {icon}
-      <span>{label}</span>
-      
-      {premiumOnly && !isPremium && (
-        <Lock className="h-3.5 w-3.5 absolute right-2 text-satotrack-neon" />
-      )}
-    </NavLink>
+    <nav className="flex flex-col space-y-1">
+      {navigationItems.map((item) => (
+        <NavItem
+          key={item.name}
+          name={item.name}
+          href={item.href}
+          icon={item.icon}
+          isAuthenticated={isAuthenticated}
+        />
+      ))}
+    </nav>
   );
 };
 
-const SidebarNavigation: React.FC = () => {
-  const { isAuthenticated, userPlan } = useAuth();
-  const isPremium = userPlan === 'premium';
+interface NavItemProps {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  isAuthenticated: boolean;
+}
 
-  if (!isAuthenticated) {
+const NavItem: React.FC<NavItemProps> = ({ name, href, icon: Icon, isAuthenticated }) => {
+  // If the route is /auth and the user is authenticated, don't render the link
+  if (href === '/auth' && isAuthenticated) {
     return null;
   }
 
+  // If the route is /auth and the user is not authenticated, render the link
+  if (href === '/auth' && !isAuthenticated) {
+    return (
+      <NavLink
+        to={href}
+        className={({ isActive }) =>
+          `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-accent-foreground ${
+            isActive ? 'bg-secondary text-accent-foreground' : 'text-muted-foreground'
+          }`
+        }
+      >
+        <Icon className="h-4 w-4" />
+        {name}
+      </NavLink>
+    );
+  }
+
+  // If the route is /register and the user is authenticated, don't render the link
+  if (href === '/register' && isAuthenticated) {
+    return null;
+  }
+
+  // If the route is /register and the user is not authenticated, render the link
+  if (href === '/register' && !isAuthenticated) {
+    return (
+      <NavLink
+        to={href}
+        className={({ isActive }) =>
+          `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-accent-foreground ${
+            isActive ? 'bg-secondary text-accent-foreground' : 'text-muted-foreground'
+          }`
+        }
+      >
+        <Icon className="h-4 w-4" />
+        {name}
+      </NavLink>
+    );
+  }
+
+  // If the route is / and the user is not authenticated, render the link
+  if (href === '/' && !isAuthenticated) {
+    return (
+      <NavLink
+        to={href}
+        className={({ isActive }) =>
+          `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-accent-foreground ${
+            isActive ? 'bg-secondary text-accent-foreground' : 'text-muted-foreground'
+          }`
+        }
+      >
+        <Icon className="h-4 w-4" />
+        {name}
+      </NavLink>
+    );
+  }
+
   return (
-    <div className="space-y-1">
-      <SidebarLink to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" />
-      <SidebarLink to="/carteiras" icon={<Wallet className="h-5 w-5" />} label="Carteiras" />
-      <SidebarLink to="/historico" icon={<History className="h-5 w-5" />} label="Histórico" />
-      <SidebarLink 
-        to="/projecao-lucros" 
-        icon={<TrendingUp className="h-5 w-5" />} 
-        label="Projeção de Lucros" 
-        premiumOnly={true}
-      />
-      <SidebarLink to="/notificacoes" icon={<Bell className="h-5 w-5" />} label="Notificações" />
-      {isPremium && (
-        <SidebarLink to="/api-docs" icon={<Code className="h-5 w-5" />} label="API Docs" />
-      )}
-      <SidebarLink to="/configuracoes" icon={<Settings className="h-5 w-5" />} label="Configurações" />
-    </div>
+    <NavLink
+      to={href}
+      className={({ isActive }) =>
+        `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-accent-foreground ${
+          isActive ? 'bg-secondary text-accent-foreground' : 'text-muted-foreground'
+        }`
+      }
+    >
+      <Icon className="h-4 w-4" />
+      {name}
+    </NavLink>
   );
 };
 

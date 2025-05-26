@@ -1,4 +1,3 @@
-
 export interface CarteiraBTC {
   id: string;
   nome: string;
@@ -49,4 +48,49 @@ export interface DatabaseTransacaoBTC {
   transaction_type: 'entrada' | 'saida';
   transaction_date: string;
   created_at: string;
+}
+
+export interface ReferralData {
+  code: string;
+  totalReferrals: number;
+  activeReferrals: number;
+  totalEarnings: number;
+  pendingEarnings: number;
+  conversionRate: number;
+}
+
+export interface GrowthMetrics {
+  totalUsers: number;
+  activeUsers: number;
+  conversionRate: number;
+  mrr: number;
+  cac: number;
+  ltv: number;
+  churnRate: number;
+}
+
+export interface AcquisitionChannel {
+  name: string;
+  percentage: number;
+  cac: number;
+  conversionRate: number;
+}
+
+export interface CohortData {
+  cohort: string;
+  month0: number;
+  month1: number;
+  month2: number;
+  month3: number;
+}
+
+export type PlanType = 'free' | 'pro' | 'premium' | 'enterprise';
+
+export interface PlanFeatures {
+  name: string;
+  price: string;
+  features: string[];
+  limitations: string[];
+  target: string;
+  popular?: boolean;
 }
