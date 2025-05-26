@@ -17,6 +17,7 @@ export interface TokenBalance {
   balance: number;
   decimals: number;
   usdValue: number;
+  [key: string]: any; // Add index signature for Json compatibility
 }
 
 export interface NetworkApiConfig {
@@ -98,6 +99,16 @@ export const saveMultiChainWallet = async (
       throw new Error(`Rede ${detectedAddress.network.name} não suportada`);
     }
 
+    // Convert tokens to JSON-compatible format
+    const tokensJson = walletData.tokens.map(token => ({
+      address: token.address,
+      symbol: token.symbol,
+      name: token.name,
+      balance: token.balance,
+      decimals: token.decimals,
+      usdValue: token.usdValue
+    }));
+
     // Inserir carteira
     const { data: wallet, error: walletError } = await supabase
       .from('crypto_wallets')
@@ -111,7 +122,7 @@ export const saveMultiChainWallet = async (
         total_received: walletData.nativeBalance, // Será atualizado pela API
         total_sent: 0, // Será calculado pela API
         transaction_count: walletData.transactionCount,
-        tokens_data: walletData.tokens,
+        tokens_data: tokensJson,
         last_updated: new Date().toISOString()
       })
       .select()
@@ -181,6 +192,16 @@ export const updateMultiChainWallet = async (walletId: string): Promise<any> => 
     // Buscar dados atualizados
     const walletData = await fetchWalletData(detectedAddress);
 
+    // Convert tokens to JSON-compatible format
+    const tokensJson = walletData.tokens.map(token => ({
+      address: token.address,
+      symbol: token.symbol,
+      name: token.name,
+      balance: token.balance,
+      decimals: token.decimals,
+      usdValue: token.usdValue
+    }));
+
     // Atualizar carteira
     const { data: updatedWallet, error: updateError } = await supabase
       .from('crypto_wallets')
@@ -188,7 +209,7 @@ export const updateMultiChainWallet = async (walletId: string): Promise<any> => 
         balance: walletData.nativeBalance,
         native_token_balance: walletData.nativeBalance,
         transaction_count: walletData.transactionCount,
-        tokens_data: walletData.tokens,
+        tokens_data: tokensJson,
         last_updated: new Date().toISOString()
       })
       .eq('id', walletId)

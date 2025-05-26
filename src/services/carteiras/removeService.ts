@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/sonner';
 export const removeCarteira = async (id: string): Promise<void> => {
   try {
     const { error } = await supabase
-      .from('bitcoin_wallets')
+      .from('crypto_wallets')
       .delete()
       .eq('id', id);
     

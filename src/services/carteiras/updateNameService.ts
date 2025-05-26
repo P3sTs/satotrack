@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/sonner';
 export const updateWalletName = async (id: string, name: string): Promise<void> => {
   try {
     const { error } = await supabase
-      .from('bitcoin_wallets')
+      .from('crypto_wallets')
       .update({ name })
       .eq('id', id);
     
