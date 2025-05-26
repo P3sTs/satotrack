@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Check, AlertCircle } from "lucide-react";
-import { useCarteiras } from '../contexts/CarteirasContext';
-import { validarEnderecoBitcoin } from '../services/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useCarteiras } from '../contexts/carteiras';
+import { validarEnderecoCrypto } from '../services/api';
 import { toast } from '@/components/ui/sonner';
+import { CheckCircle, AlertCircle, Wallet } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface NewWalletModalProps {
   isOpen: boolean;
@@ -15,120 +16,160 @@ interface NewWalletModalProps {
 }
 
 const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
+  const { adicionarCarteira, isLoading } = useCarteiras();
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { adicionarCarteira } = useCarteiras();
+  const [detectedNetwork, setDetectedNetwork] = useState<any>(null);
 
-  const enderecoValido = endereco ? validarEnderecoBitcoin(endereco) : false;
+  const handleEnderecoChange = (value: string) => {
+    setEndereco(value);
+    
+    if (value.trim()) {
+      const detected = validarEnderecoCrypto(value.trim());
+      setDetectedNetwork(detected);
+    } else {
+      setDetectedNetwork(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!nome.trim()) {
-      toast.error("Por favor, insira um nome para a carteira");
+      toast.error('Por favor, insira um nome para a carteira');
       return;
     }
 
-    if (!enderecoValido) {
-      toast.error("Endereço Bitcoin inválido");
+    if (!detectedNetwork) {
+      toast.error('Por favor, insira um endereço válido de criptomoeda');
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await adicionarCarteira(nome, endereco);
+      await adicionarCarteira(nome.trim(), endereco.trim());
       setNome('');
       setEndereco('');
-      toast.success("Carteira adicionada com sucesso!");
+      setDetectedNetwork(null);
       onClose();
     } catch (error) {
-      // Improved error handling to properly extract the error message
-      console.error("Error adding wallet:", error);
-      let errorMessage = "Erro ao adicionar carteira";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        // Handle Supabase or other object errors
-        const errorObj = error as any;
-        errorMessage = errorObj.message || errorObj.error_description || errorObj.details || JSON.stringify(error);
-      }
-      
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Erro ao adicionar carteira:', error);
+    }
+  };
+
+  const getNetworkColor = (symbol: string) => {
+    switch (symbol) {
+      case 'BTC': return 'bg-orange-500';
+      case 'ETH': return 'bg-blue-500';
+      case 'BNB': return 'bg-yellow-500';
+      case 'MATIC': return 'bg-purple-500';
+      case 'SOL': return 'bg-green-500';
+      case 'AVAX': return 'bg-red-500';
+      case 'ARB': return 'bg-cyan-500';
+      case 'OP': return 'bg-red-400';
+      default: return 'bg-gray-500';
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Nova Carteira Bitcoin
+            <Wallet className="h-5 w-5" />
+            Adicionar Nova Carteira
           </DialogTitle>
-          <DialogDescription>
-            Adicione uma carteira Bitcoin para monitorar seu saldo e transações
-          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="nome">Nome da Carteira</Label>
-            <Input 
-              id="nome" 
+            <Input
+              id="nome"
+              placeholder="Ex: Carteira Principal, Savings, Trading..."
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex: Carteira Principal"
-              disabled={isSubmitting}
+              required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="endereco">Endereço Bitcoin</Label>
-            <Input 
-              id="endereco" 
+            <Label htmlFor="endereco">
+              Endereço da Criptomoeda
+              <span className="text-xs text-muted-foreground ml-2">
+                (Bitcoin, Ethereum, Solana, BSC, Polygon, etc.)
+              </span>
+            </Label>
+            <Input
+              id="endereco"
+              placeholder="Cole o endereço aqui..."
               value={endereco}
-              onChange={(e) => setEndereco(e.target.value)}
-              placeholder="Ex: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
-              disabled={isSubmitting}
+              onChange={(e) => handleEnderecoChange(e.target.value)}
+              className="font-mono text-sm"
+              required
             />
             
-            {endereco && (
-              <div className="flex items-center text-sm mt-1">
-                {enderecoValido ? (
-                  <p className="text-green-500 flex items-center">
-                    <Check className="h-3 w-3 mr-1" />
-                    Endereço válido
-                  </p>
+            {/* Feedback visual da detecção do endereço */}
+            <div className="flex items-center min-h-[24px]">
+              {endereco && (
+                detectedNetwork ? (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-green-600">Endereço válido detectado:</span>
+                    <Badge 
+                      className={`${getNetworkColor(detectedNetwork.network.symbol)} text-white text-xs`}
+                    >
+                      {detectedNetwork.network.name} ({detectedNetwork.network.symbol})
+                    </Badge>
+                  </div>
                 ) : (
-                  <p className="text-destructive flex items-center">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Endereço inválido
-                  </p>
-                )}
-              </div>
-            )}
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <span className="text-sm text-red-600">
+                      Endereço não reconhecido ou inválido
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Informações sobre redes suportadas */}
+          <div className="bg-muted/50 p-3 rounded-lg">
+            <p className="text-xs font-medium mb-2">Redes Suportadas:</p>
+            <div className="flex flex-wrap gap-1">
+              {[
+                { name: 'Bitcoin', symbol: 'BTC' },
+                { name: 'Ethereum', symbol: 'ETH' },
+                { name: 'Solana', symbol: 'SOL' },
+                { name: 'BSC', symbol: 'BNB' },
+                { name: 'Polygon', symbol: 'MATIC' },
+                { name: 'Avalanche', symbol: 'AVAX' },
+                { name: 'Arbitrum', symbol: 'ARB' },
+                { name: 'Optimism', symbol: 'OP' }
+              ].map((network) => (
+                <Badge 
+                  key={network.symbol}
+                  variant="outline" 
+                  className={`${getNetworkColor(network.symbol)} text-white border-none text-xs`}
+                >
+                  {network.symbol}
+                </Badge>
+              ))}
+            </div>
           </div>
           
-          <DialogFooter className="mt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
+          <div className="flex gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancelar
             </Button>
             <Button 
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-bitcoin hover:bg-bitcoin-dark"
+              type="submit" 
+              disabled={isLoading || !detectedNetwork}
+              className="flex-1"
             >
-              {isSubmitting ? "Adicionando..." : "Salvar Carteira"}
+              {isLoading ? 'Adicionando...' : 'Adicionar Carteira'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

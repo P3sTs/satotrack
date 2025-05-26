@@ -45,42 +45,36 @@ export type Database = {
         }
         Relationships: []
       }
-      bitcoin_wallets: {
+      blockchain_networks: {
         Row: {
-          address: string
-          balance: number | null
-          created_at: string | null
+          chain_id: string | null
+          created_at: string
+          explorer_url: string | null
           id: string
-          last_updated: string | null
+          is_active: boolean
           name: string
-          total_received: number | null
-          total_sent: number | null
-          transaction_count: number | null
-          user_id: string | null
+          rpc_url: string | null
+          symbol: string
         }
         Insert: {
-          address: string
-          balance?: number | null
-          created_at?: string | null
+          chain_id?: string | null
+          created_at?: string
+          explorer_url?: string | null
           id?: string
-          last_updated?: string | null
+          is_active?: boolean
           name: string
-          total_received?: number | null
-          total_sent?: number | null
-          transaction_count?: number | null
-          user_id?: string | null
+          rpc_url?: string | null
+          symbol: string
         }
         Update: {
-          address?: string
-          balance?: number | null
-          created_at?: string | null
+          chain_id?: string | null
+          created_at?: string
+          explorer_url?: string | null
           id?: string
-          last_updated?: string | null
+          is_active?: boolean
           name?: string
-          total_received?: number | null
-          total_sent?: number | null
-          transaction_count?: number | null
-          user_id?: string | null
+          rpc_url?: string | null
+          symbol?: string
         }
         Relationships: []
       }
@@ -142,6 +136,65 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      crypto_wallets: {
+        Row: {
+          address: string
+          address_type: string | null
+          balance: number | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          name: string
+          native_token_balance: number | null
+          network_id: string
+          tokens_data: Json | null
+          total_received: number | null
+          total_sent: number | null
+          transaction_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          address: string
+          address_type?: string | null
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          name: string
+          native_token_balance?: number | null
+          network_id: string
+          tokens_data?: Json | null
+          total_received?: number | null
+          total_sent?: number | null
+          transaction_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          address_type?: string | null
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          name?: string
+          native_token_balance?: number | null
+          network_id?: string
+          tokens_data?: Json | null
+          total_received?: number | null
+          total_sent?: number | null
+          transaction_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_wallets_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "blockchain_networks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_volatility: {
         Row: {
@@ -409,6 +462,50 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_token_balances: {
+        Row: {
+          balance: number
+          decimals: number
+          id: string
+          last_updated: string
+          token_address: string
+          token_name: string
+          token_symbol: string
+          usd_value: number | null
+          wallet_id: string | null
+        }
+        Insert: {
+          balance?: number
+          decimals?: number
+          id?: string
+          last_updated?: string
+          token_address: string
+          token_name: string
+          token_symbol: string
+          usd_value?: number | null
+          wallet_id?: string | null
+        }
+        Update: {
+          balance?: number
+          decimals?: number
+          id?: string
+          last_updated?: string
+          token_address?: string
+          token_name?: string
+          token_symbol?: string
+          usd_value?: number | null
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_token_balances_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "crypto_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_transactions: {
         Row: {
           amount: number
@@ -442,7 +539,7 @@ export type Database = {
             foreignKeyName: "wallet_transactions_wallet_id_fkey"
             columns: ["wallet_id"]
             isOneToOne: false
-            referencedRelation: "bitcoin_wallets"
+            referencedRelation: "crypto_wallets"
             referencedColumns: ["id"]
           },
         ]

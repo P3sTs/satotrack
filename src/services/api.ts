@@ -2,6 +2,8 @@
 import { supabase } from '../integrations/supabase/client';
 import { CarteiraBTC, TransacaoBTC } from '../types/types';
 import { toast } from '@/hooks/use-toast';
+import { detectAddressNetwork, DetectedAddress } from './crypto/addressDetector';
+import { fetchWalletData, saveMultiChainWallet } from './crypto/multiChainService';
 
 // Check if user is authenticated
 const checkAuthentication = async () => {
@@ -14,52 +16,46 @@ const checkAuthentication = async () => {
 
 // Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
 export function validarEnderecoBitcoin(endereco: string): boolean {
-  // Valida endereços Bitcoin Legacy (1...)
-  const legacyRegex = /^[1][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
-  
-  // Valida endereços SegWit (3...)
-  const segwitRegex = /^[3][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
-  
-  // Valida endereços Bech32 (bc1...)
-  const bech32Regex = /^(bc1)[a-zA-HJ-NP-Z0-9]{25,89}$/;
-  
-  return legacyRegex.test(endereco) || segwitRegex.test(endereco) || bech32Regex.test(endereco);
+  // Usar o novo detector de endereços
+  const detected = detectAddressNetwork(endereco);
+  return detected !== null && detected.isValid;
 }
 
-// Buscar dados da carteira diretamente da API blockchain via edge function
+// Função universal para validar qualquer endereço de criptomoeda
+export function validarEnderecoCrypto(endereco: string): DetectedAddress | null {
+  return detectAddressNetwork(endereco);
+}
+
+// Buscar dados da carteira usando o novo sistema multi-chain
 export async function fetchCarteiraDados(endereco: string, wallet_id?: string): Promise<Partial<CarteiraBTC>> {
   try {
     // Check authentication first
     await checkAuthentication();
     
-    // Chamar a edge function para buscar dados atualizados
-    const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
-      body: { address: endereco, wallet_id }
-    });
-
-    if (error) {
-      console.error('Erro na Edge Function:', error);
-      throw new Error(`Erro ao conectar com as APIs blockchain: ${error.message}`);
+    // Detectar o tipo de endereço
+    const detectedAddress = detectAddressNetwork(endereco);
+    
+    if (!detectedAddress) {
+      throw new Error('Endereço de criptomoeda não reconhecido ou inválido');
     }
 
-    if (!data) {
-      throw new Error('Não foi possível obter dados do endereço Bitcoin');
-    }
+    // Buscar dados usando o serviço multi-chain
+    const walletData = await fetchWalletData(detectedAddress);
 
     return {
-      saldo: data.balance,
-      total_entradas: data.total_received,
-      total_saidas: data.total_sent,
-      qtde_transacoes: data.transaction_count
+      saldo: walletData.nativeBalance,
+      total_entradas: walletData.nativeBalance, // Para compatibilidade
+      total_saidas: 0, // Será calculado conforme necessário
+      qtde_transacoes: walletData.transactionCount
     };
   } catch (error) {
     console.error('Erro ao buscar dados da carteira:', error);
     toast({
       title: "Erro",
-      description: 'Erro ao conectar com as APIs blockchain',
+      description: error instanceof Error ? error.message : 'Erro ao conectar com as APIs blockchain',
       variant: "destructive"
     });
-    throw new Error('Erro ao conectar com as APIs blockchain');
+    throw error;
   }
 }
 
@@ -71,7 +67,7 @@ export async function fetchTransacoes(wallet_id: string): Promise<TransacaoBTC[]
     
     // First check if the wallet belongs to the user
     const { data: wallet, error: walletError } = await supabase
-      .from('bitcoin_wallets')
+      .from('crypto_wallets')
       .select('id')
       .eq('id', wallet_id)
       .eq('user_id', user.id)
@@ -120,7 +116,7 @@ export async function atualizarDadosCron(wallet_id: string): Promise<void> {
     
     // Buscar o endereço da carteira
     const { data: wallet, error } = await supabase
-      .from('bitcoin_wallets')
+      .from('crypto_wallets')
       .select('address')
       .eq('id', wallet_id)
       .eq('user_id', user.id) // Ensure user owns this wallet

@@ -4,7 +4,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 
 /**
- * Loads carteiras from the database
+ * Loads crypto wallets from the database (updated for multi-chain support)
  */
 export const loadCarteiras = async (sortOption: string, sortDirection: string) => {
   try {
@@ -16,8 +16,16 @@ export const loadCarteiras = async (sortOption: string, sortDirection: string) =
     }
 
     const { data, error } = await supabase
-      .from('bitcoin_wallets')
-      .select('*')
+      .from('crypto_wallets')
+      .select(`
+        *,
+        blockchain_networks (
+          name,
+          symbol,
+          chain_id,
+          explorer_url
+        )
+      `)
       .eq('user_id', user.id) // Only fetch wallets belonging to the current user
       .order(sortOption === 'saldo' ? 'balance' : 'last_updated', { ascending: sortDirection === 'asc' });
       
@@ -34,7 +42,12 @@ export const loadCarteiras = async (sortOption: string, sortDirection: string) =
       ultimo_update: c.last_updated,
       total_entradas: Number(c.total_received),
       total_saidas: Number(c.total_sent),
-      qtde_transacoes: c.transaction_count
+      qtde_transacoes: c.transaction_count,
+      // Novos campos para suporte multi-chain
+      network: c.blockchain_networks,
+      addressType: c.address_type,
+      nativeTokenBalance: Number(c.native_token_balance),
+      tokensData: c.tokens_data || []
     }));
     
     return carteirasFormatadas;
