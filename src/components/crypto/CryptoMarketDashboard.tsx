@@ -67,7 +67,9 @@ const CryptoMarketDashboard: React.FC = () => {
     setRefreshing(false);
   };
 
-  const getMarketCapFormatted = (marketCap: number) => {
+  const getMarketCapFormatted = (marketCap: number | undefined | null) => {
+    if (!marketCap || marketCap === 0) return 'N/A';
+    
     if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
     if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
     if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
@@ -127,8 +129,8 @@ const CryptoMarketDashboard: React.FC = () => {
                     className="h-6 w-6"
                   />
                   <div>
-                    <CardTitle className="text-sm">{crypto.symbol.toUpperCase()}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{crypto.name}</p>
+                    <CardTitle className="text-sm">{crypto.symbol?.toUpperCase() || 'N/A'}</CardTitle>
+                    <p className="text-xs text-muted-foreground">{crypto.name || 'N/A'}</p>
                   </div>
                 </div>
                 {crypto.id === 'bitcoin' && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
@@ -137,19 +139,19 @@ const CryptoMarketDashboard: React.FC = () => {
             <CardContent className="pt-0">
               <div className="space-y-1">
                 <div className="text-lg font-bold">
-                  {formatCurrency(crypto.current_price, 'USD')}
+                  {crypto.current_price ? formatCurrency(crypto.current_price, 'USD') : 'N/A'}
                 </div>
                 <div className="flex items-center justify-between">
                   <Badge 
-                    variant={crypto.price_change_percentage_24h >= 0 ? 'default' : 'destructive'}
+                    variant={crypto.price_change_percentage_24h && crypto.price_change_percentage_24h >= 0 ? 'default' : 'destructive'}
                     className="text-xs"
                   >
-                    {crypto.price_change_percentage_24h >= 0 ? (
+                    {crypto.price_change_percentage_24h && crypto.price_change_percentage_24h >= 0 ? (
                       <TrendingUp className="h-3 w-3 mr-1" />
                     ) : (
                       <TrendingDown className="h-3 w-3 mr-1" />
                     )}
-                    {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
+                    {crypto.price_change_percentage_24h ? Math.abs(crypto.price_change_percentage_24h).toFixed(2) : '0.00'}%
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {getMarketCapFormatted(crypto.market_cap)}
@@ -183,7 +185,7 @@ const CryptoMarketDashboard: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {indicators ? (
+                {indicators && selectedCrypto.current_price ? (
                   <TechnicalIndicators 
                     indicators={indicators}
                     currentPrice={selectedCrypto.current_price}
@@ -207,12 +209,14 @@ const CryptoMarketDashboard: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Preço Atual:</span>
-                      <span className="font-semibold">{formatCurrency(selectedCrypto.current_price, 'USD')}</span>
+                      <span className="font-semibold">
+                        {selectedCrypto.current_price ? formatCurrency(selectedCrypto.current_price, 'USD') : 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Mudança 24h:</span>
-                      <span className={selectedCrypto.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}>
-                        {selectedCrypto.price_change_percentage_24h.toFixed(2)}%
+                      <span className={selectedCrypto.price_change_percentage_24h && selectedCrypto.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}>
+                        {selectedCrypto.price_change_percentage_24h ? selectedCrypto.price_change_percentage_24h.toFixed(2) : '0.00'}%
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -227,12 +231,12 @@ const CryptoMarketDashboard: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Símbolo:</span>
-                      <span className="font-semibold">{selectedCrypto.symbol.toUpperCase()}</span>
+                      <span className="font-semibold">{selectedCrypto.symbol?.toUpperCase() || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Última Atualização:</span>
                       <span className="font-semibold text-xs">
-                        {new Date(selectedCrypto.last_updated).toLocaleTimeString('pt-BR')}
+                        {selectedCrypto.last_updated ? new Date(selectedCrypto.last_updated).toLocaleTimeString('pt-BR') : 'N/A'}
                       </span>
                     </div>
                   </div>
