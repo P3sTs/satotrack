@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useCarteiras } from '../contexts/CarteirasContext';
+import { useCarteiras } from '../contexts/carteiras';
 import { toast } from '@/components/ui/sonner';
 
 const UserSettings: React.FC = () => {
@@ -27,22 +27,34 @@ const UserSettings: React.FC = () => {
 
   const handleSave = () => {
     try {
+      console.log('Saving wallet preference:', selectedWallet);
       definirCarteiraPrincipal(selectedWallet);
       toast.success("Preferências salvas com sucesso!");
       setIsOpen(false);
     } catch (error) {
+      console.error('Error saving preferences:', error);
       toast.error("Erro ao salvar preferências");
     }
   };
 
   const handleRemovePrimary = () => {
     try {
+      console.log('Removing primary wallet');
       definirCarteiraPrincipal(null);
       setSelectedWallet(null);
       toast.success("Carteira principal removida");
       setIsOpen(false);
     } catch (error) {
+      console.error('Error removing primary wallet:', error);
       toast.error("Erro ao remover carteira principal");
+    }
+  };
+
+  const handleWalletSelect = (walletId: string) => {
+    console.log('Selecting wallet:', walletId);
+    // Ensure we never set an empty string
+    if (walletId && walletId.trim() !== '') {
+      setSelectedWallet(walletId);
     }
   };
 
@@ -74,27 +86,35 @@ const UserSettings: React.FC = () => {
                   Nenhuma carteira adicionada ainda
                 </p>
               ) : (
-                carteiras.map((carteira) => (
-                  <div 
-                    key={carteira.id}
-                    className={`flex items-center p-3 rounded-md cursor-pointer border transition-colors ${
-                      selectedWallet === carteira.id 
-                        ? "border-bitcoin bg-bitcoin/5" 
-                        : "border-border hover:bg-accent"
-                    }`}
-                    onClick={() => setSelectedWallet(carteira.id)}
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{carteira.nome}</p>
-                      <p className="text-xs text-muted-foreground font-mono truncate">
-                        {carteira.endereco}
-                      </p>
+                carteiras.map((carteira) => {
+                  // Ensure carteira.id is not empty before rendering
+                  if (!carteira.id || carteira.id.trim() === '') {
+                    console.warn('Skipping wallet with empty ID:', carteira);
+                    return null;
+                  }
+                  
+                  return (
+                    <div 
+                      key={carteira.id}
+                      className={`flex items-center p-3 rounded-md cursor-pointer border transition-colors ${
+                        selectedWallet === carteira.id 
+                          ? "border-bitcoin bg-bitcoin/5" 
+                          : "border-border hover:bg-accent"
+                      }`}
+                      onClick={() => handleWalletSelect(carteira.id)}
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{carteira.nome}</p>
+                        <p className="text-xs text-muted-foreground font-mono truncate">
+                          {carteira.endereco}
+                        </p>
+                      </div>
+                      {selectedWallet === carteira.id && (
+                        <Check className="h-4 w-4 text-bitcoin ml-2" />
+                      )}
                     </div>
-                    {selectedWallet === carteira.id && (
-                      <Check className="h-4 w-4 text-bitcoin ml-2" />
-                    )}
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
