@@ -37,50 +37,106 @@ export const useAuthPlans = (user: AuthUser | null) => {
     }
   };
 
-  // Atualiza o plano do usuário para premium
-  const upgradeUserPlan = async () => {
+  // Verificar status da assinatura via Stripe
+  const checkSubscriptionStatus = async () => {
+    if (!user) return;
+    
     try {
       setIsLoading(true);
-      if (!user || !user.id) throw new Error('Usuário não autenticado');
-      if (!user.email_confirmed_at) throw new Error('Email não verificado');
+      const { data, error } = await supabase.functions.invoke('check-subscription');
       
-      // Usa type assertion para contornar a verificação de tipo
-      const { error } = await supabase
-        .from('user_plans')
-        .upsert({ 
-          user_id: user.id, 
-          plan_type: 'premium',
-          updated_at: new Date().toISOString()
-        });
-      
-      if (error) throw error;
-      
-      setUserPlan('premium');
-      toast({
-        title: "Plano atualizado",
-        description: "Você agora é um usuário Premium! Aproveite todos os recursos.",
-        variant: "default"
-      });
-
-    } catch (error) {
-      console.error('Erro ao atualizar plano do usuário:', error);
-      
-      let errorMessage = "Não foi possível atualizar para o plano Premium. Tente novamente.";
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Email não verificado')) {
-          errorMessage = "Verifique seu email antes de fazer upgrade para o plano Premium.";
-        }
+      if (error) {
+        console.error('Erro ao verificar assinatura:', error);
+        return;
       }
       
+      if (data) {
+        setUserPlan(data.plan_type as PlanType);
+        toast({
+          title: "Status da assinatura atualizado",
+          description: data.subscribed ? "Você tem uma assinatura ativa!" : "Nenhuma assinatura ativa encontrada.",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao verificar status da assinatura:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Criar sessão de checkout do Stripe
+  const createCheckoutSession = async () => {
+    if (!user) {
       toast({
-        title: "Erro ao atualizar plano",
-        description: errorMessage,
+        title: "Erro",
+        description: "Você precisa estar logado para fazer upgrade.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      
+      if (error) {
+        console.error('Erro ao criar sessão de checkout:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível iniciar o processo de pagamento. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (data?.url) {
+        // Abrir checkout do Stripe em nova aba
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao criar checkout:', error);
+      toast({
+        title: "Erro",
+        description: "Erro interno. Tente novamente mais tarde.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Abrir portal do cliente para gerenciar assinatura
+  const openCustomerPortal = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        console.error('Erro ao abrir portal do cliente:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível abrir o portal de gerenciamento.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (data?.url) {
+        // Abrir portal do cliente em nova aba
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao abrir portal:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Atualiza o plano do usuário para premium (mantido para compatibilidade)
+  const upgradeUserPlan = async () => {
+    await createCheckoutSession();
   };
 
   // Gera token de API para usuários premium
@@ -92,11 +148,9 @@ export const useAuthPlans = (user: AuthUser | null) => {
       
       setIsLoading(true);
       
-      // Gera um token aleatório
       const token = Math.random().toString(36).substring(2, 15) + 
                     Math.random().toString(36).substring(2, 15);
       
-      // Usa type assertion para contornar a verificação de tipo
       const { error } = await supabase
         .from('user_plans')
         .upsert({ 
@@ -144,7 +198,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
   // Calcula se o usuário pode adicionar mais carteiras com base em seu plano
   const canAddMoreWallets = (currentWallets: number): boolean => {
     if (userPlan === 'premium') return true;
-    return currentWallets < 1; // Usuários gratuitos podem ter apenas 1 carteira
+    return currentWallets < 1;
   };
 
   // Efeito para buscar o plano quando o usuário muda
@@ -152,7 +206,6 @@ export const useAuthPlans = (user: AuthUser | null) => {
     if (user?.id) {
       fetchUserPlan(user.id);
     } else {
-      // Redefine para valores padrão quando não houver usuário
       setUserPlan('free');
       setApiToken(null);
       setApiRequestsRemaining(1000);
@@ -167,6 +220,9 @@ export const useAuthPlans = (user: AuthUser | null) => {
     upgradeUserPlan,
     generateApiToken,
     canAddMoreWallets,
-    isLoading
+    isLoading,
+    checkSubscriptionStatus,
+    createCheckoutSession,
+    openCustomerPortal
   };
 };

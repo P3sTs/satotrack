@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Lock, Star } from 'lucide-react';
+import { CheckCircle, XCircle, Lock, Star, Settings } from 'lucide-react';
 import { Advertisement } from '@/components/monetization/Advertisement';
 import { toast } from '@/hooks/use-toast';
+import { useSearchParams } from 'react-router-dom';
 
 interface PlanFeatureProps {
   text: string;
@@ -24,25 +25,40 @@ const PlanFeature: React.FC<PlanFeatureProps> = ({ text, included }) => (
 );
 
 const PlanosPage: React.FC = () => {
-  const { userPlan, upgradeUserPlan } = useAuth();
+  const { userPlan, createCheckoutSession, openCustomerPortal, checkSubscriptionStatus, isLoading } = useAuth();
   const isPremium = userPlan === 'premium';
+  const [searchParams] = useSearchParams();
+  
+  // Verificar se houve sucesso no checkout
+  useEffect(() => {
+    const checkout = searchParams.get('checkout');
+    if (checkout === 'success') {
+      toast({
+        title: "Pagamento realizado com sucesso!",
+        description: "Bem-vindo ao SatoTrack Premium! Verificando seu status...",
+      });
+      // Verificar status da assinatura após checkout bem-sucedido
+      setTimeout(() => {
+        checkSubscriptionStatus?.();
+      }, 2000);
+    } else if (checkout === 'canceled') {
+      toast({
+        title: "Checkout cancelado",
+        description: "Você pode tentar novamente quando quiser.",
+        variant: "destructive"
+      });
+    }
+  }, [searchParams, checkSubscriptionStatus]);
   
   const handleUpgrade = async () => {
-    if (upgradeUserPlan) {
-      try {
-        await upgradeUserPlan();
-        toast({
-          title: "Plano atualizado",
-          description: "Você agora é um usuário Premium! Aproveite todos os recursos.",
-          variant: "success"
-        });
-      } catch (error) {
-        toast({
-          title: "Erro ao atualizar plano",
-          description: "Não foi possível atualizar para o plano Premium. Tente novamente.",
-          variant: "destructive"
-        });
-      }
+    if (createCheckoutSession) {
+      await createCheckoutSession();
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    if (openCustomerPortal) {
+      await openCustomerPortal();
     }
   };
   
@@ -123,19 +139,31 @@ const PlanosPage: React.FC = () => {
             <PlanFeature text="Suporte prioritário" included={true} />
             <PlanFeature text="Sem anúncios" included={true} />
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-2">
             {isPremium ? (
-              <Button disabled className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white">
-                <Star className="h-4 w-4 mr-2 fill-white" />
-                Plano Atual
-              </Button>
+              <>
+                <Button disabled className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white">
+                  <Star className="h-4 w-4 mr-2 fill-white" />
+                  Plano Atual
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={handleManageSubscription}
+                  disabled={isLoading}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Gerenciar Assinatura
+                </Button>
+              </>
             ) : (
               <Button 
                 className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white" 
                 onClick={handleUpgrade}
+                disabled={isLoading}
               >
                 <Lock className="h-4 w-4 mr-2" />
-                Fazer upgrade
+                {isLoading ? 'Processando...' : 'Fazer upgrade'}
               </Button>
             )}
           </CardFooter>
@@ -153,31 +181,34 @@ const PlanosPage: React.FC = () => {
         
         <div className="space-y-4">
           <div>
-            <h3 className="font-medium">Como funciona o upgrade para Premium?</h3>
+            <h3 className="font-medium">Como funciona o pagamento?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Ao clicar em "Fazer upgrade", seu plano será atualizado automaticamente. Para esta versão demo,
-              o upgrade é instantâneo sem necessidade de pagamento.
+              O pagamento é processado de forma segura através do Stripe. Você será redirecionado para uma página segura 
+              de checkout onde poderá inserir seus dados de cartão de crédito.
             </p>
           </div>
           
           <div>
             <h3 className="font-medium">Posso cancelar minha assinatura Premium?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Sim! Você pode cancelar sua assinatura a qualquer momento. O acesso Premium continua disponível até o final do período pago.
+              Sim! Você pode cancelar sua assinatura a qualquer momento através do botão "Gerenciar Assinatura". 
+              O acesso Premium continua disponível até o final do período pago.
             </p>
           </div>
           
           <div>
             <h3 className="font-medium">Como funciona a exportação de relatórios?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Assinantes Premium podem exportar dados em formato PDF e CSV de qualquer período, incluindo relatórios completos para declaração de impostos.
+              Assinantes Premium podem exportar dados em formato PDF e CSV de qualquer período, incluindo relatórios 
+              completos para declaração de impostos.
             </p>
           </div>
           
           <div>
-            <h3 className="font-medium">Posso utilizar o Premium em múltiplos dispositivos?</h3>
+            <h3 className="font-medium">É seguro fornecer meus dados de pagamento?</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Sim! Sua assinatura Premium está vinculada à sua conta e pode ser utilizada em qualquer dispositivo em que você fizer login.
+              Sim! Utilizamos o Stripe, uma das plataformas de pagamento mais seguras do mundo. Seus dados de cartão 
+              são criptografados e nunca passam pelos nossos servidores.
             </p>
           </div>
         </div>
