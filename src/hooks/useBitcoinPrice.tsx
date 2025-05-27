@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useBitcoinPrice, BitcoinPriceData } from './useBitcoinPrice';
+import { useBitcoinPrice as useOriginalBitcoinPrice, BitcoinPriceData } from './useBitcoinPrice';
 
 interface BitcoinPriceContextType {
   data: BitcoinPriceData | null;
@@ -13,8 +13,12 @@ interface BitcoinPriceContextType {
 
 const BitcoinPriceContext = createContext<BitcoinPriceContextType | undefined>(undefined);
 
-export const BitcoinPriceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const bitcoinPriceData = useBitcoinPrice();
+interface BitcoinPriceProviderProps {
+  children: ReactNode;
+}
+
+export const BitcoinPriceProvider: React.FC<BitcoinPriceProviderProps> = ({ children }) => {
+  const bitcoinPriceData = useOriginalBitcoinPrice();
 
   return (
     <BitcoinPriceContext.Provider value={bitcoinPriceData}>
