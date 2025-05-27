@@ -14,11 +14,21 @@ const checkAuthentication = async () => {
   return user;
 };
 
-// Função para validar endereço Bitcoin - Melhorada para aceitar tanto endereços Legacy quanto SegWit
+// Função para validar endereço Bitcoin - Atualizada para suportar todos os tipos
 export function validarEnderecoBitcoin(endereco: string): boolean {
   // Usar o novo detector de endereços
   const detected = detectAddressNetwork(endereco);
-  return detected !== null && detected.isValid;
+  
+  if (!detected) {
+    console.log('Address not detected by detectAddressNetwork');
+    return false;
+  }
+  
+  // Aceitar Bitcoin e Litecoin (que usa padrões similares)
+  const isValidBitcoin = detected.network.id === 'bitcoin' || detected.network.id === 'litecoin';
+  console.log('Address validation result:', { detected, isValidBitcoin });
+  
+  return isValidBitcoin && detected.isValid;
 }
 
 // Função universal para validar qualquer endereço de criptomoeda
@@ -32,15 +42,22 @@ export async function fetchCarteiraDados(endereco: string, wallet_id?: string): 
     // Check authentication first
     await checkAuthentication();
     
+    console.log('Fetching wallet data for address:', endereco);
+    
     // Detectar o tipo de endereço
     const detectedAddress = detectAddressNetwork(endereco);
     
     if (!detectedAddress) {
+      console.error('Address not recognized:', endereco);
       throw new Error('Endereço de criptomoeda não reconhecido ou inválido');
     }
 
+    console.log('Detected address:', detectedAddress);
+
     // Buscar dados usando o serviço multi-chain
     const walletData = await fetchWalletData(detectedAddress);
+    
+    console.log('Wallet data fetched:', walletData);
 
     return {
       saldo: walletData.nativeBalance,

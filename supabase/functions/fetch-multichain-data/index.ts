@@ -119,7 +119,7 @@ async function fetchEthereumData(address: string, network: string) {
   }
 }
 
-// Solana data fetching
+// Solana data fetching - melhorado com tratamento de erros
 async function fetchSolanaData(address: string) {
   try {
     const rpcUrl = 'https://api.mainnet-beta.solana.com';
@@ -137,46 +137,92 @@ async function fetchSolanaData(address: string) {
     });
     
     const balanceData = await balanceResponse.json();
+    console.log('Solana balance response:', balanceData);
+    
+    // Verificar se há erro na resposta
+    if (balanceData.error) {
+      console.error('Solana RPC error:', balanceData.error);
+      throw new Error(`Solana RPC error: ${balanceData.error.message}`);
+    }
+    
+    // Verificar se result existe e tem a propriedade value
+    if (!balanceData.result || typeof balanceData.result.value === 'undefined') {
+      console.error('Invalid Solana response structure:', balanceData);
+      // Retornar dados padrão para endereços inválidos ou sem atividade
+      return {
+        nativeBalance: 0,
+        tokens: [],
+        totalUsdValue: 0,
+        transactionCount: 0
+      };
+    }
+    
     const nativeBalance = balanceData.result.value / Math.pow(10, 9); // Convert lamports to SOL
 
-    // Get token accounts
-    const tokenResponse = await fetch(rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getTokenAccountsByOwner',
-        params: [
-          address,
-          { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
-          { encoding: 'jsonParsed' }
-        ]
-      })
-    });
-    
-    const tokenData = await tokenResponse.json();
+    // Get token accounts - com tratamento de erro melhorado
     let tokens = [];
+    let transactionCount = 0;
     
-    if (tokenData.result && tokenData.result.value) {
-      tokens = tokenData.result.value.map((account: any) => {
-        const info = account.account.data.parsed.info;
-        return {
-          address: info.mint,
-          symbol: 'SPL', // Would need token metadata for actual symbol
-          name: 'SPL Token',
-          balance: parseInt(info.tokenAmount.amount) / Math.pow(10, info.tokenAmount.decimals),
-          decimals: info.tokenAmount.decimals,
-          usdValue: 0
-        };
-      }).filter((token: any) => token.balance > 0).slice(0, 10);
+    try {
+      const tokenResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 2,
+          method: 'getTokenAccountsByOwner',
+          params: [
+            address,
+            { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
+            { encoding: 'jsonParsed' }
+          ]
+        })
+      });
+      
+      const tokenData = await tokenResponse.json();
+      console.log('Solana token response:', tokenData);
+      
+      if (tokenData.result && tokenData.result.value && Array.isArray(tokenData.result.value)) {
+        tokens = tokenData.result.value.map((account: any) => {
+          const info = account.account.data.parsed.info;
+          return {
+            address: info.mint,
+            symbol: 'SPL', // Would need token metadata for actual symbol
+            name: 'SPL Token',
+            balance: parseInt(info.tokenAmount.amount) / Math.pow(10, info.tokenAmount.decimals),
+            decimals: info.tokenAmount.decimals,
+            usdValue: 0
+          };
+        }).filter((token: any) => token.balance > 0).slice(0, 10);
+      }
+      
+      // Tentar obter número de transações
+      const signaturesResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 3,
+          method: 'getSignaturesForAddress',
+          params: [address, { limit: 1000 }]
+        })
+      });
+      
+      const signaturesData = await signaturesResponse.json();
+      if (signaturesData.result && Array.isArray(signaturesData.result)) {
+        transactionCount = signaturesData.result.length;
+      }
+      
+    } catch (tokenError) {
+      console.error('Error fetching Solana tokens:', tokenError);
+      // Continue sem tokens se houver erro
     }
 
     return {
       nativeBalance,
       tokens,
       totalUsdValue: 0,
-      transactionCount: 0 // Solana doesn't have a simple transaction count API
+      transactionCount
     };
   } catch (error) {
     console.error('Solana API error:', error);
@@ -191,6 +237,8 @@ serve(async (req) => {
 
   try {
     const { address, network, chainId } = await req.json();
+    
+    console.log('Processing request for:', { address, network, chainId });
     
     if (!address || !network) {
       return new Response(
@@ -221,6 +269,8 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
+
+    console.log('Returning data:', data);
 
     return new Response(
       JSON.stringify(data),
