@@ -1,6 +1,5 @@
 
 import React, { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
 import TopBar from './TopBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Footer from '../Footer';
@@ -11,6 +10,10 @@ import { SidebarProvider, SidebarRail, SidebarInset, SidebarTrigger } from '@/co
 import NewAppSidebar from './NewAppSidebar';
 import MobileNavigation from '../navigation/MobileNavigation';
 import AppContent from './AppContent';
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
 
 /**
  * Loading fallback component for suspense
@@ -33,7 +36,7 @@ const LoadingFallback = () => (
  * Main application layout component
  * Handles responsive layout with sidebar and mobile navigation
  */
-const AppLayout = () => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { userPlan } = useAuth();
   const isMobile = useIsMobile();
   const showAds = userPlan === 'free';
@@ -59,7 +62,14 @@ const AppLayout = () => {
             )}
             
             {/* Main Content Area */}
-            <AppContent showAds={showAds} />
+            <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
+              <Suspense fallback={<LoadingFallback />}>
+                {children}
+              </Suspense>
+            </div>
+            
+            <Footer />
+            {showAds && <Advertisement position="footer" />}
           </SidebarInset>
         </div>
       </div>
