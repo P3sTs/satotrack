@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
 import { CarteirasProvider } from './contexts/carteiras';
 import { ViewModeProvider } from './contexts/ViewModeContext';
@@ -24,23 +24,21 @@ import AppLayout from './components/layout/AppLayout';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <CarteirasProvider>
-          <ViewModeProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/planos" element={<PlanosPage />} />
-              <Route path="/sobre" element={<Sobre />} />
-              <Route path="/*" element={<AppLayoutRoutes />} />
-            </Routes>
-            <Toaster />
-          </ViewModeProvider>
-        </CarteirasProvider>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <CarteirasProvider>
+        <ViewModeProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/planos" element={<PlanosPage />} />
+            <Route path="/sobre" element={<Sobre />} />
+            <Route path="/*" element={<AppLayoutRoutes />} />
+          </Routes>
+          <Toaster />
+        </ViewModeProvider>
+      </CarteirasProvider>
+    </AuthProvider>
   );
 }
 
