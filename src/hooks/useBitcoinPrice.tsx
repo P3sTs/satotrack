@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useBitcoinPrice as useOriginalBitcoinPrice, BitcoinPriceData } from './useBitcoinPrice';
+import { useBitcoinPrice as useOriginalBitcoinPrice, BitcoinPriceData } from './useBitcoinPrice.ts';
 
 interface BitcoinPriceContextType {
   data: BitcoinPriceData | null;
@@ -36,4 +36,4 @@ export const useBitcoinPriceContext = (): BitcoinPriceContextType => {
 };
 
 // Re-export the original hook and types
-export * from './useBitcoinPrice';
+export * from './useBitcoinPrice.ts';
