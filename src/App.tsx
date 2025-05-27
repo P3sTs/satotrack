@@ -33,34 +33,24 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/planos" element={<PlanosPage />} />
             <Route path="/sobre" element={<Sobre />} />
-            <Route path="/*" element={<AppLayoutRoutes />} />
+            <Route path="/referral" element={<AppLayout><ProtectedRoute><ReferralProgram /></ProtectedRoute></AppLayout>} />
+            <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
+            <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
+            <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
+            <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />
+            <Route path="/crypto" element={<AppLayout><ProtectedRoute><Crypto /></ProtectedRoute></AppLayout>} />
+            <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucros /></ProtectedRoute></AppLayout>} />
+            <Route path="/historico" element={<AppLayout><ProtectedRoute><Historico /></ProtectedRoute></AppLayout>} />
+            <Route path="/notificacoes" element={<AppLayout><ProtectedRoute><Notificacoes /></ProtectedRoute></AppLayout>} />
+            <Route path="/cupons" element={<AppLayout><ProtectedRoute><CouponManager /></ProtectedRoute></AppLayout>} />
+            <Route path="/politica-privacidade" element={<AppLayout><PoliticaPrivacidade /></AppLayout>} />
+            <Route path="/termos-de-uso" element={<AppLayout><TermosDeUso /></AppLayout>} />
+            <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
           </Routes>
           <Toaster />
         </ViewModeProvider>
       </CarteirasProvider>
     </AuthProvider>
-  );
-}
-
-function AppLayoutRoutes() {
-  return (
-    <AppLayout>
-      <Routes>
-        <Route path="/referral" element={<ProtectedRoute><ReferralProgram /></ProtectedRoute>} />
-        <Route path="/growth" element={<ProtectedRoute><GrowthDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/carteiras" element={<ProtectedRoute><WalletsManager /></ProtectedRoute>} />
-        <Route path="/mercado" element={<ProtectedRoute><Mercado /></ProtectedRoute>} />
-        <Route path="/crypto" element={<ProtectedRoute><Crypto /></ProtectedRoute>} />
-        <Route path="/projecao-lucros" element={<ProtectedRoute><ProjecaoLucros /></ProtectedRoute>} />
-        <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
-        <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
-        <Route path="/cupons" element={<ProtectedRoute><CouponManager /></ProtectedRoute>} />
-        <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
-        <Route path="/termos-de-uso" element={<TermosDeUso />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AppLayout>
   );
 }
 
