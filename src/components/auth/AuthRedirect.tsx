@@ -4,17 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 
 const AuthRedirect = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) {
-      // Se o usuário já estiver autenticado, redireciona para o dashboard
-      navigate('/dashboard', { replace: true });
-    }
-  }, [user, loading, navigate]);
-
-  // Não renderiza nada, apenas faz o redirecionamento
+  // Este componente não faz nada para evitar conflitos de redirecionamento
+  // A lógica de redirecionamento está agora centralizada no App.tsx
   return null;
 };
 

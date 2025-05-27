@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { 
   Card, 
@@ -16,22 +16,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Lock } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  
-  // Redirect user if they're already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+  const { signIn } = useAuth();
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -58,8 +49,7 @@ export const LoginForm = () => {
         description: "Você foi autenticado com sucesso.",
       });
       
-      // Forçar navegação para o dashboard após o login bem-sucedido
-      navigate('/dashboard', { replace: true });
+      // O redirecionamento será feito automaticamente pelo PublicRoute
       
     } catch (err) {
       console.error("Erro de login:", err);

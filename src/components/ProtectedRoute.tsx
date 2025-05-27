@@ -1,49 +1,18 @@
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { useAuth } from '../contexts/auth';
-import { Navigate, useLocation } from 'react-router-dom';
-import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle, ShieldAlert } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading, isAuthenticated, updateLastActivity, securityStatus } = useAuth();
-  const location = useLocation();
+  const { securityStatus } = useAuth();
   
-  // Update activity when route changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      updateLastActivity();
-      console.log("Activity updated in protected route, user:", !!user);
-    }
-  }, [isAuthenticated, location.pathname, updateLastActivity]);
-  
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="space-y-4 w-4/5 max-w-md">
-          <Skeleton className="h-10 w-10 rounded-full mx-auto" />
-          <Skeleton className="h-4 w-3/4 mx-auto" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect to authentication if no user
-  if (!user) {
-    console.log("No user found in protected route, redirecting to auth");
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
-  console.log("Protected route rendering content with user:", !!user);
-  
-  // Render content with security alert if needed
+  // Renderizar apenas o conteúdo com alertas de segurança se necessário
+  // O redirecionamento é feito no App.tsx
   return (
     <>
       {securityStatus !== 'secure' && (

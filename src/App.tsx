@@ -15,6 +15,7 @@ import Sobre from './pages/Sobre';
 import Auth from './pages/Auth';
 import PlanosPage from './pages/PlanosPage';
 import NotFound from './pages/NotFound';
+import Home from './pages/Home';
 import { Toaster } from '@/components/ui/sonner';
 import LandingPage from './pages/LandingPage';
 import ReferralProgram from './pages/ReferralProgram';
@@ -29,8 +30,9 @@ function App() {
         <ViewModeProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/landing" element={<LandingPage />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
             <Route path="/planos" element={<PlanosPage />} />
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/referral" element={<AppLayout><ProtectedRoute><ReferralProgram /></ProtectedRoute></AppLayout>} />
@@ -55,7 +57,15 @@ function App() {
 }
 
 function Index() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dashboard-dark">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-satotrack-neon"></div>
+      </div>
+    );
+  }
   
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -65,13 +75,39 @@ function Index() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-satotrack-neon"></div>
+      </div>
+    );
   }
 
-  return children;
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-satotrack-neon"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 function PoliticaPrivacidade() {
