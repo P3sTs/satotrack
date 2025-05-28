@@ -68,6 +68,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     upgradeUserPlan,
     generateApiToken,
     canAddMoreWallets,
+    isLoading,
+    checkSubscriptionStatus,
+    createCheckoutSession,
+    openCustomerPortal
   } = useAuthPlans(user ? user as AuthUser : null);
 
   // Boas-vindas e alertas
@@ -99,7 +103,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     upgradeUserPlan,
     generateApiToken,
     canAddMoreWallets,
-    passwordStrength
+    passwordStrength,
+    createCheckoutSession,
+    openCustomerPortal,
+    checkSubscriptionStatus,
+    isLoading
   };
   
   // Provide authentication context to child components

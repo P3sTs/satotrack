@@ -43,6 +43,10 @@ export interface AuthContextType {
   generateApiToken?: () => Promise<string>;
   apiToken?: string | null;
   apiRequestsRemaining?: number;
+  createCheckoutSession: () => Promise<void>;
+  openCustomerPortal: () => Promise<void>;
+  checkSubscriptionStatus: () => Promise<void>;
+  isLoading: boolean;
 }
 
 export interface LoginAttempt {
