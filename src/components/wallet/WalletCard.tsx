@@ -1,198 +1,155 @@
 
 import React, { useState } from 'react';
-import { CarteiraBTC } from '../../types/types';
-import { formatBitcoinValue, formatDate } from '../../utils/formatters';
+import { Copy, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Pencil, RefreshCw, Star } from 'lucide-react';
-import { useCarteiras } from '../../contexts/carteiras';
-import { toast } from '@/components/ui/sonner';
-import WalletEditor from './WalletEditor';
-import DeleteWalletDialog from './DeleteWalletDialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
+import { formatCurrency } from '@/utils/formatters';
+import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
 
 interface WalletCardProps {
   carteira: CarteiraBTC;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  isPrimary?: boolean;
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({ carteira }) => {
-  const { 
-    removerCarteira, 
-    atualizarNomeCarteira, 
-    atualizarCarteira, 
-    isUpdating, 
-    definirCarteiraPrincipal, 
-    carteiraPrincipal 
-  } = useCarteiras();
-  
-  const [editingWallet, setEditingWallet] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+const WalletCard: React.FC<WalletCardProps> = ({ 
+  carteira, 
+  onEdit, 
+  onDelete,
+  isPrimary = false 
+}) => {
+  const [copied, setCopied] = useState(false);
+  const [showFullAddress, setShowFullAddress] = useState(false);
 
-  const handleStartEdit = () => {
-    setEditingWallet(true);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingWallet(false);
-  };
-
-  const handleSaveEdit = async (newName: string) => {
-    if (!newName.trim()) {
-      toast.error('O nome da carteira não pode ficar em branco');
-      return;
-    }
-
+  const handleCopyAddress = async () => {
     try {
-      await atualizarNomeCarteira(carteira.id, newName.trim());
-      setEditingWallet(false);
-      toast.success('Nome da carteira atualizado com sucesso');
+      await navigator.clipboard.writeText(carteira.endereco);
+      setCopied(true);
+      toast({
+        title: "Endereço copiado!",
+        description: "O endereço da carteira foi copiado para a área de transferência.",
+      });
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error('Erro ao atualizar o nome da carteira');
-      console.error(error);
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o endereço.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await removerCarteira(carteira.id);
-      toast.success('Carteira removida com sucesso');
-    } catch (error) {
-      toast.error('Erro ao remover a carteira');
-      console.error(error);
-    }
+  const truncateAddress = (address: string) => {
+    if (address.length <= 16) return address;
+    return `${address.slice(0, 8)}...${address.slice(-8)}`;
   };
 
-  const handleUpdate = async () => {
-    try {
-      await atualizarCarteira(carteira.id);
-      toast.success('Carteira atualizada com sucesso');
-    } catch (error) {
-      toast.error('Erro ao atualizar a carteira');
-      console.error(error);
-    }
+  const openBlockchainExplorer = () => {
+    window.open(`https://blockstream.info/address/${carteira.endereco}`, '_blank');
   };
-
-  const togglePrimaryWallet = () => {
-    if (carteiraPrincipal === carteira.id) {
-      definirCarteiraPrincipal(null);
-      toast.success('Carteira principal removida');
-    } else {
-      definirCarteiraPrincipal(carteira.id);
-      toast.success('Carteira definida como principal');
-    }
-  };
-
-  const isPrimary = carteiraPrincipal === carteira.id;
 
   return (
-    <div className={`border rounded-lg p-6 bg-card ${isPrimary ? 'ring-2 ring-bitcoin' : ''}`}>
-      <div className="flex flex-col md:flex-row justify-between">
-        <div className="md:w-2/3">
-          {editingWallet ? (
-            <WalletEditor 
-              initialName={carteira.nome}
-              onSave={handleSaveEdit}
-              onCancel={handleCancelEdit}
-            />
-          ) : (
-            <div className="flex items-center mb-3">
-              <h3 className="text-xl font-semibold mr-2">{carteira.nome}</h3>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6" 
-                onClick={handleStartEdit}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          )}
-          
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Endereço</p>
-            <p className="text-sm font-mono break-all">{carteira.endereco}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Total recebido</p>
-              <p className="font-medium">{formatBitcoinValue(carteira.total_entradas)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Total enviado</p>
-              <p className="font-medium">{formatBitcoinValue(carteira.total_saidas)}</p>
-            </div>
-          </div>
+    <Card className={`wallet-card ${isPrimary ? 'border-bitcoin' : ''}`}>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg font-medium">
+            {carteira.nome}
+            {isPrimary && (
+              <Badge variant="outline" className="ml-2 text-xs border-bitcoin text-bitcoin">
+                Principal
+              </Badge>
+            )}
+          </CardTitle>
         </div>
         
-        <div className="md:w-1/3 md:border-l md:pl-6 pt-4 md:pt-0">
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Saldo atual</p>
-            <p className="text-2xl font-bold bitcoin-gradient-text">{formatBitcoinValue(carteira.saldo)}</p>
-          </div>
-          
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Última atualização</p>
-            <p>{formatDate(carteira.ultimo_update)}</p>
-          </div>
-          
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Número de transações</p>
-            <p>{carteira.qtde_transacoes}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleUpdate}
-              disabled={!!isUpdating[carteira.id]}
-              className="w-full"
-            >
-              {isUpdating[carteira.id] ? (
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Atualizar
-            </Button>
-            
-            <Button 
-              variant={isPrimary ? "neon" : "outline"}
-              size="sm"
-              onClick={togglePrimaryWallet}
-              className="w-full"
-            >
-              <Star className="h-4 w-4 mr-2" />
-              {isPrimary ? "Principal" : "Favoritar"}
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => window.location.href = `/carteira/${carteira.id}`}
-              className="w-full"
-            >
-              Ver detalhes
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="w-full"
-            >
-              Remover
-            </Button>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground mb-1">Endereço:</p>
+            <div className="flex items-center gap-2 bg-muted/30 p-2 rounded-md">
+              <code className="text-xs font-mono flex-1 truncate">
+                {showFullAddress ? carteira.endereco : truncateAddress(carteira.endereco)}
+              </code>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={() => setShowFullAddress(!showFullAddress)}
+                  title={showFullAddress ? "Ocultar endereço completo" : "Mostrar endereço completo"}
+                >
+                  {showFullAddress ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={handleCopyAddress}
+                  title="Copiar endereço"
+                >
+                  {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={openBlockchainExplorer}
+                  title="Ver no blockchain"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </CardHeader>
 
-      <DeleteWalletDialog 
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDelete}
-      />
-    </div>
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <p className="text-2xl font-bold text-bitcoin">
+              {formatCurrency(carteira.saldo || 0, 'BTC')}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              ≈ {formatCurrency((carteira.saldo || 0) * (carteira.cotacao || 0), 'BRL')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Transações</p>
+              <p className="font-medium">{carteira.transacoes?.length || 0}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Última atualização</p>
+              <p className="font-medium">
+                {carteira.ultimaAtualizacao 
+                  ? new Date(carteira.ultimaAtualizacao).toLocaleDateString('pt-BR')
+                  : 'Nunca'
+                }
+              </p>
+            </div>
+          </div>
+
+          {(onEdit || onDelete) && (
+            <div className="flex gap-2 pt-2 border-t">
+              {onEdit && (
+                <Button variant="outline" size="sm" onClick={onEdit} className="flex-1">
+                  Editar
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="destructive" size="sm" onClick={onDelete} className="flex-1">
+                  Excluir
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

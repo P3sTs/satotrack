@@ -6,6 +6,8 @@ import { CarteirasProvider } from './contexts/carteiras';
 import { ViewModeProvider } from './contexts/ViewModeContext';
 import Dashboard from './pages/Dashboard';
 import WalletsManager from './pages/WalletsManager';
+import NovaCarteira from './pages/NovaCarteira';
+import Configuracoes from './pages/Configuracoes';
 import Mercado from './pages/Mercado';
 import Crypto from './pages/Crypto';
 import ProjecaoLucros from './pages/ProjecaoLucros';
@@ -39,6 +41,8 @@ function App() {
             <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
+            <Route path="/nova-carteira" element={<AppLayout><ProtectedRoute><NovaCarteira /></ProtectedRoute></AppLayout>} />
+            <Route path="/configuracoes" element={<AppLayout><ProtectedRoute><Configuracoes /></ProtectedRoute></AppLayout>} />
             <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />
             <Route path="/crypto" element={<AppLayout><ProtectedRoute><Crypto /></ProtectedRoute></AppLayout>} />
             <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucros /></ProtectedRoute></AppLayout>} />

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Home, Wallet, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink } from 'lucide-react';
+import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 
@@ -15,11 +16,13 @@ const SidebarNavigation: React.FC = () => {
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Carteiras', href: '/carteiras', icon: Wallet },
+    { name: 'Nova Carteira', href: '/nova-carteira', icon: Plus },
     { name: 'Mercado', href: '/mercado', icon: TrendingUp },
     { name: 'Análises', href: '/crypto', icon: BarChart3 },
     { name: 'Projeções', href: '/projecao-lucros', icon: Target },
     { name: 'Histórico', href: '/historico', icon: History },
     { name: 'Notificações', href: '/notificacoes', icon: Bell },
+    { name: 'Configurações', href: '/configuracoes', icon: Settings },
     { name: 'Programa Referência', href: '/referral', icon: Users },
     { name: 'Growth Metrics', href: '/growth', icon: TrendingUp },
     { name: 'Landing Page', href: '/landing', icon: ExternalLink },

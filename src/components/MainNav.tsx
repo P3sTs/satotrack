@@ -11,11 +11,12 @@ const MainNav: React.FC = () => {
   };
   
   const navItems = [
-    { path: '/', label: 'Início' },
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/carteiras', label: 'Carteiras' },
+    { path: '/nova-carteira', label: 'Nova Carteira' },
     { path: '/mercado', label: 'Mercado BTC' },
     { path: '/crypto', label: 'Redes Crypto' },
+    { path: '/configuracoes', label: 'Configurações' },
   ];
   
   return (
