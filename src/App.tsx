@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
@@ -24,6 +25,7 @@ import GrowthDashboard from './pages/GrowthDashboard';
 import CouponManager from './components/monetization/CouponManager';
 import AppLayout from './components/layout/AppLayout';
 import OnChainDashboard from './pages/OnChainDashboard';
+import CarteiraDetalhes from './pages/CarteiraDetalhes';
 
 function App() {
   return (
@@ -42,6 +44,7 @@ function App() {
             <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/onchain" element={<AppLayout><ProtectedRoute><OnChainDashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
+            <Route path="/carteira/:id" element={<AppLayout><ProtectedRoute><CarteiraDetalhes /></ProtectedRoute></AppLayout>} />
             <Route path="/nova-carteira" element={<AppLayout><ProtectedRoute><NovaCarteira /></ProtectedRoute></AppLayout>} />
             <Route path="/configuracoes" element={<AppLayout><ProtectedRoute><Configuracoes /></ProtectedRoute></AppLayout>} />
             <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />

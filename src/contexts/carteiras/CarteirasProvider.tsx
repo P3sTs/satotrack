@@ -29,28 +29,50 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     getPrimaryWalletFromStorage()
   );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   
-  // Check authentication status
+  // Check authentication status only once
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
-      const isAuthd = await checkAuthentication();
-      setIsAuthenticated(isAuthd);
+      try {
+        const isAuthd = await checkAuthentication();
+        if (isMounted) {
+          setIsAuthenticated(isAuthd);
+          setAuthChecked(true);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setAuthChecked(true);
+        }
+      }
     };
     
     checkAuth();
     
     // Listen for auth changes
     const subscription = setupAuthListener((isAuthd) => {
-      setIsAuthenticated(isAuthd);
+      if (isMounted) {
+        setIsAuthenticated(isAuthd);
+        if (!authChecked) {
+          setAuthChecked(true);
+        }
+      }
     });
     
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
   
   // Carregar todas as carteiras do usuário
   useEffect(() => {
+    if (!authChecked) return;
+    
     async function carregarCarteiras() {
       setIsLoading(true);
       try {
@@ -62,7 +84,7 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     }
 
     carregarCarteiras();
-  }, [sortOption, sortDirection, isAuthenticated]);
+  }, [sortOption, sortDirection, isAuthenticated, authChecked]);
 
   const adicionarCarteira = useCallback(async (nome: string, endereco: string): Promise<void> => {
     if (!isAuthenticated) {
@@ -207,4 +229,3 @@ export const CarteirasProvider: React.FC<CarteirasProviderProps> = ({ children }
     </CarteirasContext.Provider>
   );
 };
-
