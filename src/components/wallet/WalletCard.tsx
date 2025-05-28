@@ -113,20 +113,20 @@ const WalletCard: React.FC<WalletCardProps> = ({
               {formatCurrency(carteira.saldo || 0, 'BTC')}
             </p>
             <p className="text-sm text-muted-foreground">
-              ≈ {formatCurrency((carteira.saldo || 0) * (carteira.cotacao || 0), 'BRL')}
+              ≈ {formatCurrency((carteira.saldo || 0) * 100000, 'BRL')}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Transações</p>
-              <p className="font-medium">{carteira.transacoes?.length || 0}</p>
+              <p className="font-medium">{carteira.qtde_transacoes || 0}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Última atualização</p>
               <p className="font-medium">
-                {carteira.ultimaAtualizacao 
-                  ? new Date(carteira.ultimaAtualizacao).toLocaleDateString('pt-BR')
+                {carteira.ultimo_update 
+                  ? new Date(carteira.ultimo_update).toLocaleDateString('pt-BR')
                   : 'Nunca'
                 }
               </p>
