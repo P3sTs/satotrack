@@ -12,6 +12,7 @@ const MainNav: React.FC = () => {
   
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/onchain', label: 'OnChain Monitor' },
     { path: '/carteiras', label: 'Carteiras' },
     { path: '/nova-carteira', label: 'Nova Carteira' },
     { path: '/mercado', label: 'Mercado BTC' },

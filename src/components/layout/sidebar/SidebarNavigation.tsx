@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings } from 'lucide-react';
+import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 
@@ -15,6 +15,7 @@ const SidebarNavigation: React.FC = () => {
 
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'OnChain Monitor', href: '/onchain', icon: Activity },
     { name: 'Carteiras', href: '/carteiras', icon: Wallet },
     { name: 'Nova Carteira', href: '/nova-carteira', icon: Plus },
     { name: 'Mercado', href: '/mercado', icon: TrendingUp },
