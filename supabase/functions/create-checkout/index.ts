@@ -68,7 +68,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/planos?checkout=success`,
+      success_url: `${req.headers.get("origin")}/planos?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/planos?checkout=canceled`,
       metadata: {
         user_id: user.id,

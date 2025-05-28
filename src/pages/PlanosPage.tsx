@@ -33,19 +33,41 @@ const PlanosPage: React.FC = () => {
   // Verificar se houve sucesso no checkout e atualizar status
   useEffect(() => {
     const checkout = searchParams.get('checkout');
-    if (checkout === 'success') {
+    const sessionId = searchParams.get('session_id');
+    
+    if (checkout === 'success' && sessionId) {
+      console.log('Checkout successful, verifying subscription status...');
+      
       toast({
         title: "Pagamento realizado com sucesso!",
         description: "Bem-vindo ao SatoTrack Premium! Verificando seu status...",
       });
       
-      // Verificar status da assinatura após checkout bem-sucedido
+      // Aguardar um pouco para o webhook processar e então verificar status
       const verifySubscription = async () => {
-        await checkSubscriptionStatus?.();
-        // Redirecionar para dashboard após verificação
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+        // Aguardar 3 segundos para dar tempo do webhook processar
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        try {
+          await checkSubscriptionStatus?.();
+          console.log('Subscription status verified');
+          
+          // Limpar parâmetros da URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+          
+          // Redirecionar para dashboard após verificação
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+        } catch (error) {
+          console.error('Error verifying subscription:', error);
+          toast({
+            title: "Erro ao verificar status",
+            description: "Tente recarregar a página em alguns momentos.",
+            variant: "destructive"
+          });
+        }
       };
       
       verifySubscription();
@@ -55,6 +77,10 @@ const PlanosPage: React.FC = () => {
         description: "Você pode tentar novamente quando quiser.",
         variant: "destructive"
       });
+      
+      // Limpar parâmetros da URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
     }
   }, [searchParams, checkSubscriptionStatus, navigate]);
   
