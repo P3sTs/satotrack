@@ -61,14 +61,14 @@ serve(async (req) => {
               name: "SatoTrack Premium",
               description: "Acesso completo às funcionalidades premium do SatoTrack"
             },
-            unit_amount: 990, // R$ 9,90 em centavos
+            unit_amount: 1990, // R$ 19,90 em centavos
             recurring: { interval: "month" },
           },
           quantity: 1,
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?checkout=success`,
+      success_url: `${req.headers.get("origin")}/planos?checkout=success`,
       cancel_url: `${req.headers.get("origin")}/planos?checkout=canceled`,
       metadata: {
         user_id: user.id,

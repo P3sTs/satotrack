@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, XCircle, Lock, Star, Settings } from 'lucide-react';
 import { Advertisement } from '@/components/monetization/Advertisement';
 import { toast } from '@/hooks/use-toast';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 interface PlanFeatureProps {
   text: string;
@@ -28,8 +28,9 @@ const PlanosPage: React.FC = () => {
   const { userPlan, createCheckoutSession, openCustomerPortal, checkSubscriptionStatus, isLoading } = useAuth();
   const isPremium = userPlan === 'premium';
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
-  // Verificar se houve sucesso no checkout
+  // Verificar se houve sucesso no checkout e atualizar status
   useEffect(() => {
     const checkout = searchParams.get('checkout');
     if (checkout === 'success') {
@@ -37,10 +38,17 @@ const PlanosPage: React.FC = () => {
         title: "Pagamento realizado com sucesso!",
         description: "Bem-vindo ao SatoTrack Premium! Verificando seu status...",
       });
+      
       // Verificar status da assinatura após checkout bem-sucedido
-      setTimeout(() => {
-        checkSubscriptionStatus?.();
-      }, 2000);
+      const verifySubscription = async () => {
+        await checkSubscriptionStatus?.();
+        // Redirecionar para dashboard após verificação
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      };
+      
+      verifySubscription();
     } else if (checkout === 'canceled') {
       toast({
         title: "Checkout cancelado",
@@ -48,7 +56,7 @@ const PlanosPage: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [searchParams, checkSubscriptionStatus]);
+  }, [searchParams, checkSubscriptionStatus, navigate]);
   
   const handleUpgrade = async () => {
     if (createCheckoutSession) {
@@ -120,7 +128,7 @@ const PlanosPage: React.FC = () => {
             <CardTitle>Plano Premium</CardTitle>
             <CardDescription>Para usuários avançados</CardDescription>
             <div className="mt-4">
-              <span className="text-3xl font-bold">R$ 9,90</span>
+              <span className="text-3xl font-bold">R$ 19,90</span>
               <span className="text-muted-foreground">/mês</span>
             </div>
           </CardHeader>

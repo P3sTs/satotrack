@@ -32,43 +32,26 @@ const LandingPage: React.FC = () => {
       target: 'Iniciantes'
     },
     {
-      name: 'Pro',
+      name: 'Premium',
       price: 'R$ 19,90',
       priceNote: '/mês',
-      description: 'Para traders casuais',
+      description: 'Para traders e investidores',
       features: [
-        '5 carteiras monitoradas',
+        'Carteiras ilimitadas',
         'Relatórios PDF personalizados',
         'API básica (1000 req/mês)',
         'Alertas inteligentes',
         'Análise de impostos',
-        'Suporte prioritário'
+        'Gráficos avançados',
+        'Exportação de dados',
+        'Suporte prioritário',
+        'Sem anúncios'
       ],
       limitations: [],
       cta: 'Começar Teste Grátis',
       popular: true,
-      target: 'Traders Casuais',
+      target: 'Traders e Investidores',
       badge: 'Mais Popular'
-    },
-    {
-      name: 'Premium',
-      price: 'R$ 99,90',
-      priceNote: '/mês',
-      description: 'Para investidores sérios',
-      features: [
-        'Carteiras ilimitadas',
-        'Alertas com Machine Learning',
-        'API avançada (ilimitada)',
-        'Relatórios institucionais',
-        'Análise de portfolio avançada',
-        'Modo privacidade total',
-        'Suporte 24/7',
-        'Acesso a beta features'
-      ],
-      limitations: [],
-      cta: 'Upgrade Premium',
-      popular: false,
-      target: 'Investidores Sérios'
     }
   ];
 
@@ -192,7 +175,7 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {plans.map((plan, index) => (
               <Card 
                 key={index} 
