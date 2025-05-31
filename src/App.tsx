@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
@@ -27,6 +26,7 @@ import CouponManager from './components/monetization/CouponManager';
 import AppLayout from './components/layout/AppLayout';
 import OnChainDashboard from './pages/OnChainDashboard';
 import CarteiraDetalhes from './pages/CarteiraDetalhes';
+import CryptoVisualization3D from './pages/CryptoVisualization3D';
 
 function App() {
   return (
@@ -57,6 +57,7 @@ function App() {
             <Route path="/cupons" element={<AppLayout><ProtectedRoute><CouponManager /></ProtectedRoute></AppLayout>} />
             <Route path="/politica-privacidade" element={<AppLayout><PoliticaPrivacidade /></AppLayout>} />
             <Route path="/termos-de-uso" element={<AppLayout><TermosDeUso /></AppLayout>} />
+            <Route path="/3d-visualization" element={<AppLayout><ProtectedRoute><CryptoVisualization3D /></ProtectedRoute></AppLayout>} />
             <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
           </Routes>
           <Toaster />

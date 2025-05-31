@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity, Search } from 'lucide-react';
+import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity, Search, Box } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 
@@ -38,6 +38,7 @@ const SidebarNavigation: React.FC = () => {
       path: '/bitcoin-lookup',
       description: 'Consultar carteiras Bitcoin'
     },
+    { name: 'Visualização 3D', href: '/3d-visualization', icon: Box },
   ];
 
   return (

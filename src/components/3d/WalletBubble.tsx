@@ -1,0 +1,167 @@
+
+import React, { useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Html, Sphere } from '@react-three/drei';
+import { Mesh, Vector3 } from 'three';
+import { useDrag } from '@react-three/drei';
+
+interface WalletNode {
+  id: string;
+  address: string;
+  position: Vector3;
+  balance: number;
+  totalReceived: number;
+  totalSent: number;
+  transactionCount: number;
+  isLocked: boolean;
+  connections: string[];
+  type: 'main' | 'transaction' | 'connected';
+}
+
+interface WalletBubbleProps {
+  node: WalletNode;
+  onClick: () => void;
+  onPositionChange: (position: Vector3) => void;
+  onToggleLock: () => void;
+  onRemove: () => void;
+}
+
+const WalletBubble: React.FC<WalletBubbleProps> = ({
+  node,
+  onClick,
+  onPositionChange,
+  onToggleLock,
+  onRemove
+}) => {
+  const meshRef = useRef<Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const { camera } = useThree();
+
+  // Animação de pulsação
+  useFrame((state) => {
+    if (meshRef.current && !dragging) {
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      meshRef.current.scale.setScalar(scale);
+    }
+  });
+
+  // Configurar drag
+  const bind = useDrag(
+    ({ movement: [x, y], dragging: isDragging }) => {
+      if (node.isLocked) return;
+      
+      setDragging(isDragging);
+      
+      if (meshRef.current && isDragging) {
+        const vector = new Vector3();
+        vector.set(
+          (x / window.innerWidth) * 2 - 1,
+          -(y / window.innerHeight) * 2 + 1,
+          0.5
+        );
+        vector.unproject(camera);
+        vector.sub(camera.position).normalize();
+        const distance = -camera.position.z / vector.z;
+        vector.multiplyScalar(distance).add(camera.position);
+        
+        meshRef.current.position.copy(vector);
+        onPositionChange(vector);
+      }
+    },
+    { pointerEvents: true }
+  );
+
+  const getColor = () => {
+    if (node.type === 'main') return '#06b6d4'; // Cyan para carteira principal
+    if (node.type === 'transaction') return '#8b5cf6'; // Roxo para transações
+    return '#10b981'; // Verde para conexões
+  };
+
+  const getSize = () => {
+    const baseSize = 1;
+    const balanceScale = Math.log10(node.balance + 1) * 0.3;
+    return Math.max(baseSize, baseSize + balanceScale);
+  };
+
+  return (
+    <group position={node.position}>
+      <Sphere
+        ref={meshRef}
+        args={[getSize(), 32, 32]}
+        {...bind()}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+      >
+        <meshPhysicalMaterial
+          color={getColor()}
+          transparent
+          opacity={hovered ? 0.9 : 0.7}
+          roughness={0.1}
+          metalness={0.8}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          transmission={0.3}
+          thickness={0.5}
+          envMapIntensity={1}
+        />
+      </Sphere>
+
+      {/* Efeito de glow */}
+      <Sphere args={[getSize() * 1.2, 16, 16]}>
+        <meshBasicMaterial
+          color={getColor()}
+          transparent
+          opacity={0.2}
+          side={2}
+        />
+      </Sphere>
+
+      {/* Label flutuante */}
+      {hovered && (
+        <Html
+          position={[0, getSize() + 1, 0]}
+          center
+          distanceFactor={10}
+          occlude
+        >
+          <div className="bg-black/80 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs">
+            <div className="font-mono text-xs">
+              {node.address.substring(0, 8)}...{node.address.substring(node.address.length - 8)}
+            </div>
+            <div className="text-cyan-400">
+              💰 {node.balance.toFixed(4)} BTC
+            </div>
+            <div className="text-purple-400">
+              🔄 {node.transactionCount} transações
+            </div>
+            {node.isLocked && (
+              <div className="text-yellow-400 mt-1">
+                🔒 Travada
+              </div>
+            )}
+          </div>
+        </Html>
+      )}
+
+      {/* Anel de conexões */}
+      {node.connections.length > 0 && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[getSize() * 1.5, getSize() * 1.7, 32]} />
+          <meshBasicMaterial
+            color="#fbbf24"
+            transparent
+            opacity={0.6}
+            side={2}
+          />
+        </mesh>
+      )}
+    </group>
+  );
+};
+
+export default WalletBubble;

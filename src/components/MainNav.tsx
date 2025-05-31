@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -19,6 +18,7 @@ const MainNav: React.FC = () => {
     { path: '/mercado', label: 'Mercado BTC' },
     { path: '/crypto', label: 'Redes Crypto' },
     { path: '/configuracoes', label: 'Configurações' },
+    { path: '/3d-visualization', label: '3D Explorer' },
   ];
   
   return (
