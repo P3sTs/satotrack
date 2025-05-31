@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
@@ -29,6 +28,8 @@ import OnChainDashboard from './pages/OnChainDashboard';
 import CarteiraDetalhes from './pages/CarteiraDetalhes';
 import CryptoVisualization3D from './pages/CryptoVisualization3D';
 import ApiDashboard from './pages/ApiDashboard';
+import Privacidade from './pages/Privacidade';
+import TermosUso from './pages/TermosUso';
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
             <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
             <Route path="/planos" element={<PlanosPage />} />
             <Route path="/sobre" element={<Sobre />} />
+            <Route path="/privacidade" element={<Privacidade />} />
+            <Route path="/termos-uso" element={<TermosUso />} />
             <Route path="/referral" element={<AppLayout><ProtectedRoute><ReferralProgram /></ProtectedRoute></AppLayout>} />
             <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />

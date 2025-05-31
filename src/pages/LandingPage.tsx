@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Star, Users, TrendingUp, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
+import { Link } from 'react-router-dom';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -261,6 +263,40 @@ const LandingPage: React.FC = () => {
           </Button>
         </div>
       </section>
+
+      {/* Footer with Legal Links */}
+      <footer className="py-8 border-t border-dashboard-medium bg-dashboard-dark">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
+                alt="SatoTrack Logo" 
+                className="h-6 w-6 object-contain"
+              />
+              <span className="font-orbitron font-semibold text-lg satotrack-gradient-text">
+                SatoTrack
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+              <Link to="/termos-uso" className="hover:text-satotrack-neon transition-colors">
+                Termos de Uso
+              </Link>
+              <Link to="/privacidade" className="hover:text-satotrack-neon transition-colors">
+                Política de Privacidade
+              </Link>
+              <Link to="/sobre" className="hover:text-satotrack-neon transition-colors">
+                Sobre
+              </Link>
+            </div>
+          </div>
+          
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            <p>© {new Date().getFullYear()} SatoTrack. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
