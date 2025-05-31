@@ -99,7 +99,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       >
         <meshPhysicalMaterial
           color={getColor()}
-          transparent
+          transparent={true}
           opacity={hovered ? 0.9 : 0.7}
           roughness={0.1}
           metalness={0.8}
@@ -115,7 +115,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       <Sphere args={[getSize() * 1.2, 16, 16]}>
         <meshBasicMaterial
           color={getColor()}
-          transparent
+          transparent={true}
           opacity={0.2}
           side={2}
         />
@@ -154,7 +154,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
           <ringGeometry args={[getSize() * 1.5, getSize() * 1.7, 32]} />
           <meshBasicMaterial
             color="#fbbf24"
-            transparent
+            transparent={true}
             opacity={0.6}
             side={2}
           />
