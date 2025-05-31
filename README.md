@@ -1,73 +1,122 @@
-# Welcome to your Lovable project
+📝 README.md - SatoTracker
 
-## Project info
+# 🚀 SatoTracker
 
-**URL**: https://lovable.dev/projects/59aaef3c-2fec-438b-bcab-1bdb044f5040
+SatoTracker é uma plataforma inteligente de rastreamento de carteiras e transações em criptomoedas. Tenha controle total dos seus ativos, visualize transações, saldos e movimentações em tempo real com dashboards modernos, interativos e tecnologia 3D fluida.
 
-## How can I edit this code?
+## 🌐 Acesse o projeto:
 
-There are several ways of editing your application.
+👉 [https://satotrack.lovable.app](https://satotrack.lovable.app)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/59aaef3c-2fec-438b-bcab-1bdb044f5040) and start prompting.
+## ✨ Funcionalidades
 
-Changes made via Lovable will be committed automatically to this repo.
+- 🔍 **Rastreamento de Carteiras Cripto** (BTC, ETH, e muito mais...)
+- 📈 **Dashboard Interativo** — Gráficos 3D, bolhas de dados, drag & drop, pop-up de informações.
+- 📨 **Notificações em Tempo Real** — Alertas sobre movimentações no mercado e na sua carteira.
+- 🧠 **Análise Inteligente de Mercado** — Previsões e tendências com IA.
+- 💳 **Integração com PIX e Stripe** — Pagamento recorrente de forma segura.
+- 🔗 **API Pública** — Consulte dados de carteiras, transações e mercado.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🔥 Tecnologias
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- 🟨 **Deno + TypeScript** — Backend serverless
+- 🟦 **Supabase** — Banco de dados PostgreSQL + Auth + Storage
+- 🌐 **Next.js / React** — Frontend web responsivo
+- 🎨 **Three.js + WebGL** — Visualização 3D fluida
+- 🚀 **Lovable.app Infra** — Deploy serverless
+- 🏦 **Stripe / PIX** — Sistema de pagamentos
+- 🔗 **APIs Blockchain.info + BlockCypher + Binance API**
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 📦 Instalação local
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 🚀 Backend (Deno)
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+deno task dev
+# ou
+deno run --allow-net --allow-env --allow-read index.ts
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+💻 Frontend (Next.js)
+
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+🗄️ Banco (Supabase)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Configure as variáveis:
 
-**Use GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-## What technologies are used for this project?
+Instale as tabelas: (SQL disponível na pasta /supabase)
 
-This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/59aaef3c-2fec-438b-bcab-1bdb044f5040) and click on Share -> Publish.
+🔑 Ambiente (.env example)
 
-## Can I connect a custom domain to my Lovable project?
+SUPABASE_URL=https://xxxxxxxx.supabase.co
+SUPABASE_ANON_KEY=public-anon-key
+SUPABASE_SERVICE_ROLE_KEY=service-role-key
+NEXT_PUBLIC_API_URL=https://satotrack.lovable.app/api
+BINANCE_API_KEY=your-binance-key
+BINANCE_SECRET=your-binance-secret
+STRIPE_SECRET_KEY=your-stripe-secret
 
-Yes, you can!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+🔗 API Pública
+
+Consultar carteira BTC
+
+POST /functions/v1/fetch-wallet-data
+
+Body:
+{
+  "address": "endereco_btc",
+  "wallet_id": "opcional"
+}
+
+🔗 Endpoint:
+
+https://<seu-supabase-url>/functions/v1/fetch-wallet-data
+
+🔥 Retorno:
+
+{
+  "balance": 1.234,
+  "total_received": 5.678,
+  "total_sent": 4.444,
+  "transactions": [
+    {
+      "hash": "xxxx",
+      "amount": 0.5,
+      "transaction_type": "entrada",
+      "transaction_date": "2024-12-01T00:00:00Z"
+    }
+  ]
+}
+
+
+---
+
+💰 Licença
+
+Este projeto é de uso privado. Todos os direitos reservados © 2025 — SatoTracker
+
+
+---
+
+🚀 Desenvolvido por
+
+👨‍💻 @No_dts — GitHub | Instagram | Telegram
