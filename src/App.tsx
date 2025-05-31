@@ -43,6 +43,7 @@ function App() {
             <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/onchain" element={<AppLayout><ProtectedRoute><OnChainDashboard /></ProtectedRoute></AppLayout>} />
+            <Route path="/bitcoin-lookup" element={<AppLayout><ProtectedRoute><BitcoinLookup /></ProtectedRoute></AppLayout>} />
             <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
             <Route path="/carteira/:id" element={<AppLayout><ProtectedRoute><CarteiraDetalhes /></ProtectedRoute></AppLayout>} />
             <Route path="/nova-carteira" element={<AppLayout><ProtectedRoute><NovaCarteira /></ProtectedRoute></AppLayout>} />

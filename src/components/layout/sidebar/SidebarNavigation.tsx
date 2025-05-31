@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity } from 'lucide-react';
+import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity, Search } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
+import { useAuth, useNavigate, useLocation } from '@/contexts/auth';
 
 interface NavItemProps {
   name: string;
@@ -12,6 +11,12 @@ interface NavItemProps {
 
 const SidebarNavigation: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -27,6 +32,12 @@ const SidebarNavigation: React.FC = () => {
     { name: 'Programa Referência', href: '/referral', icon: Users },
     { name: 'Growth Metrics', href: '/growth', icon: TrendingUp },
     { name: 'Landing Page', href: '/landing', icon: ExternalLink },
+    {
+      icon: Search,
+      label: 'Consulta BTC',
+      path: '/bitcoin-lookup',
+      description: 'Consultar carteiras Bitcoin'
+    },
   ];
 
   return (
