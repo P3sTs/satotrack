@@ -3,7 +3,8 @@ import React, { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
 import { Mesh, Vector3 } from 'three';
-import { useDrag } from '@react-three/drei';
+import { useDrag } from '@use-gesture/react';
+import { useSpring, animated } from '@react-spring/three';
 
 interface WalletNode {
   id: string;
@@ -36,7 +37,13 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const { camera } = useThree();
+  const { camera, size } = useThree();
+
+  // Spring animation for position
+  const [springs, api] = useSpring(() => ({
+    position: [node.position.x, node.position.y, node.position.z],
+    scale: 1,
+  }));
 
   // Animação de pulsação
   useFrame((state) => {
@@ -46,18 +53,19 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
     }
   });
 
-  // Configurar drag
+  // Configurar drag usando @use-gesture/react
   const bind = useDrag(
-    ({ movement: [x, y], dragging: isDragging }) => {
+    ({ movement: [x, y], dragging: isDragging, first, last }) => {
       if (node.isLocked) return;
       
       setDragging(isDragging);
       
       if (meshRef.current && isDragging) {
+        // Convert screen coordinates to world coordinates
         const vector = new Vector3();
         vector.set(
-          (x / window.innerWidth) * 2 - 1,
-          -(y / window.innerHeight) * 2 + 1,
+          (x / size.width) * 2 - 1,
+          -(y / size.height) * 2 + 1,
           0.5
         );
         vector.unproject(camera);
@@ -65,11 +73,23 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
         const distance = -camera.position.z / vector.z;
         vector.multiplyScalar(distance).add(camera.position);
         
-        meshRef.current.position.copy(vector);
-        onPositionChange(vector);
+        const newPosition = new Vector3(
+          node.position.x + x * 0.01,
+          node.position.y - y * 0.01,
+          node.position.z
+        );
+        
+        api.start({ position: [newPosition.x, newPosition.y, newPosition.z] });
+        
+        if (last) {
+          onPositionChange(newPosition);
+        }
       }
     },
-    { pointerEvents: true }
+    { 
+      filterTaps: true,
+      pointer: { touch: true }
+    }
   );
 
   const getColor = () => {
@@ -85,7 +105,8 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
   };
 
   return (
-    <group position={node.position}>
+    // @ts-ignore - React Spring animated component
+    <animated.group position={springs.position}>
       <Sphere
         ref={meshRef}
         args={[getSize(), 32, 32]}
@@ -97,17 +118,12 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
           onClick();
         }}
       >
-        <meshPhysicalMaterial
+        <meshStandardMaterial
           color={getColor()}
           transparent={true}
           opacity={hovered ? 0.9 : 0.7}
           roughness={0.1}
           metalness={0.8}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          transmission={0.3}
-          thickness={0.5}
-          envMapIntensity={1}
         />
       </Sphere>
 
@@ -160,7 +176,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
           />
         </mesh>
       )}
-    </group>
+    </animated.group>
   );
 };
 
