@@ -80,7 +80,7 @@ const TransacoesList: React.FC<TransacoesListProps> = ({
                 </div>
                 
                 <p className="text-xs text-muted-foreground mb-1">
-                  {formatDate(tx.data, true)} {/* Add the true parameter to include time */}
+                  {formatDate(tx.data)}
                 </p>
                 
                 <div className="flex items-center gap-1">

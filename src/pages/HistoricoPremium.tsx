@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/auth';
-import { PremiumFeatureGate } from '@/components/monetization/PremiumFeatureGate';
+import PremiumFeatureGate from '@/components/monetization/PremiumFeatureGate';
 import Historico from './Historico';
 
 const HistoricoPremium: React.FC = () => {

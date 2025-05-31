@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/auth';
-import { PremiumFeatureGate } from '@/components/monetization/PremiumFeatureGate';
+import PremiumFeatureGate from '@/components/monetization/PremiumFeatureGate';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -146,7 +146,7 @@ const ApiDashboard: React.FC = () => {
               <div className="bg-dashboard-medium rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="secondary">GET</Badge>
-                  <code className="text-sm">/api/v1/wallet/{address}</code>
+                  <code className="text-sm">/api/v1/wallet/{'{address}'}</code>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Obtém informações detalhadas de uma carteira Bitcoin
@@ -156,7 +156,7 @@ const ApiDashboard: React.FC = () => {
               <div className="bg-dashboard-medium rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="secondary">GET</Badge>
-                  <code className="text-sm">/api/v1/transactions/{address}</code>
+                  <code className="text-sm">/api/v1/transactions/{'{address}'}</code>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Lista transações de uma carteira específica

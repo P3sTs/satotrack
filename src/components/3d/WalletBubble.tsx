@@ -98,7 +98,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       <Sphere
         ref={meshRef}
         args={[getSize(), 32, 32]}
-        {...bind()}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onClick={(e) => {
