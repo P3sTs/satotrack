@@ -61,18 +61,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       setDragging(isDragging);
       
       if (meshRef.current && isDragging) {
-        // Convert screen coordinates to world coordinates
-        const vector = new Vector3();
-        vector.set(
-          (x / size.width) * 2 - 1,
-          -(y / size.height) * 2 + 1,
-          0.5
-        );
-        vector.unproject(camera);
-        vector.sub(camera.position).normalize();
-        const distance = -camera.position.z / vector.z;
-        vector.multiplyScalar(distance).add(camera.position);
-        
         const newPosition = new Vector3(
           node.position.x + x * 0.01,
           node.position.y - y * 0.01,

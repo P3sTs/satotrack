@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
@@ -9,9 +10,9 @@ import NovaCarteira from './pages/NovaCarteira';
 import Configuracoes from './pages/Configuracoes';
 import Mercado from './pages/Mercado';
 import Crypto from './pages/Crypto';
-import ProjecaoLucros from './pages/ProjecaoLucros';
-import Historico from './pages/Historico';
-import Notificacoes from './pages/Notificacoes';
+import ProjecaoLucrosPremium from './pages/ProjecaoLucrosPremium';
+import HistoricoPremium from './pages/HistoricoPremium';
+import NotificacoesPremium from './pages/NotificacoesPremium';
 import Sobre from './pages/Sobre';
 import Auth from './pages/Auth';
 import PlanosPage from './pages/PlanosPage';
@@ -27,6 +28,7 @@ import AppLayout from './components/layout/AppLayout';
 import OnChainDashboard from './pages/OnChainDashboard';
 import CarteiraDetalhes from './pages/CarteiraDetalhes';
 import CryptoVisualization3D from './pages/CryptoVisualization3D';
+import ApiDashboard from './pages/ApiDashboard';
 
 function App() {
   return (
@@ -51,9 +53,10 @@ function App() {
             <Route path="/configuracoes" element={<AppLayout><ProtectedRoute><Configuracoes /></ProtectedRoute></AppLayout>} />
             <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />
             <Route path="/crypto" element={<AppLayout><ProtectedRoute><Crypto /></ProtectedRoute></AppLayout>} />
-            <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucros /></ProtectedRoute></AppLayout>} />
-            <Route path="/historico" element={<AppLayout><ProtectedRoute><Historico /></ProtectedRoute></AppLayout>} />
-            <Route path="/notificacoes" element={<AppLayout><ProtectedRoute><Notificacoes /></ProtectedRoute></AppLayout>} />
+            <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucrosPremium /></ProtectedRoute></AppLayout>} />
+            <Route path="/historico" element={<AppLayout><ProtectedRoute><HistoricoPremium /></ProtectedRoute></AppLayout>} />
+            <Route path="/notificacoes" element={<AppLayout><ProtectedRoute><NotificacoesPremium /></ProtectedRoute></AppLayout>} />
+            <Route path="/api" element={<AppLayout><ProtectedRoute><ApiDashboard /></ProtectedRoute></AppLayout>} />
             <Route path="/cupons" element={<AppLayout><ProtectedRoute><CouponManager /></ProtectedRoute></AppLayout>} />
             <Route path="/politica-privacidade" element={<AppLayout><PoliticaPrivacidade /></AppLayout>} />
             <Route path="/termos-de-uso" element={<AppLayout><TermosDeUso /></AppLayout>} />
