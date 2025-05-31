@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Wallet, Plus, TrendingUp, BarChart3, Target, History, Bell, Users, ExternalLink, Settings, Activity, Search } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
-import { useAuth, useNavigate, useLocation } from '@/contexts/auth';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth';
 
 interface NavItemProps {
   name: string;

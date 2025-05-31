@@ -18,6 +18,7 @@ import Auth from './pages/Auth';
 import PlanosPage from './pages/PlanosPage';
 import NotFound from './pages/NotFound';
 import Home from './pages/Home';
+import BitcoinLookup from './pages/BitcoinLookup';
 import { Toaster } from '@/components/ui/sonner';
 import LandingPage from './pages/LandingPage';
 import ReferralProgram from './pages/ReferralProgram';
