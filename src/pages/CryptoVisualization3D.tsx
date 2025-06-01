@@ -7,10 +7,11 @@ const CryptoVisualization3D: React.FC = () => {
     <div className="min-h-screen bg-black">
       <div className="absolute top-4 left-4 z-50">
         <h1 className="text-2xl font-bold text-satotrack-neon mb-2">
-          🌌 Crypto Visualization 3D
+          🌌 Visualização 3D de Carteiras
         </h1>
-        <p className="text-muted-foreground text-sm">
-          Explore carteiras cripto em um ambiente 3D interativo
+        <p className="text-muted-foreground text-sm max-w-md">
+          Explore carteiras Bitcoin em um ambiente 3D interativo. 
+          Digite um endereço Bitcoin para começar a visualização.
         </p>
       </div>
       

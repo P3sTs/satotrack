@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Copy, ExternalLink, Plus } from 'lucide-react';
+import { X, Copy, ExternalLink, Plus, Expand } from 'lucide-react';
 import { formatBitcoinValue, formatDate } from '@/utils/formatters';
 
 interface WalletNode {
@@ -16,21 +16,37 @@ interface WalletNode {
   isLocked: boolean;
   connections: string[];
   type: 'main' | 'transaction' | 'connected';
+  transactions?: Array<{
+    hash: string;
+    amount: number;
+    transaction_type: string;
+    transaction_date: string;
+  }>;
 }
 
 interface WalletDetailPopupProps {
   wallet: WalletNode;
   onClose: () => void;
   onAddConnection: (address: string) => void;
+  onExpandConnections?: () => void;
 }
 
 const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
   wallet,
   onClose,
-  onAddConnection
+  onAddConnection,
+  onExpandConnections
 }) => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const openInExplorer = () => {
+    if (wallet.type === 'transaction') {
+      window.open(`https://blockstream.info/tx/${wallet.address}`, '_blank');
+    } else {
+      window.open(`https://blockstream.info/address/${wallet.address}`, '_blank');
+    }
   };
 
   return (
@@ -42,11 +58,13 @@ const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
       />
       
       {/* Popup */}
-      <div className="relative bg-gradient-to-br from-black via-gray-900 to-black border border-cyan-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+      <div className="relative bg-gradient-to-br from-black via-gray-900 to-black border border-cyan-500/50 rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-cyan-400">
-            💎 Detalhes da Carteira
+            {wallet.type === 'main' && '🏦 Carteira Bitcoin'}
+            {wallet.type === 'transaction' && '⚡ Transação'}
+            {wallet.type === 'connected' && '🔗 Carteira Conectada'}
           </h3>
           <Button
             variant="ghost"
@@ -61,11 +79,11 @@ const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
         {/* Address */}
         <div className="mb-4">
           <label className="text-xs text-gray-400 uppercase tracking-wide">
-            Endereço
+            {wallet.type === 'transaction' ? 'Hash da Transação' : 'Endereço'}
           </label>
           <div className="flex items-center gap-2 mt-1">
-            <code className="bg-black/50 text-cyan-300 text-xs p-2 rounded border border-cyan-500/30 flex-1 font-mono">
-              {wallet.address.substring(0, 12)}...{wallet.address.substring(wallet.address.length - 12)}
+            <code className="bg-black/50 text-cyan-300 text-xs p-2 rounded border border-cyan-500/30 flex-1 font-mono break-all">
+              {wallet.address}
             </code>
             <Button
               variant="ghost"
@@ -81,7 +99,9 @@ const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-black/30 p-3 rounded-lg border border-green-500/30">
-            <div className="text-xs text-gray-400">Saldo Atual</div>
+            <div className="text-xs text-gray-400">
+              {wallet.type === 'transaction' ? 'Valor' : 'Saldo Atual'}
+            </div>
             <div className="text-lg font-bold text-green-400">
               {formatBitcoinValue(wallet.balance)}
             </div>
@@ -94,19 +114,23 @@ const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
             </div>
           </div>
           
-          <div className="bg-black/30 p-3 rounded-lg border border-purple-500/30">
-            <div className="text-xs text-gray-400">Total Recebido</div>
-            <div className="text-sm font-bold text-purple-400">
-              {formatBitcoinValue(wallet.totalReceived)}
-            </div>
-          </div>
-          
-          <div className="bg-black/30 p-3 rounded-lg border border-orange-500/30">
-            <div className="text-xs text-gray-400">Total Enviado</div>
-            <div className="text-sm font-bold text-orange-400">
-              {formatBitcoinValue(wallet.totalSent)}
-            </div>
-          </div>
+          {wallet.type !== 'transaction' && (
+            <>
+              <div className="bg-black/30 p-3 rounded-lg border border-purple-500/30">
+                <div className="text-xs text-gray-400">Total Recebido</div>
+                <div className="text-sm font-bold text-purple-400">
+                  {formatBitcoinValue(wallet.totalReceived)}
+                </div>
+              </div>
+              
+              <div className="bg-black/30 p-3 rounded-lg border border-orange-500/30">
+                <div className="text-xs text-gray-400">Total Enviado</div>
+                <div className="text-sm font-bold text-orange-400">
+                  {formatBitcoinValue(wallet.totalSent)}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Type Badge */}
@@ -131,27 +155,69 @@ const WalletDetailPopup: React.FC<WalletDetailPopupProps> = ({
           )}
         </div>
 
+        {/* Recent Transactions */}
+        {wallet.transactions && wallet.transactions.length > 0 && (
+          <div className="mb-4">
+            <label className="text-xs text-gray-400 uppercase tracking-wide mb-2 block">
+              Transações Recentes
+            </label>
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {wallet.transactions.slice(0, 3).map((tx, index) => (
+                <div key={index} className="bg-black/30 p-2 rounded border border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs">
+                      <div className="text-gray-300 font-mono">
+                        {tx.hash.substring(0, 8)}...{tx.hash.substring(tx.hash.length - 8)}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {formatDate(tx.transaction_date)}
+                      </div>
+                    </div>
+                    <div className={`text-sm font-bold ${
+                      tx.transaction_type === 'entrada' ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {tx.transaction_type === 'entrada' ? '+' : '-'}{formatBitcoinValue(tx.amount)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/50 text-purple-300"
-            onClick={() => {
-              // Simular adição de conexão
-              const mockAddress = `1A${Math.random().toString(36).substring(2, 15)}`;
-              onAddConnection(mockAddress);
-            }}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Expandir Conexões
-          </Button>
+          {wallet.type === 'main' && onExpandConnections && (
+            <Button
+              variant="outline"
+              className="w-full bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/50 text-purple-300"
+              onClick={onExpandConnections}
+            >
+              <Expand className="h-4 w-4 mr-2" />
+              Expandir Transações
+            </Button>
+          )}
           
           <Button
             variant="outline"
             className="w-full bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/50 text-blue-300"
+            onClick={openInExplorer}
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             Ver no Explorer
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full bg-green-600/20 hover:bg-green-600/30 border-green-500/50 text-green-300"
+            onClick={() => {
+              // Simular adição de conexão com endereço relacionado
+              const mockAddress = `1A${Math.random().toString(36).substring(2, 15)}BTC${Math.random().toString(36).substring(2, 8)}`;
+              onAddConnection(mockAddress);
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Conexão
           </Button>
         </div>
 
