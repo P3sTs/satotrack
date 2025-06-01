@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Vector3 } from 'three';
 import { toast } from '@/hooks/use-toast';
 
@@ -26,9 +26,11 @@ export const useWalletNodes = () => {
   const [walletNodes, setWalletNodes] = useState<WalletNode[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletNode | null>(null);
 
-  const addWalletNode = (walletData: any, address: string, position?: Vector3) => {
+  const addWalletNode = useCallback((walletData: any, address: string, position?: Vector3) => {
+    console.log('Adding wallet node:', { walletData, address });
+    
     const newNode: WalletNode = {
-      id: `wallet-${Date.now()}`,
+      id: `wallet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       address,
       position: position || new Vector3(
         (Math.random() - 0.5) * 20,
@@ -45,25 +47,34 @@ export const useWalletNodes = () => {
       transactions: walletData.transactions || []
     };
 
-    setWalletNodes(prev => [...prev, newNode]);
-  };
+    setWalletNodes(prev => {
+      // Verificar se já existe um nó com este endereço
+      const exists = prev.find(node => node.address === address);
+      if (exists) {
+        console.log('Wallet already exists, updating instead');
+        return prev.map(node => 
+          node.address === address ? { ...node, ...newNode, id: node.id } : node
+        );
+      }
+      console.log('Adding new wallet node');
+      return [...prev, newNode];
+    });
+  }, []);
 
-  const removeNode = (nodeId: string) => {
+  const removeNode = useCallback((nodeId: string) => {
     setWalletNodes(prev => prev.filter(node => node.id !== nodeId));
-    if (selectedWallet?.id === nodeId) {
-      setSelectedWallet(null);
-    }
-  };
+    setSelectedWallet(prev => prev?.id === nodeId ? null : prev);
+  }, []);
 
-  const toggleLockNode = (nodeId: string) => {
+  const toggleLockNode = useCallback((nodeId: string) => {
     setWalletNodes(prev =>
       prev.map(node =>
         node.id === nodeId ? { ...node, isLocked: !node.isLocked } : node
       )
     );
-  };
+  }, []);
 
-  const reorganizeNodes = () => {
+  const reorganizeNodes = useCallback(() => {
     setWalletNodes(prev => 
       prev.map((node, index) => ({
         ...node,
@@ -75,9 +86,9 @@ export const useWalletNodes = () => {
         isLocked: false
       }))
     );
-  };
+  }, []);
 
-  const expandWalletConnections = (wallet: WalletNode) => {
+  const expandWalletConnections = useCallback((wallet: WalletNode) => {
     if (!wallet.transactions || wallet.transactions.length === 0) {
       toast({
         title: "📭 Sem transações",
@@ -100,12 +111,12 @@ export const useWalletNodes = () => {
       return;
     }
 
-    significantTransactions.forEach((tx, index) => {
+    const newNodes = significantTransactions.map((tx, index) => {
       const angle = (index * (Math.PI * 2)) / significantTransactions.length;
       const radius = 8;
       
-      const transactionNode: WalletNode = {
-        id: `tx-${tx.hash}-${Date.now()}`,
+      return {
+        id: `tx-${tx.hash}-${Date.now()}-${index}`,
         address: tx.hash,
         position: new Vector3(
           wallet.position.x + Math.cos(angle) * radius,
@@ -118,26 +129,26 @@ export const useWalletNodes = () => {
         transactionCount: 1,
         isLocked: false,
         connections: [wallet.id],
-        type: 'transaction',
+        type: 'transaction' as const,
         transactions: [tx]
       };
-
-      setWalletNodes(prev => [...prev, transactionNode]);
     });
+
+    setWalletNodes(prev => [...prev, ...newNodes]);
 
     toast({
       title: "🔗 Conexões expandidas",
       description: `Adicionadas ${significantTransactions.length} transações relacionadas`,
     });
-  };
+  }, []);
 
-  const updateNodePosition = (nodeId: string, newPosition: Vector3) => {
+  const updateNodePosition = useCallback((nodeId: string, newPosition: Vector3) => {
     setWalletNodes(prev =>
       prev.map(n =>
         n.id === nodeId ? { ...n, position: newPosition } : n
       )
     );
-  };
+  }, []);
 
   return {
     walletNodes,

@@ -1,5 +1,5 @@
 
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense, useRef, memo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid } from '@react-three/drei';
 import { Vector3 } from 'three';
@@ -15,7 +15,7 @@ interface Scene3DRendererProps {
   onRemoveNode: (nodeId: string) => void;
 }
 
-const Scene3DRenderer: React.FC<Scene3DRendererProps> = ({
+const Scene3DRenderer: React.FC<Scene3DRendererProps> = memo(({
   walletNodes,
   onWalletClick,
   onNodePositionChange,
@@ -28,6 +28,9 @@ const Scene3DRenderer: React.FC<Scene3DRendererProps> = ({
     <Canvas
       camera={{ position: [15, 15, 15], fov: 60 }}
       style={{ background: 'linear-gradient(to bottom, #0a0a0a, #1a1a2e)' }}
+      dpr={[1, 2]}
+      performance={{ min: 0.5 }}
+      frameloop="demand"
     >
       <Suspense fallback={null}>
         {/* Iluminação */}
@@ -77,6 +80,8 @@ const Scene3DRenderer: React.FC<Scene3DRendererProps> = ({
           enableRotate={true}
           maxDistance={100}
           minDistance={5}
+          enableDamping={true}
+          dampingFactor={0.05}
         />
 
         {/* Ambiente */}
@@ -84,6 +89,8 @@ const Scene3DRenderer: React.FC<Scene3DRendererProps> = ({
       </Suspense>
     </Canvas>
   );
-};
+});
+
+Scene3DRenderer.displayName = 'Scene3DRenderer';
 
 export default Scene3DRenderer;

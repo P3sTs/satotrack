@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, memo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
 import { Mesh, Vector3 } from 'three';
@@ -27,7 +27,7 @@ interface WalletBubbleProps {
   onRemove: () => void;
 }
 
-const WalletBubble: React.FC<WalletBubbleProps> = ({
+const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   node,
   onClick,
   onPositionChange,
@@ -37,7 +37,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const { camera, size } = useThree();
+  const { size } = useThree();
 
   // Spring animation for position
   const [springs, api] = useSpring(() => ({
@@ -45,17 +45,17 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
     scale: 1,
   }));
 
-  // Animação de pulsação
+  // Animação de pulsação otimizada
   useFrame((state) => {
     if (meshRef.current && !dragging) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
       meshRef.current.scale.setScalar(scale);
     }
   });
 
   // Configurar drag usando @use-gesture/react
   const bind = useDrag(
-    ({ movement: [x, y], dragging: isDragging, first, last }) => {
+    ({ movement: [x, y], dragging: isDragging, last }) => {
       if (node.isLocked) return;
       
       setDragging(isDragging);
@@ -88,16 +88,16 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
 
   const getSize = () => {
     const baseSize = 1;
-    const balanceScale = Math.log10(node.balance + 1) * 0.3;
+    const balanceScale = Math.min(Math.log10(node.balance + 1) * 0.3, 2);
     return Math.max(baseSize, baseSize + balanceScale);
   };
 
   return (
     // @ts-ignore - React Spring animated component
-    <animated.group position={springs.position}>
+    <animated.group position={springs.position} {...bind()}>
       <Sphere
         ref={meshRef}
-        args={[getSize(), 32, 32]}
+        args={[getSize(), 16, 16]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onClick={(e) => {
@@ -124,7 +124,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
         />
       </Sphere>
 
-      {/* Label flutuante */}
+      {/* Label flutuante - apenas quando hovering */}
       {hovered && (
         <Html
           position={[0, getSize() + 1, 0]}
@@ -132,7 +132,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
           distanceFactor={10}
           occlude
         >
-          <div className="bg-black/80 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs">
+          <div className="bg-black/80 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs pointer-events-none">
             <div className="font-mono text-xs">
               {node.address.substring(0, 8)}...{node.address.substring(node.address.length - 8)}
             </div>
@@ -154,7 +154,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       {/* Anel de conexões */}
       {node.connections.length > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[getSize() * 1.5, getSize() * 1.7, 32]} />
+          <ringGeometry args={[getSize() * 1.5, getSize() * 1.7, 16]} />
           <meshBasicMaterial
             color="#fbbf24"
             transparent={true}
@@ -165,6 +165,8 @@ const WalletBubble: React.FC<WalletBubbleProps> = ({
       )}
     </animated.group>
   );
-};
+});
+
+WalletBubble.displayName = 'WalletBubble';
 
 export default WalletBubble;

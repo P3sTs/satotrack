@@ -25,13 +25,20 @@ export const useWalletData = () => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Erro na resposta da API:', response.status, errorText);
-        throw new Error(`Erro na API: ${response.status} - ${errorText}`);
+        throw new Error(`Erro na API: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('Dados recebidos da API:', data);
       
-      return data;
+      // Garantir que os dados estão no formato correto
+      return {
+        balance: data.balance || 0,
+        total_received: data.total_received || 0,
+        total_sent: data.total_sent || 0,
+        transaction_count: data.transaction_count || 0,
+        transactions: Array.isArray(data.transactions) ? data.transactions : []
+      };
     } catch (error) {
       console.error('Erro ao chamar a API fetch-wallet-data:', error);
       throw error;

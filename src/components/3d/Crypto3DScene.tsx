@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Vector3 } from 'three';
 import SearchInterface from './SearchInterface';
 import WalletDetailPopup from './WalletDetailPopup';
@@ -24,16 +24,19 @@ const Crypto3DScene: React.FC = () => {
     updateNodePosition
   } = useWalletNodes();
 
-  const handleAddWallet = async (address: string, position?: Vector3) => {
+  const handleAddWallet = useCallback(async (address: string, position?: Vector3) => {
     try {
+      console.log('handleAddWallet called with:', address);
       const walletData = await validateAndFetchWallet(address);
+      console.log('walletData received:', walletData);
       addWalletNode(walletData, address, position);
     } catch (error) {
+      console.error('Error in handleAddWallet:', error);
       // Error handling is done in the hook
     }
-  };
+  }, [validateAndFetchWallet, addWalletNode]);
 
-  const handleAddConnection = (address: string) => {
+  const handleAddConnection = useCallback((address: string) => {
     if (selectedWallet) {
       const newPosition = new Vector3(
         selectedWallet.position.x + (Math.random() - 0.5) * 10,
@@ -42,7 +45,13 @@ const Crypto3DScene: React.FC = () => {
       );
       handleAddWallet(address, newPosition);
     }
-  };
+  }, [selectedWallet, handleAddWallet]);
+
+  const handleExpandConnections = useCallback(() => {
+    if (selectedWallet) {
+      expandWalletConnections(selectedWallet);
+    }
+  }, [selectedWallet, expandWalletConnections]);
 
   return (
     <div className="w-full h-screen relative">
@@ -71,7 +80,7 @@ const Crypto3DScene: React.FC = () => {
           wallet={selectedWallet}
           onClose={() => setSelectedWallet(null)}
           onAddConnection={handleAddConnection}
-          onExpandConnections={() => expandWalletConnections(selectedWallet)}
+          onExpandConnections={handleExpandConnections}
         />
       )}
 
