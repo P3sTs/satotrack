@@ -37,21 +37,34 @@ const Crypto3DScene: React.FC = () => {
 
   const fetchWalletData = async (address: string): Promise<any> => {
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
-        body: {
+      console.log('Iniciando busca para endereço:', address);
+      
+      // Fazer chamada direta para o endpoint usando fetch
+      const response = await fetch('https://cwmzzdwoagtmxdmgtfzj.supabase.co/functions/v1/fetch-wallet-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bXp6ZHdvYWd0bXhkbWd0ZnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MzMxNDksImV4cCI6MjA2MjIwOTE0OX0.qScbTmaTrg8OT5VHd4P92w83wXZGYEjX8YVDM4V-Hzs',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bXp6ZHdvYWd0bXhkbWd0ZnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MzMxNDksImV4cCI6MjA2MjIwOTE0OX0.qScbTmaTrg8OT5VHd4P92w83wXZGYEjX8YVDM4V-Hzs'
+        },
+        body: JSON.stringify({
           address: address,
-          wallet_id: null // opcional
-        }
+          wallet_id: null
+        })
       });
 
-      if (error) {
-        console.error('Erro na função edge:', error);
-        throw new Error(error.message || 'Erro ao buscar dados da carteira');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro na resposta da API:', response.status, errorText);
+        throw new Error(`Erro na API: ${response.status} - ${errorText}`);
       }
 
+      const data = await response.json();
+      console.log('Dados recebidos da API:', data);
+      
       return data;
     } catch (error) {
-      console.error('Erro ao chamar a função fetch-wallet-data:', error);
+      console.error('Erro ao chamar a API fetch-wallet-data:', error);
       throw error;
     }
   };
@@ -60,11 +73,16 @@ const Crypto3DScene: React.FC = () => {
     setIsLoading(true);
     
     try {
-      console.log('Buscando dados para endereço:', address);
+      console.log('Adicionando carteira para endereço:', address);
       
+      // Validar formato básico do endereço Bitcoin
+      if (!address || address.length < 26 || address.length > 35) {
+        throw new Error('Formato de endereço Bitcoin inválido');
+      }
+
       const walletData = await fetchWalletData(address);
       
-      console.log('Dados recebidos:', walletData);
+      console.log('Dados processados:', walletData);
 
       if (!walletData) {
         throw new Error('Nenhum dado retornado para esta carteira');
@@ -91,15 +109,15 @@ const Crypto3DScene: React.FC = () => {
       setWalletNodes(prev => [...prev, newNode]);
       
       toast({
-        title: "Carteira adicionada com sucesso!",
-        description: `Endereço: ${address.substring(0, 8)}...${address.substring(address.length - 8)}`,
+        title: "✅ Carteira adicionada com sucesso!",
+        description: `${address.substring(0, 8)}...${address.substring(address.length - 8)} • ${walletData.balance || 0} BTC`,
       });
 
     } catch (error: any) {
-      console.error('Erro ao buscar dados da carteira:', error);
+      console.error('Erro completo:', error);
       
       toast({
-        title: "Erro ao buscar dados da carteira",
+        title: "❌ Erro ao buscar dados da carteira",
         description: error.message || 'Verifique se o endereço está correto e tente novamente',
         variant: "destructive"
       });
@@ -140,7 +158,7 @@ const Crypto3DScene: React.FC = () => {
   const expandWalletConnections = async (wallet: WalletNode) => {
     if (!wallet.transactions || wallet.transactions.length === 0) {
       toast({
-        title: "Sem transações",
+        title: "📭 Sem transações",
         description: "Esta carteira não possui transações para expandir",
         variant: "destructive"
       });
@@ -151,6 +169,15 @@ const Crypto3DScene: React.FC = () => {
     const significantTransactions = wallet.transactions
       .filter(tx => tx.amount > 0.001) // Filtrar transações pequenas
       .slice(0, 5); // Limitar a 5 transações
+
+    if (significantTransactions.length === 0) {
+      toast({
+        title: "📊 Transações muito pequenas",
+        description: "Não há transações significativas para visualizar",
+        variant: "destructive"
+      });
+      return;
+    }
 
     significantTransactions.forEach((tx, index) => {
       const angle = (index * (Math.PI * 2)) / significantTransactions.length;
@@ -178,7 +205,7 @@ const Crypto3DScene: React.FC = () => {
     });
 
     toast({
-      title: "Conexões expandidas",
+      title: "🔗 Conexões expandidas",
       description: `Adicionadas ${significantTransactions.length} transações relacionadas`,
     });
   };
@@ -200,7 +227,7 @@ const Crypto3DScene: React.FC = () => {
               📊 {walletNodes.length} carteira{walletNodes.length > 1 ? 's' : ''} ativa{walletNodes.length > 1 ? 's' : ''}
             </div>
             <div className="text-gray-300 text-xs mt-1">
-              💰 Total: {walletNodes.reduce((sum, node) => sum + node.balance, 0).toFixed(4)} BTC
+              💰 Total: {walletNodes.reduce((sum, node) => sum + node.balance, 0).toFixed(8)} BTC
             </div>
           </div>
         </div>
@@ -287,17 +314,28 @@ const Crypto3DScene: React.FC = () => {
         />
       )}
 
-      {/* Instruções de uso */}
+      {/* Instruções de uso - apenas quando não há carteiras */}
       {walletNodes.length === 0 && !isLoading && (
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg border border-cyan-500/50 max-w-md text-center">
           <div className="text-cyan-400 font-semibold mb-2">
             🚀 Como usar a Visualização 3D
           </div>
           <div className="text-sm text-gray-300 space-y-1">
-            <div>• Digite um endereço Bitcoin na busca</div>
+            <div>• Digite um endereço Bitcoin válido na busca</div>
             <div>• Clique nas esferas para ver detalhes</div>
             <div>• Arraste para mover as carteiras</div>
             <div>• Use o mouse para rotacionar a cena</div>
+          </div>
+        </div>
+      )}
+
+      {/* Indicador de carregamento */}
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-black/80 text-white p-6 rounded-lg border border-cyan-500/50 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-cyan-400 border-t-transparent mx-auto mb-4"></div>
+            <div className="text-cyan-400 font-semibold">Carregando dados da blockchain...</div>
+            <div className="text-gray-300 text-sm mt-2">Isso pode levar alguns segundos</div>
           </div>
         </div>
       )}
