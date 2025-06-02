@@ -130,7 +130,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   }, [node.position]);
 
   // Garantir que os argumentos do ring geometry são válidos
-  const ringArgs = useMemo(() => {
+  const ringArgs = useMemo((): [number, number, number] => {
     const innerRadius = visualProps.innerRadius;
     const outerRadius = visualProps.outerRadius;
     
