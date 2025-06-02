@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Vector3 } from 'three';
 import SearchInterface from './SearchInterface';
 import WalletDetailPopup from './WalletDetailPopup';
@@ -11,6 +11,8 @@ import { useWalletData } from './hooks/useWalletData';
 import { useWalletNodes } from './hooks/useWalletNodes';
 
 const Crypto3DScene: React.FC = () => {
+  console.log('🎬 [Crypto3DScene] Renderizando componente principal');
+  
   const { isLoading, validateAndFetchWallet } = useWalletData();
   const {
     walletNodes,
@@ -25,18 +27,24 @@ const Crypto3DScene: React.FC = () => {
   } = useWalletNodes();
 
   const handleAddWallet = useCallback(async (address: string, position?: Vector3) => {
+    console.log('🔍 [Crypto3DScene] handleAddWallet chamado com:', address);
+    
     try {
-      console.log('handleAddWallet called with:', address);
       const walletData = await validateAndFetchWallet(address);
-      console.log('walletData received:', walletData);
-      addWalletNode(walletData, address, position);
+      console.log('📊 [Crypto3DScene] Dados da carteira recebidos:', walletData);
+      
+      if (walletData) {
+        addWalletNode(walletData, address, position);
+        console.log('✅ [Crypto3DScene] Nó da carteira adicionado com sucesso');
+      }
     } catch (error) {
-      console.error('Error in handleAddWallet:', error);
-      // Error handling is done in the hook
+      console.error('❌ [Crypto3DScene] Erro em handleAddWallet:', error);
     }
   }, [validateAndFetchWallet, addWalletNode]);
 
   const handleAddConnection = useCallback((address: string) => {
+    console.log('🔗 [Crypto3DScene] Adicionando conexão:', address);
+    
     if (selectedWallet) {
       const newPosition = new Vector3(
         selectedWallet.position.x + (Math.random() - 0.5) * 10,
@@ -48,33 +56,56 @@ const Crypto3DScene: React.FC = () => {
   }, [selectedWallet, handleAddWallet]);
 
   const handleExpandConnections = useCallback(() => {
+    console.log('🌐 [Crypto3DScene] Expandindo conexões');
+    
     if (selectedWallet) {
       expandWalletConnections(selectedWallet);
     }
   }, [selectedWallet, expandWalletConnections]);
 
+  // Memoizar componentes para evitar re-renderizações desnecessárias
+  const memoizedSearchInterface = useMemo(() => (
+    <SearchInterface 
+      onSearch={handleAddWallet}
+      onReorganize={reorganizeNodes}
+      isLoading={isLoading}
+    />
+  ), [handleAddWallet, reorganizeNodes, isLoading]);
+
+  const memoizedSceneStatus = useMemo(() => (
+    <SceneStatus walletNodes={walletNodes} />
+  ), [walletNodes]);
+
+  const memoizedScene3DRenderer = useMemo(() => (
+    <Scene3DRenderer
+      walletNodes={walletNodes}
+      onWalletClick={setSelectedWallet}
+      onNodePositionChange={updateNodePosition}
+      onToggleLock={toggleLockNode}
+      onRemoveNode={removeNode}
+    />
+  ), [walletNodes, setSelectedWallet, updateNodePosition, toggleLockNode, removeNode]);
+
+  const memoizedUsageInstructions = useMemo(() => (
+    <UsageInstructions show={walletNodes.length === 0 && !isLoading} />
+  ), [walletNodes.length, isLoading]);
+
+  const memoizedLoadingOverlay = useMemo(() => (
+    <LoadingOverlay isLoading={isLoading} />
+  ), [isLoading]);
+
+  console.log('📈 [Crypto3DScene] Estado atual:', {
+    walletsCount: walletNodes.length,
+    isLoading,
+    hasSelectedWallet: !!selectedWallet
+  });
+
   return (
-    <div className="w-full h-screen relative">
-      {/* Interface de busca flutuante */}
-      <SearchInterface 
-        onSearch={handleAddWallet}
-        onReorganize={reorganizeNodes}
-        isLoading={isLoading}
-      />
+    <div className="w-full h-screen relative bg-gradient-to-b from-gray-900 to-black">
+      {memoizedSearchInterface}
+      {memoizedSceneStatus}
+      {memoizedScene3DRenderer}
 
-      {/* Informações de status */}
-      <SceneStatus walletNodes={walletNodes} />
-
-      {/* Canvas 3D */}
-      <Scene3DRenderer
-        walletNodes={walletNodes}
-        onWalletClick={setSelectedWallet}
-        onNodePositionChange={updateNodePosition}
-        onToggleLock={toggleLockNode}
-        onRemoveNode={removeNode}
-      />
-
-      {/* Popup de detalhes */}
       {selectedWallet && (
         <WalletDetailPopup
           wallet={selectedWallet}
@@ -84,11 +115,8 @@ const Crypto3DScene: React.FC = () => {
         />
       )}
 
-      {/* Instruções de uso - apenas quando não há carteiras */}
-      <UsageInstructions show={walletNodes.length === 0 && !isLoading} />
-
-      {/* Indicador de carregamento */}
-      <LoadingOverlay isLoading={isLoading} />
+      {memoizedUsageInstructions}
+      {memoizedLoadingOverlay}
     </div>
   );
 };

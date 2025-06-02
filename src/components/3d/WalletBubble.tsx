@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, memo } from 'react';
+import React, { useRef, useState, memo, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
 import { Mesh, Vector3 } from 'three';
@@ -34,36 +34,55 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   onToggleLock,
   onRemove
 }) => {
+  console.log('🎈 [WalletBubble] Renderizando bubble para:', node.address.substring(0, 8) + '...');
+  
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const { size } = useThree();
+  const { viewport } = useThree();
 
-  // Spring animation for position
+  // Spring animation para posição
   const [springs, api] = useSpring(() => ({
     position: [node.position.x, node.position.y, node.position.z],
     scale: 1,
   }));
 
-  // Animação de pulsação otimizada
+  // Memoizar propriedades visuais
+  const visualProps = useMemo(() => {
+    const getColor = () => {
+      if (node.type === 'main') return '#06b6d4';
+      if (node.type === 'transaction') return '#8b5cf6';
+      return '#10b981';
+    };
+
+    const getSize = () => {
+      const baseSize = 1;
+      const balanceScale = Math.min(Math.log10(node.balance + 1) * 0.3, 1.5);
+      return Math.max(baseSize, baseSize + balanceScale);
+    };
+
+    return { color: getColor(), size: getSize() };
+  }, [node.type, node.balance]);
+
+  // Animação de pulsação otimizada - apenas quando não está sendo arrastado
   useFrame((state) => {
-    if (meshRef.current && !dragging) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+    if (meshRef.current && !dragging && !node.isLocked) {
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
       meshRef.current.scale.setScalar(scale);
     }
   });
 
-  // Configurar drag usando @use-gesture/react
+  // Configurar drag otimizado
   const bind = useDrag(
     ({ movement: [x, y], dragging: isDragging, last }) => {
       if (node.isLocked) return;
       
       setDragging(isDragging);
       
-      if (meshRef.current && isDragging) {
+      if (isDragging) {
         const newPosition = new Vector3(
-          node.position.x + x * 0.01,
-          node.position.y - y * 0.01,
+          node.position.x + (x / viewport.width) * 20,
+          node.position.y - (y / viewport.height) * 20,
           node.position.z
         );
         
@@ -76,28 +95,23 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     },
     { 
       filterTaps: true,
-      pointer: { touch: true }
+      pointer: { touch: true },
+      threshold: 5
     }
   );
 
-  const getColor = () => {
-    if (node.type === 'main') return '#06b6d4'; // Cyan para carteira principal
-    if (node.type === 'transaction') return '#8b5cf6'; // Roxo para transações
-    return '#10b981'; // Verde para conexões
-  };
-
-  const getSize = () => {
-    const baseSize = 1;
-    const balanceScale = Math.min(Math.log10(node.balance + 1) * 0.3, 2);
-    return Math.max(baseSize, baseSize + balanceScale);
-  };
+  // Memoizar o endereço formatado
+  const formattedAddress = useMemo(() => 
+    `${node.address.substring(0, 8)}...${node.address.substring(node.address.length - 8)}`,
+    [node.address]
+  );
 
   return (
     // @ts-ignore - React Spring animated component
     <animated.group position={springs.position} {...bind()}>
       <Sphere
         ref={meshRef}
-        args={[getSize(), 16, 16]}
+        args={[visualProps.size, 12, 12]} // Reduzir segmentos para melhor performance
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onClick={(e) => {
@@ -106,41 +120,41 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         }}
       >
         <meshStandardMaterial
-          color={getColor()}
+          color={visualProps.color}
           transparent={true}
           opacity={hovered ? 0.9 : 0.7}
-          roughness={0.1}
-          metalness={0.8}
+          roughness={0.2}
+          metalness={0.6}
         />
       </Sphere>
 
-      {/* Efeito de glow */}
-      <Sphere args={[getSize() * 1.2, 16, 16]}>
+      {/* Efeito de glow simplificado */}
+      <Sphere args={[visualProps.size * 1.15, 8, 8]}>
         <meshBasicMaterial
-          color={getColor()}
+          color={visualProps.color}
           transparent={true}
-          opacity={0.2}
+          opacity={0.15}
           side={2}
         />
       </Sphere>
 
-      {/* Label flutuante - apenas quando hovering */}
+      {/* Label otimizado - apenas quando hovering */}
       {hovered && (
         <Html
-          position={[0, getSize() + 1, 0]}
+          position={[0, visualProps.size + 1, 0]}
           center
-          distanceFactor={10}
+          distanceFactor={8}
           occlude
         >
-          <div className="bg-black/80 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs pointer-events-none">
-            <div className="font-mono text-xs">
-              {node.address.substring(0, 8)}...{node.address.substring(node.address.length - 8)}
+          <div className="bg-black/90 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs pointer-events-none max-w-xs">
+            <div className="font-mono text-xs truncate">
+              {formattedAddress}
             </div>
             <div className="text-cyan-400">
               💰 {node.balance.toFixed(4)} BTC
             </div>
             <div className="text-purple-400">
-              🔄 {node.transactionCount} transações
+              🔄 {node.transactionCount} tx
             </div>
             {node.isLocked && (
               <div className="text-yellow-400 mt-1">
@@ -151,14 +165,14 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         </Html>
       )}
 
-      {/* Anel de conexões */}
+      {/* Anel de conexões simplificado */}
       {node.connections.length > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[getSize() * 1.5, getSize() * 1.7, 16]} />
+          <ringGeometry args={[visualProps.size * 1.3, visualProps.size * 1.5, 8]} />
           <meshBasicMaterial
             color="#fbbf24"
             transparent={true}
-            opacity={0.6}
+            opacity={0.5}
             side={2}
           />
         </mesh>
