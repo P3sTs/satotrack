@@ -1,14 +1,13 @@
 
 import React, { useRef, useState, memo, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree, ThreeEvent } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
-import { Mesh, Vector3 } from 'three';
-import { useDrag } from '@use-gesture/react';
+import * as THREE from 'three';
 
 interface WalletNode {
   id: string;
   address: string;
-  position: Vector3;
+  position: THREE.Vector3;
   balance: number;
   totalReceived: number;
   totalSent: number;
@@ -21,7 +20,7 @@ interface WalletNode {
 interface WalletBubbleProps {
   node: WalletNode;
   onClick: () => void;
-  onPositionChange: (position: Vector3) => void;
+  onPositionChange: (position: THREE.Vector3) => void;
   onToggleLock: () => void;
   onRemove: () => void;
 }
@@ -36,7 +35,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   console.log('🎈 [WalletBubble] Renderizando bubble para:', node.address.substring(0, 8) + '...');
   
   const groupRef = useRef<THREE.Group>(null);
-  const meshRef = useRef<Mesh>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
   const { viewport } = useThree();
@@ -66,33 +65,32 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Configurar drag otimizado - usando eventos nativos em vez de props spreading
-  const bind = useDrag(
-    ({ movement: [x, y], dragging: isDragging, last }) => {
-      if (node.isLocked || !groupRef.current) return;
-      
-      setDragging(isDragging);
-      
-      if (isDragging) {
-        const newPosition = new Vector3(
-          node.position.x + (x / viewport.width) * 20,
-          node.position.y - (y / viewport.height) * 20,
-          node.position.z
-        );
-        
-        groupRef.current.position.copy(newPosition);
-        
-        if (last) {
-          onPositionChange(newPosition);
-        }
-      }
-    },
-    { 
-      filterTaps: true,
-      pointer: { touch: true },
-      threshold: 5
-    }
-  );
+  // Handlers para eventos de drag simplificados
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    if (node.isLocked) return;
+    event.stopPropagation();
+    setDragging(true);
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    setDragging(false);
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!dragging || node.isLocked || !groupRef.current) return;
+    
+    event.stopPropagation();
+    
+    const newPosition = new THREE.Vector3(
+      event.point.x,
+      event.point.y,
+      node.position.z
+    );
+    
+    groupRef.current.position.copy(newPosition);
+    onPositionChange(newPosition);
+  };
 
   // Memoizar o endereço formatado
   const formattedAddress = useMemo(() => 
@@ -104,14 +102,16 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     <group 
       ref={groupRef}
       position={[node.position.x, node.position.y, node.position.z]}
-      {...bind()}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerMove={handlePointerMove}
     >
       <Sphere
         ref={meshRef}
         args={[visualProps.size, 12, 12]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        onClick={(e) => {
+        onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation();
           onClick();
         }}
@@ -131,7 +131,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
           color={visualProps.color}
           transparent={true}
           opacity={0.15}
-          side={2}
+          side={THREE.DoubleSide}
         />
       </Sphere>
 
@@ -170,7 +170,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
             color="#fbbf24"
             transparent={true}
             opacity={0.5}
-            side={2}
+            side={THREE.DoubleSide}
           />
         </mesh>
       )}
