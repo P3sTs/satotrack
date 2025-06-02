@@ -4,7 +4,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
 import { Mesh, Vector3 } from 'three';
 import { useDrag } from '@use-gesture/react';
-import { useSpring, animated } from '@react-spring/three';
 
 interface WalletNode {
   id: string;
@@ -36,16 +35,11 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
 }) => {
   console.log('🎈 [WalletBubble] Renderizando bubble para:', node.address.substring(0, 8) + '...');
   
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
   const { viewport } = useThree();
-
-  // Spring animation para posição
-  const [springs, api] = useSpring(() => ({
-    position: [node.position.x, node.position.y, node.position.z],
-    scale: 1,
-  }));
 
   // Memoizar propriedades visuais
   const visualProps = useMemo(() => {
@@ -72,10 +66,10 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Configurar drag otimizado
+  // Configurar drag otimizado - usando eventos nativos em vez de props spreading
   const bind = useDrag(
     ({ movement: [x, y], dragging: isDragging, last }) => {
-      if (node.isLocked) return;
+      if (node.isLocked || !groupRef.current) return;
       
       setDragging(isDragging);
       
@@ -86,7 +80,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
           node.position.z
         );
         
-        api.start({ position: [newPosition.x, newPosition.y, newPosition.z] });
+        groupRef.current.position.copy(newPosition);
         
         if (last) {
           onPositionChange(newPosition);
@@ -107,11 +101,14 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   );
 
   return (
-    // @ts-ignore - React Spring animated component
-    <animated.group position={springs.position} {...bind()}>
+    <group 
+      ref={groupRef}
+      position={[node.position.x, node.position.y, node.position.z]}
+      {...bind()}
+    >
       <Sphere
         ref={meshRef}
-        args={[visualProps.size, 12, 12]} // Reduzir segmentos para melhor performance
+        args={[visualProps.size, 12, 12]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onClick={(e) => {
@@ -177,7 +174,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
           />
         </mesh>
       )}
-    </animated.group>
+    </group>
   );
 });
 
