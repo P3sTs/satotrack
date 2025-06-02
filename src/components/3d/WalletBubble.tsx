@@ -38,7 +38,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const { viewport } = useThree();
 
   // Memoizar propriedades visuais
   const visualProps = useMemo(() => {
@@ -65,7 +64,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Handlers para eventos - simplificados e seguros
+  // Handlers para eventos - super simplificados
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (node.isLocked) return;
     event.stopPropagation();
@@ -84,7 +83,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     if (!dragging || node.isLocked || !groupRef.current) return;
     event.stopPropagation();
     
-    // Usar apenas a posição do evento do Three.js
+    // Usar apenas a posição do evento do Three.js se existir
     if (event.point) {
       groupRef.current.position.copy(event.point);
     }
@@ -103,21 +102,21 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     [node.address]
   );
 
-  // Posição como array simples para evitar problemas de prop
-  const groupPosition: [number, number, number] = [
-    node.position.x, 
-    node.position.y, 
-    node.position.z
-  ];
+  // Posição segura como array
+  const position: [number, number, number] = useMemo(() => [
+    node.position.x || 0, 
+    node.position.y || 0, 
+    node.position.z || 0
+  ], [node.position]);
 
   return (
     <group 
       ref={groupRef}
-      position={groupPosition}
+      position={position}
     >
       <Sphere
         ref={meshRef}
-        args={[visualProps.size, 12, 12]}
+        args={[visualProps.size, 16, 16]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onPointerDown={handlePointerDown}
@@ -127,7 +126,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       >
         <meshStandardMaterial
           color={visualProps.color}
-          transparent={true}
+          transparent
           opacity={hovered ? 0.9 : 0.7}
           roughness={0.2}
           metalness={0.6}
@@ -138,13 +137,13 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       <Sphere args={[visualProps.size * 1.15, 8, 8]}>
         <meshBasicMaterial
           color={visualProps.color}
-          transparent={true}
+          transparent
           opacity={0.15}
           side={THREE.DoubleSide}
         />
       </Sphere>
 
-      {/* Label otimizado - apenas quando hovering */}
+      {/* Label apenas quando hovering */}
       {hovered && (
         <Html
           position={[0, visualProps.size + 1, 0]}
@@ -171,13 +170,13 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         </Html>
       )}
 
-      {/* Anel de conexões simplificado */}
+      {/* Anel de conexões se houver */}
       {node.connections.length > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[visualProps.size * 1.3, visualProps.size * 1.5, 8]} />
           <meshBasicMaterial
             color="#fbbf24"
-            transparent={true}
+            transparent
             opacity={0.5}
             side={THREE.DoubleSide}
           />
