@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { WalletNode } from '../../hooks/useWalletNodes';
+import { WalletNode } from '../../types/WalletNode';
 
 interface WalletBadgesProps {
   wallet: WalletNode;
@@ -9,30 +8,29 @@ interface WalletBadgesProps {
 
 const WalletBadges: React.FC<WalletBadgesProps> = ({ wallet }) => {
   return (
-    <div className="mb-4 flex flex-wrap gap-2">
-      <Badge 
-        variant="outline" 
-        className={`
-          ${wallet.type === 'main' ? 'border-cyan-500/50 text-cyan-400' : ''}
-          ${wallet.type === 'transaction' ? 'border-purple-500/50 text-purple-400' : ''}
-          ${wallet.type === 'connected' ? 'border-green-500/50 text-green-400' : ''}
-        `}
-      >
-        {wallet.type === 'main' && '🏦 Principal'}
-        {wallet.type === 'transaction' && '⚡ Transação'}
-        {wallet.type === 'connected' && '🔗 Conectada'}
-      </Badge>
-      
+    <div className="flex flex-wrap gap-2 mb-4">
       {wallet.isLocked && (
-        <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
+        <div className="px-2 py-1 bg-yellow-500/20 text-yellow-300 text-xs rounded-full border border-yellow-500/30">
           🔒 Travada
-        </Badge>
+        </div>
       )}
-
-      {wallet.balance === 0 && wallet.type === 'main' && (
-        <Badge variant="outline" className="border-gray-500/50 text-gray-400">
-          💸 Vazia
-        </Badge>
+      
+      {wallet.connections && wallet.connections.length > 0 && (
+        <div className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
+          🔗 {wallet.connections.length} conexões
+        </div>
+      )}
+      
+      {wallet.transactions && wallet.transactions.length > 0 && (
+        <div className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-500/30">
+          📊 {wallet.transactions.length} transações
+        </div>
+      )}
+      
+      {wallet.balance > 0 && (
+        <div className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full border border-green-500/30">
+          💰 Ativa
+        </div>
       )}
     </div>
   );

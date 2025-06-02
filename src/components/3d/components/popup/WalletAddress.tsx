@@ -1,47 +1,51 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { WalletNode } from '../../hooks/useWalletNodes';
+import { WalletNode } from '../../types/WalletNode';
 
 interface WalletAddressProps {
   wallet: WalletNode;
 }
 
 const WalletAddress: React.FC<WalletAddressProps> = ({ wallet }) => {
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({
-        title: "✅ Copiado!",
-        description: "Endereço copiado para a área de transferência",
-      });
-    }).catch(() => {
-      toast({
-        title: "❌ Erro",
-        description: "Não foi possível copiar o endereço",
-        variant: "destructive"
-      });
-    });
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(wallet.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy address:', err);
+    }
+  };
+
+  const formatAddress = (address: string) => {
+    if (address.length <= 16) return address;
+    return `${address.substring(0, 8)}...${address.substring(address.length - 8)}`;
   };
 
   return (
     <div className="mb-4">
       <label className="text-xs text-gray-400 uppercase tracking-wide">
-        {wallet.type === 'transaction' ? 'Hash da Transação' : 'Endereço Bitcoin'}
+        Endereço
       </label>
-      <div className="flex items-center gap-2 mt-1">
-        <code className="bg-black/50 text-cyan-300 text-xs p-2 rounded border border-cyan-500/30 flex-1 font-mono break-all">
-          {wallet.address}
-        </code>
+      <div className="flex items-center gap-2 mt-1 p-3 bg-black/30 rounded-lg border border-gray-700">
+        <div className="flex-1 font-mono text-sm text-gray-300 break-all">
+          {formatAddress(wallet.address)}
+        </div>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => copyToClipboard(wallet.address)}
-          className="text-gray-400 hover:text-cyan-400 p-2"
-          title="Copiar endereço"
+          onClick={copyToClipboard}
+          className="text-gray-400 hover:text-white flex-shrink-0"
         >
-          <Copy className="h-3 w-3" />
+          {copied ? (
+            <Check className="h-4 w-4 text-green-400" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

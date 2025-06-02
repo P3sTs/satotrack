@@ -3,10 +3,9 @@ import React from 'react';
 
 const PopupFooter: React.FC = () => {
   return (
-    <div className="mt-4 pt-3 border-t border-gray-700 text-xs text-gray-500">
-      <div className="flex justify-between items-center">
-        <span>Dados em tempo real</span>
-        <span>🔐 Seguro via blockchain</span>
+    <div className="mt-6 pt-4 border-t border-gray-700">
+      <div className="text-xs text-gray-500 text-center">
+        💡 Clique e arraste para mover as carteiras na visualização 3D
       </div>
     </div>
   );

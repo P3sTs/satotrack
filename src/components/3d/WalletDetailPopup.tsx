@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { WalletNode } from './types/WalletNode';
 import WalletHeader from './components/popup/WalletHeader';
 import WalletAddress from './components/popup/WalletAddress';
 import WalletStats from './components/popup/WalletStats';
@@ -8,25 +9,6 @@ import TransactionsList from './components/popup/TransactionsList';
 import WalletActions from './components/popup/WalletActions';
 import WalletConnections from './components/popup/WalletConnections';
 import PopupFooter from './components/popup/PopupFooter';
-
-interface WalletNode {
-  id: string;
-  address: string;
-  position: any;
-  balance: number;
-  totalReceived: number;
-  totalSent: number;
-  transactionCount: number;
-  isLocked: boolean;
-  connections: string[];
-  type: 'main' | 'transaction' | 'connected';
-  transactions?: Array<{
-    hash: string;
-    amount: number;
-    transaction_type: string;
-    transaction_date: string;
-  }>;
-}
 
 interface WalletDetailPopupProps {
   wallet: WalletNode;

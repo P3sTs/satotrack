@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WalletNode } from '../../hooks/useWalletNodes';
+import { WalletNode } from '../../types/WalletNode';
 
 interface WalletConnectionsProps {
   wallet: WalletNode;

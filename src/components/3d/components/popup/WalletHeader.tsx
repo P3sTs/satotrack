@@ -1,8 +1,8 @@
 
 import React from 'react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { X, Wallet, Hash, Plus } from 'lucide-react';
-import { WalletNode } from '../../hooks/useWalletNodes';
+import { WalletNode } from '../../types/WalletNode';
 
 interface WalletHeaderProps {
   wallet: WalletNode;
@@ -10,18 +10,44 @@ interface WalletHeaderProps {
 }
 
 const WalletHeader: React.FC<WalletHeaderProps> = ({ wallet, onClose }) => {
+  const getTypeIcon = () => {
+    switch (wallet.type) {
+      case 'main':
+        return '💰';
+      case 'transaction':
+        return '🔄';
+      case 'connected':
+        return '🔗';
+      default:
+        return '📍';
+    }
+  };
+
+  const getTypeLabel = () => {
+    switch (wallet.type) {
+      case 'main':
+        return 'Carteira Principal';
+      case 'transaction':
+        return 'Transação';
+      case 'connected':
+        return 'Carteira Conectada';
+      default:
+        return 'Carteira';
+    }
+  };
+
   return (
     <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        {wallet.type === 'main' && <Wallet className="h-5 w-5 text-cyan-400" />}
-        {wallet.type === 'transaction' && <Hash className="h-5 w-5 text-purple-400" />}
-        {wallet.type === 'connected' && <Plus className="h-5 w-5 text-green-400" />}
-        
-        <h3 className="text-xl font-bold text-cyan-400">
-          {wallet.type === 'main' && 'Carteira Bitcoin'}
-          {wallet.type === 'transaction' && 'Transação'}
-          {wallet.type === 'connected' && 'Carteira Conectada'}
-        </h3>
+      <div className="flex items-center gap-3">
+        <div className="text-2xl">{getTypeIcon()}</div>
+        <div>
+          <h3 className="text-lg font-bold text-white">
+            {getTypeLabel()}
+          </h3>
+          <div className="text-sm text-gray-400">
+            ID: {wallet.id.substring(0, 8)}...
+          </div>
+        </div>
       </div>
       
       <Button

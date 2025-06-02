@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { formatBitcoinValue, formatDate } from '@/utils/formatters';
-import { WalletNode } from '../../hooks/useWalletNodes';
+import { WalletNode } from '../../types/WalletNode';
 
 interface TransactionsListProps {
   wallet: WalletNode;
