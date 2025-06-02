@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useWalletData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,30 +10,26 @@ export const useWalletData = () => {
     console.log('🔍 [useWalletData] Iniciando busca para endereço:', address);
     
     try {
-      const response = await fetch('https://cwmzzdwoagtmxdmgtfzj.supabase.co/functions/v1/fetch-wallet-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bXp6ZHdvYWd0bXhkbWd0ZnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MzMxNDksImV4cCI6MjA2MjIwOTE0OX0.qScbTmaTrg8OT5VHd4P92w83wXZGYEjX8YVDM4V-Hzs',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bXp6ZHdvYWd0bXhkbWd0ZnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MzMxNDksImV4cCI6MjA2MjIwOTE0OX0.qScbTmaTrg8OT5VHd4P92w83wXZGYEjX8YVDM4V-Hzs'
-        },
-        body: JSON.stringify({
+      // Usar o método invoke do Supabase para chamar a função de borda
+      const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
+        body: {
           address: address,
           wallet_id: null
-        }),
-        signal: AbortSignal.timeout(30000) // 30 segundo timeout
+        }
       });
 
-      console.log('📡 [useWalletData] Response status:', response.status);
+      console.log('📡 [useWalletData] Response da função de borda:', { data, error });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ [useWalletData] Erro na resposta da API:', response.status, errorText);
-        throw new Error(`Erro na API: ${response.status}`);
+      if (error) {
+        console.error('❌ [useWalletData] Erro na função de borda:', error);
+        throw new Error(`Erro na API: ${error.message}`);
       }
 
-      const data = await response.json();
-      console.log('✅ [useWalletData] Dados recebidos da API:', data);
+      if (!data) {
+        throw new Error('Nenhum dado retornado para esta carteira');
+      }
+
+      console.log('✅ [useWalletData] Dados recebidos da função de borda:', data);
       
       // Validação e formatação dos dados
       const walletData = {
@@ -40,14 +37,14 @@ export const useWalletData = () => {
         total_received: Number(data.total_received) || 0,
         total_sent: Number(data.total_sent) || 0,
         transaction_count: Number(data.transaction_count) || 0,
-        transactions: Array.isArray(data.transactions) ? data.transactions.slice(0, 10) : [] // Limitar a 10 transações
+        transactions: Array.isArray(data.transactions) ? data.transactions.slice(0, 10) : []
       };
 
       console.log('🔄 [useWalletData] Dados formatados:', walletData);
       return walletData;
 
     } catch (error) {
-      console.error('💥 [useWalletData] Erro ao chamar a API:', error);
+      console.error('💥 [useWalletData] Erro ao chamar a função de borda:', error);
       throw error;
     }
   };

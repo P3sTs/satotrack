@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, memo, useMemo } from 'react';
-import { useFrame, useThree, ThreeEvent } from '@react-three/fiber';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { Html, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -39,6 +39,12 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
 
+  // Validar dados do nó
+  if (!node || !node.position) {
+    console.warn('⚠️ [WalletBubble] Nó inválido:', node);
+    return null;
+  }
+
   // Memoizar propriedades visuais
   const visualProps = useMemo(() => {
     const getColor = () => {
@@ -49,14 +55,14 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
 
     const getSize = () => {
       const baseSize = 1;
-      const balanceScale = Math.min(Math.log10(node.balance + 1) * 0.3, 1.5);
+      const balanceScale = Math.min(Math.log10((node.balance || 0) + 1) * 0.3, 1.5);
       return Math.max(baseSize, baseSize + balanceScale);
     };
 
     return { color: getColor(), size: getSize() };
   }, [node.type, node.balance]);
 
-  // Animação de pulsação otimizada
+  // Animação de pulsação
   useFrame((state) => {
     if (meshRef.current && !dragging && !node.isLocked) {
       const scale = 1 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
@@ -64,7 +70,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Handlers para eventos - super simplificados
+  // Handlers simplificados
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (node.isLocked) return;
     event.stopPropagation();
@@ -83,7 +89,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     if (!dragging || node.isLocked || !groupRef.current) return;
     event.stopPropagation();
     
-    // Usar apenas a posição do evento do Three.js se existir
     if (event.point) {
       groupRef.current.position.copy(event.point);
     }
@@ -96,23 +101,26 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   };
 
-  // Memoizar o endereço formatado
+  // Endereço formatado
   const formattedAddress = useMemo(() => 
     `${node.address.substring(0, 8)}...${node.address.substring(node.address.length - 8)}`,
     [node.address]
   );
 
-  // Posição segura como array
-  const position: [number, number, number] = useMemo(() => [
-    node.position.x || 0, 
-    node.position.y || 0, 
-    node.position.z || 0
-  ], [node.position]);
+  // Posição segura
+  const safePosition: [number, number, number] = useMemo(() => {
+    const pos = node.position;
+    return [
+      typeof pos.x === 'number' ? pos.x : 0,
+      typeof pos.y === 'number' ? pos.y : 0,
+      typeof pos.z === 'number' ? pos.z : 0
+    ];
+  }, [node.position]);
 
   return (
     <group 
       ref={groupRef}
-      position={position}
+      position={safePosition}
     >
       <Sphere
         ref={meshRef}
@@ -133,7 +141,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         />
       </Sphere>
 
-      {/* Efeito de glow simplificado */}
+      {/* Efeito de glow */}
       <Sphere args={[visualProps.size * 1.15, 8, 8]}>
         <meshBasicMaterial
           color={visualProps.color}
@@ -143,7 +151,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         />
       </Sphere>
 
-      {/* Label apenas quando hovering */}
+      {/* Label quando hovering */}
       {hovered && (
         <Html
           position={[0, visualProps.size + 1, 0]}
@@ -156,10 +164,10 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
               {formattedAddress}
             </div>
             <div className="text-cyan-400">
-              💰 {node.balance.toFixed(4)} BTC
+              💰 {(node.balance || 0).toFixed(4)} BTC
             </div>
             <div className="text-purple-400">
-              🔄 {node.transactionCount} tx
+              🔄 {node.transactionCount || 0} tx
             </div>
             {node.isLocked && (
               <div className="text-yellow-400 mt-1">
@@ -170,8 +178,8 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         </Html>
       )}
 
-      {/* Anel de conexões se houver */}
-      {node.connections.length > 0 && (
+      {/* Anel de conexões */}
+      {node.connections && node.connections.length > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[visualProps.size * 1.3, visualProps.size * 1.5, 8]} />
           <meshBasicMaterial
