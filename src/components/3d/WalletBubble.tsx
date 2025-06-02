@@ -45,7 +45,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     return null;
   }
 
-  // Memoizar propriedades visuais
+  // Memoizar propriedades visuais com validação rigorosa
   const visualProps = useMemo(() => {
     const getColor = () => {
       if (node.type === 'main') return '#06b6d4';
@@ -55,11 +55,23 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
 
     const getSize = () => {
       const baseSize = 1;
-      const balanceScale = Math.min(Math.log10((node.balance || 0) + 1) * 0.3, 1.5);
-      return Math.max(baseSize, baseSize + balanceScale);
+      const balance = typeof node.balance === 'number' ? node.balance : 0;
+      const balanceScale = Math.min(Math.log10(balance + 1) * 0.3, 1.5);
+      const finalSize = Math.max(baseSize, baseSize + balanceScale);
+      
+      // Garantir que retornamos um número válido
+      return isNaN(finalSize) ? baseSize : finalSize;
     };
 
-    return { color: getColor(), size: getSize() };
+    const size = getSize();
+    return { 
+      color: getColor(), 
+      size: size,
+      // Pré-calcular valores para evitar cálculos no render
+      innerRadius: size * 1.3,
+      outerRadius: size * 1.5,
+      glowSize: size * 1.15
+    };
   }, [node.type, node.balance]);
 
   // Animação de pulsação
@@ -111,11 +123,25 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const safePosition: [number, number, number] = useMemo(() => {
     const pos = node.position;
     return [
-      typeof pos.x === 'number' ? pos.x : 0,
-      typeof pos.y === 'number' ? pos.y : 0,
-      typeof pos.z === 'number' ? pos.z : 0
+      typeof pos.x === 'number' && !isNaN(pos.x) ? pos.x : 0,
+      typeof pos.y === 'number' && !isNaN(pos.y) ? pos.y : 0,
+      typeof pos.z === 'number' && !isNaN(pos.z) ? pos.z : 0
     ];
   }, [node.position]);
+
+  // Garantir que os argumentos do ring geometry são válidos
+  const ringArgs = useMemo(() => {
+    const innerRadius = visualProps.innerRadius;
+    const outerRadius = visualProps.outerRadius;
+    
+    // Validar que os valores são números válidos
+    if (isNaN(innerRadius) || isNaN(outerRadius) || innerRadius <= 0 || outerRadius <= innerRadius) {
+      console.warn('⚠️ [WalletBubble] Ring geometry args inválidos, usando valores padrão');
+      return [1.3, 1.5, 8];
+    }
+    
+    return [innerRadius, outerRadius, 8];
+  }, [visualProps.innerRadius, visualProps.outerRadius]);
 
   return (
     <group 
@@ -142,7 +168,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       </Sphere>
 
       {/* Efeito de glow */}
-      <Sphere args={[visualProps.size * 1.15, 8, 8]}>
+      <Sphere args={[visualProps.glowSize, 8, 8]}>
         <meshBasicMaterial
           color={visualProps.color}
           transparent
@@ -178,10 +204,10 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         </Html>
       )}
 
-      {/* Anel de conexões */}
+      {/* Anel de conexões - agora com args válidos garantidos */}
       {node.connections && node.connections.length > 0 && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[visualProps.size * 1.3, visualProps.size * 1.5, 8]} />
+          <ringGeometry args={ringArgs} />
           <meshBasicMaterial
             color="#fbbf24"
             transparent
