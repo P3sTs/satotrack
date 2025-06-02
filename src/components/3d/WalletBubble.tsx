@@ -38,8 +38,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<THREE.Vector2 | null>(null);
-  const { viewport, camera } = useThree();
+  const { viewport } = useThree();
 
   // Memoizar propriedades visuais
   const visualProps = useMemo(() => {
@@ -66,30 +65,11 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Handlers simplificados para eventos
+  // Handlers para eventos - simplificados e seguros
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (node.isLocked) return;
     event.stopPropagation();
     setDragging(true);
-    setDragStart(new THREE.Vector2(event.clientX, event.clientY));
-  };
-
-  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!dragging || node.isLocked || !groupRef.current || !dragStart) return;
-    
-    event.stopPropagation();
-    
-    const deltaX = (event.clientX - dragStart.x) / viewport.width * viewport.width * 0.01;
-    const deltaY = -(event.clientY - dragStart.y) / viewport.height * viewport.height * 0.01;
-    
-    const newPosition = new THREE.Vector3(
-      node.position.x + deltaX,
-      node.position.y + deltaY,
-      node.position.z
-    );
-    
-    groupRef.current.position.copy(newPosition);
-    setDragStart(new THREE.Vector2(event.clientX, event.clientY));
   };
 
   const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
@@ -98,7 +78,16 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       onPositionChange(groupRef.current.position.clone());
     }
     setDragging(false);
-    setDragStart(null);
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!dragging || node.isLocked || !groupRef.current) return;
+    event.stopPropagation();
+    
+    // Usar apenas a posição do evento do Three.js
+    if (event.point) {
+      groupRef.current.position.copy(event.point);
+    }
   };
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -114,10 +103,17 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     [node.address]
   );
 
+  // Posição como array simples para evitar problemas de prop
+  const groupPosition: [number, number, number] = [
+    node.position.x, 
+    node.position.y, 
+    node.position.z
+  ];
+
   return (
     <group 
       ref={groupRef}
-      position={[node.position.x, node.position.y, node.position.z]}
+      position={groupPosition}
     >
       <Sphere
         ref={meshRef}
