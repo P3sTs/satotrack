@@ -1,26 +1,7 @@
-
 import { useState, useCallback, useRef } from 'react';
 import { Vector3 } from 'three';
 import { toast } from '@/hooks/use-toast';
-
-export interface WalletNode {
-  id: string;
-  address: string;
-  position: Vector3;
-  balance: number;
-  totalReceived: number;
-  totalSent: number;
-  transactionCount: number;
-  isLocked: boolean;
-  connections: string[];
-  type: 'main' | 'transaction' | 'connected';
-  transactions?: Array<{
-    hash: string;
-    amount: number;
-    transaction_type: string;
-    transaction_date: string;
-  }>;
-}
+import { WalletNode } from '../types/WalletNode';
 
 export const useWalletNodes = () => {
   const [walletNodes, setWalletNodes] = useState<WalletNode[]>([]);
@@ -52,8 +33,7 @@ export const useWalletNodes = () => {
         transactionCount: Number(walletData.transaction_count) || 0,
         isLocked: false,
         connections: [],
-        type: 'main',
-        transactions: Array.isArray(walletData.transactions) ? walletData.transactions.slice(0, 5) : []
+        type: 'main'
       };
 
       console.log('📝 [useWalletNodes] Nó criado:', newNode);
@@ -112,56 +92,9 @@ export const useWalletNodes = () => {
   const expandWalletConnections = useCallback((wallet: WalletNode) => {
     console.log('🌐 [useWalletNodes] Expandindo conexões para:', wallet.address);
     
-    if (!wallet.transactions || wallet.transactions.length === 0) {
-      toast({
-        title: "📭 Sem transações",
-        description: "Esta carteira não possui transações para expandir",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const significantTransactions = wallet.transactions
-      .filter(tx => Number(tx.amount) > 0.001)
-      .slice(0, 3); // Reduzir para apenas 3 para evitar sobrecarga
-
-    if (significantTransactions.length === 0) {
-      toast({
-        title: "📊 Transações muito pequenas",
-        description: "Não há transações significativas para visualizar",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newNodes = significantTransactions.map((tx, index) => {
-      const angle = (index * (Math.PI * 2)) / significantTransactions.length;
-      const radius = 8;
-      
-      return {
-        id: `tx-${tx.hash}-${Date.now()}-${index}`,
-        address: tx.hash,
-        position: new Vector3(
-          wallet.position.x + Math.cos(angle) * radius,
-          wallet.position.y + Math.sin(angle) * radius,
-          wallet.position.z + (Math.random() - 0.5) * 4
-        ),
-        balance: Number(tx.amount) || 0,
-        totalReceived: Number(tx.amount) || 0,
-        totalSent: 0,
-        transactionCount: 1,
-        isLocked: false,
-        connections: [wallet.id],
-        type: 'transaction' as const,
-        transactions: [tx]
-      };
-    });
-
-    setWalletNodes(prev => [...prev, ...newNodes]);
-
     toast({
-      title: "🔗 Conexões expandidas",
-      description: `Adicionadas ${significantTransactions.length} transações relacionadas`,
+      title: "🔗 Funcionalidade em desenvolvimento",
+      description: "A expansão de conexões será implementada em breve",
     });
   }, []);
 
@@ -185,3 +118,5 @@ export const useWalletNodes = () => {
     updateNodePosition
   };
 };
+
+export { WalletNode };

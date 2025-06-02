@@ -1,21 +1,13 @@
 
 import React, { useRef, useState, memo, useMemo } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { Html, Sphere } from '@react-three/drei';
+import { Sphere } from '@react-three/drei';
 import * as THREE from 'three';
-
-interface WalletNode {
-  id: string;
-  address: string;
-  position: THREE.Vector3;
-  balance: number;
-  totalReceived: number;
-  totalSent: number;
-  transactionCount: number;
-  isLocked: boolean;
-  connections: string[];
-  type: 'main' | 'transaction' | 'connected';
-}
+import { WalletNode } from './types/WalletNode';
+import { useWalletVisualProps } from './hooks/useWalletVisualProps';
+import WalletLabel from './components/WalletLabel';
+import WalletGlow from './components/WalletGlow';
+import ConnectionRing from './components/ConnectionRing';
 
 interface WalletBubbleProps {
   node: WalletNode;
@@ -45,34 +37,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     return null;
   }
 
-  // Memoizar propriedades visuais com validação rigorosa
-  const visualProps = useMemo(() => {
-    const getColor = () => {
-      if (node.type === 'main') return '#06b6d4';
-      if (node.type === 'transaction') return '#8b5cf6';
-      return '#10b981';
-    };
-
-    const getSize = () => {
-      const baseSize = 1;
-      const balance = typeof node.balance === 'number' ? node.balance : 0;
-      const balanceScale = Math.min(Math.log10(balance + 1) * 0.3, 1.5);
-      const finalSize = Math.max(baseSize, baseSize + balanceScale);
-      
-      // Garantir que retornamos um número válido
-      return isNaN(finalSize) ? baseSize : finalSize;
-    };
-
-    const size = getSize();
-    return { 
-      color: getColor(), 
-      size: size,
-      // Pré-calcular valores para evitar cálculos no render
-      innerRadius: size * 1.3,
-      outerRadius: size * 1.5,
-      glowSize: size * 1.15
-    };
-  }, [node.type, node.balance]);
+  const visualProps = useWalletVisualProps(node);
 
   // Animação de pulsação
   useFrame((state) => {
@@ -113,12 +78,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   };
 
-  // Endereço formatado
-  const formattedAddress = useMemo(() => 
-    `${node.address.substring(0, 8)}...${node.address.substring(node.address.length - 8)}`,
-    [node.address]
-  );
-
   // Posição segura
   const safePosition: [number, number, number] = useMemo(() => {
     const pos = node.position;
@@ -128,20 +87,6 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       typeof pos.z === 'number' && !isNaN(pos.z) ? pos.z : 0
     ];
   }, [node.position]);
-
-  // Garantir que os argumentos do ring geometry são válidos
-  const ringArgs = useMemo((): [number, number, number] => {
-    const innerRadius = visualProps.innerRadius;
-    const outerRadius = visualProps.outerRadius;
-    
-    // Validar que os valores são números válidos
-    if (isNaN(innerRadius) || isNaN(outerRadius) || innerRadius <= 0 || outerRadius <= innerRadius) {
-      console.warn('⚠️ [WalletBubble] Ring geometry args inválidos, usando valores padrão');
-      return [1.3, 1.5, 8];
-    }
-    
-    return [innerRadius, outerRadius, 8];
-  }, [visualProps.innerRadius, visualProps.outerRadius]);
 
   return (
     <group 
@@ -167,55 +112,22 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         />
       </Sphere>
 
-      {/* Efeito de glow */}
-      <Sphere args={[visualProps.glowSize, 8, 8]}>
-        <meshBasicMaterial
-          color={visualProps.color}
-          transparent
-          opacity={0.15}
-          side={THREE.DoubleSide}
-        />
-      </Sphere>
+      <WalletGlow 
+        glowSize={visualProps.glowSize} 
+        color={visualProps.color} 
+      />
 
-      {/* Label quando hovering */}
-      {hovered && (
-        <Html
-          position={[0, visualProps.size + 1, 0]}
-          center
-          distanceFactor={8}
-          occlude
-        >
-          <div className="bg-black/90 backdrop-blur-sm text-white p-2 rounded-lg border border-cyan-500/50 text-xs pointer-events-none max-w-xs">
-            <div className="font-mono text-xs truncate">
-              {formattedAddress}
-            </div>
-            <div className="text-cyan-400">
-              💰 {(node.balance || 0).toFixed(4)} BTC
-            </div>
-            <div className="text-purple-400">
-              🔄 {node.transactionCount || 0} tx
-            </div>
-            {node.isLocked && (
-              <div className="text-yellow-400 mt-1">
-                🔒 Travada
-              </div>
-            )}
-          </div>
-        </Html>
-      )}
+      <WalletLabel 
+        node={node} 
+        size={visualProps.size} 
+        hovered={hovered} 
+      />
 
-      {/* Anel de conexões - agora com args válidos garantidos */}
-      {node.connections && node.connections.length > 0 && (
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={ringArgs} />
-          <meshBasicMaterial
-            color="#fbbf24"
-            transparent
-            opacity={0.5}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      )}
+      <ConnectionRing 
+        innerRadius={visualProps.innerRadius}
+        outerRadius={visualProps.outerRadius}
+        hasConnections={node.connections && node.connections.length > 0}
+      />
     </group>
   );
 });
