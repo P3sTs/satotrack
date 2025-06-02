@@ -12,4 +12,10 @@ export interface WalletNode {
   isLocked: boolean;
   connections: string[];
   type: 'main' | 'transaction' | 'connected';
+  transactions?: Array<{
+    hash: string;
+    amount: number;
+    transaction_type: string;
+    transaction_date: string;
+  }>;
 }

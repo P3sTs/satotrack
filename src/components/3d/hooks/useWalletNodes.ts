@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef } from 'react';
 import { Vector3 } from 'three';
 import { toast } from '@/hooks/use-toast';
@@ -119,4 +120,4 @@ export const useWalletNodes = () => {
   };
 };
 
-export { WalletNode };
+export type { WalletNode };
