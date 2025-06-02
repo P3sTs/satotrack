@@ -38,7 +38,8 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const { viewport } = useThree();
+  const [dragStart, setDragStart] = useState<THREE.Vector2 | null>(null);
+  const { viewport, camera } = useThree();
 
   // Memoizar propriedades visuais
   const visualProps = useMemo(() => {
@@ -57,7 +58,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     return { color: getColor(), size: getSize() };
   }, [node.type, node.balance]);
 
-  // Animação de pulsação otimizada - apenas quando não está sendo arrastado
+  // Animação de pulsação otimizada
   useFrame((state) => {
     if (meshRef.current && !dragging && !node.isLocked) {
       const scale = 1 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
@@ -65,31 +66,46 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Handlers para eventos de drag simplificados
+  // Handlers simplificados para eventos
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     if (node.isLocked) return;
     event.stopPropagation();
     setDragging(true);
-  };
-
-  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setDragging(false);
+    setDragStart(new THREE.Vector2(event.clientX, event.clientY));
   };
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!dragging || node.isLocked || !groupRef.current) return;
+    if (!dragging || node.isLocked || !groupRef.current || !dragStart) return;
     
     event.stopPropagation();
     
+    const deltaX = (event.clientX - dragStart.x) / viewport.width * viewport.width * 0.01;
+    const deltaY = -(event.clientY - dragStart.y) / viewport.height * viewport.height * 0.01;
+    
     const newPosition = new THREE.Vector3(
-      event.point.x,
-      event.point.y,
+      node.position.x + deltaX,
+      node.position.y + deltaY,
       node.position.z
     );
     
     groupRef.current.position.copy(newPosition);
-    onPositionChange(newPosition);
+    setDragStart(new THREE.Vector2(event.clientX, event.clientY));
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    if (dragging && groupRef.current) {
+      event.stopPropagation();
+      onPositionChange(groupRef.current.position.clone());
+    }
+    setDragging(false);
+    setDragStart(null);
+  };
+
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    if (!dragging) {
+      event.stopPropagation();
+      onClick();
+    }
   };
 
   // Memoizar o endereço formatado
@@ -102,19 +118,16 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     <group 
       ref={groupRef}
       position={[node.position.x, node.position.y, node.position.z]}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerMove={handlePointerMove}
     >
       <Sphere
         ref={meshRef}
         args={[visualProps.size, 12, 12]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        onClick={(e: ThreeEvent<MouseEvent>) => {
-          e.stopPropagation();
-          onClick();
-        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onClick={handleClick}
       >
         <meshStandardMaterial
           color={visualProps.color}
