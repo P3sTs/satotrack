@@ -15,14 +15,13 @@ const MainNav: React.FC = () => {
   
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/onchain', label: 'OnChain Monitor' },
     { path: '/carteiras', label: 'Carteiras' },
     { path: '/bitcoin-lookup', label: 'Consulta BTC' },
     { path: '/nova-carteira', label: 'Nova Carteira' },
     { path: '/mercado', label: 'Mercado BTC' },
     { path: '/crypto', label: 'Redes Crypto' },
+    { path: '/referral', label: 'Indicações' },
     { path: '/configuracoes', label: 'Configurações' },
-    { path: '/3d-visualization', label: '3D Explorer' },
     // Itens Premium condicionais
     ...(isPremium ? [
       { path: '/api', label: 'API', premium: true },
