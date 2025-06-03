@@ -94,12 +94,19 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     ];
   }, [node.position]);
 
-  // Propriedades seguras para os componentes
+  // Propriedades seguras para os componentes - com validação rigorosa
   const safeSize = Math.max(0.5, Math.min(3, visualProps.size));
   const safeColor = visualProps.color || '#06b6d4';
   const safeGlowSize = Math.max(0.6, Math.min(4, visualProps.glowSize || safeSize * 1.15));
   const safeInnerRadius = Math.max(0.7, Math.min(4, visualProps.innerRadius || safeSize * 1.3));
   const safeOuterRadius = Math.max(0.8, Math.min(5, visualProps.outerRadius || safeSize * 1.5));
+
+  // Validação final dos argumentos da Sphere
+  const sphereArgs: [number, number, number] = [
+    safeSize,
+    Math.max(8, Math.min(32, 16)), // widthSegments
+    Math.max(6, Math.min(32, 16))  // heightSegments
+  ];
 
   return (
     <group 
@@ -108,7 +115,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     >
       <Sphere
         ref={meshRef}
-        args={[safeSize, 16, 16]}
+        args={sphereArgs}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onPointerDown={handlePointerDown}

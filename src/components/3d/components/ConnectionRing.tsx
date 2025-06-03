@@ -14,13 +14,11 @@ const ConnectionRing: React.FC<ConnectionRingProps> = ({
   hasConnections 
 }) => {
   const ringArgs = useMemo((): [number, number, number] => {
-    // Validar que os valores são números válidos
-    if (isNaN(innerRadius) || isNaN(outerRadius) || innerRadius <= 0 || outerRadius <= innerRadius) {
-      console.warn('⚠️ [ConnectionRing] Ring geometry args inválidos, usando valores padrão');
-      return [1.3, 1.5, 8];
-    }
+    // Strict validation to prevent Three.js errors
+    const safeInnerRadius = typeof innerRadius === 'number' && !isNaN(innerRadius) && innerRadius > 0 ? innerRadius : 1.3;
+    const safeOuterRadius = typeof outerRadius === 'number' && !isNaN(outerRadius) && outerRadius > safeInnerRadius ? outerRadius : safeInnerRadius + 0.2;
     
-    return [innerRadius, outerRadius, 8];
+    return [safeInnerRadius, safeOuterRadius, 8];
   }, [innerRadius, outerRadius]);
 
   if (!hasConnections) return null;

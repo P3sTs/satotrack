@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WalletNode } from '../hooks/useWalletNodes';
+import { WalletNode } from '../types/WalletNode';
 
 interface SceneStatusProps {
   walletNodes: WalletNode[];
@@ -9,7 +9,7 @@ interface SceneStatusProps {
 const SceneStatus: React.FC<SceneStatusProps> = ({ walletNodes }) => {
   if (walletNodes.length === 0) return null;
 
-  const totalBalance = walletNodes.reduce((sum, node) => sum + node.balance, 0);
+  const totalBalance = walletNodes.reduce((sum, node) => sum + (node.balance || 0), 0);
 
   return (
     <div className="absolute top-20 left-4 z-40 bg-black/80 backdrop-blur-sm text-white p-3 rounded-lg border border-cyan-500/50">
