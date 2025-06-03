@@ -25,6 +25,22 @@ const Scene3DContent: React.FC<{
 }> = ({ walletNodes, onWalletClick, onNodePositionChange, onToggleLock, onRemoveNode }) => {
   const controlsRef = useRef<any>();
 
+  // Validar walletNodes
+  const validWalletNodes = walletNodes.filter(node => 
+    node && 
+    node.id && 
+    node.address &&
+    node.position && 
+    typeof node.position.x === 'number' && 
+    !isNaN(node.position.x) &&
+    typeof node.position.y === 'number' && 
+    !isNaN(node.position.y) &&
+    typeof node.position.z === 'number' && 
+    !isNaN(node.position.z)
+  );
+
+  console.log('🎮 [Scene3DContent] Nós válidos:', validWalletNodes.length, 'de', walletNodes.length);
+
   return (
     <>
       {/* Iluminação otimizada */}
@@ -48,25 +64,23 @@ const Scene3DContent: React.FC<{
       />
 
       {/* Partículas apenas se houver poucos nós */}
-      {walletNodes.length < 5 && <FloatingParticles />}
+      {validWalletNodes.length < 5 && <FloatingParticles />}
 
-      {/* Nós das carteiras - renderizar apenas se valid */}
-      {walletNodes
-        .filter(node => node && node.id && node.position)
-        .map((node) => (
-          <WalletBubble
-            key={node.id}
-            node={node}
-            onClick={() => onWalletClick(node)}
-            onPositionChange={(newPosition) => {
-              if (!node.isLocked) {
-                onNodePositionChange(node.id, newPosition);
-              }
-            }}
-            onToggleLock={() => onToggleLock(node.id)}
-            onRemove={() => onRemoveNode(node.id)}
-          />
-        ))}
+      {/* Nós das carteiras - renderizar apenas os válidos */}
+      {validWalletNodes.map((node) => (
+        <WalletBubble
+          key={node.id}
+          node={node}
+          onClick={() => onWalletClick(node)}
+          onPositionChange={(newPosition) => {
+            if (!node.isLocked && newPosition) {
+              onNodePositionChange(node.id, newPosition);
+            }
+          }}
+          onToggleLock={() => onToggleLock(node.id)}
+          onRemove={() => onRemoveNode(node.id)}
+        />
+      ))}
 
       {/* Controles de órbita otimizados */}
       <OrbitControls
@@ -96,7 +110,7 @@ const Scene3DRenderer: React.FC<Scene3DRendererProps> = memo(({
   onToggleLock,
   onRemoveNode
 }) => {
-  console.log('🎮 [Scene3DRenderer] Renderizando cena 3D com', walletNodes.length, 'nós');
+  console.log('🎮 [Scene3DRenderer] Renderizando cena 3D com', walletNodes?.length || 0, 'nós');
 
   // Fallback se não houver dados válidos
   if (!Array.isArray(walletNodes)) {

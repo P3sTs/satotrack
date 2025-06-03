@@ -24,7 +24,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   onToggleLock,
   onRemove
 }) => {
-  console.log('🎈 [WalletBubble] Renderizando bubble para:', node.address.substring(0, 8) + '...');
+  console.log('🎈 [WalletBubble] Renderizando bubble para:', node?.address?.substring(0, 8) + '...');
   
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
@@ -32,12 +32,18 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
   const [dragging, setDragging] = useState(false);
 
   // Validar dados do nó
-  if (!node || !node.position) {
+  if (!node || !node.position || !node.address) {
     console.warn('⚠️ [WalletBubble] Nó inválido:', node);
     return null;
   }
 
   const visualProps = useWalletVisualProps(node);
+
+  // Validar visualProps
+  if (!visualProps || typeof visualProps.size !== 'number' || isNaN(visualProps.size)) {
+    console.warn('⚠️ [WalletBubble] VisualProps inválido:', visualProps);
+    return null;
+  }
 
   // Animação de pulsação
   useFrame((state) => {
@@ -88,6 +94,13 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     ];
   }, [node.position]);
 
+  // Propriedades seguras para os componentes
+  const safeSize = Math.max(0.5, Math.min(3, visualProps.size));
+  const safeColor = visualProps.color || '#06b6d4';
+  const safeGlowSize = Math.max(0.6, Math.min(4, visualProps.glowSize || safeSize * 1.15));
+  const safeInnerRadius = Math.max(0.7, Math.min(4, visualProps.innerRadius || safeSize * 1.3));
+  const safeOuterRadius = Math.max(0.8, Math.min(5, visualProps.outerRadius || safeSize * 1.5));
+
   return (
     <group 
       ref={groupRef}
@@ -95,7 +108,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     >
       <Sphere
         ref={meshRef}
-        args={[visualProps.size, 16, 16]}
+        args={[safeSize, 16, 16]}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onPointerDown={handlePointerDown}
@@ -104,7 +117,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
         onClick={handleClick}
       >
         <meshStandardMaterial
-          color={visualProps.color}
+          color={safeColor}
           transparent
           opacity={hovered ? 0.9 : 0.7}
           roughness={0.2}
@@ -113,20 +126,20 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       </Sphere>
 
       <WalletGlow 
-        glowSize={visualProps.glowSize} 
-        color={visualProps.color} 
+        glowSize={safeGlowSize} 
+        color={safeColor} 
       />
 
       <WalletLabel 
         node={node} 
-        size={visualProps.size} 
+        size={safeSize} 
         hovered={hovered} 
       />
 
       <ConnectionRing 
-        innerRadius={visualProps.innerRadius}
-        outerRadius={visualProps.outerRadius}
-        hasConnections={node.connections && node.connections.length > 0}
+        innerRadius={safeInnerRadius}
+        outerRadius={safeOuterRadius}
+        hasConnections={Boolean(node.connections && node.connections.length > 0)}
       />
     </group>
   );

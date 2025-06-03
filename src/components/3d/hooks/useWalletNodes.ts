@@ -17,25 +17,42 @@ export const useWalletNodes = () => {
       return;
     }
 
+    if (!address || typeof address !== 'string') {
+      console.error('❌ [useWalletNodes] Endereço inválido:', address);
+      return;
+    }
+
     processingRef.current = true;
 
     try {
+      // Criar posição válida
+      const safePosition = position || new Vector3(
+        (Math.random() - 0.5) * 15,
+        (Math.random() - 0.5) * 15,
+        (Math.random() - 0.5) * 15
+      );
+
+      // Validar e sanitizar os dados da carteira
+      const sanitizedWalletData = {
+        balance: typeof walletData?.balance === 'number' && !isNaN(walletData.balance) ? walletData.balance : 0,
+        total_received: typeof walletData?.total_received === 'number' && !isNaN(walletData.total_received) ? walletData.total_received : 0,
+        total_sent: typeof walletData?.total_sent === 'number' && !isNaN(walletData.total_sent) ? walletData.total_sent : 0,
+        transaction_count: typeof walletData?.transaction_count === 'number' && !isNaN(walletData.transaction_count) ? walletData.transaction_count : 0,
+        transactions: Array.isArray(walletData?.transactions) ? walletData.transactions : []
+      };
+
       const newNode: WalletNode = {
         id: `wallet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         address: address.trim(),
-        position: position || new Vector3(
-          (Math.random() - 0.5) * 15,
-          (Math.random() - 0.5) * 15,
-          (Math.random() - 0.5) * 15
-        ),
-        balance: Number(walletData.balance) || 0,
-        totalReceived: Number(walletData.total_received) || 0,
-        totalSent: Number(walletData.total_sent) || 0,
-        transactionCount: Number(walletData.transaction_count) || 0,
+        position: safePosition,
+        balance: sanitizedWalletData.balance,
+        totalReceived: sanitizedWalletData.total_received,
+        totalSent: sanitizedWalletData.total_sent,
+        transactionCount: sanitizedWalletData.transaction_count,
         isLocked: false,
         connections: [],
         type: 'main',
-        transactions: walletData.transactions || []
+        transactions: sanitizedWalletData.transactions
       };
 
       console.log('📝 [useWalletNodes] Nó criado:', newNode);
@@ -101,6 +118,11 @@ export const useWalletNodes = () => {
   }, []);
 
   const updateNodePosition = useCallback((nodeId: string, newPosition: Vector3) => {
+    if (!newPosition || typeof newPosition.x !== 'number' || isNaN(newPosition.x)) {
+      console.warn('⚠️ [useWalletNodes] Posição inválida para o nó:', nodeId);
+      return;
+    }
+    
     setWalletNodes(prev =>
       prev.map(n =>
         n.id === nodeId ? { ...n, position: newPosition.clone() } : n
@@ -120,5 +142,3 @@ export const useWalletNodes = () => {
     updateNodePosition
   };
 };
-
-export type { WalletNode };
