@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Share, Copy, Gift } from 'lucide-react';
+import { Share, Copy, Gift, RefreshCw } from 'lucide-react';
 
 interface ReferralCodeCardProps {
   referralCode: string;
@@ -52,12 +52,12 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
               <Input 
                 value={referralCode} 
                 readOnly 
-                className="font-mono text-center text-lg"
+                className="font-mono text-center text-lg font-bold"
               />
               <Button 
                 variant="outline" 
                 onClick={handleCopyCode}
-                className={copiedCode ? 'bg-green-100' : ''}
+                className={copiedCode ? 'bg-green-100 border-green-300' : ''}
                 disabled={isLoading}
               >
                 <Copy className="h-4 w-4" />
@@ -65,14 +65,29 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
               </Button>
             </div>
             
-            <Button 
-              onClick={onShareLink} 
-              className="w-full"
-              disabled={isLoading}
-            >
-              <Share className="h-4 w-4 mr-2" />
-              Compartilhar Link
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={onShareLink} 
+                className="flex-1"
+                disabled={isLoading}
+              >
+                <Share className="h-4 w-4 mr-2" />
+                Compartilhar Link
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={onGenerateCode} 
+                disabled={isLoading}
+                title="Gerar novo código"
+              >
+                {isLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </>
         ) : (
           <Button 
@@ -80,8 +95,17 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
             className="w-full"
             disabled={isLoading}
           >
-            <Gift className="h-4 w-4 mr-2" />
-            {isLoading ? 'Gerando...' : 'Gerar Código de Indicação'}
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                <Gift className="h-4 w-4 mr-2" />
+                Gerar Código de Indicação
+              </>
+            )}
           </Button>
         )}
         
@@ -108,6 +132,17 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
+          </div>
+        )}
+
+        {referralCode && (
+          <div className="text-center p-3 bg-bitcoin/10 rounded-lg border border-bitcoin/20">
+            <p className="text-sm font-medium text-bitcoin">
+              🎯 Link de Cadastro com seu Código:
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 break-all">
+              {window.location.origin}/auth?ref={referralCode}
+            </p>
           </div>
         )}
       </CardContent>
