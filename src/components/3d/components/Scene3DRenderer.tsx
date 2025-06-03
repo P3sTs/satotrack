@@ -15,18 +15,9 @@ interface Scene3DRendererProps {
   onRemoveNode: (nodeId: string) => void;
 }
 
-// Error boundary component for 3D scene
-const Scene3DContent: React.FC<{
-  walletNodes: WalletNode[];
-  onWalletClick: (wallet: WalletNode) => void;
-  onNodePositionChange: (nodeId: string, position: Vector3) => void;
-  onToggleLock: (nodeId: string) => void;
-  onRemoveNode: (nodeId: string) => void;
-}> = ({ walletNodes, onWalletClick, onNodePositionChange, onToggleLock, onRemoveNode }) => {
-  const controlsRef = useRef<any>();
-
-  // Validar walletNodes
-  const validWalletNodes = walletNodes.filter(node => 
+// Função de validação separada para evitar re-renderizações
+const validateWalletNode = (node: WalletNode): boolean => {
+  return !!(
     node && 
     node.id && 
     node.address &&
@@ -38,8 +29,33 @@ const Scene3DContent: React.FC<{
     typeof node.position.z === 'number' && 
     !isNaN(node.position.z)
   );
+};
+
+// Error boundary component for 3D scene
+const Scene3DContent: React.FC<{
+  walletNodes: WalletNode[];
+  onWalletClick: (wallet: WalletNode) => void;
+  onNodePositionChange: (nodeId: string, position: Vector3) => void;
+  onToggleLock: (nodeId: string) => void;
+  onRemoveNode: (nodeId: string) => void;
+}> = ({ walletNodes, onWalletClick, onNodePositionChange, onToggleLock, onRemoveNode }) => {
+  // Validar walletNodes com memoização
+  const validWalletNodes = React.useMemo(() => {
+    return walletNodes.filter(validateWalletNode);
+  }, [walletNodes]);
 
   console.log('🎮 [Scene3DContent] Nós válidos:', validWalletNodes.length, 'de', walletNodes.length);
+
+  // Callbacks memoizados para evitar re-renderizações
+  const handleWalletClick = React.useCallback((wallet: WalletNode) => {
+    onWalletClick(wallet);
+  }, [onWalletClick]);
+
+  const handlePositionChange = React.useCallback((nodeId: string, position: Vector3) => {
+    if (position && typeof position.x === 'number' && !isNaN(position.x)) {
+      onNodePositionChange(nodeId, position);
+    }
+  }, [onNodePositionChange]);
 
   return (
     <>
@@ -71,10 +87,10 @@ const Scene3DContent: React.FC<{
         <WalletBubble
           key={node.id}
           node={node}
-          onClick={() => onWalletClick(node)}
+          onClick={() => handleWalletClick(node)}
           onPositionChange={(newPosition) => {
             if (!node.isLocked && newPosition) {
-              onNodePositionChange(node.id, newPosition);
+              handlePositionChange(node.id, newPosition);
             }
           }}
           onToggleLock={() => onToggleLock(node.id)}
@@ -84,7 +100,6 @@ const Scene3DContent: React.FC<{
 
       {/* Controles de órbita otimizados */}
       <OrbitControls
-        ref={controlsRef}
         enablePan={true}
         enableZoom={true}
         enableRotate={true}

@@ -53,65 +53,63 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
     }
   });
 
-  // Handlers simplificados
-  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+  // Handlers simplificados - sem usar props diretamente em callbacks
+  const handlePointerDown = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (node.isLocked) return;
     event.stopPropagation();
     setDragging(true);
-  };
+  }, [node.isLocked]);
 
-  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerUp = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (dragging && groupRef.current) {
       event.stopPropagation();
-      onPositionChange(groupRef.current.position.clone());
+      const position = groupRef.current.position.clone();
+      onPositionChange(position);
     }
     setDragging(false);
-  };
+  }, [dragging, onPositionChange]);
 
-  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerMove = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (!dragging || node.isLocked || !groupRef.current) return;
     event.stopPropagation();
     
     if (event.point) {
       groupRef.current.position.copy(event.point);
     }
-  };
+  }, [dragging, node.isLocked]);
 
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+  const handleClick = React.useCallback((event: ThreeEvent<MouseEvent>) => {
     if (!dragging) {
       event.stopPropagation();
       onClick();
     }
-  };
+  }, [dragging, onClick]);
 
-  // Posição segura
-  const safePosition: [number, number, number] = useMemo(() => {
+  // Posição segura usando array simples
+  const position = useMemo(() => {
     const pos = node.position;
     return [
       typeof pos.x === 'number' && !isNaN(pos.x) ? pos.x : 0,
       typeof pos.y === 'number' && !isNaN(pos.y) ? pos.y : 0,
       typeof pos.z === 'number' && !isNaN(pos.z) ? pos.z : 0
-    ];
+    ] as [number, number, number];
   }, [node.position]);
 
-  // Propriedades seguras para os componentes - com validação rigorosa
-  const safeSize = Math.max(0.5, Math.min(3, visualProps.size));
-  const safeColor = visualProps.color || '#06b6d4';
-  const safeGlowSize = Math.max(0.6, Math.min(4, visualProps.glowSize || safeSize * 1.15));
-  const safeInnerRadius = Math.max(0.7, Math.min(4, visualProps.innerRadius || safeSize * 1.3));
-  const safeOuterRadius = Math.max(0.8, Math.min(5, visualProps.outerRadius || safeSize * 1.5));
-
-  // Validação final dos argumentos da Sphere
-  const sphereArgs: [number, number, number] = [
+  // Propriedades seguras - valores primitivos apenas
+  const safeSize = useMemo(() => Math.max(0.5, Math.min(3, visualProps.size || 1)), [visualProps.size]);
+  const safeColor = useMemo(() => visualProps.color || '#06b6d4', [visualProps.color]);
+  
+  // Args da Sphere como valores primitivos
+  const sphereArgs = useMemo((): [number, number, number] => [
     safeSize,
-    Math.max(8, Math.min(32, 16)), // widthSegments
-    Math.max(6, Math.min(32, 16))  // heightSegments
-  ];
+    16, // widthSegments fixo
+    16  // heightSegments fixo
+  ], [safeSize]);
 
   return (
     <group 
       ref={groupRef}
-      position={safePosition}
+      position={position}
     >
       <Sphere
         ref={meshRef}
@@ -125,7 +123,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       >
         <meshStandardMaterial
           color={safeColor}
-          transparent
+          transparent={true}
           opacity={hovered ? 0.9 : 0.7}
           roughness={0.2}
           metalness={0.6}
@@ -133,7 +131,7 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       </Sphere>
 
       <WalletGlow 
-        glowSize={safeGlowSize} 
+        glowSize={safeSize * 1.15} 
         color={safeColor} 
       />
 
@@ -144,8 +142,8 @@ const WalletBubble: React.FC<WalletBubbleProps> = memo(({
       />
 
       <ConnectionRing 
-        innerRadius={safeInnerRadius}
-        outerRadius={safeOuterRadius}
+        innerRadius={safeSize * 1.3}
+        outerRadius={safeSize * 1.5}
         hasConnections={Boolean(node.connections && node.connections.length > 0)}
       />
     </group>

@@ -13,8 +13,8 @@ const ConnectionRing: React.FC<ConnectionRingProps> = ({
   outerRadius, 
   hasConnections 
 }) => {
+  // Args do ring como valores primitivos seguros
   const ringArgs = useMemo((): [number, number, number] => {
-    // Strict validation to prevent Three.js errors
     const safeInnerRadius = typeof innerRadius === 'number' && !isNaN(innerRadius) && innerRadius > 0 ? innerRadius : 1.3;
     const safeOuterRadius = typeof outerRadius === 'number' && !isNaN(outerRadius) && outerRadius > safeInnerRadius ? outerRadius : safeInnerRadius + 0.2;
     
@@ -28,7 +28,7 @@ const ConnectionRing: React.FC<ConnectionRingProps> = ({
       <ringGeometry args={ringArgs} />
       <meshBasicMaterial
         color="#fbbf24"
-        transparent
+        transparent={true}
         opacity={0.5}
         side={THREE.DoubleSide}
       />
