@@ -315,6 +315,9 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          premium_until: string | null
+          referral_code: string | null
+          total_referrals: number | null
           updated_at: string
         }
         Insert: {
@@ -322,6 +325,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          premium_until?: string | null
+          referral_code?: string | null
+          total_referrals?: number | null
           updated_at?: string
         }
         Update: {
@@ -329,9 +335,54 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          premium_until?: string | null
+          referral_code?: string | null
+          total_referrals?: number | null
           updated_at?: string
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referred_user_email: string
+          referred_user_id: string
+          referrer_user_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referred_user_email: string
+          referred_user_id: string
+          referrer_user_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referred_user_email?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sync_logs: {
         Row: {

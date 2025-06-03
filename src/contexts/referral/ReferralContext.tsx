@@ -6,7 +6,8 @@ import { toast } from '@/hooks/use-toast';
 
 export interface ReferralData {
   id: string;
-  user_id: string;
+  referrer_user_id: string;
+  referred_user_id: string;
   referred_user_email: string;
   created_at: string;
   status: 'completed' | 'pending';
@@ -132,23 +133,44 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
         .eq('id', user.id)
         .single();
       
-      if (profileError) throw profileError;
-      
-      if (profile) {
+      if (profileError) {
+        console.error('Erro ao buscar perfil:', profileError);
+        // Se o perfil não existir, criar um novo
+        if (profileError.code === 'PGRST116') {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              referral_code: null,
+              total_referrals: 0
+            });
+          
+          if (insertError) {
+            console.error('Erro ao criar perfil:', insertError);
+          }
+        }
+      } else if (profile) {
         setReferralCode(profile.referral_code || '');
         setTotalReferrals(profile.total_referrals || 0);
       }
       
-      // Buscar histórico de indicações
-      const { data: referrals, error: referralsError } = await supabase
-        .from('referrals')
-        .select('*')
-        .eq('referrer_user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (referralsError) throw referralsError;
-      
-      setReferralHistory(referrals || []);
+      // Buscar histórico de indicações apenas se temos uma query válida
+      try {
+        const { data: referrals, error: referralsError } = await supabase
+          .from('referrals')
+          .select('*')
+          .eq('referrer_user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (referralsError) {
+          console.error('Erro ao buscar indicações:', referralsError);
+        } else {
+          setReferralHistory(referrals || []);
+        }
+      } catch (error) {
+        console.error('Erro na consulta de referrals:', error);
+        setReferralHistory([]);
+      }
       
     } catch (error) {
       console.error('Erro ao buscar dados de indicação:', error);
