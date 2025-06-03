@@ -154,7 +154,7 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
         setTotalReferrals(profile.total_referrals || 0);
       }
       
-      // Buscar histórico de indicações apenas se temos uma query válida
+      // Buscar histórico de indicações com type assertion
       try {
         const { data: referrals, error: referralsError } = await supabase
           .from('referrals')
@@ -165,7 +165,12 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
         if (referralsError) {
           console.error('Erro ao buscar indicações:', referralsError);
         } else {
-          setReferralHistory(referrals || []);
+          // Type assertion to ensure status is properly typed
+          const typedReferrals = (referrals || []).map(referral => ({
+            ...referral,
+            status: referral.status as 'completed' | 'pending'
+          })) as ReferralData[];
+          setReferralHistory(typedReferrals);
         }
       } catch (error) {
         console.error('Erro na consulta de referrals:', error);
