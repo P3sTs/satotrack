@@ -5,7 +5,7 @@ import { OrbitControls, Environment, Grid } from '@react-three/drei';
 import { Vector3 } from 'three';
 import WalletBubble from '../WalletBubble';
 import FloatingParticles from '../FloatingParticles';
-import { WalletNode } from '../hooks/useWalletNodes';
+import { WalletNode } from '../types/WalletNode';
 
 interface Scene3DRendererProps {
   walletNodes: WalletNode[];

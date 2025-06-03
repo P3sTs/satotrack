@@ -60,9 +60,9 @@ export const useWalletData = () => {
     setIsLoading(true);
     
     try {
-      // Validação básica
-      if (!address || typeof address !== 'string' || address.length < 26 || address.length > 35) {
-        throw new Error('Formato de endereço Bitcoin inválido');
+      // Validação básica mais flexível
+      if (!address || typeof address !== 'string' || address.trim().length < 20) {
+        throw new Error('Formato de endereço inválido');
       }
 
       console.log('✅ [useWalletData] Endereço validado, buscando dados...');

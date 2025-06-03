@@ -34,7 +34,8 @@ export const useWalletNodes = () => {
         transactionCount: Number(walletData.transaction_count) || 0,
         isLocked: false,
         connections: [],
-        type: 'main'
+        type: 'main',
+        transactions: walletData.transactions || []
       };
 
       console.log('📝 [useWalletNodes] Nó criado:', newNode);
