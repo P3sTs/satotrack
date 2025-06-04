@@ -1,41 +1,33 @@
 
 import React, { Suspense } from 'react';
-import TopBar from './TopBar';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Footer from '../Footer';
 import { useAuth } from '@/contexts/auth';
 import { Advertisement } from '../monetization/Advertisement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarProvider, SidebarRail, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import NewAppSidebar from './NewAppSidebar';
 import MobileNavigation from '../navigation/MobileNavigation';
-import AppContent from './AppContent';
+import ContextualHeader from './ContextualHeader';
+import Footer from '../Footer';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-/**
- * Loading fallback component for suspense
- */
 const LoadingFallback = () => (
-  <div className="p-4">
-    <div className="space-y-4">
+  <div className="p-6 space-y-6">
+    <div className="space-y-2">
       <Skeleton className="h-8 w-full max-w-md" />
+      <Skeleton className="h-4 w-full max-w-lg" />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <Skeleton className="h-32 w-full" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-32 w-full" />
     </div>
   </div>
 );
 
-/**
- * Main application layout component
- * Handles responsive layout with sidebar and mobile navigation
- */
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { userPlan } = useAuth();
   const isMobile = useIsMobile();
@@ -43,7 +35,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex flex-col min-h-screen w-full">
+      <div className="flex flex-col min-h-screen w-full bg-dashboard-dark">
         {/* Mobile Navigation - only shown on mobile devices */}
         {isMobile && <MobileNavigation />}
         
@@ -52,20 +44,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {!isMobile && <NewAppSidebar />}
           <SidebarRail className={isMobile ? "hidden" : "block"} />
           
-          <SidebarInset className="bg-dashboard-dark text-white">
-            {/* Desktop TopBar */}
+          <SidebarInset className="bg-dashboard-dark text-white flex flex-col">
+            {/* Contextual Header */}
             {!isMobile && (
-              <div className="flex items-center p-2 border-b border-dashboard-medium">
-                <SidebarTrigger />
-                <TopBar />
+              <div className="flex items-center border-b border-dashboard-medium/30">
+                <div className="p-2">
+                  <SidebarTrigger />
+                </div>
+                <div className="flex-1">
+                  <ContextualHeader />
+                </div>
               </div>
             )}
             
             {/* Main Content Area */}
-            <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
-              <Suspense fallback={<LoadingFallback />}>
-                {children}
-              </Suspense>
+            <div className="flex-1 overflow-auto">
+              <div className="p-4 sm:p-6">
+                <Suspense fallback={<LoadingFallback />}>
+                  {children}
+                </Suspense>
+              </div>
             </div>
             
             <Footer />
