@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface ReferralData {
   id: string;
@@ -45,31 +45,27 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
   const referralsNeeded = 20 - (totalReferrals % 20);
 
   // Função para criar código baseado no nome do usuário
-  const createUserBasedCode = async (userName: string): Promise<string> => {
+  const createUserBasedCode = (userName: string, userId: string): string => {
     // Limpar e abreviar o nome
     const cleanName = userName
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remove acentos
       .replace(/[^a-zA-Z0-9]/g, '') // Remove caracteres especiais
       .toUpperCase()
-      .substring(0, 6); // Máximo 6 caracteres
+      .substring(0, 4); // Máximo 4 caracteres
 
     // Se o nome limpo for muito curto, usar o user ID
-    const namePrefix = cleanName.length >= 3 ? cleanName : user?.id?.substring(0, 6).toUpperCase() || 'USER';
+    const namePrefix = cleanName.length >= 3 ? cleanName : userId.substring(0, 4).toUpperCase();
     
     // Adicionar sufixo único baseado no user ID
-    const userSuffix = user?.id?.substring(0, 4).toUpperCase() || '0000';
+    const userSuffix = userId.substring(0, 4).toUpperCase();
     
     return `SATO${namePrefix}${userSuffix}`;
   };
 
   const generateReferralCode = async () => {
     if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para gerar um código de indicação.",
-        variant: "destructive"
-      });
+      toast.error("Você precisa estar logado para gerar um código de indicação.");
       return;
     }
     
@@ -82,20 +78,53 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
         .from('profiles')
         .select('full_name, referral_code')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
       
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
-        throw profileError;
+        
+        // Se não existe perfil, criar um novo
+        if (profileError.code === 'PGRST116') {
+          const userName = user.user_metadata?.full_name || 
+                          user.user_metadata?.name || 
+                          user.email?.split('@')[0] || 
+                          'Usuario';
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              full_name: userName,
+              referral_code: null,
+              total_referrals: 0
+            });
+          
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            throw insertError;
+          }
+          
+          // Buscar novamente o perfil criado
+          const { data: newProfile, error: newProfileError } = await supabase
+            .from('profiles')
+            .select('full_name, referral_code')
+            .eq('id', user.id)
+            .single();
+          
+          if (newProfileError) {
+            throw newProfileError;
+          }
+          
+          profile = newProfile;
+        } else {
+          throw profileError;
+        }
       }
       
       // Se já tem código, retornar o existente
       if (profile?.referral_code) {
         setReferralCode(profile.referral_code);
-        toast({
-          title: "Código já existe!",
-          description: "Você já possui um código de indicação.",
-        });
+        toast.success("Código de indicação já existe!");
         return;
       }
       
@@ -109,7 +138,7 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       console.log('Using name for code generation:', userName);
       
       // Gerar código baseado no nome
-      const baseCode = await createUserBasedCode(userName);
+      const baseCode = createUserBasedCode(userName, user.id);
       console.log('Generated base code:', baseCode);
       
       // Verificar se o código já existe
@@ -159,38 +188,29 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       
       console.log('Final code to save:', finalCode);
       
-      // Salvar o código no perfil (criar ou atualizar)
-      const { error: upsertError } = await supabase
+      // Salvar o código no perfil
+      const { error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
+        .update({
           referral_code: finalCode,
           full_name: userName // Garantir que o nome está salvo
-        }, {
-          onConflict: 'id'
-        });
+        })
+        .eq('id', user.id);
       
-      if (upsertError) {
-        console.error('Error saving referral code:', upsertError);
-        throw upsertError;
+      if (updateError) {
+        console.error('Error saving referral code:', updateError);
+        throw updateError;
       }
       
       setReferralCode(finalCode);
       
-      toast({
-        title: "Código gerado!",
-        description: `Seu código de indicação ${finalCode} foi criado com sucesso.`,
-      });
+      toast.success(`Código gerado com sucesso: ${finalCode}`);
       
       console.log('Referral code generated successfully:', finalCode);
       
     } catch (error) {
       console.error('Erro ao gerar código:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível gerar o código de indicação. Tente novamente.",
-        variant: "destructive"
-      });
+      toast.error("Não foi possível gerar o código de indicação. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -198,37 +218,22 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
 
   const copyReferralCode = async () => {
     if (!referralCode) {
-      toast({
-        title: "Erro",
-        description: "Nenhum código de indicação disponível para copiar.",
-        variant: "destructive"
-      });
+      toast.error("Nenhum código de indicação disponível para copiar.");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(referralCode);
-      toast({
-        title: "Código copiado!",
-        description: "Seu código de indicação foi copiado para a área de transferência.",
-      });
+      toast.success("Código copiado para a área de transferência!");
     } catch (error) {
       console.error('Error copying to clipboard:', error);
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o código. Tente copiar manualmente.",
-        variant: "destructive"
-      });
+      toast.error("Não foi possível copiar o código. Tente copiar manualmente.");
     }
   };
 
   const shareReferralLink = async () => {
     if (!referralCode) {
-      toast({
-        title: "Erro",
-        description: "Gere um código de indicação primeiro.",
-        variant: "destructive"
-      });
+      toast.error("Gere um código de indicação primeiro.");
       return;
     }
 
@@ -242,21 +247,16 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
           text: shareText,
           url: shareUrl
         });
+        toast.success("Link compartilhado com sucesso!");
       } catch (error) {
         console.log('Erro ao compartilhar:', error);
         // Fallback para clipboard
         await navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Link copiado!",
-          description: "Como o compartilhamento não funcionou, o link foi copiado para a área de transferência.",
-        });
+        toast.success("Link copiado para compartilhar!");
       }
     } else {
       await navigator.clipboard.writeText(shareText);
-      toast({
-        title: "Link copiado!",
-        description: "Link de indicação copiado para compartilhar.",
-      });
+      toast.success("Link copiado para compartilhar!");
     }
   };
 
@@ -325,7 +325,6 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
           setReferralHistory([]);
         } else {
           console.log('Referrals found:', referrals?.length || 0);
-          // Type the data properly to match our interface
           const typedReferrals: ReferralData[] = (referrals || []).map(referral => ({
             ...referral,
             status: referral.status as 'completed' | 'pending'
@@ -339,11 +338,7 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       
     } catch (error) {
       console.error('Erro ao buscar dados de indicação:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os dados de indicação.",
-        variant: "destructive"
-      });
+      toast.error("Não foi possível carregar os dados de indicação.");
     } finally {
       setIsLoading(false);
     }

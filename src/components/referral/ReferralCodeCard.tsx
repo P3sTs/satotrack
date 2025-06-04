@@ -52,12 +52,12 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
               <Input 
                 value={referralCode} 
                 readOnly 
-                className="font-mono text-center text-lg font-bold"
+                className="font-mono text-center text-lg font-bold bg-muted"
               />
               <Button 
                 variant="outline" 
                 onClick={handleCopyCode}
-                className={copiedCode ? 'bg-green-100 border-green-300' : ''}
+                className={copiedCode ? 'bg-green-100 border-green-300 text-green-800' : ''}
                 disabled={isLoading}
               >
                 <Copy className="h-4 w-4" />
@@ -94,11 +94,12 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
             onClick={onGenerateCode} 
             className="w-full"
             disabled={isLoading}
+            size="lg"
           >
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Gerando...
+                Gerando código...
               </>
             ) : (
               <>
@@ -109,7 +110,7 @@ const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
           </Button>
         )}
         
-        <div className="bg-dashboard-medium/50 p-4 rounded-lg">
+        <div className="bg-muted/50 p-4 rounded-lg">
           <h4 className="font-medium mb-2">Como funciona:</h4>
           <ul className="text-sm space-y-1 text-muted-foreground">
             <li>• Compartilhe seu código único com amigos</li>
