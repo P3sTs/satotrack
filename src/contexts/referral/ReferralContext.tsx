@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +44,25 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
 
   const referralsNeeded = 20 - (totalReferrals % 20);
 
+  // Função para criar código baseado no nome do usuário
+  const createUserBasedCode = async (userName: string): Promise<string> => {
+    // Limpar e abreviar o nome
+    const cleanName = userName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-zA-Z0-9]/g, '') // Remove caracteres especiais
+      .toUpperCase()
+      .substring(0, 6); // Máximo 6 caracteres
+
+    // Se o nome limpo for muito curto, usar o user ID
+    const namePrefix = cleanName.length >= 3 ? cleanName : user?.id?.substring(0, 6).toUpperCase() || 'USER';
+    
+    // Adicionar sufixo único baseado no user ID
+    const userSuffix = user?.id?.substring(0, 4).toUpperCase() || '0000';
+    
+    return `SATO${namePrefix}${userSuffix}`;
+  };
+
   const generateReferralCode = async () => {
     if (!user) {
       toast({
@@ -55,59 +75,115 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
     
     try {
       setIsLoading(true);
+      console.log('Starting referral code generation for user:', user.id);
       
-      // Gerar código único baseado no user ID e timestamp
-      const timestamp = Date.now().toString(36);
-      const userPrefix = user.id.slice(0, 6).toUpperCase();
-      const code = `SATO${userPrefix}${timestamp.toUpperCase()}`;
+      // Buscar dados do perfil do usuário para obter o nome
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name, referral_code')
+        .eq('id', user.id)
+        .maybeSingle();
       
-      console.log('Generating referral code:', code, 'for user:', user.id);
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
+      
+      // Se já tem código, retornar o existente
+      if (profile?.referral_code) {
+        setReferralCode(profile.referral_code);
+        toast({
+          title: "Código já existe!",
+          description: "Você já possui um código de indicação.",
+        });
+        return;
+      }
+      
+      // Obter nome do usuário (do perfil ou dos metadados)
+      let userName = profile?.full_name || 
+                   user.user_metadata?.full_name || 
+                   user.user_metadata?.name || 
+                   user.email?.split('@')[0] || 
+                   'Usuario';
+      
+      console.log('Using name for code generation:', userName);
+      
+      // Gerar código baseado no nome
+      const baseCode = await createUserBasedCode(userName);
+      console.log('Generated base code:', baseCode);
       
       // Verificar se o código já existe
       const { data: existingCode, error: checkError } = await supabase
         .from('profiles')
         .select('referral_code')
-        .eq('referral_code', code)
+        .eq('referral_code', baseCode)
         .maybeSingle();
       
-      if (checkError) {
+      if (checkError && checkError.code !== 'PGRST116') {
         console.error('Error checking existing code:', checkError);
         throw checkError;
       }
       
+      let finalCode = baseCode;
+      
+      // Se código já existe, adicionar sufixo numérico
       if (existingCode) {
-        // Se código já existe, gerar um novo com sufixo aleatório
-        const randomSuffix = Math.random().toString(36).substr(2, 3).toUpperCase();
-        const newCode = `${code}${randomSuffix}`;
+        let counter = 1;
+        let isUnique = false;
         
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            referral_code: newCode
-          });
+        while (!isUnique && counter < 100) {
+          const testCode = `${baseCode}${counter.toString().padStart(2, '0')}`;
+          
+          const { data: testExisting, error: testError } = await supabase
+            .from('profiles')
+            .select('referral_code')
+            .eq('referral_code', testCode)
+            .maybeSingle();
+          
+          if (testError && testError.code !== 'PGRST116') {
+            throw testError;
+          }
+          
+          if (!testExisting) {
+            finalCode = testCode;
+            isUnique = true;
+          } else {
+            counter++;
+          }
+        }
         
-        if (updateError) throw updateError;
-        setReferralCode(newCode);
-      } else {
-        // Salvar o código no perfil do usuário
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            referral_code: code
-          });
-        
-        if (updateError) throw updateError;
-        setReferralCode(code);
+        if (!isUnique) {
+          throw new Error('Não foi possível gerar um código único');
+        }
       }
+      
+      console.log('Final code to save:', finalCode);
+      
+      // Salvar o código no perfil (criar ou atualizar)
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          referral_code: finalCode,
+          full_name: userName // Garantir que o nome está salvo
+        }, {
+          onConflict: 'id'
+        });
+      
+      if (upsertError) {
+        console.error('Error saving referral code:', upsertError);
+        throw upsertError;
+      }
+      
+      setReferralCode(finalCode);
       
       toast({
         title: "Código gerado!",
-        description: "Seu código de indicação foi criado com sucesso.",
+        description: `Seu código de indicação ${finalCode} foi criado com sucesso.`,
       });
       
-      console.log('Referral code generated successfully:', code);
+      console.log('Referral code generated successfully:', finalCode);
+      
     } catch (error) {
       console.error('Erro ao gerar código:', error);
       toast({
@@ -197,33 +273,40 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       // Buscar dados do perfil
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('referral_code, total_referrals')
+        .select('referral_code, total_referrals, full_name')
         .eq('id', user.id)
         .maybeSingle();
       
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.error('Erro ao buscar perfil:', profileError);
+        throw profileError;
+      }
+      
+      if (!profile) {
+        // Criar perfil se não existir
+        console.log('Profile not found, creating new profile');
+        const userName = user.user_metadata?.full_name || 
+                        user.user_metadata?.name || 
+                        user.email?.split('@')[0] || 
+                        'Usuario';
         
-        // Se o perfil não existir, criar um novo
-        if (profileError.code === 'PGRST116') {
-          console.log('Profile not found, creating new profile');
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              referral_code: null,
-              total_referrals: 0
-            });
-          
-          if (insertError) {
-            console.error('Erro ao criar perfil:', insertError);
-          } else {
-            console.log('Profile created successfully');
-            setReferralCode('');
-            setTotalReferrals(0);
-          }
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            full_name: userName,
+            referral_code: null,
+            total_referrals: 0
+          });
+        
+        if (insertError) {
+          console.error('Erro ao criar perfil:', insertError);
+        } else {
+          console.log('Profile created successfully');
+          setReferralCode('');
+          setTotalReferrals(0);
         }
-      } else if (profile) {
+      } else {
         console.log('Profile found:', profile);
         setReferralCode(profile.referral_code || '');
         setTotalReferrals(profile.total_referrals || 0);
