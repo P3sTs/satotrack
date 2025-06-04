@@ -1,6 +1,7 @@
+
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/auth';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/auth';
 import { CarteirasProvider } from './contexts/carteiras';
 import { ViewModeProvider } from './contexts/ViewModeContext';
 import { ReferralProvider } from './contexts/referral/ReferralContext';
@@ -29,6 +30,7 @@ import CarteiraDetalhes from './pages/CarteiraDetalhes';
 import ApiDashboard from './pages/ApiDashboard';
 import Privacidade from './pages/Privacidade';
 import TermosUso from './pages/TermosUso';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -89,24 +91,6 @@ function Index() {
   }
   
   return <Navigate to="/landing" replace />;
-}
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-satotrack-neon"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
