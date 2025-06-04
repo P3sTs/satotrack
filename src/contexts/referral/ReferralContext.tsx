@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -243,7 +242,12 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
           setReferralHistory([]);
         } else {
           console.log('Referrals found:', referrals?.length || 0);
-          setReferralHistory(referrals || []);
+          // Type the data properly to match our interface
+          const typedReferrals: ReferralData[] = (referrals || []).map(referral => ({
+            ...referral,
+            status: referral.status as 'completed' | 'pending'
+          }));
+          setReferralHistory(typedReferrals);
         }
       } catch (error) {
         console.error('Erro na consulta de referrals:', error);
