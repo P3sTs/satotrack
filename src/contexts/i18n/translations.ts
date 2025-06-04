@@ -47,6 +47,21 @@ export interface Translations {
     theme: string;
     notifications: string;
     profile: string;
+    appearance: string;
+    appearanceDescription: string;
+    preferences: string;
+    preferencesDescription: string;
+    defaultWallet: string;
+    selectTheme: string;
+    selectLanguage: string;
+    selectDefaultWallet: string;
+    darkTheme: string;
+    lightTheme: string;
+    systemTheme: string;
+    enableNotifications: string;
+    autoSync: string;
+    saveSuccess: string;
+    loginRequired: string;
   };
 }
 
@@ -98,7 +113,22 @@ export const translations: Record<string, Translations> = {
       language: 'Idioma',
       theme: 'Tema',
       notifications: 'Notificações',
-      profile: 'Perfil'
+      profile: 'Perfil',
+      appearance: 'Aparência',
+      appearanceDescription: 'Configure a aparência da aplicação',
+      preferences: 'Preferências',
+      preferencesDescription: 'Configure suas preferências de uso',
+      defaultWallet: 'Carteira Padrão',
+      selectTheme: 'Selecione o tema',
+      selectLanguage: 'Selecione o idioma',
+      selectDefaultWallet: 'Selecione uma carteira padrão',
+      darkTheme: 'Escuro',
+      lightTheme: 'Claro',
+      systemTheme: 'Sistema',
+      enableNotifications: 'Ativar notificações',
+      autoSync: 'Sincronização automática',
+      saveSuccess: 'Configurações salvas com sucesso!',
+      loginRequired: 'Você precisa estar logado para acessar as configurações.'
     }
   },
   'en-US': {
@@ -148,7 +178,22 @@ export const translations: Record<string, Translations> = {
       language: 'Language',
       theme: 'Theme',
       notifications: 'Notifications',
-      profile: 'Profile'
+      profile: 'Profile',
+      appearance: 'Appearance',
+      appearanceDescription: 'Configure the application appearance',
+      preferences: 'Preferences',
+      preferencesDescription: 'Configure your usage preferences',
+      defaultWallet: 'Default Wallet',
+      selectTheme: 'Select theme',
+      selectLanguage: 'Select language',
+      selectDefaultWallet: 'Select a default wallet',
+      darkTheme: 'Dark',
+      lightTheme: 'Light',
+      systemTheme: 'System',
+      enableNotifications: 'Enable notifications',
+      autoSync: 'Auto synchronization',
+      saveSuccess: 'Settings saved successfully!',
+      loginRequired: 'You need to be logged in to access settings.'
     }
   }
 };

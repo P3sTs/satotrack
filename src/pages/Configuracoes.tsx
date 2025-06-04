@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { useCarteiras } from '@/contexts/carteiras';
+import { useI18n } from '@/contexts/i18n/I18nContext';
+import { useTheme } from '@/components/theme-provider';
 import {
   Card,
   CardContent,
@@ -25,73 +27,76 @@ import { toast } from 'sonner';
 const Configuracoes = () => {
   const { user } = useAuth();
   const { carteiras, definirCarteiraPrincipal, carteiraPrincipal } = useCarteiras();
+  const { language, setLanguage, availableLanguages, t } = useI18n();
+  const { theme, setTheme } = useTheme();
   
-  const [theme, setTheme] = useState('dark');
-  const [language, setLanguage] = useState('pt-BR');
   const [notifications, setNotifications] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
   const [defaultWallet, setDefaultWallet] = useState(carteiraPrincipal || '');
   
   const handleSaveSettings = () => {
-    // Save theme preference
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    
     // Save wallet preference
-    definirCarteiraPrincipal(defaultWallet || null);
+    if (defaultWallet) {
+      definirCarteiraPrincipal(defaultWallet);
+    }
     
     // Notify user
-    toast.success('Configurações salvas com sucesso!');
+    toast.success(t.settings.saveSuccess || 'Configurações salvas com sucesso!');
   };
   
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Você precisa estar logado para acessar as configurações.</p>
+        <p>{t.settings.loginRequired || 'Você precisa estar logado para acessar as configurações.'}</p>
       </div>
     );
   }
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Configurações</h1>
+      <h1 className="text-2xl font-bold mb-6">{t.settings.title}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Aparência</CardTitle>
+            <CardTitle>{t.settings.appearance || 'Aparência'}</CardTitle>
             <CardDescription>
-              Configure a aparência da aplicação
+              {t.settings.appearanceDescription || 'Configure a aparência da aplicação'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="theme">Tema</Label>
+              <Label htmlFor="theme">{t.settings.theme}</Label>
               <Select 
                 value={theme} 
                 onValueChange={setTheme}
               >
                 <SelectTrigger id="theme">
-                  <SelectValue placeholder="Selecione o tema" />
+                  <SelectValue placeholder={t.settings.selectTheme || 'Selecione o tema'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dark">Escuro</SelectItem>
-                  <SelectItem value="light">Claro</SelectItem>
+                  <SelectItem value="dark">{t.settings.darkTheme || 'Escuro'}</SelectItem>
+                  <SelectItem value="light">{t.settings.lightTheme || 'Claro'}</SelectItem>
+                  <SelectItem value="system">{t.settings.systemTheme || 'Sistema'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="language">Idioma</Label>
+              <Label htmlFor="language">{t.settings.language}</Label>
               <Select 
                 value={language} 
                 onValueChange={setLanguage}
               >
                 <SelectTrigger id="language">
-                  <SelectValue placeholder="Selecione o idioma" />
+                  <SelectValue placeholder={t.settings.selectLanguage || 'Selecione o idioma'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
-                  <SelectItem value="en-US">English (US)</SelectItem>
+                  {availableLanguages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -100,20 +105,20 @@ const Configuracoes = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Preferências</CardTitle>
+            <CardTitle>{t.settings.preferences || 'Preferências'}</CardTitle>
             <CardDescription>
-              Configure suas preferências de uso
+              {t.settings.preferencesDescription || 'Configure suas preferências de uso'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="default-wallet">Carteira Padrão</Label>
+              <Label htmlFor="default-wallet">{t.settings.defaultWallet || 'Carteira Padrão'}</Label>
               <Select 
                 value={defaultWallet} 
                 onValueChange={setDefaultWallet}
               >
                 <SelectTrigger id="default-wallet">
-                  <SelectValue placeholder="Selecione uma carteira padrão" />
+                  <SelectValue placeholder={t.settings.selectDefaultWallet || 'Selecione uma carteira padrão'} />
                 </SelectTrigger>
                 <SelectContent>
                   {carteiras.map(carteira => (
@@ -131,7 +136,9 @@ const Configuracoes = () => {
                 checked={notifications}
                 onCheckedChange={setNotifications}
               />
-              <Label htmlFor="notifications">Ativar notificações</Label>
+              <Label htmlFor="notifications">
+                {t.settings.enableNotifications || 'Ativar notificações'}
+              </Label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -140,7 +147,9 @@ const Configuracoes = () => {
                 checked={autoSync}
                 onCheckedChange={setAutoSync}
               />
-              <Label htmlFor="auto-sync">Sincronização automática</Label>
+              <Label htmlFor="auto-sync">
+                {t.settings.autoSync || 'Sincronização automática'}
+              </Label>
             </div>
           </CardContent>
         </Card>
@@ -148,7 +157,7 @@ const Configuracoes = () => {
       
       <div className="mt-6 text-right">
         <Button onClick={handleSaveSettings}>
-          Salvar Configurações
+          {t.common.save}
         </Button>
       </div>
     </div>

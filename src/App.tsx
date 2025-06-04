@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/auth';
@@ -6,6 +5,7 @@ import { CarteirasProvider } from './contexts/carteiras';
 import { ViewModeProvider } from './contexts/ViewModeContext';
 import { ReferralProvider } from './contexts/referral/ReferralContext';
 import { I18nProvider } from './contexts/i18n/I18nContext';
+import { ThemeProvider } from './components/theme-provider';
 import Dashboard from './pages/Dashboard';
 import WalletsManager from './pages/WalletsManager';
 import NovaCarteira from './pages/NovaCarteira';
@@ -34,44 +34,46 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <AuthProvider>
-      <I18nProvider>
-        <ReferralProvider>
-          <CarteirasProvider>
-            <ViewModeProvider>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/landing" element={<LandingPage />} />
-                <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-                <Route path="/planos" element={<PlanosPage />} />
-                <Route path="/sobre" element={<Sobre />} />
-                <Route path="/privacidade" element={<Privacidade />} />
-                <Route path="/termos-uso" element={<TermosUso />} />
-                <Route path="/referral" element={<AppLayout><ProtectedRoute><ReferralProgram /></ProtectedRoute></AppLayout>} />
-                <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
-                <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
-                <Route path="/bitcoin-lookup" element={<AppLayout><ProtectedRoute><BitcoinLookup /></ProtectedRoute></AppLayout>} />
-                <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
-                <Route path="/carteira/:id" element={<AppLayout><ProtectedRoute><CarteiraDetalhes /></ProtectedRoute></AppLayout>} />
-                <Route path="/nova-carteira" element={<AppLayout><ProtectedRoute><NovaCarteira /></ProtectedRoute></AppLayout>} />
-                <Route path="/configuracoes" element={<AppLayout><ProtectedRoute><Configuracoes /></ProtectedRoute></AppLayout>} />
-                <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />
-                <Route path="/crypto" element={<AppLayout><ProtectedRoute><Crypto /></ProtectedRoute></AppLayout>} />
-                <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucrosPremium /></ProtectedRoute></AppLayout>} />
-                <Route path="/historico" element={<AppLayout><ProtectedRoute><HistoricoPremium /></ProtectedRoute></AppLayout>} />
-                <Route path="/notificacoes" element={<AppLayout><ProtectedRoute><NotificacoesPremium /></ProtectedRoute></AppLayout>} />
-                <Route path="/api" element={<AppLayout><ProtectedRoute><ApiDashboard /></ProtectedRoute></AppLayout>} />
-                <Route path="/politica-privacidade" element={<AppLayout><PoliticaPrivacidade /></AppLayout>} />
-                <Route path="/termos-de-uso" element={<AppLayout><TermosDeUso /></AppLayout>} />
-                <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
-              </Routes>
-              <Toaster />
-            </ViewModeProvider>
-          </CarteirasProvider>
-        </ReferralProvider>
-      </I18nProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="system" storageKey="satotrack-ui-theme">
+      <AuthProvider>
+        <I18nProvider>
+          <ReferralProvider>
+            <CarteirasProvider>
+              <ViewModeProvider>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/landing" element={<LandingPage />} />
+                  <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+                  <Route path="/planos" element={<PlanosPage />} />
+                  <Route path="/sobre" element={<Sobre />} />
+                  <Route path="/privacidade" element={<Privacidade />} />
+                  <Route path="/termos-uso" element={<TermosUso />} />
+                  <Route path="/referral" element={<AppLayout><ProtectedRoute><ReferralProgram /></ProtectedRoute></AppLayout>} />
+                  <Route path="/growth" element={<AppLayout><ProtectedRoute><GrowthDashboard /></ProtectedRoute></AppLayout>} />
+                  <Route path="/dashboard" element={<AppLayout><ProtectedRoute><Dashboard /></ProtectedRoute></AppLayout>} />
+                  <Route path="/bitcoin-lookup" element={<AppLayout><ProtectedRoute><BitcoinLookup /></ProtectedRoute></AppLayout>} />
+                  <Route path="/carteiras" element={<AppLayout><ProtectedRoute><WalletsManager /></ProtectedRoute></AppLayout>} />
+                  <Route path="/carteira/:id" element={<AppLayout><ProtectedRoute><CarteiraDetalhes /></ProtectedRoute></AppLayout>} />
+                  <Route path="/nova-carteira" element={<AppLayout><ProtectedRoute><NovaCarteira /></ProtectedRoute></AppLayout>} />
+                  <Route path="/configuracoes" element={<AppLayout><ProtectedRoute><Configuracoes /></ProtectedRoute></AppLayout>} />
+                  <Route path="/mercado" element={<AppLayout><ProtectedRoute><Mercado /></ProtectedRoute></AppLayout>} />
+                  <Route path="/crypto" element={<AppLayout><ProtectedRoute><Crypto /></ProtectedRoute></AppLayout>} />
+                  <Route path="/projecao-lucros" element={<AppLayout><ProtectedRoute><ProjecaoLucrosPremium /></ProtectedRoute></AppLayout>} />
+                  <Route path="/historico" element={<AppLayout><ProtectedRoute><HistoricoPremium /></ProtectedRoute></AppLayout>} />
+                  <Route path="/notificacoes" element={<AppLayout><ProtectedRoute><NotificacoesPremium /></ProtectedRoute></AppLayout>} />
+                  <Route path="/api" element={<AppLayout><ProtectedRoute><ApiDashboard /></ProtectedRoute></AppLayout>} />
+                  <Route path="/politica-privacidade" element={<AppLayout><PoliticaPrivacidade /></AppLayout>} />
+                  <Route path="/termos-de-uso" element={<AppLayout><TermosDeUso /></AppLayout>} />
+                  <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
+                </Routes>
+                <Toaster />
+              </ViewModeProvider>
+            </CarteirasProvider>
+          </ReferralProvider>
+        </I18nProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
