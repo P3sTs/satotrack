@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/auth';
 import { toast } from '@/hooks/use-toast';
 
 const SidebarFooter: React.FC = () => {
-  const { user, signOut, isAuthenticated } = useAuth();
+  const { user, signOut, isAuthenticated, securityStatus } = useAuth();
   const navigate = useNavigate();
 
   // Get user initials for avatar
@@ -56,8 +56,8 @@ const SidebarFooter: React.FC = () => {
             </div>
           </div>
           
-          {user?.securityStatus && user.securityStatus !== 'secure' && (
-            <SecurityStatus securityStatus={user.securityStatus} />
+          {securityStatus !== 'secure' && (
+            <SecurityStatus securityStatus={securityStatus} />
           )}
           
           <Button 

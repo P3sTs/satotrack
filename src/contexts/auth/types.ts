@@ -15,13 +15,13 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   lastActivity: Date | null;
   updateLastActivity: () => void;
-  securityStatus: 'normal' | 'warning' | 'danger';
+  securityStatus: 'secure' | 'warning' | 'danger';
   failedLoginAttempts: number;
   resetFailedLoginAttempts: () => void;
   userPlan: PlanType;
   apiToken: string | null;
   apiRequestsRemaining: number;
-  upgradeUserPlan: (newPlan: PlanType) => Promise<void>;
+  upgradeUserPlan: (newPlan?: PlanType) => Promise<void>;
   generateApiToken: () => Promise<string>;
   canAddMoreWallets: () => boolean;
   passwordStrength: (password: string) => { score: number; feedback: string };
@@ -32,7 +32,18 @@ export interface AuthContextType {
 }
 
 export interface SecurityStatus {
-  status: 'normal' | 'warning' | 'danger';
+  status: 'secure' | 'warning' | 'danger';
   lastLogin?: Date;
   suspiciousActivity?: boolean;
+}
+
+export interface LoginAttempt {
+  email: string;
+  timestamp: number;
+  success: boolean;
+}
+
+export interface PasswordStrengthResult {
+  score: number;
+  feedback: string;
 }

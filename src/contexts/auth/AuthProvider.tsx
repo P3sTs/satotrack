@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signOut,
     isAuthenticated,
-    lastActivity,
+    lastActivity: lastActivity ? new Date(lastActivity) : null,
     updateLastActivity,
     securityStatus,
     failedLoginAttempts,

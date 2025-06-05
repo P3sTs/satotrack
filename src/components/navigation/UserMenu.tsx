@@ -7,6 +7,7 @@ import { SecurityStatus } from '../auth/SecurityStatus';
 import UserSettings from '../UserSettings';
 import { AuthUser } from '@/contexts/auth/types';
 import { PlanBadge } from '../monetization/PlanDisplay';
+import { useAuth } from '@/contexts/auth';
 
 interface UserMenuProps {
   user: AuthUser | null;
@@ -16,6 +17,8 @@ interface UserMenuProps {
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout, navigate }) => {
+  const { securityStatus } = useAuth();
+
   if (!user) {
     return (
       <Button variant="neon" size="sm" onClick={() => navigate('/auth')}>
@@ -24,9 +27,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, getUserInitials, handleLogout
       </Button>
     );
   }
-
-  // Fix: Acesso seguro ao securityStatus com verificação de tipo e valor padrão
-  const securityStatus = user?.securityStatus || 'secure';
 
   return (
     <div className="flex items-center gap-3">

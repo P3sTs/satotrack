@@ -47,6 +47,10 @@ export const Advertisement: React.FC<AdvertisementProps> = ({ position, classNam
     setVisible(false);
   };
   
+  const handleUpgrade = () => {
+    upgradeUserPlan();
+  };
+  
   if (position === 'footer') {
     return (
       <div className={`fixed bottom-0 left-0 right-0 bg-card p-3 border-t border-border z-30 ${className}`}>
@@ -59,7 +63,7 @@ export const Advertisement: React.FC<AdvertisementProps> = ({ position, classNam
             {ad.title} - <a href={ad.link} className="text-bitcoin hover:underline">{ad.cta}</a>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-xs" onClick={upgradeUserPlan}>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={handleUpgrade}>
               Remover anúncios
             </Button>
             <Button variant="ghost" size="icon" onClick={handleClose} className="h-6 w-6">
@@ -99,7 +103,7 @@ export const Advertisement: React.FC<AdvertisementProps> = ({ position, classNam
             variant="outline" 
             size="sm" 
             className="text-xs h-7"
-            onClick={upgradeUserPlan}
+            onClick={handleUpgrade}
           >
             Remover anúncios
           </Button>
@@ -135,7 +139,7 @@ export const Advertisement: React.FC<AdvertisementProps> = ({ position, classNam
         <Button 
           variant="outline" 
           size="sm"
-          onClick={upgradeUserPlan}
+          onClick={handleUpgrade}
         >
           Remover anúncios
         </Button>

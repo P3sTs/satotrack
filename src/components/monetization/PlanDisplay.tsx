@@ -38,6 +38,10 @@ export const PlanFeature: React.FC<PlanFeatureProps> = ({ feature, includedIn, i
 export const PlanComparisonTable: React.FC = () => {
   const { userPlan, upgradeUserPlan } = useAuth();
   
+  const handleUpgrade = () => {
+    upgradeUserPlan();
+  };
+  
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="grid grid-cols-3 p-4 border-b">
@@ -91,7 +95,7 @@ export const PlanComparisonTable: React.FC = () => {
       {userPlan !== 'premium' && (
         <div className="p-4 bg-muted/30 flex justify-center">
           <Button 
-            onClick={upgradeUserPlan} 
+            onClick={handleUpgrade} 
             className="bg-bitcoin hover:bg-bitcoin/90 text-white"
           >
             <LockOpen className="h-4 w-4 mr-2" />
@@ -108,9 +112,13 @@ export const UpgradeButton: React.FC<{ className?: string }> = ({ className }) =
   
   if (userPlan === 'premium') return null;
   
+  const handleUpgrade = () => {
+    upgradeUserPlan();
+  };
+  
   return (
     <Button 
-      onClick={upgradeUserPlan}
+      onClick={handleUpgrade}
       className={`bg-bitcoin hover:bg-bitcoin/90 text-white ${className}`}
       size="sm"
     >
