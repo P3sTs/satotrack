@@ -85,8 +85,8 @@ export const useAuthFunctions = (
     }
   };
 
-  // Registro com validação de senha
-  const signUp = async (email: string, password: string, fullName: string) => {
+  // Registro com validação de senha e código de referência
+  const signUp = async (email: string, password: string, fullName: string, referralCode?: string) => {
     if (!email || !password || !fullName) {
       toast({
         title: "Campos obrigatórios",
@@ -108,23 +108,49 @@ export const useAuthFunctions = (
       const sanitizedEmail = email.trim().toLowerCase();
       const sanitizedName = fullName.trim();
       
-      const { error } = await supabase.auth.signUp({ 
-        email: sanitizedEmail, 
-        password,
-        options: {
-          data: {
+      // Se há código de referência, usar a Edge Function
+      if (referralCode) {
+        console.log('Using Edge Function for referral registration');
+        
+        const { data, error } = await supabase.functions.invoke('process-referral', {
+          body: {
+            email: sanitizedEmail,
+            password,
             full_name: sanitizedName,
-            created_at: new Date().toISOString()
+            referral_code: referralCode
           }
+        });
+        
+        if (error) {
+          console.error('Edge Function error:', error);
+          throw new Error(error.message || 'Erro ao processar indicação');
         }
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Conta criada com sucesso",
-        description: "Verifique seu email para ativar sua conta.",
-      });
+        
+        toast({
+          title: "Conta criada com sucesso!",
+          description: data?.bonus || "Indicação registrada com sucesso!",
+        });
+        
+      } else {
+        // Registro normal sem referência
+        const { error } = await supabase.auth.signUp({ 
+          email: sanitizedEmail, 
+          password,
+          options: {
+            data: {
+              full_name: sanitizedName,
+              created_at: new Date().toISOString()
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Conta criada com sucesso",
+          description: "Verifique seu email para ativar sua conta.",
+        });
+      }
       
     } catch (error) {
       const authError = error as AuthError;

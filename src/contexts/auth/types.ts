@@ -1,61 +1,38 @@
 
-import { Session, User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 
-export type PlanType = 'free' | 'premium';
+export type AuthUser = User;
 
-export interface SecuritySettings {
-  twoFactorEnabled?: boolean;
-  lastPasswordChange?: Date;
-  securityQuestionEnabled?: boolean;
-  loginNotificationsEnabled?: boolean;
-}
-
-export interface AuthUser extends User {
-  email: string;
-  plan?: PlanType;
-  securityStatus?: 'secure' | 'warning' | 'danger';
-}
+export type PlanType = 'free' | 'premium' | 'enterprise';
 
 export interface AuthContextType {
   session: Session | null;
   user: AuthUser | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
-  signOut: () => Promise<void>;
   loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, referralCode?: string) => Promise<void>;
+  signOut: () => Promise<void>;
   isAuthenticated: boolean;
-  passwordStrength: (password: string) => { score: number; feedback: string };
-  lastActivity: number | null;
+  lastActivity: Date | null;
   updateLastActivity: () => void;
-  securityStatus: 'secure' | 'warning' | 'danger';
+  securityStatus: 'normal' | 'warning' | 'danger';
   failedLoginAttempts: number;
   resetFailedLoginAttempts: () => void;
-  forgotPassword?: (email: string) => Promise<void>;
-  resetPassword?: (password: string) => Promise<void>;
-  updateUserProfile?: (profileData: Partial<AuthUser>) => Promise<void>;
-  updateSecuritySettings?: (settings: Partial<SecuritySettings>) => Promise<void>;
-  securitySettings?: SecuritySettings;
-  isLockedOut?: boolean;
-  lockoutEnd?: Date | null;
-  upgradeUserPlan?: () => Promise<void>;
   userPlan: PlanType;
-  canAddMoreWallets: (currentWallets: number) => boolean;
-  generateApiToken?: () => Promise<string>;
-  apiToken?: string | null;
-  apiRequestsRemaining?: number;
-  createCheckoutSession: () => Promise<void>;
-  openCustomerPortal: () => Promise<void>;
+  apiToken: string | null;
+  apiRequestsRemaining: number;
+  upgradeUserPlan: (newPlan: PlanType) => Promise<void>;
+  generateApiToken: () => Promise<string>;
+  canAddMoreWallets: () => boolean;
+  passwordStrength: (password: string) => { score: number; feedback: string };
+  createCheckoutSession: (priceId: string) => Promise<{ url: string }>;
+  openCustomerPortal: () => Promise<{ url: string }>;
   checkSubscriptionStatus: () => Promise<void>;
   isLoading: boolean;
 }
 
-export interface LoginAttempt {
-  email: string;
-  timestamp: number;
-  success: boolean;
-}
-
-export interface PasswordStrengthResult {
-  score: number;
-  feedback: string;
+export interface SecurityStatus {
+  status: 'normal' | 'warning' | 'danger';
+  lastLogin?: Date;
+  suspiciousActivity?: boolean;
 }
