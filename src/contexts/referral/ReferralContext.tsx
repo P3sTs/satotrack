@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -80,56 +79,57 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
         .eq('id', user.id)
         .single();
       
+      let currentProfile = profile;
+      
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
+      
+      // Se não existe perfil, criar um novo
+      if (profileError && profileError.code === 'PGRST116') {
+        const userName = user.user_metadata?.full_name || 
+                        user.user_metadata?.name || 
+                        user.email?.split('@')[0] || 
+                        'Usuario';
         
-        // Se não existe perfil, criar um novo
-        if (profileError.code === 'PGRST116') {
-          const userName = user.user_metadata?.full_name || 
-                          user.user_metadata?.name || 
-                          user.email?.split('@')[0] || 
-                          'Usuario';
-          
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              full_name: userName,
-              referral_code: null,
-              total_referrals: 0
-            });
-          
-          if (insertError) {
-            console.error('Error creating profile:', insertError);
-            throw insertError;
-          }
-          
-          // Buscar novamente o perfil criado
-          const { data: newProfile, error: newProfileError } = await supabase
-            .from('profiles')
-            .select('full_name, referral_code')
-            .eq('id', user.id)
-            .single();
-          
-          if (newProfileError) {
-            throw newProfileError;
-          }
-          
-          profile = newProfile;
-        } else {
-          throw profileError;
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            full_name: userName,
+            referral_code: null,
+            total_referrals: 0
+          });
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          throw insertError;
         }
+        
+        // Buscar novamente o perfil criado
+        const { data: newProfile, error: newProfileError } = await supabase
+          .from('profiles')
+          .select('full_name, referral_code')
+          .eq('id', user.id)
+          .single();
+        
+        if (newProfileError) {
+          throw newProfileError;
+        }
+        
+        currentProfile = newProfile;
       }
       
       // Se já tem código, retornar o existente
-      if (profile?.referral_code) {
-        setReferralCode(profile.referral_code);
+      if (currentProfile?.referral_code) {
+        setReferralCode(currentProfile.referral_code);
         toast.success("Código de indicação já existe!");
         return;
       }
       
       // Obter nome do usuário (do perfil ou dos metadados)
-      let userName = profile?.full_name || 
+      let userName = currentProfile?.full_name || 
                    user.user_metadata?.full_name || 
                    user.user_metadata?.name || 
                    user.email?.split('@')[0] || 
