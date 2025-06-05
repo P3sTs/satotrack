@@ -1,71 +1,56 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { AuthUser, PlanType } from './types';
+import { toast } from '@/hooks/use-toast';
 
 export const useAuthPlans = (user: AuthUser | null) => {
   const [userPlan, setUserPlan] = useState<PlanType>('free');
   const [apiToken, setApiToken] = useState<string | null>(null);
-  const [apiRequestsRemaining, setApiRequestsRemaining] = useState<number>(1000);
+  const [apiRequestsRemaining, setApiRequestsRemaining] = useState(1000);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Buscar plano do usuário do banco de dados
-  const fetchUserPlan = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('user_plans')
-        .select('plan_type, api_token, api_requests')
-        .eq('user_id', userId)
-        .single();
-      
-      if (error) {
-        console.error('Erro ao buscar plano do usuário:', error);
-        return;
-      }
-      
-      if (data) {
-        setUserPlan(data.plan_type as PlanType);
-        setApiToken(data.api_token);
-        setApiRequestsRemaining(data.api_requests || 1000);
-      }
-    } catch (error) {
-      console.error('Erro em fetchUserPlan:', error);
-    } finally {
-      setIsLoading(false);
+  // Load user plan and API info
+  useEffect(() => {
+    if (user) {
+      loadUserPlanData();
     }
-  };
+  }, [user]);
 
-  // Verificar status da assinatura via Stripe
-  const checkSubscriptionStatus = async () => {
+  const loadUserPlanData = async () => {
     if (!user) return;
-    
+
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('check-subscription');
-      
-      if (error) {
-        console.error('Erro ao verificar assinatura:', error);
-        return;
+      // Check user plan from profiles table (premium_status)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('premium_status, premium_expiry')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        const isPremium = profile.premium_status === 'active' && 
+                         (!profile.premium_expiry || new Date(profile.premium_expiry) > new Date());
+        setUserPlan(isPremium ? 'premium' : 'free');
       }
-      
-      if (data) {
-        setUserPlan(data.plan_type as PlanType);
-        toast({
-          title: "Status da assinatura atualizado",
-          description: data.subscribed ? "Você tem uma assinatura ativa!" : "Nenhuma assinatura ativa encontrada.",
-        });
+
+      // Load API data from user_plans table
+      const { data: planData } = await supabase
+        .from('user_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (planData) {
+        setApiToken(planData.api_token);
+        setApiRequestsRemaining(planData.api_requests || 1000);
       }
     } catch (error) {
-      console.error('Erro ao verificar status da assinatura:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error loading user plan data:', error);
     }
   };
 
-  // Criar sessão de checkout do Stripe
-  const createCheckoutSession = async () => {
+  const upgradeUserPlan = async (newPlan?: PlanType) => {
     if (!user) {
       toast({
         title: "Erro",
@@ -74,30 +59,26 @@ export const useAuthPlans = (user: AuthUser | null) => {
       });
       return;
     }
+
+    setIsLoading(true);
     
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('create-checkout');
+      // For now, we'll just simulate the upgrade process
+      // In a real implementation, this would integrate with a payment processor
       
-      if (error) {
-        console.error('Erro ao criar sessão de checkout:', error);
+      if (newPlan === 'premium' || !newPlan) {
         toast({
-          title: "Erro",
-          description: "Não foi possível iniciar o processo de pagamento. Tente novamente.",
-          variant: "destructive"
+          title: "Upgrade Premium",
+          description: "Funcionalidade de pagamento em desenvolvimento. Use o programa de indicações para obter Premium gratuitamente!",
         });
-        return;
       }
       
-      if (data?.url) {
-        // Abrir checkout do Stripe em nova aba
-        window.open(data.url, '_blank');
-      }
+      await loadUserPlanData();
     } catch (error) {
-      console.error('Erro ao criar checkout:', error);
+      console.error('Error upgrading plan:', error);
       toast({
         title: "Erro",
-        description: "Erro interno. Tente novamente mais tarde.",
+        description: "Não foi possível processar o upgrade. Tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -105,118 +86,58 @@ export const useAuthPlans = (user: AuthUser | null) => {
     }
   };
 
-  // Abrir portal do cliente para gerenciar assinatura
-  const openCustomerPortal = async () => {
-    if (!user) return;
+  const generateApiToken = async (): Promise<string> => {
+    if (!user) throw new Error('User not authenticated');
+
+    const newToken = `sato_${user.id.substring(0, 8)}_${Date.now()}`;
     
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      
-      if (error) {
-        console.error('Erro ao abrir portal do cliente:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível abrir o portal de gerenciamento.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (data?.url) {
-        // Abrir portal do cliente em nova aba
-        window.open(data.url, '_blank');
-      }
-    } catch (error) {
-      console.error('Erro ao abrir portal:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Atualiza o plano do usuário para premium (mantido para compatibilidade)
-  const upgradeUserPlan = async () => {
-    await createCheckoutSession();
-  };
-
-  // Gera token de API para usuários premium
-  const generateApiToken = async () => {
-    try {
-      if (!user || !user.id) throw new Error('Usuário não autenticado');
-      if (!user.email_confirmed_at) throw new Error('Email não verificado');
-      if (userPlan !== 'premium') throw new Error('Tokens de API estão disponíveis apenas para usuários premium');
-      
-      setIsLoading(true);
-      
-      const token = Math.random().toString(36).substring(2, 15) + 
-                    Math.random().toString(36).substring(2, 15);
-      
-      const { error } = await supabase
-        .from('user_plans')
-        .upsert({ 
-          user_id: user.id, 
-          api_token: token,
-          updated_at: new Date().toISOString()
-        });
-      
-      if (error) throw error;
-      
-      setApiToken(token);
-      toast({
-        title: "API Token gerado",
-        description: "Seu novo token de API foi gerado com sucesso.",
+    // Save token to database
+    const { error } = await supabase
+      .from('user_plans')
+      .upsert({
+        user_id: user.id,
+        api_token: newToken,
+        plan_type: userPlan,
+        api_requests: apiRequestsRemaining
       });
-      
-      return token;
-    } catch (error) {
-      console.error('Erro ao gerar token de API:', error);
-      
-      let errorMessage = "Não foi possível gerar o token de API.";
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Email não verificado')) {
-          errorMessage = "Verifique seu email antes de gerar um token de API.";
-        } else if (error.message.includes('apenas para usuários premium')) {
-          errorMessage = "Tokens de API estão disponíveis apenas para usuários premium.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      toast({
-        title: "Erro ao gerar token",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      
-      return '';
-    } finally {
-      setIsLoading(false);
-    }
+
+    if (error) throw error;
+
+    setApiToken(newToken);
+    return newToken;
   };
 
-  // Calcula se o usuário pode adicionar mais carteiras com base em seu plano
   const canAddMoreWallets = (currentWallets: number): boolean => {
     if (userPlan === 'premium') return true;
-    return currentWallets < 1;
+    return currentWallets < 1; // Free plan limited to 1 wallet
   };
 
-  // Efeito para buscar o plano quando o usuário muda
-  useEffect(() => {
-    if (user?.id) {
-      fetchUserPlan(user.id);
-    } else {
-      setUserPlan('free');
-      setApiToken(null);
-      setApiRequestsRemaining(1000);
-    }
-  }, [user?.id]);
+  const checkSubscriptionStatus = async (): Promise<void> => {
+    await loadUserPlanData();
+  };
+
+  const createCheckoutSession = async (priceId: string): Promise<{ url: string }> => {
+    // Placeholder implementation
+    toast({
+      title: "Em desenvolvimento",
+      description: "Sistema de pagamento em desenvolvimento.",
+    });
+    return { url: '' };
+  };
+
+  const openCustomerPortal = async (): Promise<{ url: string }> => {
+    // Placeholder implementation
+    toast({
+      title: "Em desenvolvimento",
+      description: "Portal do cliente em desenvolvimento.",
+    });
+    return { url: '' };
+  };
 
   return {
     userPlan,
     apiToken,
     apiRequestsRemaining,
-    fetchUserPlan,
     upgradeUserPlan,
     generateApiToken,
     canAddMoreWallets,

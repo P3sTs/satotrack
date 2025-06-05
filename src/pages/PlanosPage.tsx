@@ -1,249 +1,209 @@
 
-import React, { useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Lock, Star, Settings } from 'lucide-react';
-import { Advertisement } from '@/components/monetization/Advertisement';
-import { toast } from '@/hooks/use-toast';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/auth';
+import { Check, Star, Zap, Shield, Crown } from 'lucide-react';
+import { PlanComparisonTable } from '@/components/monetization/PlanDisplay';
 
-interface PlanFeatureProps {
-  text: string;
-  included: boolean;
-}
+const PlanosPage = () => {
+  const { userPlan, upgradeUserPlan, isLoading } = useAuth();
 
-const PlanFeature: React.FC<PlanFeatureProps> = ({ text, included }) => (
-  <div className="flex items-center py-2">
-    {included ? (
-      <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-    ) : (
-      <XCircle className="h-4 w-4 mr-2 text-muted-foreground" />
-    )}
-    <span className={!included ? 'text-muted-foreground' : ''}>{text}</span>
-  </div>
-);
-
-const PlanosPage: React.FC = () => {
-  const { userPlan, createCheckoutSession, openCustomerPortal, checkSubscriptionStatus, isLoading } = useAuth();
-  const isPremium = userPlan === 'premium';
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  
-  // Verificar se houve sucesso no checkout e atualizar status
-  useEffect(() => {
-    const checkout = searchParams.get('checkout');
-    const sessionId = searchParams.get('session_id');
-    
-    if (checkout === 'success' && sessionId) {
-      console.log('Checkout successful, verifying subscription status...');
-      
-      toast({
-        title: "Pagamento realizado com sucesso!",
-        description: "Bem-vindo ao SatoTrack Premium! Verificando seu status...",
-      });
-      
-      // Aguardar um pouco para o webhook processar e então verificar status
-      const verifySubscription = async () => {
-        // Aguardar 3 segundos para dar tempo do webhook processar
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        try {
-          await checkSubscriptionStatus?.();
-          console.log('Subscription status verified');
-          
-          // Limpar parâmetros da URL
-          const newUrl = window.location.pathname;
-          window.history.replaceState({}, '', newUrl);
-          
-          // Redirecionar para dashboard após verificação
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-        } catch (error) {
-          console.error('Error verifying subscription:', error);
-          toast({
-            title: "Erro ao verificar status",
-            description: "Tente recarregar a página em alguns momentos.",
-            variant: "destructive"
-          });
-        }
-      };
-      
-      verifySubscription();
-    } else if (checkout === 'canceled') {
-      toast({
-        title: "Checkout cancelado",
-        description: "Você pode tentar novamente quando quiser.",
-        variant: "destructive"
-      });
-      
-      // Limpar parâmetros da URL
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [searchParams, checkSubscriptionStatus, navigate]);
-  
-  const handleUpgrade = async () => {
-    if (createCheckoutSession) {
-      await createCheckoutSession();
+  const handleUpgrade = async (planType: 'premium') => {
+    try {
+      await upgradeUserPlan(planType);
+    } catch (error) {
+      console.error('Erro ao fazer upgrade:', error);
     }
   };
 
-  const handleManageSubscription = async () => {
-    if (openCustomerPortal) {
-      await openCustomerPortal();
+  const plans = [
+    {
+      name: 'Gratuito',
+      price: 'R$ 0',
+      period: '/mês',
+      description: 'Perfeito para começar a monitorar seus primeiros bitcoins',
+      icon: Shield,
+      current: userPlan === 'free',
+      features: [
+        '1 carteira monitorada',
+        'Dados básicos de mercado',
+        'Alertas limitados',
+        'Histórico de 30 dias',
+        'Suporte por email'
+      ],
+      limitations: [
+        'Sem alertas por Telegram/Email',
+        'Sem relatórios mensais',
+        'Gráficos básicos apenas',
+        'Sem acesso à API',
+        'Com anúncios'
+      ]
+    },
+    {
+      name: 'Premium',
+      price: 'R$ 29',
+      period: '/mês',
+      description: 'Para traders sérios que precisam de monitoramento completo',
+      icon: Crown,
+      popular: true,
+      current: userPlan === 'premium',
+      features: [
+        'Carteiras ilimitadas',
+        'Dados avançados de mercado',
+        'Alertas por Telegram/Email',
+        'Histórico completo',
+        'Relatórios mensais detalhados',
+        'Gráficos interativos avançados',
+        'Acesso completo à API',
+        'Sem anúncios',
+        'Suporte prioritário',
+        'Análises de mercado exclusivas'
+      ]
     }
-  };
-  
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      <div className="text-center max-w-2xl mx-auto mb-8 md:mb-12">
-        <h1 className="text-2xl md:text-4xl font-bold mb-4">Escolha o melhor plano para você</h1>
-        <p className="text-muted-foreground">
-          Monitore suas carteiras Bitcoin com o SatoTrack e tenha acesso às melhores ferramentas de análise
-        </p>
-      </div>
-      
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        {/* Plano Gratuito */}
-        <Card className={`relative ${!isPremium ? 'border-bitcoin' : ''}`}>
-          {!isPremium && (
-            <div className="absolute top-0 right-0 bg-bitcoin text-white text-xs py-1 px-3 rounded-bl">
-              Seu plano atual
-            </div>
-          )}
-          <CardHeader>
-            <CardTitle>Plano Gratuito</CardTitle>
-            <CardDescription>Perfeito para iniciantes</CardDescription>
-            <div className="mt-4">
-              <span className="text-3xl font-bold">R$ 0</span>
-              <span className="text-muted-foreground">/mês</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <PlanFeature text="1 carteira monitorada" included={true} />
-            <PlanFeature text="Dados de mercado básicos (24h e 7d)" included={true} />
-            <PlanFeature text="Monitoramento de saldo" included={true} />
-            <PlanFeature text="Gráficos interativos básicos" included={true} />
-            <PlanFeature text="Carteiras múltiplas" included={false} />
-            <PlanFeature text="Gráficos avançados (30d, 90d, YTD)" included={false} />
-            <PlanFeature text="Exportação de dados em PDF/CSV" included={false} />
-            <PlanFeature text="Alertas por Telegram/Email" included={false} />
-            <PlanFeature text="Comparação de carteiras" included={false} />
-            <PlanFeature text="Screenshot de gráficos" included={false} />
-            <PlanFeature text="Relatórios mensais" included={false} />
-            <PlanFeature text="Acesso à API de dados" included={false} />
-            <PlanFeature text="Sem anúncios" included={false} />
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" disabled className="w-full">
-              Plano Atual
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        {/* Plano Premium */}
-        <Card className={`relative ${isPremium ? 'border-bitcoin' : ''}`}>
-          {isPremium && (
-            <div className="absolute top-0 right-0 bg-bitcoin text-white text-xs py-1 px-3 rounded-bl">
-              Seu plano atual
-            </div>
-          )}
-          <CardHeader>
-            <CardTitle>Plano Premium</CardTitle>
-            <CardDescription>Para usuários avançados</CardDescription>
-            <div className="mt-4">
-              <span className="text-3xl font-bold">R$ 19,90</span>
-              <span className="text-muted-foreground">/mês</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <PlanFeature text="Carteiras ilimitadas" included={true} />
-            <PlanFeature text="Dados de mercado completos" included={true} />
-            <PlanFeature text="Monitoramento avançado" included={true} />
-            <PlanFeature text="Gráficos interativos avançados (30d, 90d, YTD)" included={true} />
-            <PlanFeature text="Exportação de dados em PDF/CSV" included={true} />
-            <PlanFeature text="Alertas por Telegram/Email" included={true} />
-            <PlanFeature text="Comparação de carteiras" included={true} />
-            <PlanFeature text="Screenshot de gráficos" included={true} />
-            <PlanFeature text="Relatórios mensais completos" included={true} />
-            <PlanFeature text="Painel exclusivo Premium" included={true} />
-            <PlanFeature text="Acesso à API de dados" included={true} />
-            <PlanFeature text="Suporte prioritário" included={true} />
-            <PlanFeature text="Sem anúncios" included={true} />
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            {isPremium ? (
-              <>
-                <Button disabled className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white">
-                  <Star className="h-4 w-4 mr-2 fill-white" />
-                  Plano Atual
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={handleManageSubscription}
-                  disabled={isLoading}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Gerenciar Assinatura
-                </Button>
-              </>
-            ) : (
-              <Button 
-                className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white" 
-                onClick={handleUpgrade}
-                disabled={isLoading}
-              >
-                <Lock className="h-4 w-4 mr-2" />
-                {isLoading ? 'Processando...' : 'Fazer upgrade'}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
-      </div>
-      
-      {!isPremium && (
-        <div className="max-w-4xl mx-auto mt-8">
-          <Advertisement position="panel" />
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-orbitron font-bold mb-4">
+            Escolha seu <span className="text-bitcoin">Plano</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Monitore suas carteiras Bitcoin com as ferramentas mais avançadas do mercado
+          </p>
         </div>
-      )}
-      
-      <div className="max-w-2xl mx-auto mt-12">
-        <h2 className="text-xl font-bold mb-4">Perguntas Frequentes</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium">Como funciona o pagamento?</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              O pagamento é processado de forma segura através do Stripe. Você será redirecionado para uma página segura 
-              de checkout onde poderá inserir seus dados de cartão de crédito.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium">Posso cancelar minha assinatura Premium?</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Sim! Você pode cancelar sua assinatura a qualquer momento através do botão "Gerenciar Assinatura". 
-              O acesso Premium continua disponível até o final do período pago.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium">Como funciona a exportação de relatórios?</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Assinantes Premium podem exportar dados em formato PDF e CSV de qualquer período, incluindo relatórios 
-              completos para declaração de impostos.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium">É seguro fornecer meus dados de pagamento?</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Sim! Utilizamos o Stripe, uma das plataformas de pagamento mais seguras do mundo. Seus dados de cartão 
-              são criptografados e nunca passam pelos nossos servidores.
-            </p>
+
+        {/* Planos */}
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          {plans.map((plan, index) => {
+            const Icon = plan.icon;
+            return (
+              <Card key={index} className={`relative ${plan.popular ? 'border-bitcoin shadow-lg scale-105' : ''} ${plan.current ? 'ring-2 ring-bitcoin' : ''}`}>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-bitcoin text-white px-3 py-1">
+                      <Star className="h-3 w-3 mr-1" />
+                      Mais Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                {plan.current && (
+                  <div className="absolute -top-3 right-4">
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                      Plano Atual
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader className="text-center pb-4">
+                  <div className="flex justify-center mb-4">
+                    <div className={`p-3 rounded-full ${plan.popular ? 'bg-bitcoin/10' : 'bg-muted'}`}>
+                      <Icon className={`h-8 w-8 ${plan.popular ? 'text-bitcoin' : 'text-muted-foreground'}`} />
+                    </div>
+                  </div>
+                  
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  
+                  <div className="flex items-baseline justify-center mt-4">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground ml-1">{plan.period}</span>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                    
+                    {plan.limitations && plan.limitations.map((limitation, limitIndex) => (
+                      <div key={limitIndex} className="flex items-start gap-3 opacity-60">
+                        <div className="h-4 w-4 mt-0.5 flex-shrink-0 text-red-500">×</div>
+                        <span className="text-sm line-through">{limitation}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4">
+                    {plan.current ? (
+                      <Button className="w-full" variant="outline" disabled>
+                        Plano Atual
+                      </Button>
+                    ) : plan.name === 'Premium' ? (
+                      <Button 
+                        className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white"
+                        onClick={() => handleUpgrade('premium')}
+                        disabled={isLoading}
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        {isLoading ? 'Processando...' : 'Upgrade para Premium'}
+                      </Button>
+                    ) : (
+                      <Button className="w-full" variant="outline" disabled>
+                        Plano Gratuito
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Tabela de Comparação */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-8">Comparação Detalhada</h2>
+          <PlanComparisonTable />
+        </div>
+
+        {/* FAQ */}
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-8">Perguntas Frequentes</h2>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Posso cancelar a qualquer momento?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Sim, você pode cancelar sua assinatura Premium a qualquer momento. 
+                  Você continuará tendo acesso aos recursos Premium até o final do período pago.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Como funciona o programa de indicações?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  A cada 20 indicações válidas, você ganha 1 mês Premium gratuito! 
+                  Acesse o programa de indicações para obter seu código único e começar a indicar amigos.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Meus dados estão seguros?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Absolutamente. Utilizamos as melhores práticas de segurança e criptografia. 
+                  Seus dados nunca são compartilhados com terceiros e você mantém total controle sobre suas informações.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -23,6 +23,17 @@ serve(async (req) => {
 
     console.log('Processing referral registration for:', email, 'with code:', referral_code);
 
+    // Validar dados de entrada
+    if (!email || !password || !full_name) {
+      return new Response(
+        JSON.stringify({ error: 'Email, senha e nome completo são obrigatórios' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     // 1. Criar o novo usuário
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
@@ -68,6 +79,7 @@ serve(async (req) => {
     }
 
     // 3. Se tiver código de referência, processar a indicação
+    let referralProcessed = false;
     if (referral_code) {
       const { error: referralError } = await supabase.rpc('process_referral', {
         referrer_code: referral_code,
@@ -79,15 +91,48 @@ serve(async (req) => {
         // Não falha a criação da conta por causa disso
       } else {
         console.log('Referral processed successfully');
+        referralProcessed = true;
       }
+    }
+
+    // 4. Criar configurações padrão do usuário
+    const { error: settingsError } = await supabase
+      .from('user_settings')
+      .insert({
+        user_id: newUserId,
+        telegram_notifications_enabled: false,
+        email_daily_summary: false,
+        email_weekly_summary: false,
+        push_notifications_enabled: false,
+        price_alert_threshold: 5,
+        balance_alert_threshold: 0
+      });
+
+    if (settingsError) {
+      console.error('Error creating user settings:', settingsError);
+      // Não falha a criação da conta por causa disso
+    }
+
+    // 5. Criar plano padrão do usuário
+    const { error: planError } = await supabase
+      .from('user_plans')
+      .insert({
+        user_id: newUserId,
+        plan_type: 'free',
+        api_requests: 1000
+      });
+
+    if (planError) {
+      console.error('Error creating user plan:', planError);
+      // Não falha a criação da conta por causa disso
     }
 
     return new Response(
       JSON.stringify({
         message: 'Conta criada com sucesso!',
         user_id: newUserId,
-        referral_processed: !!referral_code,
-        bonus: referral_code ? 'Indicação registrada com sucesso!' : null
+        referral_processed: referralProcessed,
+        bonus: referralProcessed ? 'Indicação registrada com sucesso!' : null
       }),
       { 
         status: 200, 

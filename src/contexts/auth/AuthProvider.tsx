@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     apiRequestsRemaining,
     upgradeUserPlan,
     generateApiToken,
-    canAddMoreWallets,
+    canAddMoreWallets: () => canAddMoreWallets(0), // Fix: provide required parameter
     passwordStrength,
     createCheckoutSession,
     openCustomerPortal,

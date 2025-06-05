@@ -1,158 +1,185 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/auth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { FileText, Download, Lock, CheckCircle } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
-import { CarteiraBTC } from '@/types/types';
+import { useAuth } from '@/contexts/auth';
+import { FileText, Download, Calendar, TrendingUp, Shield } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
-interface ReportGeneratorProps {
-  carteira: CarteiraBTC;
+interface MonthlyReport {
+  month: string;
+  totalValue: number;
+  transactions: number;
+  topWallet: string;
+  performance: number;
 }
 
-export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ carteira }) => {
+const mockReports: MonthlyReport[] = [
+  {
+    month: 'Novembro 2024',
+    totalValue: 0.15432,
+    transactions: 23,
+    topWallet: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+    performance: 12.5
+  },
+  {
+    month: 'Outubro 2024',
+    totalValue: 0.14821,
+    transactions: 18,
+    topWallet: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
+    performance: -3.2
+  },
+  {
+    month: 'Setembro 2024',
+    totalValue: 0.16234,
+    transactions: 31,
+    topWallet: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+    performance: 8.7
+  }
+];
+
+export const ReportGenerator: React.FC = () => {
   const { userPlan, upgradeUserPlan } = useAuth();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [reportGenerated, setReportGenerated] = useState(false);
-  
-  const isPremium = userPlan === 'premium';
-  
-  const handleGenerateReport = async () => {
-    setIsGenerating(true);
-    
-    // Simulate report generation
-    setTimeout(() => {
-      setIsGenerating(false);
-      setReportGenerated(true);
-      toast.success("Relatório gerado com sucesso!");
-    }, 2000);
+  const [generatingReport, setGeneratingReport] = useState(false);
+
+  const handleUpgrade = async () => {
+    try {
+      await upgradeUserPlan();
+    } catch (error) {
+      console.error('Erro ao fazer upgrade:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível processar o upgrade. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
-  
-  const handleDownloadReport = () => {
-    // In a real app, this would download the actual PDF
-    toast.success("Download do relatório iniciado.");
+
+  const generateReport = async (month: string) => {
+    if (userPlan !== 'premium') {
+      toast({
+        title: "Recurso Premium",
+        description: "Relatórios mensais são exclusivos para usuários Premium.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setGeneratingReport(true);
     
-    // Create a fake PDF download for demo purposes
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:application/pdf;charset=utf-8,');
-    element.setAttribute('download', `relatorio-${carteira.nome.replace(/\s+/g, '_')}.pdf`);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    try {
+      // Simular geração de relatório
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Relatório gerado",
+        description: `Relatório de ${month} foi gerado com sucesso!`,
+      });
+      
+      // Aqui você implementaria o download real do relatório
+      console.log(`Generating report for ${month}`);
+      
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o relatório. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingReport(false);
+    }
   };
-  
+
+  if (userPlan !== 'premium') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-bitcoin" />
+            Relatórios Mensais Premium
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center py-8">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">Relatórios Detalhados</h3>
+            <p className="text-muted-foreground mb-4">
+              Acesse relatórios mensais detalhados com análises de performance, 
+              distribuição de carteiras e insights de mercado.
+            </p>
+            <Button 
+              onClick={handleUpgrade}
+              className="bg-bitcoin hover:bg-bitcoin/90 text-white"
+            >
+              Upgrade para Premium
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <FileText className="h-4 w-4 mr-2" />
-          Relatório Profissional
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Relatórios Mensais
         </CardTitle>
-        <CardDescription>
-          {isPremium 
-            ? "Gere relatórios detalhados da sua carteira" 
-            : "Recurso disponível para usuários Premium ou compra avulsa"}
-        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3 text-sm">
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-            <span>Gráficos de entrada/saída de BTC</span>
-          </div>
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-            <span>Histórico dos últimos 30 dias</span>
-          </div>
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-            <span>Insights sobre transações</span>
-          </div>
-          <div className="flex items-center">
-            <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-            <span>Análise de desempenho</span>
-          </div>
+      <CardContent className="space-y-4">
+        <div className="grid gap-4">
+          {mockReports.map((report, index) => (
+            <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{report.month}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Valor Total:</span>
+                      <div className="font-mono">{report.totalValue} BTC</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Transações:</span>
+                      <div>{report.transactions}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm">
+                    <TrendingUp className={`h-4 w-4 ${report.performance >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className={report.performance >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {report.performance >= 0 ? '+' : ''}{report.performance}%
+                    </span>
+                    <span className="text-muted-foreground">vs mês anterior</span>
+                  </div>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => generateReport(report.month)}
+                  disabled={generatingReport}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {generatingReport ? 'Gerando...' : 'Download'}
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
         
-        {reportGenerated && (
-          <div className="mt-4 p-3 bg-muted rounded-md flex justify-between items-center">
-            <div>
-              <p className="font-medium">Relatório pronto!</p>
-              <p className="text-xs text-muted-foreground">
-                {carteira.nome} - {new Date().toLocaleDateString()}
-              </p>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleDownloadReport}>
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
-          </div>
-        )}
+        <div className="text-center pt-4 border-t">
+          <p className="text-sm text-muted-foreground">
+            Relatórios são gerados automaticamente todo mês para usuários Premium
+          </p>
+        </div>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-2">
-        {isPremium ? (
-          <Button 
-            onClick={handleGenerateReport} 
-            className="w-full bg-bitcoin hover:bg-bitcoin/90 text-white"
-            disabled={isGenerating}
-          >
-            {isGenerating ? (
-              <>
-                <span className="animate-pulse rounded-full h-3 w-3 mr-2 bg-current"></span>
-                Gerando relatório...
-              </>
-            ) : (
-              <>
-                <FileText className="h-4 w-4 mr-2" />
-                {reportGenerated ? 'Gerar novo relatório' : 'Gerar relatório'}
-              </>
-            )}
-          </Button>
-        ) : (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="w-full">
-                <FileText className="h-4 w-4 mr-2" />
-                Gerar relatório
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Relatório Profissional</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Escolha como deseja obter seu relatório profissional:
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="py-4">
-                <div className="flex items-center justify-between mb-4 pb-4 border-b">
-                  <div>
-                    <h4 className="font-medium">Compra avulsa</h4>
-                    <p className="text-sm text-muted-foreground">Relatório único para esta carteira</p>
-                  </div>
-                  <Button>R$ 9,90</Button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Plano Premium</h4>
-                    <p className="text-sm text-muted-foreground">Relatórios ilimitados + todos os recursos</p>
-                  </div>
-                  <Button onClick={upgradeUserPlan} className="bg-bitcoin hover:bg-bitcoin/90 text-white">
-                    <Lock className="h-4 w-4 mr-2" />
-                    Upgrade
-                  </Button>
-                </div>
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Continuar com compra avulsa</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </CardFooter>
     </Card>
   );
 };
+
+export default ReportGenerator;
