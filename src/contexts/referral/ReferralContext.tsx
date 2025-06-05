@@ -19,6 +19,8 @@ export interface ReferralContextType {
   totalReferrals: number;
   referralsNeeded: number;
   referralHistory: ReferralData[];
+  isPremium: boolean;
+  premiumExpiry: string | null;
   isLoading: boolean;
   generateReferralCode: () => Promise<void>;
   shareReferralLink: () => Promise<void>;
@@ -41,6 +43,8 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
   const [referralCode, setReferralCode] = useState('');
   const [totalReferrals, setTotalReferrals] = useState(0);
   const [referralHistory, setReferralHistory] = useState<ReferralData[]>([]);
+  const [isPremium, setIsPremium] = useState(false);
+  const [premiumExpiry, setPremiumExpiry] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const referralsNeeded = 20 - (totalReferrals % 20);
@@ -55,25 +59,10 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       setIsLoading(true);
       console.log('Starting referral code generation for user:', user.id);
       
-      // Buscar ou criar perfil
-      const profile = await ReferralService.getOrCreateProfile(user);
-      
-      // Se já tem código, retornar o existente
-      if (profile.referral_code) {
-        setReferralCode(profile.referral_code);
-        toast.success(`Código de indicação: ${profile.referral_code}`);
-        return;
-      }
-      
-      // Gerar novo código único
-      const newCode = await ReferralService.generateUniqueReferralCode(user);
-      console.log('Generated unique code:', newCode);
-      
-      // Salvar o código
-      await ReferralService.saveReferralCode(user.id, newCode);
+      const newCode = await ReferralService.generateReferralCode(user);
       
       setReferralCode(newCode);
-      toast.success(`Código gerado com sucesso: ${newCode}`);
+      toast.success(`Novo código gerado: ${newCode}`);
       
       console.log('Referral code generation completed successfully');
       
@@ -144,27 +133,18 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       const profile = await ReferralService.getOrCreateProfile(user);
       
       setReferralCode(profile.referral_code || '');
-      setTotalReferrals(profile.total_referrals || 0);
+      setTotalReferrals(profile.referral_count || 0);
+      setIsPremium(profile.premium_status === 'active');
+      setPremiumExpiry(profile.premium_expiry);
       
       // Buscar histórico de indicações
       try {
-        const { data: referrals, error: referralsError } = await supabase
-          .from('referrals')
-          .select('*')
-          .eq('referrer_user_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (referralsError) {
-          console.error('Erro ao buscar indicações:', referralsError);
-          setReferralHistory([]);
-        } else {
-          console.log('Referrals found:', referrals?.length || 0);
-          const typedReferrals: ReferralData[] = (referrals || []).map(referral => ({
-            ...referral,
-            status: referral.status as 'completed' | 'pending'
-          }));
-          setReferralHistory(typedReferrals);
-        }
+        const history = await ReferralService.getReferralHistory(user.id);
+        const typedReferrals: ReferralData[] = history.map(referral => ({
+          ...referral,
+          status: referral.status as 'completed' | 'pending'
+        }));
+        setReferralHistory(typedReferrals);
       } catch (error) {
         console.error('Erro na consulta de referrals:', error);
         setReferralHistory([]);
@@ -187,6 +167,8 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       setReferralCode('');
       setTotalReferrals(0);
       setReferralHistory([]);
+      setIsPremium(false);
+      setPremiumExpiry(null);
     }
   }, [user]);
 
@@ -195,6 +177,8 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
     totalReferrals,
     referralsNeeded,
     referralHistory,
+    isPremium,
+    premiumExpiry,
     isLoading,
     generateReferralCode,
     shareReferralLink,

@@ -315,8 +315,12 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          premium_expiry: string | null
+          premium_status: string | null
           premium_until: string | null
           referral_code: string | null
+          referral_count: number | null
+          referred_by: string | null
           total_referrals: number | null
           updated_at: string
         }
@@ -325,8 +329,12 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          premium_expiry?: string | null
+          premium_status?: string | null
           premium_until?: string | null
           referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
           total_referrals?: number | null
           updated_at?: string
         }
@@ -335,8 +343,12 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          premium_expiry?: string | null
+          premium_status?: string | null
           premium_until?: string | null
           referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
           total_referrals?: number | null
           updated_at?: string
         }
@@ -600,7 +612,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_unique_referral_code: {
+        Args: { user_name: string; user_id: string }
+        Returns: string
+      }
+      process_referral: {
+        Args: { referrer_code: string; referred_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

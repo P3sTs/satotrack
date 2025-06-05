@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Shield } from 'lucide-react';
+import { AlertCircle, Shield, Gift } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 
@@ -22,11 +22,21 @@ export const RegisterForm = () => {
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrengthScore, setPasswordStrengthScore] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState('');
   const { signUp, passwordStrength } = useAuth();
+
+  // Capturar código de referência da URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+    }
+  }, []);
 
   // Verificar força da senha quando mudar
   useEffect(() => {
@@ -68,7 +78,7 @@ export const RegisterForm = () => {
         throw new Error(`Senha fraca: ${passwordFeedback}`);
       }
       
-      await signUp(email, password, fullName);
+      await signUp(email, password, fullName, referralCode);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocorreu um erro na autenticação');
     } finally {
@@ -100,6 +110,15 @@ export const RegisterForm = () => {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {referralCode && (
+          <Alert className="bg-green-50 border-green-200">
+            <Gift className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              🎉 Você foi convidado! Código de indicação: <strong>{referralCode}</strong>
+            </AlertDescription>
           </Alert>
         )}
         
@@ -154,6 +173,18 @@ export const RegisterForm = () => {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             autoComplete="new-password"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="referralCode">Código de Indicação (opcional)</Label>
+          <Input 
+            id="referralCode" 
+            type="text" 
+            placeholder="Digite o código de indicação" 
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
+            className="border-input focus-visible:ring-bitcoin"
           />
         </div>
       </CardContent>

@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ReferralCodeGenerator } from '../utils/codeGenerator';
 import { AuthUser } from '@/contexts/auth/types';
 
 export interface ReferralProfile {
@@ -8,11 +7,15 @@ export interface ReferralProfile {
   full_name: string | null;
   referral_code: string | null;
   total_referrals: number;
+  referral_count: number;
+  premium_status: string;
+  premium_expiry: string | null;
+  referred_by: string | null;
 }
 
 export class ReferralService {
   /**
-   * Busca ou cria o perfil do usuário
+   * Busca ou cria o perfil do usuário com código de referência automático
    */
   static async getOrCreateProfile(user: AuthUser): Promise<ReferralProfile> {
     console.log('Getting or creating profile for user:', user.id);
@@ -20,7 +23,7 @@ export class ReferralService {
     // Tentar buscar perfil existente
     const { data: existingProfile, error: fetchError } = await supabase
       .from('profiles')
-      .select('id, full_name, referral_code, total_referrals')
+      .select('id, full_name, referral_code, total_referrals, referral_count, premium_status, premium_expiry, referred_by')
       .eq('id', user.id)
       .maybeSingle();
     
@@ -34,21 +37,21 @@ export class ReferralService {
       return existingProfile;
     }
     
-    // Criar novo perfil
+    // Criar novo perfil - o trigger vai gerar o código automaticamente
     console.log('Creating new profile');
     const userName = this.extractUserName(user);
     
     const newProfile = {
       id: user.id,
       full_name: userName,
-      referral_code: null,
-      total_referrals: 0
+      referral_count: 0,
+      premium_status: 'inactive'
     };
     
     const { data: createdProfile, error: createError } = await supabase
       .from('profiles')
       .insert(newProfile)
-      .select('id, full_name, referral_code, total_referrals')
+      .select('id, full_name, referral_code, total_referrals, referral_count, premium_status, premium_expiry, referred_by')
       .single();
     
     if (createError) {
@@ -61,87 +64,102 @@ export class ReferralService {
   }
 
   /**
-   * Gera um código de referência único
+   * Força a geração de um novo código de referência
    */
-  static async generateUniqueReferralCode(user: AuthUser): Promise<string> {
-    console.log('Generating unique referral code for user:', user.id);
+  static async generateReferralCode(user: AuthUser): Promise<string> {
+    console.log('Generating referral code for user:', user.id);
     
     const userName = this.extractUserName(user);
-    console.log('Using userName:', userName);
     
-    // Gerar código base
-    const baseCode = ReferralCodeGenerator.generateCode({
-      userName,
-      userId: user.id
+    // Chamar a função do banco para gerar código único
+    const { data, error } = await supabase.rpc('generate_unique_referral_code', {
+      user_name: userName,
+      user_id: user.id
     });
     
-    console.log('Base code generated:', baseCode);
-    
-    // Verificar se o código já existe
-    const isUnique = await this.checkCodeUniqueness(baseCode);
-    
-    if (isUnique) {
-      console.log('Base code is unique, using:', baseCode);
-      return baseCode;
+    if (error) {
+      console.error('Error generating referral code:', error);
+      throw new Error(`Erro ao gerar código: ${error.message}`);
     }
     
-    // Gerar variações até encontrar um código único
-    console.log('Base code exists, generating variations');
-    const variations = ReferralCodeGenerator.generateVariations(baseCode);
+    const newCode = data;
+    console.log('Generated code:', newCode);
     
-    for (const variation of variations) {
-      const isVariationUnique = await this.checkCodeUniqueness(variation);
-      if (isVariationUnique) {
-        console.log('Found unique variation:', variation);
-        return variation;
-      }
-    }
-    
-    throw new Error('Não foi possível gerar um código único após múltiplas tentativas');
-  }
-
-  /**
-   * Salva o código de referência no perfil do usuário
-   */
-  static async saveReferralCode(userId: string, referralCode: string): Promise<void> {
-    console.log('Saving referral code:', { userId, referralCode });
-    
-    const { error } = await supabase
+    // Salvar o código no perfil
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({ 
-        referral_code: referralCode,
+        referral_code: newCode,
         updated_at: new Date().toISOString()
       })
-      .eq('id', userId);
+      .eq('id', user.id);
     
-    if (error) {
-      console.error('Error saving referral code:', error);
-      throw new Error(`Erro ao salvar código: ${error.message}`);
+    if (updateError) {
+      console.error('Error saving referral code:', updateError);
+      throw new Error(`Erro ao salvar código: ${updateError.message}`);
     }
     
-    console.log('Referral code saved successfully');
+    return newCode;
   }
 
   /**
-   * Verifica se um código é único
+   * Processa uma referência quando um usuário se cadastra
    */
-  private static async checkCodeUniqueness(code: string): Promise<boolean> {
-    console.log('Checking uniqueness for code:', code);
+  static async processReferral(referralCode: string, newUserId: string): Promise<void> {
+    console.log('Processing referral:', { referralCode, newUserId });
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('referral_code')
-      .eq('referral_code', code)
-      .maybeSingle();
+    // Chamar a função do banco para processar a referência
+    const { error } = await supabase.rpc('process_referral', {
+      referrer_code: referralCode,
+      referred_user_id: newUserId
+    });
     
     if (error) {
-      console.error('Error checking code uniqueness:', error);
-      throw new Error(`Erro ao verificar unicidade: ${error.message}`);
+      console.error('Error processing referral:', error);
+      throw new Error(`Erro ao processar indicação: ${error.message}`);
     }
     
-    const isUnique = !data;
-    console.log('Code uniqueness check result:', { code, isUnique });
-    return isUnique;
+    console.log('Referral processed successfully');
+  }
+
+  /**
+   * Busca estatísticas de referência do usuário
+   */
+  static async getReferralStats(userId: string) {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('referral_count, premium_status, premium_expiry')
+      .eq('id', userId)
+      .single();
+    
+    if (profileError) {
+      console.error('Error fetching referral stats:', profileError);
+      throw new Error(`Erro ao buscar estatísticas: ${profileError.message}`);
+    }
+    
+    return {
+      totalReferrals: profile.referral_count || 0,
+      isPremium: profile.premium_status === 'active',
+      premiumExpiry: profile.premium_expiry
+    };
+  }
+
+  /**
+   * Busca histórico de indicações
+   */
+  static async getReferralHistory(userId: string) {
+    const { data: referrals, error } = await supabase
+      .from('referrals')
+      .select('*')
+      .eq('referrer_user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching referral history:', error);
+      return [];
+    }
+    
+    return referrals || [];
   }
 
   /**
@@ -154,6 +172,6 @@ export class ReferralService {
     
     const fromEmail = user.email?.split('@')[0];
     
-    return fromMetadata || fromEmail || 'Usuario';
+    return fromMetadata || fromEmail || 'usuario';
   }
 }

@@ -16,20 +16,20 @@ const ReferralProgram: React.FC = () => {
     totalReferrals, 
     referralsNeeded, 
     referralHistory, 
+    isPremium,
+    premiumExpiry,
     isLoading,
     generateReferralCode,
     shareReferralLink,
     copyReferralCode
   } = useReferral();
 
-  const isPremium = userPlan === 'premium';
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
         <ReferralHeader />
         
-        <PremiumStatus isPremium={isPremium} />
+        <PremiumStatus isPremium={isPremium} premiumExpiry={premiumExpiry} />
         
         <ReferralStats 
           totalReferrals={totalReferrals} 

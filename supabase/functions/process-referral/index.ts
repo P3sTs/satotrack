@@ -23,24 +23,7 @@ serve(async (req) => {
 
     console.log('Processing referral registration for:', email, 'with code:', referral_code);
 
-    // 1. Verificar se o código de indicação existe
-    let referrerUserId = null;
-    if (referral_code) {
-      const { data: referrer, error: referrerError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('referral_code', referral_code)
-        .single();
-
-      if (referrerError) {
-        console.log('Referral code not found:', referral_code);
-      } else {
-        referrerUserId = referrer.id;
-        console.log('Found referrer:', referrerUserId);
-      }
-    }
-
-    // 2. Criar o novo usuário
+    // 1. Criar o novo usuário
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -64,69 +47,38 @@ serve(async (req) => {
     const newUserId = authData.user.id;
     console.log('User created successfully:', newUserId);
 
-    // 3. Se tiver indicação, registrar na tabela referrals
-    if (referrerUserId && newUserId) {
-      const { error: referralError } = await supabase
-        .from('referrals')
-        .insert({
-          referrer_user_id: referrerUserId,
-          referred_user_id: newUserId,
-          referred_user_email: email,
-          status: 'completed'
-        });
+    // 2. Criar perfil do usuário (o trigger vai gerar o código automaticamente)
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: newUserId,
+        full_name: full_name || '',
+        referred_by: referral_code || null
+      });
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      return new Response(
+        JSON.stringify({ error: 'Erro ao criar perfil: ' + profileError.message }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // 3. Se tiver código de referência, processar a indicação
+    if (referral_code) {
+      const { error: referralError } = await supabase.rpc('process_referral', {
+        referrer_code: referral_code,
+        referred_user_id: newUserId
+      });
 
       if (referralError) {
-        console.error('Error recording referral:', referralError);
+        console.error('Error processing referral:', referralError);
+        // Não falha a criação da conta por causa disso
       } else {
-        console.log('Referral recorded successfully');
-
-        // 4. Contar total de indicações do usuário
-        const { data: referralCount, error: countError } = await supabase
-          .from('referrals')
-          .select('id', { count: 'exact' })
-          .eq('referrer_user_id', referrerUserId)
-          .eq('status', 'completed');
-
-        if (!countError && referralCount) {
-          const totalReferrals = referralCount.length;
-          console.log('Total referrals for user:', totalReferrals);
-
-          // 5. Atualizar total_referrals no perfil
-          await supabase
-            .from('profiles')
-            .update({ total_referrals: totalReferrals })
-            .eq('id', referrerUserId);
-
-          // 6. Verificar se deve ganhar Premium (a cada 20 indicações)
-          if (totalReferrals > 0 && totalReferrals % 20 === 0) {
-            console.log('User earned Premium! Total referrals:', totalReferrals);
-
-            // Buscar dados atuais do plano
-            const { data: currentPlan } = await supabase
-              .from('user_plans')
-              .select('premium_until')
-              .eq('user_id', referrerUserId)
-              .single();
-
-            // Calcular nova data de expiração
-            const now = new Date();
-            const currentExpiry = currentPlan?.premium_until ? new Date(currentPlan.premium_until) : now;
-            const newExpiry = new Date(Math.max(now.getTime(), currentExpiry.getTime()));
-            newExpiry.setMonth(newExpiry.getMonth() + 1);
-
-            // Atualizar plano do usuário
-            await supabase
-              .from('user_plans')
-              .upsert({
-                user_id: referrerUserId,
-                plan_type: 'premium',
-                premium_until: newExpiry.toISOString(),
-                updated_at: now.toISOString()
-              });
-
-            console.log('Premium granted until:', newExpiry);
-          }
-        }
+        console.log('Referral processed successfully');
       }
     }
 
@@ -134,8 +86,8 @@ serve(async (req) => {
       JSON.stringify({
         message: 'Conta criada com sucesso!',
         user_id: newUserId,
-        referral_processed: !!referrerUserId,
-        bonus: referrerUserId ? 'Indicação registrada com sucesso!' : null
+        referral_processed: !!referral_code,
+        bonus: referral_code ? 'Indicação registrada com sucesso!' : null
       }),
       { 
         status: 200, 
