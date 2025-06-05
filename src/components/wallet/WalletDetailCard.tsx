@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { CarteiraBTC } from '@/contexts/types/CarteirasTypes';
+import { CarteiraBTC } from '@/types/types';
 import { Bitcoin, QrCode, Clock, ArrowDownUp } from 'lucide-react';
 import { formatBitcoinValue, formatDate, formatCurrency } from '@/utils/formatters';
 import { Button } from '@/components/ui/button';
