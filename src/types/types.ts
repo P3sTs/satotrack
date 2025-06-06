@@ -1,3 +1,4 @@
+
 export interface CarteiraBTC {
   id: string;
   nome: string;
@@ -22,6 +23,9 @@ export interface TransacaoBTC {
   tipo: 'entrada' | 'saida'; // Type: received or sent
   data: Date | string; // Date of the transaction
   endereco: string; // Address involved in the transaction
+  confirmations?: number; // Number of confirmations
+  fee?: number; // Transaction fee
+  block_height?: number | null; // Block height
 }
 
 export type SortOption = 'saldo' | 'ultimo_update';
