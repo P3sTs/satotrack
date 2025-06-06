@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ const MarketOverview: React.FC<MarketOverviewProps> = ({ currency }) => {
   }
 
   const price = currency === 'BRL' ? bitcoinData.price_brl : bitcoinData.price_usd;
-  const change24h = bitcoinData.change_24h || 0;
+  const change24h = bitcoinData.price_change_24h || 0;
   const isPositive = change24h > 0;
 
   // Mock data for other cryptocurrencies
