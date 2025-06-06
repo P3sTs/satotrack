@@ -7,7 +7,7 @@ export const useWalletData = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchWalletData = async (address: string): Promise<any> => {
-    console.log('🔍 [useWalletData] Iniciando busca para endereço:', address);
+    console.log('🔍 [useWalletData] Iniciando busca aprimorada para endereço:', address);
     
     try {
       // Usar o método invoke do Supabase para chamar a função de borda
@@ -29,18 +29,38 @@ export const useWalletData = () => {
         throw new Error('Nenhum dado retornado para esta carteira');
       }
 
-      console.log('✅ [useWalletData] Dados recebidos da função de borda:', data);
+      console.log('✅ [useWalletData] Dados completos recebidos:', data);
       
-      // Validação e formatação dos dados
+      // Validação e formatação dos dados com todos os campos disponíveis
       const walletData = {
         balance: Number(data.balance) || 0,
         total_received: Number(data.total_received) || 0,
         total_sent: Number(data.total_sent) || 0,
         transaction_count: Number(data.transaction_count) || 0,
-        transactions: Array.isArray(data.transactions) ? data.transactions.slice(0, 10) : []
+        unconfirmed_balance: Number(data.unconfirmed_balance) || 0,
+        transactions: Array.isArray(data.transactions) ? data.transactions.map((tx: any) => ({
+          hash: tx.hash,
+          amount: Number(tx.amount) || 0,
+          transaction_type: tx.transaction_type,
+          transaction_date: tx.transaction_date,
+          confirmations: Number(tx.confirmations) || 0,
+          fee: Number(tx.fee) || 0,
+          block_height: tx.block_height || null,
+          size: tx.size || 0,
+          weight: tx.weight || 0
+        })) : []
       };
 
-      console.log('🔄 [useWalletData] Dados formatados:', walletData);
+      console.log('🔄 [useWalletData] Dados formatados com transações completas:', walletData);
+      console.log(`📊 [useWalletData] Total de transações processadas: ${walletData.transactions.length}`);
+      
+      // Log das transações por tipo
+      const entradas = walletData.transactions.filter(tx => tx.transaction_type === 'entrada');
+      const saidas = walletData.transactions.filter(tx => tx.transaction_type === 'saida');
+      
+      console.log(`💰 [useWalletData] Transações de entrada: ${entradas.length}`);
+      console.log(`💸 [useWalletData] Transações de saída: ${saidas.length}`);
+      
       return walletData;
 
     } catch (error) {
@@ -50,7 +70,7 @@ export const useWalletData = () => {
   };
 
   const validateAndFetchWallet = async (address: string) => {
-    console.log('🚀 [useWalletData] Iniciando validação e busca:', address);
+    console.log('🚀 [useWalletData] Iniciando validação e busca aprimorada:', address);
     
     if (isLoading) {
       console.warn('⚠️ [useWalletData] Já está carregando, ignorando nova requisição');
@@ -65,19 +85,25 @@ export const useWalletData = () => {
         throw new Error('Formato de endereço inválido');
       }
 
-      console.log('✅ [useWalletData] Endereço validado, buscando dados...');
+      console.log('✅ [useWalletData] Endereço validado, buscando dados completos...');
       const walletData = await fetchWalletData(address.trim());
       
       if (!walletData) {
         throw new Error('Nenhum dado retornado para esta carteira');
       }
 
+      const transactionSummary = walletData.transactions.length > 0 ? 
+        ` • ${walletData.transactions.length} transações encontradas` : 
+        ' • Nenhuma transação encontrada';
+
       toast({
         title: "✅ Carteira adicionada com sucesso!",
-        description: `${address.substring(0, 8)}...${address.substring(address.length - 8)} • ${walletData.balance || 0} BTC`,
+        description: `${address.substring(0, 8)}...${address.substring(address.length - 8)} • ${walletData.balance || 0} BTC${transactionSummary}`,
       });
 
-      console.log('🎉 [useWalletData] Busca concluída com sucesso');
+      console.log('🎉 [useWalletData] Busca completa concluída com sucesso');
+      console.log(`📈 [useWalletData] Resumo: Balance: ${walletData.balance}, Received: ${walletData.total_received}, Sent: ${walletData.total_sent}, TXs: ${walletData.transaction_count}`);
+      
       return walletData;
 
     } catch (error: any) {
