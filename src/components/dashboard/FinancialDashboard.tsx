@@ -29,6 +29,10 @@ import TransactionSummary from './TransactionSummary';
 import BalanceProjection from './BalanceProjection';
 import QuickActionsPanel from './QuickActionsPanel';
 import MarketOverview from './MarketOverview';
+import AdvancedControlPanel from './AdvancedControlPanel';
+import InteractiveWidgets from './InteractiveWidgets';
+import StaticChart from './StaticChart';
+import ImmersiveTools from './ImmersiveTools';
 
 interface FinancialDashboardProps {
   refreshInterval?: number;
@@ -42,23 +46,32 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const { user, userPlan } = useAuth();
   const [currency, setCurrency] = useState<'BRL' | 'USD'>('BRL');
   const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [dashboardSettings, setDashboardSettings] = useState({
+    autoRefresh: true,
+    refreshInterval: 2,
+    chartStyle: 'line',
+    theme: 'dark',
+    notifications: true,
+    alertThreshold: 5,
+    advancedMode: false
+  });
 
   // Get primary wallet
   const primaryWallet = carteiras.find(c => c.id === carteiraPrincipal) || carteiras[0];
 
   // Auto-refresh balance every 2 seconds
   useEffect(() => {
-    if (!isAutoRefresh || !primaryWallet) return;
+    if (!dashboardSettings.autoRefresh || !primaryWallet) return;
 
     const interval = setInterval(() => {
       if (primaryWallet) {
         atualizarCarteira(primaryWallet.id);
       }
       refresh();
-    }, refreshInterval);
+    }, dashboardSettings.refreshInterval * 1000);
 
     return () => clearInterval(interval);
-  }, [primaryWallet, isAutoRefresh, refreshInterval, atualizarCarteira, refresh]);
+  }, [primaryWallet, dashboardSettings.autoRefresh, dashboardSettings.refreshInterval, atualizarCarteira, refresh]);
 
   // Calculate total portfolio values
   const totalBalance = carteiras.reduce((sum, wallet) => sum + wallet.saldo, 0);
@@ -73,16 +86,20 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     ? bitcoinData.price_brl / bitcoinData.price_usd 
     : 5.5;
 
+  const handleSettingsChange = (newSettings: any) => {
+    setDashboardSettings(prev => ({ ...prev, ...newSettings }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with currency toggle and auto-refresh */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Dashboard Financeiro
+          <h1 className="text-3xl font-bold text-white mb-2 font-orbitron satotrack-gradient-text">
+            Dashboard Imersivo
           </h1>
           <p className="text-muted-foreground">
-            Bem-vindo, {user?.email?.split('@')[0] || 'Usuário'}
+            Bem-vindo ao futuro do trading, {user?.email?.split('@')[0] || 'Trader'}
           </p>
         </div>
         
@@ -91,6 +108,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             variant={currency === 'BRL' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setCurrency('BRL')}
+            className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
           >
             🇧🇷 BRL
           </Button>
@@ -98,6 +116,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             variant={currency === 'USD' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setCurrency('USD')}
+            className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
           >
             🇺🇸 USD
           </Button>
@@ -106,12 +125,15 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             variant="outline"
             size="sm"
             onClick={() => setIsAutoRefresh(!isAutoRefresh)}
-            className={isAutoRefresh ? 'bg-green-500/20 text-green-400' : ''}
+            className={`border-satotrack-neon/50 ${isAutoRefresh ? 'bg-green-500/20 text-green-400' : 'text-satotrack-neon'}`}
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>
+
+      {/* Interactive Widgets */}
+      <InteractiveWidgets />
 
       {/* Real-time balance cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -157,21 +179,49 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         />
       </div>
 
+      {/* Advanced Control Panel */}
+      <AdvancedControlPanel onSettingsChange={handleSettingsChange} />
+
+      {/* Static Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <StaticChart 
+          title="Preço do Bitcoin (24h)"
+          type="area"
+          color="#f7931a"
+          height={180}
+        />
+        <StaticChart 
+          title="Volume de Trading"
+          type="line"
+          color="#00d4ff"
+          height={180}
+        />
+        <StaticChart 
+          title="Evolução do Portfólio"
+          type="area"
+          color="#00ff88"
+          height={180}
+        />
+      </div>
+
+      {/* Immersive Tools */}
+      <ImmersiveTools />
+
       {/* Main dashboard content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column - Charts and analytics */}
         <div className="lg:col-span-2 space-y-6">
           <Tabs defaultValue="balance" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="balance">Evolução do Saldo</TabsTrigger>
-              <TabsTrigger value="distribution">Distribuição</TabsTrigger>
-              <TabsTrigger value="projection">Projeção</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-dashboard-dark border border-satotrack-neon/20">
+              <TabsTrigger value="balance" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Evolução do Saldo</TabsTrigger>
+              <TabsTrigger value="distribution" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Distribuição</TabsTrigger>
+              <TabsTrigger value="projection" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Projeção</TabsTrigger>
             </TabsList>
             
             <TabsContent value="balance" className="mt-4">
-              <Card>
+              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
                     <TrendingUp className="h-5 w-5" />
                     Evolução do Saldo (Linha)
                   </CardTitle>
@@ -187,9 +237,9 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             </TabsContent>
             
             <TabsContent value="distribution" className="mt-4">
-              <Card>
+              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
                     <PieChart className="h-5 w-5" />
                     Distribuição dos Fundos
                   </CardTitle>
@@ -205,9 +255,9 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             </TabsContent>
             
             <TabsContent value="projection" className="mt-4">
-              <Card>
+              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
                     <BarChart3 className="h-5 w-5" />
                     Projeção de Saldo
                   </CardTitle>
@@ -228,9 +278,9 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         <div className="space-y-6">
           <QuickActionsPanel />
           
-          <Card>
+          <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-satotrack-neon">
                 <Globe className="h-5 w-5" />
                 Mercado
               </CardTitle>
