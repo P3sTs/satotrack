@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,8 +16,14 @@ import {
   Zap,
   TrendingUp,
   TrendingDown,
-  Activity
+  Activity,
+  Expand,
+  Save,
+  Share
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useGamification } from '@/contexts/gamification/GamificationContext';
+import WidgetExpansionModal from './WidgetExpansionModal';
 
 interface Widget {
   id: string;
@@ -32,6 +37,7 @@ interface Widget {
 }
 
 const InteractiveWidgets: React.FC = () => {
+  const { likeWidget, unlikeWidget, isWidgetLiked, userStats, addXP } = useGamification();
   const [widgets, setWidgets] = useState<Widget[]>([
     {
       id: 'profit-loss',
@@ -70,16 +76,105 @@ const InteractiveWidgets: React.FC = () => {
     }
   ]);
 
+  const [expandedWidget, setExpandedWidget] = useState<Widget | null>(null);
+  const [savedWidgets, setSavedWidgets] = useState<string[]>([]);
+
+  // Load saved widgets from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('savedWidgets');
+    if (saved) {
+      setSavedWidgets(JSON.parse(saved));
+    }
+  }, []);
+
   const toggleMinimize = (id: string) => {
     setWidgets(prev => prev.map(widget => 
       widget.id === id ? { ...widget, isMinimized: !widget.isMinimized } : widget
     ));
+    addXP(5, 'Widget minimizado/expandido');
   };
 
   const toggleFavorite = (id: string) => {
     setWidgets(prev => prev.map(widget => 
       widget.id === id ? { ...widget, isFavorite: !widget.isFavorite } : widget
     ));
+    addXP(5, 'Widget favoritado');
+    toast.success('Widget favoritado!');
+  };
+
+  const handleLike = (widgetId: string) => {
+    if (isWidgetLiked(widgetId)) {
+      unlikeWidget(widgetId);
+      toast.info('Curtida removida');
+    } else {
+      likeWidget(widgetId);
+    }
+  };
+
+  const handleExpand = (widget: Widget) => {
+    setExpandedWidget(widget);
+    addXP(5, 'Widget expandido');
+    toast.info(`Expandindo ${widget.title}`, {
+      description: 'Visualização detalhada carregada'
+    });
+  };
+
+  const handleSave = (widgetId: string) => {
+    const newSaved = savedWidgets.includes(widgetId)
+      ? savedWidgets.filter(id => id !== widgetId)
+      : [...savedWidgets, widgetId];
+    
+    setSavedWidgets(newSaved);
+    localStorage.setItem('savedWidgets', JSON.stringify(newSaved));
+    addXP(5, 'Widget salvo');
+    
+    toast.success(
+      savedWidgets.includes(widgetId) ? 'Widget removido dos salvos' : 'Widget salvo!',
+      { description: 'Configuração mantida' }
+    );
+  };
+
+  const handleShare = (widget: Widget) => {
+    const shareData = {
+      title: `SatoTrack - ${widget.title}`,
+      text: `Confira meus dados: ${widget.title} - ${widget.value}%`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(`${shareData.title}: ${shareData.text}`);
+      toast.success('Copiado para área de transferência!');
+    }
+    
+    addXP(10, 'Widget compartilhado');
+  };
+
+  const handleExport = (widget: Widget) => {
+    const exportData = {
+      widget: widget.title,
+      value: widget.value,
+      type: widget.type,
+      trend: widget.trend,
+      exportedAt: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json'
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${widget.title.replace(/\s+/g, '_')}_export.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    addXP(15, 'Dados exportados');
+    toast.success('Dados exportados!', {
+      description: 'Arquivo baixado com sucesso'
+    });
   };
 
   const getWidgetIcon = (type: string, trend?: string) => {
@@ -97,6 +192,9 @@ const InteractiveWidgets: React.FC = () => {
 
   const renderWidget = (widget: Widget) => {
     const Icon = getWidgetIcon(widget.type, widget.trend);
+    const likesCount = userStats.widgetLikes[widget.id] || 0;
+    const isLiked = isWidgetLiked(widget.id);
+    const isSaved = savedWidgets.includes(widget.id);
     
     return (
       <Card 
@@ -114,6 +212,11 @@ const InteractiveWidgets: React.FC = () => {
               }`} />
               {widget.title}
               {widget.isFavorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
+              {likesCount > 0 && (
+                <Badge variant="outline" className="text-xs px-1">
+                  {likesCount}
+                </Badge>
+              )}
             </CardTitle>
             
             <div className="flex items-center gap-1">
@@ -121,9 +224,18 @@ const InteractiveWidgets: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 className="h-6 w-6 p-0"
+                onClick={() => handleLike(widget.id)}
+              >
+                <Heart className={`h-3 w-3 ${isLiked ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`} />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
                 onClick={() => toggleFavorite(widget.id)}
               >
-                <Heart className={`h-3 w-3 ${widget.isFavorite ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`} />
+                <Star className={`h-3 w-3 ${widget.isFavorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
               </Button>
               
               <Button
@@ -200,17 +312,44 @@ const InteractiveWidgets: React.FC = () => {
             )}
             
             <div className="flex items-center gap-1 mt-3 pt-2 border-t border-border">
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => handleExpand(widget)}
+              >
+                <Expand className="h-3 w-3 mr-1" />
+                Expandir
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => handleExport(widget)}
+              >
                 <Download className="h-3 w-3 mr-1" />
                 Exportar
               </Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                <Share2 className="h-3 w-3 mr-1" />
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={() => handleShare(widget)}
+              >
+                <Share className="h-3 w-3 mr-1" />
                 Compartilhar
               </Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                <Bookmark className="h-3 w-3 mr-1" />
-                Salvar
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`h-6 px-2 text-xs ${isSaved ? 'text-satotrack-neon' : ''}`}
+                onClick={() => handleSave(widget.id)}
+              >
+                <Save className="h-3 w-3 mr-1" />
+                {isSaved ? 'Salvo' : 'Salvar'}
               </Button>
             </div>
           </CardContent>
@@ -220,9 +359,18 @@ const InteractiveWidgets: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {widgets.map(renderWidget)}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {widgets.map(renderWidget)}
+      </div>
+      
+      <WidgetExpansionModal
+        widget={expandedWidget}
+        isOpen={!!expandedWidget}
+        onClose={() => setExpandedWidget(null)}
+        likesCount={expandedWidget ? (userStats.widgetLikes[expandedWidget.id] || 0) : 0}
+      />
+    </>
   );
 };
 

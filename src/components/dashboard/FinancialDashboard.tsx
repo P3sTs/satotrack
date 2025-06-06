@@ -1,51 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Wallet, 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Bitcoin,
-  RefreshCw,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  BarChart3,
-  PieChart,
-  Download,
-  Settings,
-  Globe
-} from 'lucide-react';
-import { useCarteiras } from '@/contexts/carteiras';
-import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
-import { useAuth } from '@/contexts/auth';
-import { formatBitcoinValue, formatCurrency } from '@/utils/formatters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import RealTimeBalanceCard from './RealTimeBalanceCard';
-import ProfitLossIndicator from './ProfitLossIndicator';
-import TransactionSummary from './TransactionSummary';
-import BalanceProjection from './BalanceProjection';
+import DashboardHeader from './DashboardHeader';
+import PrimaryWallet from './PrimaryWallet';
 import QuickActionsPanel from './QuickActionsPanel';
+import RealTimeBalanceCard from './RealTimeBalanceCard';
 import MarketOverview from './MarketOverview';
-import AdvancedControlPanel from './AdvancedControlPanel';
+import TransactionSummary from './TransactionSummary';
 import InteractiveWidgets from './InteractiveWidgets';
-import StaticChart from './StaticChart';
 import ImmersiveTools from './ImmersiveTools';
+import AdvancedControlPanel from './AdvancedControlPanel';
+import AchievementsPanel from './AchievementsPanel';
+import StaticChart from './StaticChart';
+import { GamificationProvider } from '@/contexts/gamification/GamificationContext';
 
-interface FinancialDashboardProps {
-  refreshInterval?: number;
-}
-
-const FinancialDashboard: React.FC<FinancialDashboardProps> = ({ 
-  refreshInterval = 2000 
-}) => {
-  const { carteiras, carteiraPrincipal, atualizarCarteira } = useCarteiras();
-  const { data: bitcoinData, isRefreshing, refresh } = useBitcoinPrice();
-  const { user, userPlan } = useAuth();
-  const [currency, setCurrency] = useState<'BRL' | 'USD'>('BRL');
-  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+const FinancialDashboard: React.FC = () => {
   const [dashboardSettings, setDashboardSettings] = useState({
     autoRefresh: true,
     refreshInterval: 2,
@@ -56,242 +26,97 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     advancedMode: false
   });
 
-  // Get primary wallet
-  const primaryWallet = carteiras.find(c => c.id === carteiraPrincipal) || carteiras[0];
-
-  // Auto-refresh balance every 2 seconds
-  useEffect(() => {
-    if (!dashboardSettings.autoRefresh || !primaryWallet) return;
-
-    const interval = setInterval(() => {
-      if (primaryWallet) {
-        atualizarCarteira(primaryWallet.id);
-      }
-      refresh();
-    }, dashboardSettings.refreshInterval * 1000);
-
-    return () => clearInterval(interval);
-  }, [primaryWallet, dashboardSettings.autoRefresh, dashboardSettings.refreshInterval, atualizarCarteira, refresh]);
-
-  // Calculate total portfolio values
-  const totalBalance = carteiras.reduce((sum, wallet) => sum + wallet.saldo, 0);
-  const totalReceived = carteiras.reduce((sum, wallet) => sum + wallet.total_entradas, 0);
-  const totalSent = carteiras.reduce((sum, wallet) => sum + wallet.total_saidas, 0);
-  
-  const fiatValueBRL = totalBalance * (bitcoinData?.price_brl || 0);
-  const fiatValueUSD = totalBalance * (bitcoinData?.price_usd || 0);
-  
-  const displayValue = currency === 'BRL' ? fiatValueBRL : fiatValueUSD;
-  const exchangeRate = bitcoinData?.price_brl && bitcoinData?.price_usd 
-    ? bitcoinData.price_brl / bitcoinData.price_usd 
-    : 5.5;
-
   const handleSettingsChange = (newSettings: any) => {
     setDashboardSettings(prev => ({ ...prev, ...newSettings }));
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with currency toggle and auto-refresh */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2 font-orbitron satotrack-gradient-text">
-            Dashboard Imersivo
-          </h1>
-          <p className="text-muted-foreground">
-            Bem-vindo ao futuro do trading, {user?.email?.split('@')[0] || 'Trader'}
-          </p>
-        </div>
+    <GamificationProvider>
+      <div className="space-y-6">
+        <DashboardHeader />
         
-        <div className="flex items-center gap-2">
-          <Button
-            variant={currency === 'BRL' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setCurrency('BRL')}
-            className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
-          >
-            🇧🇷 BRL
-          </Button>
-          <Button
-            variant={currency === 'USD' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setCurrency('USD')}
-            className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
-          >
-            🇺🇸 USD
-          </Button>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="widgets">Widgets</TabsTrigger>
+            <TabsTrigger value="tools">Ferramentas</TabsTrigger>
+            <TabsTrigger value="achievements">Conquistas</TabsTrigger>
+          </TabsList>
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAutoRefresh(!isAutoRefresh)}
-            className={`border-satotrack-neon/50 ${isAutoRefresh ? 'bg-green-500/20 text-green-400' : 'text-satotrack-neon'}`}
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Interactive Widgets */}
-      <InteractiveWidgets />
-
-      {/* Real-time balance cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <RealTimeBalanceCard
-          title="Saldo Total"
-          value={totalBalance}
-          fiatValue={displayValue}
-          currency={currency}
-          icon={Wallet}
-          trend="positive"
-          bitcoinData={bitcoinData}
-        />
-        
-        <RealTimeBalanceCard
-          title="Total Recebido"
-          value={totalReceived}
-          fiatValue={totalReceived * (currency === 'BRL' ? bitcoinData?.price_brl || 0 : bitcoinData?.price_usd || 0)}
-          currency={currency}
-          icon={ArrowUpCircle}
-          trend="positive"
-          bitcoinData={bitcoinData}
-        />
-        
-        <RealTimeBalanceCard
-          title="Total Enviado"
-          value={totalSent}
-          fiatValue={totalSent * (currency === 'BRL' ? bitcoinData?.price_brl || 0 : bitcoinData?.price_usd || 0)}
-          currency={currency}
-          icon={ArrowDownCircle}
-          trend="negative"
-          bitcoinData={bitcoinData}
-        />
-        
-        <RealTimeBalanceCard
-          title="Carteiras Ativas"
-          value={carteiras.length}
-          fiatValue={0}
-          currency={currency}
-          icon={BarChart3}
-          trend="neutral"
-          isCount={true}
-          bitcoinData={bitcoinData}
-        />
-      </div>
-
-      {/* Advanced Control Panel */}
-      <AdvancedControlPanel onSettingsChange={handleSettingsChange} />
-
-      {/* Static Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        <StaticChart 
-          title="Preço do Bitcoin (24h)"
-          type="area"
-          color="#f7931a"
-          height={180}
-        />
-        <StaticChart 
-          title="Volume de Trading"
-          type="line"
-          color="#00d4ff"
-          height={180}
-        />
-        <StaticChart 
-          title="Evolução do Portfólio"
-          type="area"
-          color="#00ff88"
-          height={180}
-        />
-      </div>
-
-      {/* Immersive Tools */}
-      <ImmersiveTools />
-
-      {/* Main dashboard content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column - Charts and analytics */}
-        <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="balance" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-dashboard-dark border border-satotrack-neon/20">
-              <TabsTrigger value="balance" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Evolução do Saldo</TabsTrigger>
-              <TabsTrigger value="distribution" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Distribuição</TabsTrigger>
-              <TabsTrigger value="projection" className="data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Projeção</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="balance" className="mt-4">
-              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
-                    <TrendingUp className="h-5 w-5" />
-                    Evolução do Saldo (Linha)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ProfitLossIndicator 
-                    carteiras={carteiras}
-                    bitcoinData={bitcoinData}
-                    currency={currency}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="distribution" className="mt-4">
-              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
-                    <PieChart className="h-5 w-5" />
-                    Distribuição dos Fundos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <TransactionSummary 
-                    carteiras={carteiras}
-                    bitcoinData={bitcoinData}
-                    currency={currency}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="projection" className="mt-4">
-              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-satotrack-neon">
-                    <BarChart3 className="h-5 w-5" />
-                    Projeção de Saldo
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <BalanceProjection 
-                    carteiras={carteiras}
-                    bitcoinData={bitcoinData}
-                    currency={currency}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Right column - Quick actions and market */}
-        <div className="space-y-6">
-          <QuickActionsPanel />
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <PrimaryWallet />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <RealTimeBalanceCard />
+                  <QuickActionsPanel />
+                </div>
+                <MarketOverview />
+                <TransactionSummary />
+              </div>
+              
+              <div className="space-y-6">
+                <StaticChart 
+                  title="Bitcoin Price (24h)" 
+                  type="area" 
+                  color="#f7931a"
+                  height={300}
+                />
+                <StaticChart 
+                  title="Portfolio Balance" 
+                  type="line" 
+                  color="#00d4ff"
+                  height={200}
+                />
+                <AdvancedControlPanel onSettingsChange={handleSettingsChange} />
+              </div>
+            </div>
+          </TabsContent>
           
-          <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-satotrack-neon">
-                <Globe className="h-5 w-5" />
-                Mercado
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MarketOverview currency={currency} />
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="widgets" className="space-y-6">
+            <InteractiveWidgets />
+          </TabsContent>
+          
+          <TabsContent value="tools" className="space-y-6">
+            <ImmersiveTools />
+          </TabsContent>
+          
+          <TabsContent value="achievements" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AchievementsPanel />
+              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
+                <CardHeader>
+                  <CardTitle className="text-satotrack-neon">Estatísticas de Gamificação</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg bg-muted/50 text-center">
+                        <div className="text-2xl font-bold text-satotrack-neon">Nível 1</div>
+                        <div className="text-sm text-muted-foreground">Nível Atual</div>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50 text-center">
+                        <div className="text-2xl font-bold text-green-500">0 XP</div>
+                        <div className="text-sm text-muted-foreground">Experiência</div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Próximo nível em 100 XP
+                      </div>
+                      <div className="w-full bg-muted/20 rounded-full h-2">
+                        <div className="bg-satotrack-neon h-2 rounded-full w-0 transition-all duration-300"></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </GamificationProvider>
   );
 };
 
