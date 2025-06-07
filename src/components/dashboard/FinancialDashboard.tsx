@@ -14,8 +14,13 @@ import AdvancedControlPanel from './AdvancedControlPanel';
 import AchievementsPanel from './AchievementsPanel';
 import StaticChart from './StaticChart';
 import { GamificationProvider } from '@/contexts/gamification/GamificationContext';
+import { useCarteiras } from '@/contexts/carteiras';
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
+import { Bitcoin, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 
 const FinancialDashboard: React.FC = () => {
+  const { carteiras, addCarteira, carteiraLimitReached } = useCarteiras();
+  const { data: bitcoinData } = useBitcoinPrice();
   const [dashboardSettings, setDashboardSettings] = useState({
     autoRefresh: true,
     refreshInterval: 2,
@@ -30,10 +35,25 @@ const FinancialDashboard: React.FC = () => {
     setDashboardSettings(prev => ({ ...prev, ...newSettings }));
   };
 
+  const handleNewWallet = () => {
+    // Esta função seria implementada para abrir modal de nova carteira
+    console.log('Nova carteira');
+  };
+
+  // Calcular valores totais
+  const totalBalance = carteiras.reduce((acc, carteira) => acc + carteira.saldo, 0);
+  const totalReceived = carteiras.reduce((acc, carteira) => acc + carteira.totalRecebido, 0);
+  const totalSent = carteiras.reduce((acc, carteira) => acc + carteira.totalEnviado, 0);
+
+  const primaryWallet = carteiras.length > 0 ? carteiras[0] : null;
+
   return (
     <GamificationProvider>
       <div className="space-y-6">
-        <DashboardHeader />
+        <DashboardHeader 
+          onNewWallet={handleNewWallet}
+          reachedLimit={carteiraLimitReached}
+        />
         
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
@@ -46,13 +66,39 @@ const FinancialDashboard: React.FC = () => {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
-                <PrimaryWallet />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <RealTimeBalanceCard />
-                  <QuickActionsPanel />
+                {primaryWallet && <PrimaryWallet wallet={primaryWallet} />}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <RealTimeBalanceCard
+                    title="Saldo Total"
+                    value={totalBalance}
+                    fiatValue={totalBalance * (bitcoinData?.price_brl || 0)}
+                    currency="BRL"
+                    icon={Bitcoin}
+                    trend="positive"
+                    bitcoinData={bitcoinData}
+                  />
+                  <RealTimeBalanceCard
+                    title="Total Recebido"
+                    value={totalReceived}
+                    fiatValue={totalReceived * (bitcoinData?.price_brl || 0)}
+                    currency="BRL"
+                    icon={TrendingUp}
+                    trend="positive"
+                    bitcoinData={bitcoinData}
+                  />
+                  <RealTimeBalanceCard
+                    title="Carteiras Ativas"
+                    value={carteiras.length}
+                    fiatValue={0}
+                    currency="BRL"
+                    icon={Wallet}
+                    trend="neutral"
+                    isCount={true}
+                  />
                 </div>
-                <MarketOverview />
-                <TransactionSummary />
+                <QuickActionsPanel />
+                <MarketOverview currency="BRL" />
+                <TransactionSummary carteiras={carteiras} currency="BRL" />
               </div>
               
               <div className="space-y-6">

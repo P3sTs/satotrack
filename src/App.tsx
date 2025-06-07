@@ -31,12 +31,14 @@ import ApiDashboard from './pages/ApiDashboard';
 import Privacidade from './pages/Privacidade';
 import TermosUso from './pages/TermosUso';
 import ProtectedRoute from './components/ProtectedRoute';
-import { QueryClient, QueryClientProvider as QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <AuthProvider>
@@ -81,7 +83,7 @@ function App() {
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 

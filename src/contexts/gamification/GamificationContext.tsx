@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface Achievement {
   id: string;

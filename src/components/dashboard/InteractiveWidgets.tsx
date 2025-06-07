@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Maximize2, 
   Minimize2, 
-  RotateCcw, 
-  Download, 
-  Share2,
-  Bookmark,
   Heart,
   Star,
   Target,
@@ -19,9 +16,10 @@ import {
   Activity,
   Expand,
   Save,
-  Share
+  Share,
+  Download
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useGamification } from '@/contexts/gamification/GamificationContext';
 import WidgetExpansionModal from './WidgetExpansionModal';
 
