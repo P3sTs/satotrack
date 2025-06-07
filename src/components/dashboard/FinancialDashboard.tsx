@@ -15,11 +15,13 @@ import AchievementsPanel from './AchievementsPanel';
 import StaticChart from './StaticChart';
 import { GamificationProvider } from '@/contexts/gamification/GamificationContext';
 import { useCarteiras } from '@/contexts/carteiras';
+import { useAuth } from '@/contexts/auth';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { Bitcoin, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 
 const FinancialDashboard: React.FC = () => {
-  const { carteiras, addCarteira, carteiraLimitReached } = useCarteiras();
+  const { carteiras, adicionarCarteira } = useCarteiras();
+  const { userPlan } = useAuth();
   const { data: bitcoinData } = useBitcoinPrice();
   const [dashboardSettings, setDashboardSettings] = useState({
     autoRefresh: true,
@@ -31,6 +33,11 @@ const FinancialDashboard: React.FC = () => {
     advancedMode: false
   });
 
+  // Calculate wallet limit based on user plan
+  const isPremium = userPlan === 'premium';
+  const walletLimit = isPremium ? null : 1;
+  const carteiraLimitReached = !isPremium && carteiras.length >= 1;
+
   const handleSettingsChange = (newSettings: any) => {
     setDashboardSettings(prev => ({ ...prev, ...newSettings }));
   };
@@ -40,10 +47,10 @@ const FinancialDashboard: React.FC = () => {
     console.log('Nova carteira');
   };
 
-  // Calcular valores totais
+  // Calcular valores totais using correct property names
   const totalBalance = carteiras.reduce((acc, carteira) => acc + carteira.saldo, 0);
-  const totalReceived = carteiras.reduce((acc, carteira) => acc + carteira.totalRecebido, 0);
-  const totalSent = carteiras.reduce((acc, carteira) => acc + carteira.totalEnviado, 0);
+  const totalReceived = carteiras.reduce((acc, carteira) => acc + (carteira.total_recebido || 0), 0);
+  const totalSent = carteiras.reduce((acc, carteira) => acc + (carteira.total_enviado || 0), 0);
 
   const primaryWallet = carteiras.length > 0 ? carteiras[0] : null;
 
