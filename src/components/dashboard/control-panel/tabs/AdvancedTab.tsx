@@ -7,13 +7,11 @@ import { Shield, TrendingUp, Palette, Settings } from 'lucide-react';
 interface AdvancedTabProps {
   advancedMode: boolean;
   setAdvancedMode: (value: boolean) => void;
-  handleSettingChange: (key: string, value: any) => void;
 }
 
 const AdvancedTab: React.FC<AdvancedTabProps> = ({
   advancedMode,
   setAdvancedMode,
-  handleSettingChange,
 }) => {
   return (
     <div className="space-y-4">
@@ -24,10 +22,7 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
         </div>
         <Switch 
           checked={advancedMode} 
-          onCheckedChange={(checked) => {
-            setAdvancedMode(checked);
-            handleSettingChange('advancedMode', checked);
-          }}
+          onCheckedChange={setAdvancedMode}
         />
       </div>
       

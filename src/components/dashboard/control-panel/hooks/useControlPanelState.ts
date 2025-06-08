@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ControlPanelSettings } from '../types';
 
 export const useControlPanelState = (onSettingsChange: (settings: any) => void) => {
@@ -11,26 +11,61 @@ export const useControlPanelState = (onSettingsChange: (settings: any) => void) 
   const [notifications, setNotifications] = useState(true);
   const [advancedMode, setAdvancedMode] = useState(false);
 
-  const handleSettingChange = (key: string, value: any) => {
+  const handleSettingChange = useCallback((key: string, value: any) => {
     const newSettings = { [key]: value };
     onSettingsChange(newSettings);
-  };
+  }, [onSettingsChange]);
+
+  const handleAutoRefreshChange = useCallback((checked: boolean) => {
+    setAutoRefresh(checked);
+    handleSettingChange('autoRefresh', checked);
+  }, [handleSettingChange]);
+
+  const handleRefreshIntervalChange = useCallback((value: number[]) => {
+    setRefreshInterval(value);
+    handleSettingChange('refreshInterval', value[0]);
+  }, [handleSettingChange]);
+
+  const handleAlertThresholdChange = useCallback((value: number[]) => {
+    setAlertThreshold(value);
+    handleSettingChange('alertThreshold', value[0]);
+  }, [handleSettingChange]);
+
+  const handleThemeChange = useCallback((value: string) => {
+    setTheme(value);
+    handleSettingChange('theme', value);
+  }, [handleSettingChange]);
+
+  const handleChartStyleChange = useCallback((value: string) => {
+    setChartStyle(value);
+    handleSettingChange('chartStyle', value);
+  }, [handleSettingChange]);
+
+  const handleNotificationsChange = useCallback((checked: boolean) => {
+    setNotifications(checked);
+    handleSettingChange('notifications', checked);
+  }, [handleSettingChange]);
+
+  const handleAdvancedModeChange = useCallback((checked: boolean) => {
+    setAdvancedMode(checked);
+    handleSettingChange('advancedMode', checked);
+  }, [handleSettingChange]);
 
   return {
     autoRefresh,
-    setAutoRefresh,
+    setAutoRefresh: handleAutoRefreshChange,
     refreshInterval,
-    setRefreshInterval,
+    setRefreshInterval: handleRefreshIntervalChange,
     alertThreshold,
-    setAlertThreshold,
+    setAlertThreshold: handleAlertThresholdChange,
     theme,
-    setTheme,
+    setTheme: handleThemeChange,
     chartStyle,
-    setChartStyle,
+    setChartStyle: handleChartStyleChange,
     notifications,
-    setNotifications,
+    setNotifications: handleNotificationsChange,
     advancedMode,
-    setAdvancedMode,
+    setAdvancedMode: handleAdvancedModeChange,
     handleSettingChange,
   };
 };

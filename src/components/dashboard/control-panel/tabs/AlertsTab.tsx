@@ -10,7 +10,6 @@ interface AlertsTabProps {
   setNotifications: (value: boolean) => void;
   alertThreshold: number[];
   setAlertThreshold: (value: number[]) => void;
-  handleSettingChange: (key: string, value: any) => void;
 }
 
 const AlertsTab: React.FC<AlertsTabProps> = ({
@@ -18,7 +17,6 @@ const AlertsTab: React.FC<AlertsTabProps> = ({
   setNotifications,
   alertThreshold,
   setAlertThreshold,
-  handleSettingChange,
 }) => {
   return (
     <div className="space-y-4">
@@ -29,10 +27,7 @@ const AlertsTab: React.FC<AlertsTabProps> = ({
         </div>
         <Switch 
           checked={notifications} 
-          onCheckedChange={(checked) => {
-            setNotifications(checked);
-            handleSettingChange('notifications', checked);
-          }}
+          onCheckedChange={setNotifications}
         />
       </div>
       
@@ -40,10 +35,7 @@ const AlertsTab: React.FC<AlertsTabProps> = ({
         <label className="text-sm font-medium">Limite de Alerta (%)</label>
         <Slider
           value={alertThreshold}
-          onValueChange={(value) => {
-            setAlertThreshold(value);
-            handleSettingChange('alertThreshold', value[0]);
-          }}
+          onValueChange={setAlertThreshold}
           max={50}
           min={1}
           step={1}

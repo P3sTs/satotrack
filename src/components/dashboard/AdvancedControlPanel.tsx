@@ -26,7 +26,6 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({ onSettingsC
     setNotifications,
     advancedMode,
     setAdvancedMode,
-    handleSettingChange,
   } = useControlPanelState(onSettingsChange);
 
   return (
@@ -56,7 +55,6 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({ onSettingsC
               setChartStyle={setChartStyle}
               theme={theme}
               setTheme={setTheme}
-              handleSettingChange={handleSettingChange}
             />
           </TabsContent>
           
@@ -66,7 +64,6 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({ onSettingsC
               setNotifications={setNotifications}
               alertThreshold={alertThreshold}
               setAlertThreshold={setAlertThreshold}
-              handleSettingChange={handleSettingChange}
             />
           </TabsContent>
           
@@ -78,7 +75,6 @@ const AdvancedControlPanel: React.FC<AdvancedControlPanelProps> = ({ onSettingsC
             <AdvancedTab
               advancedMode={advancedMode}
               setAdvancedMode={setAdvancedMode}
-              handleSettingChange={handleSettingChange}
             />
           </TabsContent>
         </Tabs>

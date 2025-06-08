@@ -14,7 +14,6 @@ interface DisplayTabProps {
   setChartStyle: (value: string) => void;
   theme: string;
   setTheme: (value: string) => void;
-  handleSettingChange: (key: string, value: any) => void;
 }
 
 const DisplayTab: React.FC<DisplayTabProps> = ({
@@ -26,7 +25,6 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
   setChartStyle,
   theme,
   setTheme,
-  handleSettingChange,
 }) => {
   return (
     <div className="space-y-4">
@@ -37,10 +35,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
         </div>
         <Switch 
           checked={autoRefresh} 
-          onCheckedChange={(checked) => {
-            setAutoRefresh(checked);
-            handleSettingChange('autoRefresh', checked);
-          }}
+          onCheckedChange={setAutoRefresh}
         />
       </div>
       
@@ -48,10 +43,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
         <label className="text-sm font-medium">Intervalo de Atualização (segundos)</label>
         <Slider
           value={refreshInterval}
-          onValueChange={(value) => {
-            setRefreshInterval(value);
-            handleSettingChange('refreshInterval', value[0]);
-          }}
+          onValueChange={setRefreshInterval}
           max={30}
           min={1}
           step={1}
@@ -62,10 +54,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
       
       <div className="space-y-2">
         <label className="text-sm font-medium">Estilo do Gráfico</label>
-        <Select value={chartStyle} onValueChange={(value) => {
-          setChartStyle(value);
-          handleSettingChange('chartStyle', value);
-        }}>
+        <Select value={chartStyle} onValueChange={setChartStyle}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -80,10 +69,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
       
       <div className="space-y-2">
         <label className="text-sm font-medium">Tema</label>
-        <Select value={theme} onValueChange={(value) => {
-          setTheme(value);
-          handleSettingChange('theme', value);
-        }}>
+        <Select value={theme} onValueChange={setTheme}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
