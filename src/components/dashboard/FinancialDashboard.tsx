@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +17,7 @@ import { useCarteiras } from '@/contexts/carteiras';
 import { useAuth } from '@/contexts/auth';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { Bitcoin, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import FloatingSatoAI from './chat/FloatingSatoAI';
 
 const FinancialDashboard: React.FC = () => {
   const { carteiras, adicionarCarteira } = useCarteiras();
@@ -168,6 +168,9 @@ const FinancialDashboard: React.FC = () => {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* SatoAI Floating Chat */}
+        <FloatingSatoAI />
       </div>
     </GamificationProvider>
   );

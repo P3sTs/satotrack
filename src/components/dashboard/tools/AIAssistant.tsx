@@ -1,14 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Brain, 
   Clock,
-  TrendingUp
+  TrendingUp,
+  MessageCircle
 } from 'lucide-react';
+import SatoAIChat from '../chat/SatoAIChat';
 
 const AIAssistant: React.FC = () => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-cyan-500/20">
       <CardHeader>
@@ -38,9 +43,22 @@ const AIAssistant: React.FC = () => {
           </div>
         </div>
         
-        <Button variant="outline" className="w-full border-cyan-500/50 text-cyan-400">
-          Conversar com SatoAI
-        </Button>
+        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full border-cyan-500/50 text-cyan-400">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Conversar com SatoAI
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl bg-transparent border-none p-0">
+            <div className="flex justify-center">
+              <SatoAIChat 
+                context="Dashboard - Ferramentas"
+                onToggleMinimize={() => setIsChatOpen(false)}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
