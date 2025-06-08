@@ -12,46 +12,45 @@ export const useWidgetActions = (
 ) => {
   const { likeWidget, unlikeWidget, isWidgetLiked, addXP } = useGamification();
 
-  const toggleMinimize = (id: string) => {
+  const toggleMinimize = async (id: string) => {
     setWidgets(prev => prev.map(widget => 
       widget.id === id ? { ...widget, isMinimized: !widget.isMinimized } : widget
     ));
-    addXP(5, 'Widget minimizado/expandido');
+    await addXP(5, 'Widget minimizado/expandido');
   };
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = async (id: string) => {
     setWidgets(prev => prev.map(widget => 
       widget.id === id ? { ...widget, isFavorite: !widget.isFavorite } : widget
     ));
-    addXP(5, 'Widget favoritado');
+    await addXP(5, 'Widget favoritado');
     toast.success('Widget favoritado!');
   };
 
-  const handleLike = (widgetId: string) => {
+  const handleLike = async (widgetId: string) => {
     if (isWidgetLiked(widgetId)) {
-      unlikeWidget(widgetId);
-      toast.info('Curtida removida');
+      await unlikeWidget(widgetId);
     } else {
-      likeWidget(widgetId);
+      await likeWidget(widgetId);
     }
   };
 
-  const handleExpand = (widget: Widget) => {
+  const handleExpand = async (widget: Widget) => {
     setExpandedWidget(widget);
-    addXP(5, 'Widget expandido');
+    await addXP(5, 'Widget expandido');
     toast.info(`Expandindo ${widget.title}`, {
       description: 'Visualização detalhada carregada'
     });
   };
 
-  const handleSave = (widgetId: string) => {
+  const handleSave = async (widgetId: string) => {
     const newSaved = savedWidgets.includes(widgetId)
       ? savedWidgets.filter(id => id !== widgetId)
       : [...savedWidgets, widgetId];
     
     setSavedWidgets(newSaved);
     localStorage.setItem('savedWidgets', JSON.stringify(newSaved));
-    addXP(5, 'Widget salvo');
+    await addXP(5, 'Widget salvo');
     
     toast.success(
       savedWidgets.includes(widgetId) ? 'Widget removido dos salvos' : 'Widget salvo!',
@@ -59,7 +58,7 @@ export const useWidgetActions = (
     );
   };
 
-  const handleShare = (widget: Widget) => {
+  const handleShare = async (widget: Widget) => {
     const shareData = {
       title: `SatoTrack - ${widget.title}`,
       text: `Confira meus dados: ${widget.title} - ${widget.value}%`,
@@ -73,10 +72,10 @@ export const useWidgetActions = (
       toast.success('Copiado para área de transferência!');
     }
     
-    addXP(10, 'Widget compartilhado');
+    await addXP(10, 'Widget compartilhado');
   };
 
-  const handleExport = (widget: Widget) => {
+  const handleExport = async (widget: Widget) => {
     const exportData = {
       widget: widget.title,
       value: widget.value,
@@ -96,7 +95,7 @@ export const useWidgetActions = (
     link.click();
     URL.revokeObjectURL(url);
     
-    addXP(15, 'Dados exportados');
+    await addXP(15, 'Dados exportados');
     toast.success('Dados exportados!', {
       description: 'Arquivo baixado com sucesso'
     });

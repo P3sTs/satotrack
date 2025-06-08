@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
+import { gamificationService, UserStats, UserAchievement, WidgetLike } from '@/services/gamification/gamificationService';
 
 interface Achievement {
   id: string;
@@ -13,200 +14,205 @@ interface Achievement {
   unlockedAt?: Date;
 }
 
-interface UserStats {
-  totalLikes: number;
-  widgetLikes: Record<string, number>;
-  achievements: Achievement[];
-  level: number;
-  xp: number;
-  streak: number;
-  lastActivity: Date;
-}
-
 interface GamificationContextType {
-  userStats: UserStats;
-  likeWidget: (widgetId: string) => void;
-  unlikeWidget: (widgetId: string) => void;
+  userStats: UserStats | null;
+  achievements: Achievement[];
+  widgetLikes: Record<string, number>;
+  likeWidget: (widgetId: string) => Promise<void>;
+  unlikeWidget: (widgetId: string) => Promise<void>;
   isWidgetLiked: (widgetId: string) => boolean;
-  addXP: (amount: number, reason: string) => void;
-  checkAchievements: () => void;
+  addXP: (amount: number, reason: string) => Promise<void>;
+  checkAchievements: () => Promise<void>;
+  loading: boolean;
+  refreshData: () => Promise<void>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
-const defaultAchievements: Achievement[] = [
+const defaultAchievements = [
   {
     id: 'first-like',
     title: 'Primeira Curtida',
     description: 'Curtiu seu primeiro widget',
     icon: '👍',
-    requirement: 1,
-    unlocked: false
+    requirement: 1
   },
   {
     id: 'like-collector',
     title: 'Colecionador',
     description: 'Acumulou 10 curtidas',
     icon: '❤️',
-    requirement: 10,
-    unlocked: false
+    requirement: 10
   },
   {
     id: 'like-master',
     title: 'Mestre das Curtidas',
     description: 'Acumulou 50 curtidas',
     icon: '💎',
-    requirement: 50,
-    unlocked: false
+    requirement: 50
   },
   {
     id: 'like-legend',
     title: 'Lenda',
     description: 'Acumulou 100 curtidas',
     icon: '👑',
-    requirement: 100,
-    unlocked: false
+    requirement: 100
   }
 ];
 
 export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [userStats, setUserStats] = useState<UserStats>({
-    totalLikes: 0,
-    widgetLikes: {},
-    achievements: [...defaultAchievements],
-    level: 1,
-    xp: 0,
-    streak: 0,
-    lastActivity: new Date()
-  });
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>(defaultAchievements);
+  const [widgetLikes, setWidgetLikes] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
 
-  // Load user stats from localStorage on mount
-  useEffect(() => {
-    if (user) {
-      const savedStats = localStorage.getItem(`gamification_${user.id}`);
-      if (savedStats) {
-        const parsed = JSON.parse(savedStats);
-        setUserStats({
-          ...parsed,
-          lastActivity: new Date(parsed.lastActivity),
-          achievements: parsed.achievements.map((ach: any) => ({
-            ...ach,
-            unlockedAt: ach.unlockedAt ? new Date(ach.unlockedAt) : undefined
-          }))
-        });
-      }
+  // Carregar dados do usuário
+  const loadUserData = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
     }
-  }, [user]);
 
-  // Save user stats to localStorage whenever they change
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(`gamification_${user.id}`, JSON.stringify(userStats));
+    try {
+      setLoading(true);
+      
+      // Carregar estatísticas
+      const stats = await gamificationService.getUserStats(user.id);
+      setUserStats(stats);
+
+      // Carregar conquistas
+      const userAchievements = await gamificationService.getUserAchievements(user.id);
+      const achievementMap = new Map(userAchievements.map(a => [a.achievement_id, a]));
+      
+      const updatedAchievements = defaultAchievements.map(achievement => ({
+        ...achievement,
+        unlocked: achievementMap.has(achievement.id),
+        unlockedAt: achievementMap.get(achievement.id)?.unlocked_at 
+          ? new Date(achievementMap.get(achievement.id)!.unlocked_at) 
+          : undefined
+      }));
+      
+      setAchievements(updatedAchievements);
+
+      // Carregar curtidas dos widgets
+      const likes = await gamificationService.getUserWidgetLikes(user.id);
+      const likesMap = likes.reduce((acc, like) => {
+        acc[like.widget_id] = like.likes_count;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      setWidgetLikes(likesMap);
+
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [userStats, user]);
-
-  const likeWidget = (widgetId: string) => {
-    setUserStats(prev => {
-      const newWidgetLikes = { ...prev.widgetLikes };
-      newWidgetLikes[widgetId] = (newWidgetLikes[widgetId] || 0) + 1;
-      
-      const newTotalLikes = prev.totalLikes + 1;
-      const newXP = prev.xp + 10; // 10 XP por curtida
-      
-      return {
-        ...prev,
-        totalLikes: newTotalLikes,
-        widgetLikes: newWidgetLikes,
-        xp: newXP,
-        level: Math.floor(newXP / 100) + 1,
-        lastActivity: new Date()
-      };
-    });
-    
-    addXP(10, 'Widget curtido');
-    checkAchievements();
-    
-    toast.success('Widget curtido!', {
-      description: '+10 XP ganhos'
-    });
   };
 
-  const unlikeWidget = (widgetId: string) => {
-    setUserStats(prev => {
-      const newWidgetLikes = { ...prev.widgetLikes };
-      if (newWidgetLikes[widgetId] && newWidgetLikes[widgetId] > 0) {
-        newWidgetLikes[widgetId] -= 1;
-        if (newWidgetLikes[widgetId] === 0) {
-          delete newWidgetLikes[widgetId];
-        }
+  // Carregar dados quando o usuário mudar
+  useEffect(() => {
+    loadUserData();
+  }, [user?.id]);
+
+  const likeWidget = async (widgetId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const success = await gamificationService.likeWidget(user.id, widgetId);
+      if (success) {
+        // Atualizar estado local
+        setWidgetLikes(prev => ({
+          ...prev,
+          [widgetId]: (prev[widgetId] || 0) + 1
+        }));
+
+        // Recarregar dados para sincronizar
+        await loadUserData();
+        
+        toast.success('Widget curtido!', {
+          description: '+10 XP ganhos'
+        });
       }
-      
-      return {
-        ...prev,
-        totalLikes: Math.max(0, prev.totalLikes - 1),
-        widgetLikes: newWidgetLikes,
-        lastActivity: new Date()
-      };
-    });
+    } catch (error) {
+      console.error('Error liking widget:', error);
+      toast.error('Erro ao curtir widget');
+    }
+  };
+
+  const unlikeWidget = async (widgetId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const success = await gamificationService.unlikeWidget(user.id, widgetId);
+      if (success) {
+        // Atualizar estado local
+        setWidgetLikes(prev => ({
+          ...prev,
+          [widgetId]: Math.max(0, (prev[widgetId] || 0) - 1)
+        }));
+
+        // Recarregar dados para sincronizar
+        await loadUserData();
+        
+        toast.info('Curtida removida');
+      }
+    } catch (error) {
+      console.error('Error unliking widget:', error);
+      toast.error('Erro ao remover curtida');
+    }
   };
 
   const isWidgetLiked = (widgetId: string) => {
-    return (userStats.widgetLikes[widgetId] || 0) > 0;
+    return (widgetLikes[widgetId] || 0) > 0;
   };
 
-  const addXP = (amount: number, reason: string) => {
-    setUserStats(prev => {
-      const newXP = prev.xp + amount;
-      const newLevel = Math.floor(newXP / 100) + 1;
-      
-      if (newLevel > prev.level) {
-        toast.success(`Level Up! Nível ${newLevel}`, {
-          description: 'Parabéns pelo seu progresso!'
-        });
-      }
-      
-      return {
-        ...prev,
-        xp: newXP,
-        level: newLevel,
-        lastActivity: new Date()
-      };
-    });
-  };
+  const addXP = async (amount: number, reason: string) => {
+    if (!user?.id) return;
 
-  const checkAchievements = () => {
-    setUserStats(prev => {
-      const updatedAchievements = prev.achievements.map(achievement => {
-        if (!achievement.unlocked && prev.totalLikes >= achievement.requirement) {
-          toast.success(`Conquista Desbloqueada! ${achievement.icon}`, {
-            description: achievement.title
-          });
-          
-          return {
-            ...achievement,
-            unlocked: true,
-            unlockedAt: new Date()
-          };
-        }
-        return achievement;
+    try {
+      await gamificationService.updateUserStats(user.id, amount);
+      
+      // Recarregar dados para ver mudanças
+      await loadUserData();
+      
+      toast.success(`+${amount} XP`, {
+        description: reason
       });
-      
-      return {
-        ...prev,
-        achievements: updatedAchievements
-      };
-    });
+    } catch (error) {
+      console.error('Error adding XP:', error);
+    }
+  };
+
+  const checkAchievements = async () => {
+    if (!user?.id) return;
+
+    try {
+      await gamificationService.checkAchievements(user.id);
+      // Recarregar dados para ver novas conquistas
+      await loadUserData();
+    } catch (error) {
+      console.error('Error checking achievements:', error);
+    }
+  };
+
+  const refreshData = async () => {
+    await loadUserData();
   };
 
   return (
     <GamificationContext.Provider value={{
       userStats,
+      achievements,
+      widgetLikes,
       likeWidget,
       unlikeWidget,
       isWidgetLiked,
       addXP,
-      checkAchievements
+      checkAchievements,
+      loading,
+      refreshData
     }}>
       {children}
     </GamificationContext.Provider>

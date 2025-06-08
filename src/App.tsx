@@ -9,6 +9,7 @@ import { CarteirasProvider } from './contexts/CarteirasContext';
 import { ViewModeProvider } from './contexts/ViewModeContext';
 import { ReferralProvider } from './contexts/referral/ReferralContext';
 import { I18nProvider } from './contexts/i18n/I18nContext';
+import { GamificationProvider } from './contexts/gamification/GamificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 
@@ -40,33 +41,35 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="satotrack-theme">
         <BrowserRouter>
           <AuthProvider>
-            <CarteirasProvider>
-              <ViewModeProvider>
-                <ReferralProvider>
-                  <I18nProvider>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/auth" element={<Auth />} />
-                      
-                      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/carteiras" element={<WalletsManager />} />
-                        <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
-                        <Route path="/configuracoes" element={<Configuracoes />} />
-                        <Route path="/mercado" element={<Mercado />} />
-                        <Route path="/historico" element={<Historico />} />
-                        <Route path="/projecao" element={<ProjecaoLucros />} />
-                      </Route>
-                      
-                      <Route path="/404" element={<NotFound />} />
-                      <Route path="*" element={<Navigate to="/404" replace />} />
-                    </Routes>
-                    <Toaster />
-                  </I18nProvider>
-                </ReferralProvider>
-              </ViewModeProvider>
-            </CarteirasProvider>
+            <GamificationProvider>
+              <CarteirasProvider>
+                <ViewModeProvider>
+                  <ReferralProvider>
+                    <I18nProvider>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/auth" element={<Auth />} />
+                        
+                        <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/carteiras" element={<WalletsManager />} />
+                          <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
+                          <Route path="/configuracoes" element={<Configuracoes />} />
+                          <Route path="/mercado" element={<Mercado />} />
+                          <Route path="/historico" element={<Historico />} />
+                          <Route path="/projecao" element={<ProjecaoLucros />} />
+                        </Route>
+                        
+                        <Route path="/404" element={<NotFound />} />
+                        <Route path="*" element={<Navigate to="/404" replace />} />
+                      </Routes>
+                      <Toaster />
+                    </I18nProvider>
+                  </ReferralProvider>
+                </ViewModeProvider>
+              </CarteirasProvider>
+            </GamificationProvider>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

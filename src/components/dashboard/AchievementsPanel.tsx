@@ -3,11 +3,31 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Lock } from 'lucide-react';
+import { Trophy, Lock, Loader2 } from 'lucide-react';
 import { useGamification } from '@/contexts/gamification/GamificationContext';
 
 const AchievementsPanel: React.FC = () => {
-  const { userStats } = useGamification();
+  const { userStats, achievements, loading } = useGamification();
+
+  if (loading) {
+    return (
+      <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-purple-400">
+            <Trophy className="h-5 w-5" />
+            Conquistas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const totalLikes = userStats?.total_likes || 0;
+  const level = userStats?.level || 1;
+  const xp = userStats?.xp || 0;
 
   return (
     <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-500/20">
@@ -19,7 +39,7 @@ const AchievementsPanel: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-3">
-          {userStats.achievements.map((achievement) => (
+          {achievements.map((achievement) => (
             <div
               key={achievement.id}
               className={`p-3 rounded-lg border transition-all ${
@@ -49,7 +69,7 @@ const AchievementsPanel: React.FC = () => {
                     </Badge>
                   ) : (
                     <div className="text-xs text-muted-foreground">
-                      {userStats.totalLikes}/{achievement.requirement}
+                      {totalLikes}/{achievement.requirement}
                     </div>
                   )}
                 </div>
@@ -58,7 +78,7 @@ const AchievementsPanel: React.FC = () => {
               {!achievement.unlocked && (
                 <div className="mt-2">
                   <Progress 
-                    value={(userStats.totalLikes / achievement.requirement) * 100} 
+                    value={(totalLikes / achievement.requirement) * 100} 
                     className="h-2"
                   />
                 </div>
@@ -76,13 +96,13 @@ const AchievementsPanel: React.FC = () => {
         <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Progresso Total</span>
-            <span className="text-sm text-purple-400">{userStats.totalLikes} curtidas</span>
+            <span className="text-sm text-purple-400">{totalLikes} curtidas</span>
           </div>
           <div className="text-xs text-muted-foreground">
-            Nível {userStats.level} • {userStats.xp} XP
+            Nível {level} • {xp} XP
           </div>
           <Progress 
-            value={(userStats.xp % 100)} 
+            value={(xp % 100)} 
             className="h-2 mt-2"
           />
         </div>

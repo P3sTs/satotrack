@@ -11,11 +11,12 @@ import {
 } from 'lucide-react';
 import { Widget } from '../types';
 import { getWidgetIcon } from '../utils/widgetUtils';
+import { useGamification } from '@/contexts/gamification/GamificationContext';
 
 interface WidgetHeaderProps {
   widget: Widget;
-  likesCount: number;
-  isLiked: boolean;
+  likesCount?: number;
+  isLiked?: boolean;
   onLike: (widgetId: string) => void;
   onToggleFavorite: (id: string) => void;
   onToggleMinimize: (id: string) => void;
@@ -23,13 +24,15 @@ interface WidgetHeaderProps {
 
 const WidgetHeader: React.FC<WidgetHeaderProps> = ({
   widget,
-  likesCount,
-  isLiked,
   onLike,
   onToggleFavorite,
   onToggleMinimize
 }) => {
+  const { widgetLikes, isWidgetLiked } = useGamification();
   const Icon = getWidgetIcon(widget.type, widget.trend);
+  
+  const likesCount = widgetLikes[widget.id] || 0;
+  const isLiked = isWidgetLiked(widget.id);
 
   return (
     <div className="flex items-center justify-between">

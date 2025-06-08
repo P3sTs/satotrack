@@ -453,6 +453,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          created_at: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_plans: {
         Row: {
           api_requests: number | null
@@ -522,6 +546,42 @@ export type Database = {
           telegram_notifications_enabled?: boolean | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string
+          id: string
+          last_activity: string
+          level: number
+          streak: number
+          total_likes: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_activity?: string
+          level?: number
+          streak?: number
+          total_likes?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_activity?: string
+          level?: number
+          streak?: number
+          total_likes?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
         }
         Relationships: []
       }
@@ -607,17 +667,52 @@ export type Database = {
           },
         ]
       }
+      widget_likes: {
+        Row: {
+          created_at: string
+          id: string
+          likes_count: number
+          updated_at: string
+          user_id: string
+          widget_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          likes_count?: number
+          updated_at?: string
+          user_id: string
+          widget_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          likes_count?: number
+          updated_at?: string
+          user_id?: string
+          widget_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_and_unlock_achievements: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       generate_unique_referral_code: {
         Args: { user_name: string; user_id: string }
         Returns: string
       }
       process_referral: {
         Args: { referrer_code: string; referred_user_id: string }
+        Returns: undefined
+      }
+      update_user_stats: {
+        Args: { p_user_id: string; p_xp_change?: number }
         Returns: undefined
       }
     }
