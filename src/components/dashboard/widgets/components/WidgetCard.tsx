@@ -30,9 +30,9 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
   onShare,
   onSave
 }) => {
-  const { userStats, isWidgetLiked } = useGamification();
+  const { widgetLikes, isWidgetLiked } = useGamification();
   
-  const likesCount = userStats.widgetLikes[widget.id] || 0;
+  const likesCount = widgetLikes[widget.id] || 0;
   const isLiked = isWidgetLiked(widget.id);
   const isSaved = savedWidgets.includes(widget.id);
   

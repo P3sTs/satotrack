@@ -35,28 +35,32 @@ const defaultAchievements = [
     title: 'Primeira Curtida',
     description: 'Curtiu seu primeiro widget',
     icon: '👍',
-    requirement: 1
+    requirement: 1,
+    unlocked: false
   },
   {
     id: 'like-collector',
     title: 'Colecionador',
     description: 'Acumulou 10 curtidas',
     icon: '❤️',
-    requirement: 10
+    requirement: 10,
+    unlocked: false
   },
   {
     id: 'like-master',
     title: 'Mestre das Curtidas',
     description: 'Acumulou 50 curtidas',
     icon: '💎',
-    requirement: 50
+    requirement: 50,
+    unlocked: false
   },
   {
     id: 'like-legend',
     title: 'Lenda',
     description: 'Acumulou 100 curtidas',
     icon: '👑',
-    requirement: 100
+    requirement: 100,
+    unlocked: false
   }
 ];
 

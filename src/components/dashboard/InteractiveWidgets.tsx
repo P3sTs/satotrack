@@ -7,7 +7,7 @@ import { useWidgetState } from './widgets/hooks/useWidgetState';
 import { useWidgetActions } from './widgets/hooks/useWidgetActions';
 
 const InteractiveWidgets: React.FC = () => {
-  const { userStats } = useGamification();
+  const { widgetLikes } = useGamification();
   const {
     widgets,
     setWidgets,
@@ -56,7 +56,7 @@ const InteractiveWidgets: React.FC = () => {
         widget={expandedWidget}
         isOpen={!!expandedWidget}
         onClose={() => setExpandedWidget(null)}
-        likesCount={expandedWidget ? (userStats.widgetLikes[expandedWidget.id] || 0) : 0}
+        likesCount={expandedWidget ? (widgetLikes[expandedWidget.id] || 0) : 0}
       />
     </>
   );
