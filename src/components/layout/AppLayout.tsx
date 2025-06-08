@@ -1,5 +1,6 @@
 
 import React, { Suspense } from 'react';
+import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/auth';
 import { Advertisement } from '../monetization/Advertisement';
@@ -9,10 +10,6 @@ import NewAppSidebar from './NewAppSidebar';
 import MobileNavigation from '../navigation/MobileNavigation';
 import ContextualHeader from './ContextualHeader';
 import Footer from '../Footer';
-
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
 
 const LoadingFallback = () => (
   <div className="p-6 space-y-6">
@@ -28,7 +25,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC = () => {
   const { userPlan } = useAuth();
   const isMobile = useIsMobile();
   const showAds = userPlan === 'free';
@@ -61,7 +58,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <div className="flex-1 overflow-auto">
               <div className="p-4 sm:p-6">
                 <Suspense fallback={<LoadingFallback />}>
-                  {children}
+                  <Outlet />
                 </Suspense>
               </div>
             </div>
