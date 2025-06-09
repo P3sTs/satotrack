@@ -13,7 +13,7 @@ import {
   Minimize2,
   Maximize2
 } from 'lucide-react';
-import { useSupabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ChatMessage {
@@ -45,7 +45,6 @@ const SatoAIChat: React.FC<SatoAIChatProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const supabase = useSupabase();
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {

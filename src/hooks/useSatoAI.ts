@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useSupabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface SatoAIResponse {
@@ -10,7 +10,6 @@ interface SatoAIResponse {
 
 export const useSatoAI = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = useSupabase();
 
   const askSatoAI = async (message: string, context?: string): Promise<string | null> => {
     setIsLoading(true);
