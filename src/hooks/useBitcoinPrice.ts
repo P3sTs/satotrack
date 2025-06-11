@@ -44,7 +44,17 @@ export const useBitcoinPrice = () => {
       
       if (!response.ok) throw new Error('Falha ao buscar dados do CoinGecko');
       
-      const coinData = response.json();
+      const coinData = await response.json();
+      
+      // Determinar a tendência do mercado com tipo correto
+      const changePercentage = coinData.market_data.price_change_percentage_24h || 0;
+      let marketTrend: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+      
+      if (changePercentage >= 3) {
+        marketTrend = 'bullish';
+      } else if (changePercentage <= -3) {
+        marketTrend = 'bearish';
+      }
       
       return {
         price_change_24h: coinData.market_data.price_change_24h || 0,
@@ -52,10 +62,10 @@ export const useBitcoinPrice = () => {
         price_change_percentage_7d: coinData.market_data.price_change_percentage_7d || 0,
         price_change_percentage_30d: coinData.market_data.price_change_percentage_30d || 0,
         price_change_percentage_1y: coinData.market_data.price_change_percentage_1y || 0,
-        market_cap_usd: coinData.market_data.market_cap.usd || 0,
-        market_cap: coinData.market_data.market_cap.usd || 0,
-        volume_24h_usd: coinData.market_data.total_volume.usd || 0,
-        volume_24h: coinData.market_data.total_volume.usd || 0,
+        market_cap_usd: coinData.market_data.market_cap?.usd || 0,
+        market_cap: coinData.market_data.market_cap?.usd || 0,
+        volume_24h_usd: coinData.market_data.total_volume?.usd || 0,
+        volume_24h: coinData.market_data.total_volume?.usd || 0,
         circulating_supply: coinData.market_data.circulating_supply || 0,
         price_low_7d: coinData.market_data.low_24h || 0,
         price_high_7d: coinData.market_data.high_24h || 0,
@@ -63,8 +73,7 @@ export const useBitcoinPrice = () => {
         price_high_30d: coinData.market_data.high_24h || 0,
         price_low_1y: coinData.market_data.low_24h || 0,
         price_high_1y: coinData.market_data.high_24h || 0,
-        market_trend: coinData.market_data.price_change_percentage_24h > 3 ? 'bullish' : 
-                      coinData.market_data.price_change_percentage_24h < -3 ? 'bearish' : 'neutral'
+        market_trend: marketTrend
       };
     } catch (err) {
       console.error('Erro ao buscar dados do CoinGecko:', err);
@@ -105,14 +114,15 @@ export const useBitcoinPrice = () => {
         // Buscar dados adicionais
         const additionalData = await fetchAdditionalData();
         
-        setData({
+        const newData: BitcoinPriceData = {
           price_usd: prices.BTC_USD,
           price_brl: prices.BTC_BRL,
-          ...additionalData,
           last_updated: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
-          updated_at: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString()
-        });
+          updated_at: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
+          ...additionalData
+        };
         
+        setData(newData);
         setError(null);
       } else {
         throw new Error('Preços não disponíveis');
