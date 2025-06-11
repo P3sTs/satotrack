@@ -19,10 +19,12 @@ interface GamificationContextType {
   userStats: UserStats | null;
   achievements: Achievement[];
   loading: boolean;
+  widgetLikes: Record<string, number>;
   likeWidget: (widgetId: string) => Promise<void>;
   unlikeWidget: (widgetId: string) => Promise<void>;
-  isWidgetLiked: (widgetId: string) => Promise<boolean>;
+  isWidgetLiked: (widgetId: string) => boolean;
   getWidgetLikeCount: (widgetId: string) => Promise<number>;
+  addXP: (amount: number, description?: string) => Promise<void>;
   refreshStats: () => Promise<void>;
 }
 
@@ -77,6 +79,8 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [widgetLikes, setWidgetLikes] = useState<Record<string, number>>({});
+  const [likedWidgets, setLikedWidgets] = useState<Set<string>>(new Set());
 
   const loadUserData = async () => {
     if (!user?.id) {
@@ -90,6 +94,21 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       // Carregar estatísticas do usuário
       const stats = await gamificationService.getUserStats(user.id);
       setUserStats(stats);
+
+      // Carregar curtidas dos widgets
+      const userWidgetLikes = await gamificationService.getUserWidgetLikes(user.id);
+      const likesMap: Record<string, number> = {};
+      const likedSet = new Set<string>();
+      
+      userWidgetLikes.forEach(like => {
+        likesMap[like.widget_id] = like.likes_count;
+        if (like.likes_count > 0) {
+          likedSet.add(like.widget_id);
+        }
+      });
+      
+      setWidgetLikes(likesMap);
+      setLikedWidgets(likedSet);
 
       // Carregar conquistas desbloqueadas
       const userAchievements = await gamificationService.getUserAchievements(user.id);
@@ -118,6 +137,21 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     await loadUserData();
   };
 
+  const addXP = async (amount: number, description?: string) => {
+    if (!user?.id) return;
+
+    try {
+      await gamificationService.updateUserStats(user.id, amount);
+      await loadUserData(); // Recarregar dados para atualizar XP e conquistas
+      
+      if (description) {
+        toast.success(`+${amount} XP - ${description}`);
+      }
+    } catch (error) {
+      console.error('Error adding XP:', error);
+    }
+  };
+
   const likeWidget = async (widgetId: string) => {
     if (!user?.id) {
       toast.error('Você precisa estar logado para curtir widgets');
@@ -127,6 +161,13 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     try {
       const success = await gamificationService.likeWidget(user.id, widgetId);
       if (success) {
+        // Atualizar estado local imediatamente
+        setWidgetLikes(prev => ({
+          ...prev,
+          [widgetId]: (prev[widgetId] || 0) + 1
+        }));
+        setLikedWidgets(prev => new Set([...prev, widgetId]));
+        
         toast.success('Widget curtido! +10 XP');
         await loadUserData(); // Recarregar dados para atualizar XP e conquistas
       } else {
@@ -144,6 +185,25 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     try {
       const success = await gamificationService.unlikeWidget(user.id, widgetId);
       if (success) {
+        // Atualizar estado local imediatamente
+        setWidgetLikes(prev => {
+          const newLikes = { ...prev };
+          if (newLikes[widgetId] > 1) {
+            newLikes[widgetId] -= 1;
+          } else {
+            delete newLikes[widgetId];
+          }
+          return newLikes;
+        });
+        
+        setLikedWidgets(prev => {
+          const newSet = new Set(prev);
+          if ((widgetLikes[widgetId] || 0) <= 1) {
+            newSet.delete(widgetId);
+          }
+          return newSet;
+        });
+        
         toast.success('Curtida removida');
         await loadUserData();
       }
@@ -153,15 +213,8 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
 
-  const isWidgetLiked = async (widgetId: string): Promise<boolean> => {
-    if (!user?.id) return false;
-
-    try {
-      return await gamificationService.isWidgetLiked(user.id, widgetId);
-    } catch (error) {
-      console.error('Error checking widget like:', error);
-      return false;
-    }
+  const isWidgetLiked = (widgetId: string): boolean => {
+    return likedWidgets.has(widgetId);
   };
 
   const getWidgetLikeCount = async (widgetId: string): Promise<number> => {
@@ -183,10 +236,12 @@ export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     userStats,
     achievements,
     loading,
+    widgetLikes,
     likeWidget,
     unlikeWidget,
     isWidgetLiked,
     getWidgetLikeCount,
+    addXP,
     refreshStats
   };
 
