@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,20 +9,10 @@ import { Bell, Plus, Trash2, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Alert {
-  id: string;
-  user_id: string;
-  alert_type: 'balance' | 'transaction' | 'price' | 'volume';
-  condition: 'above' | 'below' | 'equals';
-  threshold: number;
-  currency: 'BTC' | 'BRL' | 'USD';
-  wallet_id?: string;
-  is_active: boolean;
-  notification_methods: string[];
-  created_at: string;
-  title: string;
-}
+// Use the Supabase generated type instead of our local interface
+type Alert = Tables<'user_alerts'>;
 
 const AlertsManager: React.FC = () => {
   const { user } = useAuth();
@@ -150,13 +139,13 @@ const AlertsManager: React.FC = () => {
       transaction: 'transação',
       price: 'preço do Bitcoin',
       volume: 'volume'
-    }[alert.alert_type];
+    }[alert.alert_type as 'balance' | 'transaction' | 'price' | 'volume'];
 
     const conditionText = {
       above: 'acima de',
       below: 'abaixo de',
       equals: 'igual a'
-    }[alert.condition];
+    }[alert.condition as 'above' | 'below' | 'equals'];
 
     return `Quando ${typeText} estiver ${conditionText} ${thresholdText}`;
   };
