@@ -1,138 +1,151 @@
-import React from "react"
-import {
-  Home,
-  LayoutDashboard,
-  Settings,
-  Wallet,
-  Activity,
-  HelpCircle,
-  LogOut,
-  Trophy,
+
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { 
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
+import { 
+  Home, 
+  Wallet, 
+  PlusCircle, 
+  History, 
+  BarChart3, 
+  Settings, 
   Bell,
   TrendingUp,
-  ArrowLeftRight
-} from "lucide-react"
+  Trophy,
+  GitCompare,
+  Zap
+} from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
 
-import { useAuth } from "@/contexts/auth"
-import { useNavigate } from "react-router-dom"
-import { toast } from "sonner"
-
-interface Props {
-  isDashboard?: boolean
-}
-
-interface Item {
-  title: string
-  href: string
-  description: string
-  disabled?: boolean
-  external?: boolean
-  icon: any
-  onClick?: () => void
-}
-
-const SidebarNavigation: React.FC<Props> = ({ isDashboard }) => {
-  const { signOut } = useAuth()
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.success("Logout realizado com sucesso!")
-      navigate("/auth")
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error)
-      toast.error("Erro ao realizar logout.")
+const SidebarNavigation = () => {
+  const { user, userPlan } = useAuth();
+  const isPremium = userPlan === 'premium';
+  
+  const mainItems = [
+    { 
+      label: 'Dashboard', 
+      icon: Home, 
+      href: '/dashboard' 
+    },
+    { 
+      label: 'Carteiras', 
+      icon: Wallet, 
+      href: '/carteiras' 
+    },
+    { 
+      label: 'Mercado', 
+      icon: BarChart3, 
+      href: '/mercado' 
+    },
+    { 
+      label: 'Web3 Connect', 
+      icon: Zap, 
+      href: '/web3',
+      premium: true
     }
-  }
+  ];
 
-  const navigationItems: Item[] = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/dashboard",
-      description: "Visão geral das suas finanças"
+  const analyticsItems = [
+    { 
+      label: 'Histórico', 
+      icon: History, 
+      href: '/historico' 
     },
-    {
-      title: "Carteiras",
-      icon: Wallet,
-      href: "/carteiras",
-      description: "Gerencie suas carteiras Bitcoin"
+    { 
+      label: 'Projeções', 
+      icon: TrendingUp, 
+      href: '/projecao' 
     },
-    {
-      title: "Transações",
-      icon: Activity,
-      href: "/transacoes",
-      description: "Histórico de transações"
-    },
-    {
-      title: "Performance IA",
-      icon: TrendingUp,
-      href: "/performance-analytics",
-      description: "Análise avançada com IA"
-    },
-    {
-      title: "Alertas",
-      icon: Bell,
-      href: "/alerts",
-      description: "Configure alertas personalizados"
-    },
-    {
-      title: "Projeções",
-      icon: TrendingUp,
-      href: "/projections",
-      description: "Análises e projeções de lucro"
-    },
-    {
-      title: "Comparação",
-      icon: ArrowLeftRight,
-      href: "/comparison",
-      description: "Compare suas carteiras"
-    },
-    {
-      title: "Conquistas",
-      icon: Trophy,
-      href: "/achievements",
-      description: "Desbloqueie recompensas"
-    },
-    {
-      title: "Ajuda",
-      icon: HelpCircle,
-      href: "/ajuda",
-      description: "Central de ajuda e suporte"
-    },
-    {
-      title: "Configurações",
-      icon: Settings,
-      href: "/configuracoes",
-      description: "Ajuste suas preferências"
-    },
-    {
-      title: "Sair",
-      icon: LogOut,
-      href: "#",
-      description: "Desconectar da sua conta",
-      external: true,
-      disabled: false,
-      onClick: handleLogout
+    { 
+      label: 'Comparação', 
+      icon: GitCompare, 
+      href: '/comparison' 
     }
-  ]
+  ];
+
+  const systemItems = [
+    { 
+      label: 'Alertas', 
+      icon: Bell, 
+      href: '/alerts' 
+    },
+    { 
+      label: 'Conquistas', 
+      icon: Trophy, 
+      href: '/achievements' 
+    },
+    { 
+      label: 'Configurações', 
+      icon: Settings, 
+      href: '/configuracoes' 
+    }
+  ];
+
+  const renderNavItem = (item: any) => (
+    <SidebarMenuItem key={item.href}>
+      <SidebarMenuButton asChild>
+        <NavLink
+          to={item.href}
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-dashboard-medium",
+              isActive 
+                ? "bg-dashboard-medium text-white font-medium" 
+                : "text-white/70 hover:text-white",
+              item.premium && !isPremium && "opacity-50"
+            )
+          }
+        >
+          <item.icon className="h-4 w-4" />
+          <span>{item.label}</span>
+          {item.premium && !isPremium && (
+            <span className="text-xs bg-bitcoin/20 text-bitcoin px-1 py-0.5 rounded">
+              Pro
+            </span>
+          )}
+        </NavLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
 
   return (
-    <div className="flex flex-col gap-6">
-      {navigationItems.map((item) => (
-        <a
-          key={item.title}
-          href={item.href}
-          onClick={item.onClick}
-          className="group flex gap-3 rounded-md p-3 text-sm font-medium hover:bg-secondary hover:text-accent"
-        >
-          <item.icon className="h-4 w-4 opacity-70 group-hover:opacity-100" />
-          <span>{item.title}</span>
-        </a>
-      ))}
-    </div>
-  )
-}
+    <div className="flex flex-col gap-2">
+      <SidebarGroup>
+        <SidebarGroupLabel>Principal</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {mainItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
 
-export default SidebarNavigation
+      <SidebarGroup>
+        <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {analyticsItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {systemItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </div>
+  );
+};
+
+export default SidebarNavigation;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import { ViewModeProvider } from './contexts/ViewModeContext';
 import { ReferralProvider } from './contexts/referral/ReferralContext';
 import { I18nProvider } from './contexts/i18n/I18nContext';
 import { GamificationProvider } from './contexts/gamification/GamificationContext';
+import { Web3Provider } from './contexts/web3/Web3Context';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 
@@ -28,6 +30,7 @@ import Alerts from './pages/Alerts';
 import Projections from './pages/Projections';
 import Achievements from './pages/Achievements';
 import WalletComparisonPage from './pages/WalletComparison';
+import Web3Dashboard from './pages/Web3Dashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,40 +47,43 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="satotrack-theme">
         <BrowserRouter>
           <AuthProvider>
-            <GamificationProvider>
-              <CarteirasProvider>
-                <ViewModeProvider>
-                  <ReferralProvider>
-                    <I18nProvider>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/home" element={<Home />} />
-                        <Route path="/auth" element={<Auth />} />
-                        
-                        <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                          <Route path="/dashboard" element={<Dashboard />} />
-                          <Route path="/carteiras" element={<WalletsManager />} />
-                          <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
-                          <Route path="/configuracoes" element={<Configuracoes />} />
-                          <Route path="/mercado" element={<Mercado />} />
-                          <Route path="/historico" element={<Historico />} />
-                          <Route path="/projecao" element={<ProjecaoLucros />} />
-                        </Route>
-                        
-                        <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
-                        <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
-                        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                        <Route path="/comparison" element={<ProtectedRoute><WalletComparisonPage /></ProtectedRoute>} />
-                        
-                        <Route path="/404" element={<NotFound />} />
-                        <Route path="*" element={<Navigate to="/404" replace />} />
-                      </Routes>
-                      <Toaster />
-                    </I18nProvider>
-                  </ReferralProvider>
-                </ViewModeProvider>
-              </CarteirasProvider>
-            </GamificationProvider>
+            <Web3Provider>
+              <GamificationProvider>
+                <CarteirasProvider>
+                  <ViewModeProvider>
+                    <ReferralProvider>
+                      <I18nProvider>
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/home" element={<Home />} />
+                          <Route path="/auth" element={<Auth />} />
+                          
+                          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/carteiras" element={<WalletsManager />} />
+                            <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
+                            <Route path="/configuracoes" element={<Configuracoes />} />
+                            <Route path="/mercado" element={<Mercado />} />
+                            <Route path="/historico" element={<Historico />} />
+                            <Route path="/projecao" element={<ProjecaoLucros />} />
+                            <Route path="/web3" element={<Web3Dashboard />} />
+                          </Route>
+                          
+                          <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+                          <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
+                          <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                          <Route path="/comparison" element={<ProtectedRoute><WalletComparisonPage /></ProtectedRoute>} />
+                          
+                          <Route path="/404" element={<NotFound />} />
+                          <Route path="*" element={<Navigate to="/404" replace />} />
+                        </Routes>
+                        <Toaster />
+                      </I18nProvider>
+                    </ReferralProvider>
+                  </ViewModeProvider>
+                </CarteirasProvider>
+              </GamificationProvider>
+            </Web3Provider>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
