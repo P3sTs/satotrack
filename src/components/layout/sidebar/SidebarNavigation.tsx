@@ -1,4 +1,3 @@
-
 import React from "react"
 import {
   Home,
@@ -65,6 +64,12 @@ const SidebarNavigation: React.FC<Props> = ({ isDashboard }) => {
       icon: Activity,
       href: "/transacoes",
       description: "Histórico de transações"
+    },
+    {
+      title: "Performance IA",
+      icon: TrendingUp,
+      href: "/performance-analytics",
+      description: "Análise avançada com IA"
     },
     {
       title: "Alertas",
