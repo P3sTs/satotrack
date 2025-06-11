@@ -1,169 +1,70 @@
 
-/* Utilities para o SatoTrack */
+/* Utility classes for SatoTrack */
 
 @layer utilities {
-  /* Grades responsivas */
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4;
+  /* Text gradients */
+  .satotrack-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-satotrack-neon;
   }
   
-  .grid-dashboard {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6;
+  .bitcoin-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-orange-500;
   }
-  
-  .grid-form {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
-  }
-  
-  /* Truncamento de texto e overflow */
-  .truncate-2-lines {
-    @apply line-clamp-2;
-  }
-  
-  .truncate-3-lines {
-    @apply line-clamp-3;
-  }
-  
-  /* Cores de texto contextuais */
-  .text-positive {
-    @apply text-green-500;
-  }
-  
-  .text-negative {
-    @apply text-red-500;
-  }
-  
-  .text-neutral {
-    @apply text-yellow-500;
-  }
-  
-  /* Background contextuais */
-  .bg-positive-subtle {
-    @apply bg-green-500/20;
-  }
-  
-  .bg-negative-subtle {
-    @apply bg-red-500/20;
-  }
-  
-  .bg-neutral-subtle {
-    @apply bg-yellow-500/20;
-  }
-  
-  /* Glassmorphism */
-  .glass-morphism {
-    @apply backdrop-blur-lg bg-black/30 border border-white/10;
-  }
-  
-  .glass-card {
-    @apply glass-morphism rounded-lg;
-  }
-  
-  /* Sombras */
-  .shadow-subtle {
-    @apply shadow-md shadow-black/10;
+
+  /* Shadows */
+  .shadow-neon-sm {
+    box-shadow: 0 0 5px rgba(0, 255, 198, 0.3),
+                0 0 8px rgba(0, 255, 198, 0.2);
   }
   
   .shadow-neon {
-    @apply shadow-[0_0_15px_rgba(0,255,194,0.3)];
+    box-shadow: 0 0 10px rgba(0, 255, 198, 0.4),
+                0 0 20px rgba(0, 255, 198, 0.2);
   }
   
-  .shadow-bitcoin {
-    @apply shadow-[0_0_15px_rgba(247,147,26,0.3)];
+  .shadow-neon-lg {
+    box-shadow: 0 0 15px rgba(0, 255, 198, 0.5),
+                0 0 30px rgba(0, 255, 198, 0.3);
   }
   
-  /* Gradientes */
-  .bg-gradient-dark {
-    @apply bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark;
+  .shadow-neon-xl {
+    box-shadow: 0 0 20px rgba(0, 255, 198, 0.5),
+                0 0 40px rgba(0, 255, 198, 0.3);
   }
   
-  .bg-gradient-neon {
-    @apply bg-gradient-to-r from-satotrack-neon/80 to-satotrack-neon;
-  }
-  
-  .bg-gradient-bitcoin {
-    @apply bg-gradient-to-r from-bitcoin to-bitcoin-dark;
-  }
-  
-  /* Interações */
-  .hover-scale {
-    @apply transition-transform hover:scale-105;
-  }
-  
-  .hover-bright {
-    @apply transition-filter hover:brightness-110;
-  }
-  
-  /* Posicionamento */
-  .center-absolute {
-    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
-  }
-  
-  .top-right {
-    @apply absolute top-2 right-2;
-  }
-  
-  .bottom-right {
-    @apply absolute bottom-2 right-2;
-  }
-  
-  .top-left {
-    @apply absolute top-2 left-2;
-  }
-  
-  .bottom-left {
-    @apply absolute bottom-2 left-2;
-  }
-  
-  /* Acessibilidade */
-  .sr-only {
-    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-  }
-  
-  .not-sr-only {
-    @apply static w-auto h-auto overflow-visible clip-auto m-0 p-0;
-  }
-  
-  /* Rolagem personalizada */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
-  
-  .scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
-    border-radius: 0.25rem;
+  .shadow-neon-hover {
+    box-shadow: 0 0 20px rgba(0, 255, 198, 0.6),
+                0 0 40px rgba(0, 255, 198, 0.4);
   }
 
-  /* Transições de página e view */
-  .page-transition {
-    @apply animate-fade-in;
+  /* Border glows */
+  .border-glow-neon {
+    @apply border border-satotrack-neon;
+    box-shadow: 0 0 10px rgba(0, 255, 198, 0.5);
   }
   
-  .view-transition {
-    @apply transition-all duration-300 ease-in-out;
+  .border-glow-bitcoin {
+    @apply border border-bitcoin;
+    box-shadow: 0 0 10px rgba(247, 147, 26, 0.5);
   }
   
-  .view-enter {
-    @apply opacity-0 transform scale-95;
+  /* Fluid animations */
+  .card-animate-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
-  .view-enter-active {
-    @apply opacity-100 transform scale-100;
+  .card-animate-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   }
   
-  .view-exit {
-    @apply opacity-100 transform scale-100;
+  /* 3D Card Effect */
+  .card-3d-fluid {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
   }
   
-  .view-exit-active {
-    @apply opacity-0 transform scale-95;
+  .card-3d-fluid:hover {
+    transform: translateY(-5px);
   }
 }

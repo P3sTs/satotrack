@@ -196,6 +196,126 @@ export type Database = {
           },
         ]
       }
+      love_messages: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: string
+          media_size: number | null
+          media_url: string | null
+          message_type: Database["public"]["Enums"]["message_type"] | null
+          sender_name: string
+          sender_number: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id?: string
+          media_size?: number | null
+          media_url?: string | null
+          message_type?: Database["public"]["Enums"]["message_type"] | null
+          sender_name: string
+          sender_number: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: string
+          media_size?: number | null
+          media_url?: string | null
+          message_type?: Database["public"]["Enums"]["message_type"] | null
+          sender_name?: string
+          sender_number?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      love_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_phone?: string
+        }
+        Relationships: []
+      }
+      love_photos: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          location: string | null
+          owner_number: string
+          title: string
+          url: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          owner_number: string
+          title: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          owner_number?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      love_plans: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_phone?: string
+        }
+        Relationships: []
+      }
       market_volatility: {
         Row: {
           id: string
@@ -214,6 +334,84 @@ export type Database = {
           symbol?: string
           updated_at?: string | null
           volatility_score?: number
+        }
+        Relationships: []
+      }
+      menstrual_cycles: {
+        Row: {
+          created_at: string
+          cycle_end: string | null
+          cycle_length: number | null
+          cycle_start: string
+          id: string
+          mood: string | null
+          notes: string | null
+          symptoms: string[] | null
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_end?: string | null
+          cycle_length?: number | null
+          cycle_start: string
+          id?: string
+          mood?: string | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          created_at?: string
+          cycle_end?: string | null
+          cycle_length?: number | null
+          cycle_start?: string
+          id?: string
+          mood?: string | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_phone?: string
+        }
+        Relationships: []
+      }
+      menstrual_settings: {
+        Row: {
+          average_cycle_length: number | null
+          average_period_length: number | null
+          created_at: string
+          email_notifications: boolean | null
+          id: string
+          notifications_enabled: boolean | null
+          partner_access_enabled: boolean | null
+          telegram_notifications: boolean | null
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          average_cycle_length?: number | null
+          average_period_length?: number | null
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          notifications_enabled?: boolean | null
+          partner_access_enabled?: boolean | null
+          telegram_notifications?: boolean | null
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          average_cycle_length?: number | null
+          average_period_length?: number | null
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          notifications_enabled?: boolean | null
+          partner_access_enabled?: boolean | null
+          telegram_notifications?: boolean | null
+          updated_at?: string
+          user_phone?: string
         }
         Relationships: []
       }
@@ -477,6 +675,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_music: {
+        Row: {
+          album: string | null
+          artist: string | null
+          created_at: string | null
+          duration: number | null
+          file_size: number
+          file_url: string
+          id: string
+          title: string
+          updated_at: string | null
+          user_phone: string
+        }
+        Insert: {
+          album?: string | null
+          artist?: string | null
+          created_at?: string | null
+          duration?: number | null
+          file_size: number
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_phone: string
+        }
+        Update: {
+          album?: string | null
+          artist?: string | null
+          created_at?: string | null
+          duration?: number | null
+          file_size?: number
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_phone?: string
+        }
+        Relationships: []
+      }
       user_plans: {
         Row: {
           api_requests: number | null
@@ -699,6 +936,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_next_cycle_prediction: {
+        Args: { p_user_phone: string }
+        Returns: {
+          next_period_start: string
+          next_period_end: string
+          fertile_window_start: string
+          fertile_window_end: string
+          pms_start: string
+        }[]
+      }
       check_and_unlock_achievements: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -717,7 +964,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      message_type: "text" | "audio" | "image" | "video"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -832,6 +1079,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      message_type: ["text", "audio", "image", "video"],
+    },
   },
 } as const
