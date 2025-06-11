@@ -18,6 +18,9 @@ import { useAuth } from '@/contexts/auth';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { Bitcoin, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import FloatingSatoAI from './chat/FloatingSatoAI';
+import AchievementsSystem from '@/components/gamification/AchievementsSystem';
+import ProfitLossProjection from '@/components/projecao/ProfitLossProjection';
+import WalletComparison from '@/components/wallet/WalletComparison';
 
 const FinancialDashboard: React.FC = () => {
   const { carteiras, adicionarCarteira } = useCarteiras();
@@ -63,10 +66,12 @@ const FinancialDashboard: React.FC = () => {
         />
         
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="widgets">Widgets</TabsTrigger>
             <TabsTrigger value="tools">Ferramentas</TabsTrigger>
+            <TabsTrigger value="projections">Projeções</TabsTrigger>
+            <TabsTrigger value="comparison">Comparação</TabsTrigger>
             <TabsTrigger value="achievements">Conquistas</TabsTrigger>
           </TabsList>
           
@@ -134,38 +139,16 @@ const FinancialDashboard: React.FC = () => {
             <ImmersiveTools />
           </TabsContent>
           
+          <TabsContent value="projections" className="space-y-6">
+            <ProfitLossProjection />
+          </TabsContent>
+          
+          <TabsContent value="comparison" className="space-y-6">
+            <WalletComparison />
+          </TabsContent>
+          
           <TabsContent value="achievements" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AchievementsPanel />
-              <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-darker border-satotrack-neon/20">
-                <CardHeader>
-                  <CardTitle className="text-satotrack-neon">Estatísticas de Gamificação</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg bg-muted/50 text-center">
-                        <div className="text-2xl font-bold text-satotrack-neon">Nível 1</div>
-                        <div className="text-sm text-muted-foreground">Nível Atual</div>
-                      </div>
-                      <div className="p-4 rounded-lg bg-muted/50 text-center">
-                        <div className="text-2xl font-bold text-green-500">0 XP</div>
-                        <div className="text-sm text-muted-foreground">Experiência</div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="text-sm text-muted-foreground mb-2">
-                        Próximo nível em 100 XP
-                      </div>
-                      <div className="w-full bg-muted/20 rounded-full h-2">
-                        <div className="bg-satotrack-neon h-2 rounded-full w-0 transition-all duration-300"></div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <AchievementsSystem />
           </TabsContent>
         </Tabs>
         

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,6 +24,10 @@ import Mercado from './pages/Mercado';
 import Historico from './pages/Historico';
 import ProjecaoLucros from './pages/ProjecaoLucros';
 import NotFound from './pages/NotFound';
+import Alerts from './pages/Alerts';
+import Projections from './pages/Projections';
+import Achievements from './pages/Achievements';
+import WalletComparisonPage from './pages/WalletComparison';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +63,11 @@ function App() {
                           <Route path="/historico" element={<Historico />} />
                           <Route path="/projecao" element={<ProjecaoLucros />} />
                         </Route>
+                        
+                        <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+                        <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
+                        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                        <Route path="/comparison" element={<ProtectedRoute><WalletComparisonPage /></ProtectedRoute>} />
                         
                         <Route path="/404" element={<NotFound />} />
                         <Route path="*" element={<Navigate to="/404" replace />} />

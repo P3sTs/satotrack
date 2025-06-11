@@ -1,180 +1,322 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Compare, TrendingUp, TrendingDown, Award } from 'lucide-react';
 import { useCarteiras } from '@/contexts/carteiras';
-import { useAuth } from '@/contexts/auth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PremiumFeatureGate from "@/components/monetization/PremiumFeatureGate";
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { CarteiraBTC } from '@/types/types';
-import { ArrowRightLeft, TrendingUp } from 'lucide-react';
 
 const WalletComparison: React.FC = () => {
   const { carteiras } = useCarteiras();
-  const { userPlan } = useAuth();
-  const isPremium = userPlan === 'premium';
-  
-  const [carteira1Id, setCarteira1Id] = useState<string>('');
-  const [carteira2Id, setCarteira2Id] = useState<string>('');
-  
-  const carteira1 = carteiras.find(c => c.id === carteira1Id);
-  const carteira2 = carteiras.find(c => c.id === carteira2Id);
-  
-  const formatDate = (dateString: string | Date) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+  const { data: bitcoinData } = useBitcoinPrice();
+  const [selectedWallets, setSelectedWallets] = useState<string[]>([]);
+  const [comparisonMetric, setComparisonMetric] = useState<'balance' | 'growth' | 'activity'>('balance');
+
+  const addWalletToComparison = (walletId: string) => {
+    if (selectedWallets.length < 3 && !selectedWallets.includes(walletId)) {
+      setSelectedWallets([...selectedWallets, walletId]);
+    }
   };
-  
-  return (
-    <PremiumFeatureGate
-      messageTitle="Comparação de Carteiras"
-      messageText="Compare o desempenho de múltiplas carteiras lado a lado para identificar padrões e otimizar suas estratégias."
-      blockType="replace"
-    >
+
+  const removeWalletFromComparison = (walletId: string) => {
+    setSelectedWallets(selectedWallets.filter(id => id !== walletId));
+  };
+
+  const getSelectedWallets = () => {
+    return carteiras.filter(wallet => selectedWallets.includes(wallet.id));
+  };
+
+  const generateComparisonData = () => {
+    const selectedWalletData = getSelectedWallets();
+    
+    return selectedWalletData.map(wallet => {
+      const balanceInBRL = wallet.saldo * (bitcoinData?.price_brl || 0);
+      
+      // Simular dados de crescimento (em produção, viria do histórico)
+      const growthRate = ((wallet.total_entradas - wallet.total_saidas) / Math.max(wallet.total_entradas, 1)) * 100;
+      const activityScore = wallet.qtde_transacoes * 10; // Score baseado em transações
+      
+      return {
+        name: wallet.nome,
+        id: wallet.id,
+        balance: wallet.saldo,
+        balanceBRL: balanceInBRL,
+        totalReceived: wallet.total_entradas,
+        totalSent: wallet.total_saidas,
+        transactions: wallet.qtde_transacoes,
+        growth: growthRate,
+        activity: activityScore,
+        performance: balanceInBRL / 1000 // Performance em milhares de reais
+      };
+    });
+  };
+
+  const comparisonData = generateComparisonData();
+
+  const getBestPerformer = () => {
+    if (comparisonData.length === 0) return null;
+    
+    const metric = comparisonMetric === 'balance' ? 'balanceBRL' : 
+                   comparisonMetric === 'growth' ? 'growth' : 'activity';
+    
+    return comparisonData.reduce((best, current) => 
+      current[metric] > best[metric] ? current : best
+    );
+  };
+
+  const getWorstPerformer = () => {
+    if (comparisonData.length === 0) return null;
+    
+    const metric = comparisonMetric === 'balance' ? 'balanceBRL' : 
+                   comparisonMetric === 'growth' ? 'growth' : 'activity';
+    
+    return comparisonData.reduce((worst, current) => 
+      current[metric] < worst[metric] ? current : worst
+    );
+  };
+
+  const bestPerformer = getBestPerformer();
+  const worstPerformer = getWorstPerformer();
+
+  const getMetricLabel = () => {
+    switch (comparisonMetric) {
+      case 'balance': return 'Saldo (R$)';
+      case 'growth': return 'Crescimento (%)';
+      case 'activity': return 'Atividade';
+      default: return 'Métrica';
+    }
+  };
+
+  const getChartDataKey = () => {
+    switch (comparisonMetric) {
+      case 'balance': return 'balanceBRL';
+      case 'growth': return 'growth';
+      case 'activity': return 'activity';
+      default: return 'balanceBRL';
+    }
+  };
+
+  if (carteiras.length < 2) {
+    return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowRightLeft className="h-5 w-5 text-satotrack-neon" />
-            Comparação de Carteiras
+            <Compare className="h-5 w-5" />
+            Comparador de Carteiras
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Carteira 1</label>
-              <Select value={carteira1Id} onValueChange={setCarteira1Id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma carteira" />
-                </SelectTrigger>
-                <SelectContent>
-                  {carteiras.map((wallet) => (
-                    <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Carteira 2</label>
-              <Select value={carteira2Id} onValueChange={setCarteira2Id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma carteira" />
-                </SelectTrigger>
-                <SelectContent>
-                  {carteiras.map((wallet) => (
-                    <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          {carteira1 && carteira2 ? (
-            <>
-              <Tabs defaultValue="metrics">
-                <TabsList className="w-full">
-                  <TabsTrigger value="metrics">Métricas</TabsTrigger>
-                  <TabsTrigger value="chart">Gráfico</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="metrics">
-                  <div className="space-y-4 mt-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <h3 className="text-sm font-medium text-muted-foreground">Métricas</h3>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-sm font-medium">{carteira1.nome}</h3>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-sm font-medium">{carteira2.nome}</h3>
-                      </div>
-                      
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Saldo Atual</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira1.saldo.toFixed(8)} BTC</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira2.saldo.toFixed(8)} BTC</p>
-                      </div>
-                      
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Total Recebido</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira1.total_entradas.toFixed(8)} BTC</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira2.total_entradas.toFixed(8)} BTC</p>
-                      </div>
-                      
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Total Enviado</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira1.total_saidas.toFixed(8)} BTC</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira2.total_saidas.toFixed(8)} BTC</p>
-                      </div>
-                      
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Transações</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira1.qtde_transacoes}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{carteira2.qtde_transacoes}</p>
-                      </div>
-                      
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Criação</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{formatDate(carteira1.ultimo_update)}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm">{formatDate(carteira2.ultimo_update)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="chart">
-                  <div className="h-64 mt-4 flex items-center justify-center bg-dashboard-medium/30 rounded-lg">
-                    <div className="text-center">
-                      <TrendingUp className="h-10 w-10 text-muted-foreground mb-2 mx-auto" />
-                      <p className="text-sm text-muted-foreground">
-                        Gráfico comparativo em desenvolvimento
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </>
-          ) : (
-            <div className="h-64 mt-4 flex items-center justify-center bg-dashboard-medium/30 rounded-lg">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Selecione duas carteiras para comparar
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Você poderá ver métricas lado a lado e análises comparativas
-                </p>
-              </div>
-            </div>
-          )}
+        <CardContent className="text-center py-8">
+          <Compare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="text-muted-foreground">
+            Você precisa de pelo menos 2 carteiras para usar o comparador.
+          </p>
         </CardContent>
       </Card>
-    </PremiumFeatureGate>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Compare className="h-5 w-5 text-satotrack-neon" />
+              Comparador de Carteiras
+            </CardTitle>
+            <Select value={comparisonMetric} onValueChange={(value: any) => setComparisonMetric(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="balance">Saldo em BRL</SelectItem>
+                <SelectItem value="growth">Taxa de Crescimento</SelectItem>
+                <SelectItem value="activity">Nível de Atividade</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Seleção de Carteiras */}
+            <div>
+              <h3 className="text-lg font-medium mb-3">
+                Selecione até 3 carteiras para comparar ({selectedWallets.length}/3)
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {carteiras.map(wallet => (
+                  <Button
+                    key={wallet.id}
+                    variant={selectedWallets.includes(wallet.id) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => 
+                      selectedWallets.includes(wallet.id) 
+                        ? removeWalletFromComparison(wallet.id)
+                        : addWalletToComparison(wallet.id)
+                    }
+                    disabled={!selectedWallets.includes(wallet.id) && selectedWallets.length >= 3}
+                  >
+                    {wallet.nome}
+                    {selectedWallets.includes(wallet.id) && ' ✓'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Análise de Performance */}
+            {selectedWallets.length >= 2 && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bestPerformer && (
+                    <Card className="border-green-500/30 bg-green-500/5">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Award className="h-8 w-8 text-green-500" />
+                          <div>
+                            <h4 className="font-bold text-green-500">Melhor Performance</h4>
+                            <p className="text-lg font-medium">{bestPerformer.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {getMetricLabel()}: {
+                                comparisonMetric === 'balance' 
+                                  ? `R$ ${bestPerformer.balanceBRL.toLocaleString('pt-BR')}`
+                                  : comparisonMetric === 'growth'
+                                  ? `${bestPerformer.growth.toFixed(1)}%`
+                                  : bestPerformer.activity.toString()
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {worstPerformer && bestPerformer?.id !== worstPerformer?.id && (
+                    <Card className="border-red-500/30 bg-red-500/5">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <TrendingDown className="h-8 w-8 text-red-500" />
+                          <div>
+                            <h4 className="font-bold text-red-500">Menor Performance</h4>
+                            <p className="text-lg font-medium">{worstPerformer.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {getMetricLabel()}: {
+                                comparisonMetric === 'balance' 
+                                  ? `R$ ${worstPerformer.balanceBRL.toLocaleString('pt-BR')}`
+                                  : comparisonMetric === 'growth'
+                                  ? `${worstPerformer.growth.toFixed(1)}%`
+                                  : worstPerformer.activity.toString()
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Gráfico de Comparação */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Comparação por {getMetricLabel()}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={comparisonData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="rgba(255,255,255,0.5)"
+                          />
+                          <YAxis 
+                            stroke="rgba(255,255,255,0.5)"
+                            tickFormatter={(value) => 
+                              comparisonMetric === 'balance' 
+                                ? `R$ ${(value/1000).toFixed(0)}k`
+                                : comparisonMetric === 'growth'
+                                ? `${value.toFixed(0)}%`
+                                : value.toString()
+                            }
+                          />
+                          <Tooltip 
+                            formatter={(value: number) => [
+                              comparisonMetric === 'balance' 
+                                ? `R$ ${value.toLocaleString('pt-BR')}`
+                                : comparisonMetric === 'growth'
+                                ? `${value.toFixed(1)}%`
+                                : value.toString(),
+                              getMetricLabel()
+                            ]}
+                            contentStyle={{ 
+                              backgroundColor: '#1A1F2C', 
+                              borderColor: 'rgba(255,255,255,0.1)',
+                              borderRadius: '8px'
+                            }}
+                          />
+                          <Bar 
+                            dataKey={getChartDataKey()} 
+                            fill="#00d4ff"
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Tabela Detalhada */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Comparação Detalhada</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left p-2">Carteira</th>
+                            <th className="text-right p-2">Saldo BTC</th>
+                            <th className="text-right p-2">Saldo BRL</th>
+                            <th className="text-right p-2">Transações</th>
+                            <th className="text-right p-2">Crescimento</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparisonData.map((wallet, index) => (
+                            <tr key={wallet.id} className="border-b border-border/50">
+                              <td className="p-2">
+                                <div className="flex items-center gap-2">
+                                  {index === 0 && bestPerformer?.id === wallet.id && (
+                                    <Badge className="bg-yellow-500/20 text-yellow-500">🏆</Badge>
+                                  )}
+                                  {wallet.name}
+                                </div>
+                              </td>
+                              <td className="text-right p-2">{wallet.balance.toFixed(8)}</td>
+                              <td className="text-right p-2">R$ {wallet.balanceBRL.toLocaleString('pt-BR')}</td>
+                              <td className="text-right p-2">{wallet.transactions}</td>
+                              <td className={`text-right p-2 ${
+                                wallet.growth >= 0 ? 'text-green-500' : 'text-red-500'
+                              }`}>
+                                {wallet.growth >= 0 ? '+' : ''}{wallet.growth.toFixed(1)}%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
