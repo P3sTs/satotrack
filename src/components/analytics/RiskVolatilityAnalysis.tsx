@@ -12,7 +12,8 @@ import {
   Activity,
   Zap,
   Clock,
-  DollarSign
+  DollarSign,
+  Lightbulb
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
