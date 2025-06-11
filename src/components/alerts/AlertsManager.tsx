@@ -31,10 +31,10 @@ const AlertsManager: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newAlert, setNewAlert] = useState({
-    alert_type: 'balance',
-    condition: 'above',
+    alert_type: 'balance' as const,
+    condition: 'above' as const,
     threshold: 0,
-    currency: 'BTC',
+    currency: 'BTC' as const,
     wallet_id: '',
     title: '',
     notification_methods: ['push']
@@ -48,15 +48,14 @@ const AlertsManager: React.FC = () => {
 
   const loadAlerts = async () => {
     try {
-      // Using a more generic query that should work
       const { data, error } = await supabase
-        .from('user_alerts' as any)
+        .from('user_alerts')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAlerts((data as Alert[]) || []);
+      setAlerts(data || []);
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
       toast.error('Erro ao carregar alertas');
@@ -73,7 +72,7 @@ const AlertsManager: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_alerts' as any)
+        .from('user_alerts')
         .insert([{
           user_id: user?.id,
           ...newAlert,
@@ -84,7 +83,7 @@ const AlertsManager: React.FC = () => {
 
       if (error) throw error;
 
-      setAlerts(prev => [data as Alert, ...prev]);
+      setAlerts(prev => [data, ...prev]);
       setShowCreateForm(false);
       setNewAlert({
         alert_type: 'balance',
@@ -105,7 +104,7 @@ const AlertsManager: React.FC = () => {
   const toggleAlert = async (alertId: string, isActive: boolean) => {
     try {
       const { error } = await supabase
-        .from('user_alerts' as any)
+        .from('user_alerts')
         .update({ is_active: isActive })
         .eq('id', alertId);
 
@@ -125,7 +124,7 @@ const AlertsManager: React.FC = () => {
   const deleteAlert = async (alertId: string) => {
     try {
       const { error } = await supabase
-        .from('user_alerts' as any)
+        .from('user_alerts')
         .delete()
         .eq('id', alertId);
 

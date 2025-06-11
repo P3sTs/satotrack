@@ -33,12 +33,12 @@ interface Item {
 }
 
 const SidebarNavigation: React.FC<Props> = ({ isDashboard }) => {
-  const { logout } = useAuth()
+  const { signOut } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await signOut()
       toast.success("Logout realizado com sucesso!")
       navigate("/auth")
     } catch (error) {
