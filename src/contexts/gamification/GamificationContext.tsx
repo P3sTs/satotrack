@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { gamificationService, UserStats, UserAchievement } from '@/services/gamification/gamificationService';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
-import { gamificationService, UserStats, UserAchievement, WidgetLike } from '@/services/gamification/gamificationService';
 
 interface Achievement {
   id: string;
@@ -11,67 +11,73 @@ interface Achievement {
   icon: string;
   requirement: number;
   unlocked: boolean;
-  unlockedAt?: Date;
+  unlockedAt: Date | null;
+  xpReward?: number;
 }
 
 interface GamificationContextType {
   userStats: UserStats | null;
   achievements: Achievement[];
-  widgetLikes: Record<string, number>;
+  loading: boolean;
   likeWidget: (widgetId: string) => Promise<void>;
   unlikeWidget: (widgetId: string) => Promise<void>;
-  isWidgetLiked: (widgetId: string) => boolean;
-  addXP: (amount: number, reason: string) => Promise<void>;
-  checkAchievements: () => Promise<void>;
-  loading: boolean;
-  refreshData: () => Promise<void>;
+  isWidgetLiked: (widgetId: string) => Promise<boolean>;
+  getWidgetLikeCount: (widgetId: string) => Promise<number>;
+  refreshStats: () => Promise<void>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
-const defaultAchievements = [
+export const useGamification = () => {
+  const context = useContext(GamificationContext);
+  if (!context) {
+    throw new Error('useGamification must be used within a GamificationProvider');
+  }
+  return context;
+};
+
+// Definição das conquistas
+const ACHIEVEMENTS: Omit<Achievement, 'unlocked' | 'unlockedAt'>[] = [
   {
     id: 'first-like',
-    title: 'Primeira Curtida',
-    description: 'Curtiu seu primeiro widget',
+    title: 'Primeiro Passo',
+    description: 'Curta seu primeiro widget',
     icon: '👍',
     requirement: 1,
-    unlocked: false
+    xpReward: 50
   },
   {
     id: 'like-collector',
     title: 'Colecionador',
-    description: 'Acumulou 10 curtidas',
-    icon: '❤️',
+    description: 'Curta 10 widgets',
+    icon: '⭐',
     requirement: 10,
-    unlocked: false
+    xpReward: 100
   },
   {
     id: 'like-master',
-    title: 'Mestre das Curtidas',
-    description: 'Acumulou 50 curtidas',
-    icon: '💎',
+    title: 'Mestre dos Likes',
+    description: 'Curta 50 widgets',
+    icon: '🏆',
     requirement: 50,
-    unlocked: false
+    xpReward: 250
   },
   {
     id: 'like-legend',
-    title: 'Lenda',
-    description: 'Acumulou 100 curtidas',
+    title: 'Lenda da Plataforma',
+    description: 'Curta 100 widgets',
     icon: '👑',
     requirement: 100,
-    unlocked: false
+    xpReward: 500
   }
 ];
 
-export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GamificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [achievements, setAchievements] = useState<Achievement[]>(defaultAchievements);
-  const [widgetLikes, setWidgetLikes] = useState<Record<string, number>>({});
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Carregar dados do usuário
   const loadUserData = async () => {
     if (!user?.id) {
       setLoading(false);
@@ -80,64 +86,51 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     try {
       setLoading(true);
-      
-      // Carregar estatísticas
+
+      // Carregar estatísticas do usuário
       const stats = await gamificationService.getUserStats(user.id);
       setUserStats(stats);
 
-      // Carregar conquistas
+      // Carregar conquistas desbloqueadas
       const userAchievements = await gamificationService.getUserAchievements(user.id);
-      const achievementMap = new Map(userAchievements.map(a => [a.achievement_id, a]));
-      
-      const updatedAchievements = defaultAchievements.map(achievement => ({
-        ...achievement,
-        unlocked: achievementMap.has(achievement.id),
-        unlockedAt: achievementMap.get(achievement.id)?.unlocked_at 
-          ? new Date(achievementMap.get(achievement.id)!.unlocked_at) 
-          : undefined
-      }));
-      
-      setAchievements(updatedAchievements);
+      const unlockedIds = userAchievements.map(ua => ua.achievement_id);
 
-      // Carregar curtidas dos widgets
-      const likes = await gamificationService.getUserWidgetLikes(user.id);
-      const likesMap = likes.reduce((acc, like) => {
-        acc[like.widget_id] = like.likes_count;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      setWidgetLikes(likesMap);
+      // Mapear conquistas com status de desbloqueio
+      const mappedAchievements = ACHIEVEMENTS.map(achievement => {
+        const userAchievement = userAchievements.find(ua => ua.achievement_id === achievement.id);
+        return {
+          ...achievement,
+          unlocked: unlockedIds.includes(achievement.id),
+          unlockedAt: userAchievement ? new Date(userAchievement.unlocked_at) : null
+        };
+      });
 
+      setAchievements(mappedAchievements);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('Error loading gamification data:', error);
+      toast.error('Erro ao carregar dados de gamificação');
     } finally {
       setLoading(false);
     }
   };
 
-  // Carregar dados quando o usuário mudar
-  useEffect(() => {
-    loadUserData();
-  }, [user?.id]);
+  const refreshStats = async () => {
+    await loadUserData();
+  };
 
   const likeWidget = async (widgetId: string) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast.error('Você precisa estar logado para curtir widgets');
+      return;
+    }
 
     try {
       const success = await gamificationService.likeWidget(user.id, widgetId);
       if (success) {
-        // Atualizar estado local
-        setWidgetLikes(prev => ({
-          ...prev,
-          [widgetId]: (prev[widgetId] || 0) + 1
-        }));
-
-        // Recarregar dados para sincronizar
-        await loadUserData();
-        
-        toast.success('Widget curtido!', {
-          description: '+10 XP ganhos'
-        });
+        toast.success('Widget curtido! +10 XP');
+        await loadUserData(); // Recarregar dados para atualizar XP e conquistas
+      } else {
+        toast.error('Erro ao curtir widget');
       }
     } catch (error) {
       console.error('Error liking widget:', error);
@@ -151,16 +144,8 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       const success = await gamificationService.unlikeWidget(user.id, widgetId);
       if (success) {
-        // Atualizar estado local
-        setWidgetLikes(prev => ({
-          ...prev,
-          [widgetId]: Math.max(0, (prev[widgetId] || 0) - 1)
-        }));
-
-        // Recarregar dados para sincronizar
+        toast.success('Curtida removida');
         await loadUserData();
-        
-        toast.info('Curtida removida');
       }
     } catch (error) {
       console.error('Error unliking widget:', error);
@@ -168,65 +153,46 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const isWidgetLiked = (widgetId: string) => {
-    return (widgetLikes[widgetId] || 0) > 0;
-  };
-
-  const addXP = async (amount: number, reason: string) => {
-    if (!user?.id) return;
+  const isWidgetLiked = async (widgetId: string): Promise<boolean> => {
+    if (!user?.id) return false;
 
     try {
-      await gamificationService.updateUserStats(user.id, amount);
-      
-      // Recarregar dados para ver mudanças
-      await loadUserData();
-      
-      toast.success(`+${amount} XP`, {
-        description: reason
-      });
+      return await gamificationService.isWidgetLiked(user.id, widgetId);
     } catch (error) {
-      console.error('Error adding XP:', error);
+      console.error('Error checking widget like:', error);
+      return false;
     }
   };
 
-  const checkAchievements = async () => {
-    if (!user?.id) return;
+  const getWidgetLikeCount = async (widgetId: string): Promise<number> => {
+    if (!user?.id) return 0;
 
     try {
-      await gamificationService.checkAchievements(user.id);
-      // Recarregar dados para ver novas conquistas
-      await loadUserData();
+      return await gamificationService.getWidgetLikeCount(user.id, widgetId);
     } catch (error) {
-      console.error('Error checking achievements:', error);
+      console.error('Error getting widget like count:', error);
+      return 0;
     }
   };
 
-  const refreshData = async () => {
-    await loadUserData();
+  useEffect(() => {
+    loadUserData();
+  }, [user?.id]);
+
+  const value: GamificationContextType = {
+    userStats,
+    achievements,
+    loading,
+    likeWidget,
+    unlikeWidget,
+    isWidgetLiked,
+    getWidgetLikeCount,
+    refreshStats
   };
 
   return (
-    <GamificationContext.Provider value={{
-      userStats,
-      achievements,
-      widgetLikes,
-      likeWidget,
-      unlikeWidget,
-      isWidgetLiked,
-      addXP,
-      checkAchievements,
-      loading,
-      refreshData
-    }}>
+    <GamificationContext.Provider value={value}>
       {children}
     </GamificationContext.Provider>
   );
-};
-
-export const useGamification = () => {
-  const context = useContext(GamificationContext);
-  if (!context) {
-    throw new Error('useGamification must be used within a GamificationProvider');
-  }
-  return context;
 };
