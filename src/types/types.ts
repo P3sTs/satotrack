@@ -28,7 +28,7 @@ export interface TransacaoBTC {
   block_height?: number | null; // Block height
 }
 
-export type SortOption = 'saldo' | 'ultimo_update';
+export type SortOption = 'saldo' | 'ultimo_update' | 'data_criacao';
 export type SortDirection = 'asc' | 'desc';
 
 export interface DatabaseCarteiraBTC {

@@ -35,10 +35,10 @@ const WalletsList: React.FC<WalletsListProps> = ({ onNewWallet }) => {
         ordenarCarteiras('saldo', 'asc');
         break;
       case 'newest':
-        ordenarCarteiras('data_criacao', 'desc');
+        ordenarCarteiras('ultimo_update', 'desc');
         break;
       case 'oldest':
-        ordenarCarteiras('data_criacao', 'asc');
+        ordenarCarteiras('ultimo_update', 'asc');
         break;
     }
   };

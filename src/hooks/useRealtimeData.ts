@@ -117,13 +117,25 @@ export function useRealtimeBitcoinPrice(interval = 30000) {
       return {
         price_usd: apiData.market_data.current_price.usd,
         price_brl: apiData.market_data.current_price.brl,
+        price_change_24h: apiData.market_data.price_change_24h || 0,
         price_change_percentage_24h: apiData.market_data.price_change_percentage_24h,
         price_change_percentage_7d: apiData.market_data.price_change_percentage_7d || 0,
-        volume_24h: apiData.market_data.total_volume.usd,
+        price_change_percentage_30d: apiData.market_data.price_change_percentage_30d || 0,
+        price_change_percentage_1y: apiData.market_data.price_change_percentage_1y || 0,
+        market_cap_usd: apiData.market_data.market_cap.usd,
         market_cap: apiData.market_data.market_cap.usd,
+        volume_24h_usd: apiData.market_data.total_volume.usd,
+        volume_24h: apiData.market_data.total_volume.usd,
+        circulating_supply: apiData.market_data.circulating_supply || 0,
         updated_at: apiData.market_data.last_updated,
         last_updated: apiData.market_data.last_updated,
-        market_trend: marketTrend
+        market_trend: marketTrend,
+        price_low_7d: apiData.market_data.low_24h || 0,
+        price_high_7d: apiData.market_data.high_24h || 0,
+        price_low_30d: apiData.market_data.low_24h || 0,
+        price_high_30d: apiData.market_data.high_24h || 0,
+        price_low_1y: apiData.market_data.low_24h || 0,
+        price_high_1y: apiData.market_data.high_24h || 0
       };
     },
     null,

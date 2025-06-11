@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import {
@@ -146,14 +145,14 @@ const Mercado = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {bitcoinData.volume_24h.toLocaleString('pt-BR', {
+              {(bitcoinData.volume_24h_usd || 0).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'USD',
                 maximumFractionDigits: 0
               })}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {(bitcoinData.volume_24h / bitcoinData.price_usd).toFixed(2)} BTC
+              {((bitcoinData.volume_24h_usd || 0) / bitcoinData.price_usd).toFixed(2)} BTC
             </p>
           </CardContent>
         </Card>

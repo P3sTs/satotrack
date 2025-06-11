@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCarteiras } from '@/contexts/carteiras';
@@ -174,18 +173,18 @@ const WalletDetail = () => {
         
         <div className="bg-dashboard-medium border border-dashboard-light rounded-lg mt-2">
           <TabsContent value="all" className="m-0 py-1">
-            <TransactionList transactions={transacoes[carteira.id] || []} />
+            <TransactionList transacoes={transacoes[carteira.id] || []} />
           </TabsContent>
           
           <TabsContent value="received" className="m-0 py-1">
             <TransactionList 
-              transactions={(transacoes[carteira.id] || []).filter(tx => tx.tipo === 'entrada')} 
+              transacoes={(transacoes[carteira.id] || []).filter(tx => tx.tipo === 'entrada')} 
             />
           </TabsContent>
           
           <TabsContent value="sent" className="m-0 py-1">
             <TransactionList 
-              transactions={(transacoes[carteira.id] || []).filter(tx => tx.tipo === 'saida')} 
+              transacoes={(transacoes[carteira.id] || []).filter(tx => tx.tipo === 'saida')} 
             />
           </TabsContent>
         </div>
