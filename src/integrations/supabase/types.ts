@@ -675,6 +675,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_alerts: {
+        Row: {
+          alert_type: string
+          condition: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          notification_methods: string[]
+          threshold: number
+          title: string
+          updated_at: string
+          user_id: string
+          wallet_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          condition: string
+          created_at?: string
+          currency: string
+          id?: string
+          is_active?: boolean
+          notification_methods?: string[]
+          threshold: number
+          title: string
+          updated_at?: string
+          user_id: string
+          wallet_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          condition?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          notification_methods?: string[]
+          threshold?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_alerts_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "crypto_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_music: {
         Row: {
           album: string | null

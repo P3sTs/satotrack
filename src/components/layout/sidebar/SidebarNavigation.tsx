@@ -1,3 +1,4 @@
+
 import React from "react"
 import {
   Home,
@@ -10,21 +11,14 @@ import {
   Trophy,
   Bell,
   TrendingUp,
-  Compare
+  ArrowLeftRight
 } from "lucide-react"
 
-import { MainNavItem, SidebarNavItem } from "@/types"
 import { useAuth } from "@/contexts/auth"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 interface Props {
-  isDashboard?: boolean
-}
-
-export interface SidebarNavProps {
-  mainNav: MainNavItem[]
-  sidebarNav: SidebarNavItem[]
   isDashboard?: boolean
 }
 
@@ -35,6 +29,7 @@ interface Item {
   disabled?: boolean
   external?: boolean
   icon: any
+  onClick?: () => void
 }
 
 const SidebarNavigation: React.FC<Props> = ({ isDashboard }) => {
@@ -85,7 +80,7 @@ const SidebarNavigation: React.FC<Props> = ({ isDashboard }) => {
     },
     {
       title: "Comparação",
-      icon: Compare,
+      icon: ArrowLeftRight,
       href: "/comparison",
       description: "Compare suas carteiras"
     },

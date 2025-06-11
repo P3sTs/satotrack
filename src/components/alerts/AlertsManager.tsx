@@ -48,14 +48,15 @@ const AlertsManager: React.FC = () => {
 
   const loadAlerts = async () => {
     try {
+      // Using a more generic query that should work
       const { data, error } = await supabase
-        .from('user_alerts')
+        .from('user_alerts' as any)
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAlerts(data || []);
+      setAlerts((data as Alert[]) || []);
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
       toast.error('Erro ao carregar alertas');
@@ -72,7 +73,7 @@ const AlertsManager: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_alerts')
+        .from('user_alerts' as any)
         .insert([{
           user_id: user?.id,
           ...newAlert,
@@ -83,7 +84,7 @@ const AlertsManager: React.FC = () => {
 
       if (error) throw error;
 
-      setAlerts(prev => [data, ...prev]);
+      setAlerts(prev => [data as Alert, ...prev]);
       setShowCreateForm(false);
       setNewAlert({
         alert_type: 'balance',
@@ -104,7 +105,7 @@ const AlertsManager: React.FC = () => {
   const toggleAlert = async (alertId: string, isActive: boolean) => {
     try {
       const { error } = await supabase
-        .from('user_alerts')
+        .from('user_alerts' as any)
         .update({ is_active: isActive })
         .eq('id', alertId);
 
@@ -124,7 +125,7 @@ const AlertsManager: React.FC = () => {
   const deleteAlert = async (alertId: string) => {
     try {
       const { error } = await supabase
-        .from('user_alerts')
+        .from('user_alerts' as any)
         .delete()
         .eq('id', alertId);
 
