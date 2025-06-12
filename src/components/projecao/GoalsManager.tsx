@@ -36,13 +36,13 @@ const GoalsManager: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_goals')
+        .from('user_goals' as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGoals(data || []);
+      setGoals((data as Goal[]) || []);
     } catch (error) {
       console.error('Error loading goals:', error);
       toast.error('Erro ao carregar metas');
@@ -54,7 +54,7 @@ const GoalsManager: React.FC = () => {
   const updateGoalStatus = async (goalId: string, status: 'active' | 'completed' | 'paused') => {
     try {
       const { error } = await supabase
-        .from('user_goals')
+        .from('user_goals' as any)
         .update({ status })
         .eq('id', goalId);
 
@@ -73,7 +73,7 @@ const GoalsManager: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('user_goals')
+        .from('user_goals' as any)
         .delete()
         .eq('id', goalId);
 

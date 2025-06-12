@@ -41,7 +41,7 @@ const NewGoalModal: React.FC<NewGoalModalProps> = ({ isOpen, onClose }) => {
 
     try {
       const { error } = await supabase
-        .from('user_goals')
+        .from('user_goals' as any)
         .insert({
           user_id: user.id,
           title: formData.title,

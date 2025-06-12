@@ -43,14 +43,14 @@ const ProgressTracker: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_goals')
+        .from('user_goals' as any)
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGoals(data || []);
+      setGoals((data as Goal[]) || []);
     } catch (error) {
       console.error('Error loading goals:', error);
     } finally {
@@ -83,7 +83,7 @@ const ProgressTracker: React.FC = () => {
       if (currentAmount !== goal.current_amount) {
         try {
           await supabase
-            .from('user_goals')
+            .from('user_goals' as any)
             .update({ current_amount: currentAmount })
             .eq('id', goal.id);
         } catch (error) {
