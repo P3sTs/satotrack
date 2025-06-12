@@ -161,7 +161,12 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
   useEffect(() => {
     if (user) {
       console.log('User changed, refreshing referral data');
-      refreshReferralData();
+      // Adicionar um pequeno delay para garantir que o usuário foi totalmente carregado
+      const timer = setTimeout(() => {
+        refreshReferralData();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     } else {
       console.log('No user, resetting referral state');
       setReferralCode('');
@@ -170,7 +175,7 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       setIsPremium(false);
       setPremiumExpiry(null);
     }
-  }, [user]);
+  }, [user?.id]); // Usar user.id ao invés de user para evitar re-renders desnecessários
 
   const contextValue: ReferralContextType = {
     referralCode,

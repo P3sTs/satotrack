@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Shield, Gift } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
+import { toast } from 'sonner';
 
 export const RegisterForm = () => {
   const [email, setEmail] = useState('');
@@ -35,6 +36,7 @@ export const RegisterForm = () => {
     const refCode = urlParams.get('ref');
     if (refCode) {
       setReferralCode(refCode);
+      toast.success(`Código de indicação aplicado: ${refCode}`);
     }
   }, []);
 
@@ -78,9 +80,20 @@ export const RegisterForm = () => {
         throw new Error(`Senha fraca: ${passwordFeedback}`);
       }
       
+      console.log('Iniciando registro com código de referência:', referralCode);
+      
       await signUp(email, password, fullName, referralCode);
+      
+      // Mostrar sucesso adicional se houver código de referência
+      if (referralCode) {
+        toast.success("Conta criada e indicação processada com sucesso!");
+      }
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro na autenticação');
+      console.error('Erro no registro:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Ocorreu um erro na autenticação';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

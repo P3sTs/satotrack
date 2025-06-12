@@ -24,11 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Additional auth-related state/functions
   const isAuthenticated = !!session && !!user;
   
-  // Create a signOut stub function that will be replaced by the actual function from useAuthFunctions
-  const [signOutFn, setSignOutFn] = useState<() => Promise<void>>(async () => {
-    console.log("Stub signOut called - this shouldn't happen");
-  });
-  
   // Get login security functionality
   const {
     loginAttempts,
@@ -39,8 +34,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     saveLoginAttempt
   } = useLoginAttempts();
   
-  // Get activity monitoring functionality with the signOut stub
-  const { lastActivity, updateLastActivity } = useActivityMonitor(user, signOutFn);
+  // Criar um callback memoizado para updateLastActivity
+  const updateLastActivity = useCallback(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem('lastActivity', now);
+  }, []);
+  
+  // Get activity monitoring functionality
+  const { lastActivity } = useActivityMonitor(user, async () => {
+    // Stub function for signOut - será substituído abaixo
+  });
   
   // Get Auth-related functionality
   const {
@@ -52,11 +55,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     saveLoginAttempt,
     checkFailedLoginAttempts
   );
-  
-  // Update the signOut function once it's available
-  useState(() => {
-    setSignOutFn(() => signOut);
-  });
   
   const failedLoginAttempts = getFailedLoginAttempts();
   
@@ -102,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     apiRequestsRemaining,
     upgradeUserPlan,
     generateApiToken,
-    canAddMoreWallets: () => canAddMoreWallets(0), // Fix: provide required parameter
+    canAddMoreWallets: () => canAddMoreWallets(0),
     passwordStrength,
     createCheckoutSession,
     openCustomerPortal,
