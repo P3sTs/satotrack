@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -17,6 +16,7 @@ interface Goal {
   goal_type: 'btc' | 'usd' | 'brl';
   status: 'active' | 'completed' | 'paused';
   created_at: string;
+  user_id: string;
 }
 
 const ProgressTracker: React.FC = () => {
@@ -43,14 +43,14 @@ const ProgressTracker: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_goals' as any)
+        .from('user_goals')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGoals((data as Goal[]) || []);
+      setGoals(data || []);
     } catch (error) {
       console.error('Error loading goals:', error);
     } finally {
@@ -83,7 +83,7 @@ const ProgressTracker: React.FC = () => {
       if (currentAmount !== goal.current_amount) {
         try {
           await supabase
-            .from('user_goals' as any)
+            .from('user_goals')
             .update({ current_amount: currentAmount })
             .eq('id', goal.id);
         } catch (error) {

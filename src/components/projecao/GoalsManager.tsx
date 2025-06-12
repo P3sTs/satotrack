@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,7 @@ interface Goal {
   goal_type: 'btc' | 'usd' | 'brl';
   status: 'active' | 'completed' | 'paused';
   created_at: string;
+  user_id: string;
 }
 
 const GoalsManager: React.FC = () => {
@@ -36,13 +36,13 @@ const GoalsManager: React.FC = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_goals' as any)
+        .from('user_goals')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGoals((data as Goal[]) || []);
+      setGoals(data || []);
     } catch (error) {
       console.error('Error loading goals:', error);
       toast.error('Erro ao carregar metas');
@@ -54,7 +54,7 @@ const GoalsManager: React.FC = () => {
   const updateGoalStatus = async (goalId: string, status: 'active' | 'completed' | 'paused') => {
     try {
       const { error } = await supabase
-        .from('user_goals' as any)
+        .from('user_goals')
         .update({ status })
         .eq('id', goalId);
 
@@ -73,7 +73,7 @@ const GoalsManager: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('user_goals' as any)
+        .from('user_goals')
         .delete()
         .eq('id', goalId);
 
