@@ -31,6 +31,7 @@ import Projections from './pages/Projections';
 import Achievements from './pages/Achievements';
 import WalletComparisonPage from './pages/WalletComparison';
 import Web3Dashboard from './pages/Web3Dashboard';
+import PlanosPage from './pages/PlanosPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ function App() {
                           <Route path="/" element={<Index />} />
                           <Route path="/home" element={<Home />} />
                           <Route path="/auth" element={<Auth />} />
+                          <Route path="/planos" element={<PlanosPage />} />
                           
                           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                             <Route path="/dashboard" element={<Dashboard />} />

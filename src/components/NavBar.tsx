@@ -48,21 +48,12 @@ const NavBar: React.FC = () => {
 
   // Lidar com o clique no botão premium
   const handlePremiumClick = () => {
-    if (isPremium) {
-      navigate('/premium-dashboard');
-      toast({
-        title: "Painel Premium",
-        description: "Bem-vindo ao seu painel exclusivo premium!",
-        variant: "default"
-      });
-    } else {
-      navigate('/planos');
-      toast({
-        title: "Upgrade disponível",
-        description: "Conheça os benefícios do plano Premium!",
-        variant: "default"
-      });
-    }
+    navigate('/planos');
+    toast({
+      title: isPremium ? "Painel Premium" : "Upgrade disponível",
+      description: isPremium ? "Bem-vindo ao seu painel exclusivo premium!" : "Conheça os benefícios do plano Premium!",
+      variant: "default"
+    });
   };
 
   // Não renderizar em dispositivos móveis, pois temos o MobileNavigation

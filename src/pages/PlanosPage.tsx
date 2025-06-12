@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth';
 import { Check, Star, Zap, Shield, Crown } from 'lucide-react';
 import { PlanComparisonTable } from '@/components/monetization/PlanDisplay';
+import { toast } from 'sonner';
 
 const PlanosPage = () => {
   const { userPlan, upgradeUserPlan, isLoading } = useAuth();
@@ -13,8 +14,10 @@ const PlanosPage = () => {
   const handleUpgrade = async (planType: 'premium') => {
     try {
       await upgradeUserPlan(planType);
+      toast.success('Upgrade realizado com sucesso!');
     } catch (error) {
       console.error('Erro ao fazer upgrade:', error);
+      toast.error('Erro ao processar upgrade. Tente novamente.');
     }
   };
 
