@@ -11,9 +11,10 @@ import {
   Bot,
   Loader2,
   Minimize2,
-  Maximize2
+  Maximize2,
+  RefreshCw
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSatoAI } from '@/hooks/useSatoAI';
 import { toast } from 'sonner';
 
 interface ChatMessage {
@@ -43,7 +44,7 @@ const SatoAIChat: React.FC<SatoAIChatProps> = ({
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { askSatoAI, isLoading } = useSatoAI();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -70,41 +71,39 @@ const SatoAIChat: React.FC<SatoAIChatProps> = ({
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
-    setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('satoai-chat', {
-        body: {
-          message: inputMessage,
-          context: context
-        }
-      });
+      const response = await askSatoAI(currentMessage, context);
 
-      if (error) throw error;
-
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: data.response,
-        sender: 'ai',
-        timestamp: new Date(data.timestamp)
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
+      if (response) {
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: response,
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        // Error was already handled by useSatoAI hook
+        const errorMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: 'Desculpe, não consegui processar sua mensagem. Tente novamente.',
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      toast.error('Erro ao se comunicar com o SatoAI');
-      
+      console.error('Erro inesperado:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: 'Desculpe, ocorreu um erro. Tente novamente em alguns instantes.',
+        content: 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.',
         sender: 'ai',
         timestamp: new Date()
       };
-      
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -113,6 +112,18 @@ const SatoAIChat: React.FC<SatoAIChatProps> = ({
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const clearChat = () => {
+    setMessages([
+      {
+        id: '1',
+        content: 'Chat reiniciado! Como posso ajudá-lo?',
+        sender: 'ai',
+        timestamp: new Date()
+      }
+    ]);
+    toast.success('Chat limpo com sucesso');
   };
 
   if (isMinimized) {
@@ -144,16 +155,28 @@ const SatoAIChat: React.FC<SatoAIChatProps> = ({
             <Brain className="h-5 w-5" />
             SatoAI Assistant
           </CardTitle>
-          {onToggleMinimize && (
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={onToggleMinimize}
+              onClick={clearChat}
               className="h-8 w-8 p-0"
+              title="Limpar chat"
             >
-              <Minimize2 className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
             </Button>
-          )}
+            {onToggleMinimize && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleMinimize}
+                className="h-8 w-8 p-0"
+                title="Minimizar"
+              >
+                <Minimize2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       

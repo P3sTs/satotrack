@@ -12,18 +12,37 @@ export const useSatoAI = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const askSatoAI = async (message: string, context?: string): Promise<string | null> => {
+    if (!message.trim()) {
+      toast.error('Por favor, digite uma mensagem para o SatoAI');
+      return null;
+    }
+
     setIsLoading(true);
     
     try {
+      console.log('Sending message to SatoAI:', { message, context });
+      
       const { data, error } = await supabase.functions.invoke('satoai-chat', {
         body: {
-          message,
+          message: message.trim(),
           context: context || 'SatoTrack App'
         }
       });
 
+      console.log('SatoAI response:', { data, error });
+
       if (error) {
-        throw error;
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Erro na comunicação com o SatoAI');
+      }
+
+      if (data?.error) {
+        console.error('SatoAI function error:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data?.response) {
+        throw new Error('Resposta inválida do SatoAI');
       }
 
       const result = data as SatoAIResponse;
@@ -31,7 +50,17 @@ export const useSatoAI = () => {
       
     } catch (error) {
       console.error('Erro ao consultar SatoAI:', error);
-      toast.error('Erro ao se comunicar com o SatoAI');
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (errorMessage.includes('sobrecarregado') || errorMessage.includes('Rate limit')) {
+        toast.error('SatoAI está sobrecarregado. Tente novamente em alguns segundos.');
+      } else if (errorMessage.includes('API key')) {
+        toast.error('Configuração da IA não encontrada. Contate o suporte.');
+      } else {
+        toast.error('Erro ao se comunicar com o SatoAI. Tente novamente.');
+      }
+      
       return null;
     } finally {
       setIsLoading(false);
