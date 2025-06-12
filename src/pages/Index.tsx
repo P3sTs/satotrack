@@ -5,26 +5,24 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
 const Index = () => {
-  const { user, loading, updateLastActivity } = useAuth();
+  const { user, loading, updateLastActivity, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // Efeito para redirecionamento com base no estado de autenticação
   useEffect(() => {
-    console.log("Index - Estado de autenticação:", !!user, "Carregando:", loading);
+    console.log("Index - Estado de autenticação:", !!user, "Carregando:", loading, "isAuthenticated:", isAuthenticated);
     
     if (!loading) {
-      if (!user) {
-        // Se não estiver autenticado, redirecionar para home
+      if (!user || !isAuthenticated) {
         console.log("Redirecionando para /home (não autenticado)");
         navigate('/home', { replace: true });
       } else {
-        // Se estiver autenticado, registrar atividade e ir para dashboard
         console.log("Redirecionando para /dashboard (autenticado)");
         updateLastActivity();
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, loading, navigate, updateLastActivity]);
+  }, [user, loading, navigate, updateLastActivity, isAuthenticated]);
 
   // Tela de carregamento durante a verificação de autenticação
   if (loading) {

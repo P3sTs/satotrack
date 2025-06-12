@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -22,7 +23,16 @@ export const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirecionar se já autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Usuário já autenticado, redirecionando...");
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -31,6 +41,8 @@ export const LoginForm = () => {
     setIsLoading(true);
     
     try {
+      console.log("Iniciando processo de login...");
+      
       // Validação de campos vazios
       if (!email || !password) {
         throw new Error("Todos os campos são obrigatórios");
@@ -43,17 +55,24 @@ export const LoginForm = () => {
       
       await signIn(email, password);
       
-      // Feedback visual do processo
-      toast({
-        title: "Login realizado",
-        description: "Você foi autenticado com sucesso.",
-      });
-      
-      // O redirecionamento será feito automaticamente pelo PublicRoute
+      // Aguardar um pouco e verificar se foi redirecionado
+      setTimeout(() => {
+        if (!isAuthenticated) {
+          console.log("Login aparentemente bem-sucedido, mas usuário não está autenticado. Redirecionando manualmente...");
+          navigate('/dashboard', { replace: true });
+        }
+      }, 2000);
       
     } catch (err) {
       console.error("Erro de login:", err);
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro na autenticação');
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao iniciar sessão. Tente novamente ou verifique seu e-mail.';
+      setError(errorMessage);
+      
+      toast({
+        title: "Erro no login",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +82,11 @@ export const LoginForm = () => {
   const isEmailValid = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  // Função para ir manualmente ao dashboard
+  const goToDashboard = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -82,7 +106,21 @@ export const LoginForm = () => {
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>
+              {error}
+              {error.includes('Erro ao iniciar sessão') && (
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={goToDashboard}
+                    className="text-xs"
+                  >
+                    Ir para o Dashboard
+                  </Button>
+                </div>
+              )}
+            </AlertDescription>
           </Alert>
         )}
         
@@ -121,7 +159,7 @@ export const LoginForm = () => {
           onClick={handleLogin} 
           disabled={isLoading}
         >
-          {isLoading ? 'Processando...' : 'Entrar'}
+          {isLoading ? 'Entrando...' : 'Entrar'}
         </Button>
       </CardFooter>
     </Card>

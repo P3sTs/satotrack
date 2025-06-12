@@ -10,24 +10,67 @@ export const useAuthSession = () => {
 
   // Verificar a sessão inicial ao montar o componente
   useEffect(() => {
-    console.log("Verificando sessão inicial no useAuthSession...");
+    console.log("Inicializando useAuthSession...");
     
     // Primeiro, configurar o listener de eventos de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, !!currentSession);
+      
+      // Log detalhado para debug
+      if (currentSession) {
+        console.log("Sessão ativa:", {
+          hasAccessToken: !!currentSession.access_token,
+          hasUser: !!currentSession.user,
+          userEmail: currentSession.user?.email,
+          expiresAt: currentSession.expires_at
+        });
+      }
       
       // Atualizar o estado local com a sessão e usuário
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
+
+      // Redirecionar automaticamente após login bem-sucedido
+      if (event === 'SIGNED_IN' && currentSession) {
+        console.log("Usuário logado com sucesso, redirecionando para dashboard...");
+        
+        // Aguardar um pouco para garantir que o estado foi atualizado
+        setTimeout(() => {
+          if (window.location.pathname !== '/dashboard') {
+            window.location.href = '/dashboard';
+          }
+        }, 1000);
+      }
+      
+      // Log quando usuário sai
+      if (event === 'SIGNED_OUT') {
+        console.log("Usuário deslogado");
+        if (window.location.pathname !== '/home' && window.location.pathname !== '/') {
+          window.location.href = '/home';
+        }
+      }
     });
 
     // Depois, verificar se há uma sessão ativa
     const checkSession = async () => {
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log("Verificando sessão existente...");
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
-        console.log("Sessão inicial:", !!initialSession);
+        if (error) {
+          console.error("Erro ao verificar sessão:", error);
+        }
+        
+        console.log("Sessão inicial encontrada:", !!initialSession);
+        if (initialSession) {
+          console.log("Detalhes da sessão inicial:", {
+            hasAccessToken: !!initialSession.access_token,
+            hasUser: !!initialSession.user,
+            userEmail: initialSession.user?.email
+          });
+        }
+        
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
         setLoading(false);
@@ -40,6 +83,7 @@ export const useAuthSession = () => {
     checkSession();
 
     return () => {
+      console.log("Limpando subscription do useAuthSession");
       subscription.unsubscribe();
     };
   }, []);

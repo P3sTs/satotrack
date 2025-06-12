@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Shield, Gift } from 'lucide-react';
+import { AlertCircle, Shield, Gift, CheckCircle } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { toast } from 'sonner';
@@ -26,9 +27,19 @@ export const RegisterForm = () => {
   const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [passwordStrengthScore, setPasswordStrengthScore] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState('');
-  const { signUp, passwordStrength } = useAuth();
+  const { signUp, passwordStrength, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirecionar se já autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Usuário já autenticado, redirecionando...");
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   // Capturar código de referência da URL
   useEffect(() => {
@@ -57,8 +68,10 @@ export const RegisterForm = () => {
     setIsLoading(true);
     
     try {
+      console.log("Iniciando processo de registro...");
+      
       // Validação de campos vazios
-      if (!email || !password) {
+      if (!email || !password || !fullName) {
         throw new Error("Todos os campos são obrigatórios");
       }
       
@@ -68,10 +81,6 @@ export const RegisterForm = () => {
       }
       
       // Validações adicionais para registro
-      if (!fullName) {
-        throw new Error("Por favor, informe seu nome completo");
-      }
-      
       if (password !== passwordConfirm) {
         throw new Error("As senhas não coincidem");
       }
@@ -80,14 +89,19 @@ export const RegisterForm = () => {
         throw new Error(`Senha fraca: ${passwordFeedback}`);
       }
       
-      console.log('Iniciando registro com código de referência:', referralCode);
+      console.log('Criando conta com código de referência:', referralCode || 'nenhum');
       
       await signUp(email, password, fullName, referralCode);
       
-      // Mostrar sucesso adicional se houver código de referência
-      if (referralCode) {
-        toast.success("Conta criada e indicação processada com sucesso!");
-      }
+      setRegistrationSuccess(true);
+      
+      // Aguardar um pouco para mostrar a mensagem de sucesso
+      setTimeout(() => {
+        if (!isAuthenticated) {
+          // Se não foi automaticamente autenticado, mostrar botão manual
+          console.log("Usuário não foi automaticamente autenticado");
+        }
+      }, 3000);
       
     } catch (err) {
       console.error('Erro no registro:', err);
@@ -104,6 +118,52 @@ export const RegisterForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  // Função para ir manualmente ao dashboard
+  const goToDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  // Se registro foi bem-sucedido
+  if (registrationSuccess) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-green-600">Conta Criada!</CardTitle>
+              <CardDescription>
+                Sua conta foi criada com sucesso
+              </CardDescription>
+            </div>
+            <CheckCircle className="h-5 w-5 text-green-600" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="bg-green-50 border-green-200">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              {isAuthenticated ? 
+                "Você foi automaticamente logado! Redirecionando..." : 
+                "Conta criada! Se não foi redirecionado automaticamente, clique no botão abaixo."
+              }
+            </AlertDescription>
+          </Alert>
+          
+          {!isAuthenticated && (
+            <div className="text-center">
+              <Button 
+                onClick={goToDashboard}
+                className="w-full bg-bitcoin hover:bg-bitcoin/80"
+              >
+                Ir para o Dashboard
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -145,6 +205,7 @@ export const RegisterForm = () => {
             onChange={(e) => setFullName(e.target.value)}
             className="border-input focus-visible:ring-bitcoin"
             autoComplete="name"
+            disabled={isLoading}
           />
         </div>
         
@@ -158,6 +219,7 @@ export const RegisterForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="border-input focus-visible:ring-bitcoin"
             autoComplete="email"
+            disabled={isLoading}
           />
         </div>
         
@@ -171,6 +233,7 @@ export const RegisterForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
+            disabled={isLoading}
           />
           <PasswordStrengthIndicator 
             score={passwordStrengthScore} 
@@ -186,6 +249,7 @@ export const RegisterForm = () => {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             autoComplete="new-password"
+            disabled={isLoading}
           />
         </div>
 
@@ -198,6 +262,7 @@ export const RegisterForm = () => {
             value={referralCode}
             onChange={(e) => setReferralCode(e.target.value)}
             className="border-input focus-visible:ring-bitcoin"
+            disabled={isLoading}
           />
         </div>
       </CardContent>
@@ -207,7 +272,7 @@ export const RegisterForm = () => {
           onClick={handleRegister} 
           disabled={isLoading}
         >
-          {isLoading ? 'Processando...' : 'Criar Conta'}
+          {isLoading ? 'Criando conta...' : 'Criar Conta'}
         </Button>
       </CardFooter>
     </Card>

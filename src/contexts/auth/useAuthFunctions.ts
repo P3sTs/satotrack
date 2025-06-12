@@ -27,6 +27,8 @@ export const useAuthFunctions = (
       setLoading(true);
       const sanitizedEmail = email.trim().toLowerCase();
       
+      console.log("Tentando fazer login para:", sanitizedEmail);
+      
       if (checkFailedLoginAttempts(sanitizedEmail)) {
         toast({
           title: "Conta bloqueada",
@@ -36,26 +38,34 @@ export const useAuthFunctions = (
         throw new Error("Conta temporariamente bloqueada por muitas tentativas");
       }
 
-      const { error } = await supabase.auth.signInWithPassword({ 
+      const { data, error } = await supabase.auth.signInWithPassword({ 
         email: sanitizedEmail, 
         password 
       });
       
       if (error) {
+        console.error("Erro no login:", error);
         saveLoginAttempt(sanitizedEmail, false);
         throw error;
       }
       
-      saveLoginAttempt(sanitizedEmail, true);
-      updateLastActivity();
-      
-      // Sem toast de sucesso para não atrapalhar a experiência
+      if (data.session) {
+        console.log("Login bem-sucedido, sessão criada:", !!data.session.access_token);
+        saveLoginAttempt(sanitizedEmail, true);
+        updateLastActivity();
+        
+        toast({
+          title: "Login realizado",
+          description: "Você foi autenticado com sucesso.",
+        });
+      } else {
+        throw new Error("Sessão não foi criada após login");
+      }
       
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao entrar:", authError);
       
-      // Msg de erro amigável
       if (authError.message?.includes('Invalid login')) {
         throw new Error("Email ou senha incorretos");
       } else {
@@ -70,11 +80,13 @@ export const useAuthFunctions = (
   const signOut = async () => {
     try {
       setLoading(true);
+      console.log("Fazendo logout...");
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Limpar atividade de usuário
       localStorage.removeItem('lastActivity');
+      console.log("Logout realizado com sucesso");
       
     } catch (error) {
       const authError = error as AuthError;
@@ -85,7 +97,7 @@ export const useAuthFunctions = (
     }
   };
 
-  // Registro com validação de senha e código de referência
+  // Registro com login automático
   const signUp = async (email: string, password: string, fullName: string, referralCode?: string) => {
     if (!email || !password || !fullName) {
       toast({
@@ -99,6 +111,8 @@ export const useAuthFunctions = (
     try {
       setLoading(true);
       
+      console.log("Iniciando processo de criação de conta...");
+      
       // Verifica força da senha
       const { score, feedback } = checkPasswordStrength(password);
       if (score < 3) {
@@ -108,9 +122,12 @@ export const useAuthFunctions = (
       const sanitizedEmail = email.trim().toLowerCase();
       const sanitizedName = fullName.trim();
       
+      console.log("Email sanitizado:", sanitizedEmail);
+      console.log("Código de referência:", referralCode || "nenhum");
+      
       // Se há código de referência, usar a Edge Function
       if (referralCode && referralCode.trim()) {
-        console.log('Using Edge Function for referral registration');
+        console.log('Usando Edge Function para registro com referência');
         
         try {
           const { data, error } = await supabase.functions.invoke('process-referral', {
@@ -123,11 +140,14 @@ export const useAuthFunctions = (
           });
           
           if (error) {
-            console.error('Edge Function error:', error);
+            console.error('Erro na Edge Function:', error);
             throw new Error(error.message || 'Erro ao processar indicação');
           }
           
-          console.log('Registration with referral successful:', data);
+          console.log('Registro com referência bem-sucedido:', data);
+          
+          // Login automático após registro com referência
+          await performAutoLogin(sanitizedEmail, password);
           
           toast({
             title: "Conta criada com sucesso!",
@@ -135,54 +155,23 @@ export const useAuthFunctions = (
           });
           
         } catch (functionError) {
-          console.error('Edge function failed, trying normal registration:', functionError);
+          console.error('Edge function falhou, tentando registro normal:', functionError);
           
-          // Fallback para registro normal se a Edge Function falhar
-          const { error } = await supabase.auth.signUp({ 
-            email: sanitizedEmail, 
-            password,
-            options: {
-              data: {
-                full_name: sanitizedName,
-                created_at: new Date().toISOString()
-              }
-            }
-          });
-          
-          if (error) throw error;
-          
-          toast({
-            title: "Conta criada com sucesso",
-            description: "Verifique seu email para ativar sua conta.",
-          });
+          // Fallback para registro normal
+          await performStandardSignUp(sanitizedEmail, password, sanitizedName);
+          await performAutoLogin(sanitizedEmail, password);
         }
         
       } else {
         // Registro normal sem referência
-        const { error } = await supabase.auth.signUp({ 
-          email: sanitizedEmail, 
-          password,
-          options: {
-            data: {
-              full_name: sanitizedName,
-              created_at: new Date().toISOString()
-            }
-          }
-        });
-        
-        if (error) throw error;
-        
-        toast({
-          title: "Conta criada com sucesso",
-          description: "Verifique seu email para ativar sua conta.",
-        });
+        await performStandardSignUp(sanitizedEmail, password, sanitizedName);
+        await performAutoLogin(sanitizedEmail, password);
       }
       
     } catch (error) {
       const authError = error as AuthError;
       console.error("Erro ao registrar:", authError);
       
-      // Melhor tratamento de erros
       if (authError.message?.includes('already registered')) {
         throw new Error("Este email já está registrado");
       } else if (authError.message?.includes('password')) {
@@ -192,6 +181,78 @@ export const useAuthFunctions = (
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função auxiliar para registro padrão
+  const performStandardSignUp = async (email: string, password: string, fullName: string) => {
+    console.log("Realizando registro padrão...");
+    
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          created_at: new Date().toISOString()
+        },
+        emailRedirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+    
+    if (error) {
+      console.error("Erro no registro padrão:", error);
+      throw error;
+    }
+    
+    console.log("Registro padrão realizado:", !!data.user);
+    return data;
+  };
+
+  // Função auxiliar para login automático
+  const performAutoLogin = async (email: string, password: string) => {
+    console.log("Tentando login automático após registro...");
+    
+    try {
+      // Aguardar um pouco para o usuário ser processado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (loginError) {
+        console.warn("Login automático falhou:", loginError.message);
+        // Não quebrar o fluxo se o login automático falhar
+        toast({
+          title: "Conta criada com sucesso",
+          description: "Faça login para acessar sua conta.",
+        });
+        return;
+      }
+      
+      if (loginData.session?.access_token) {
+        console.log("Login automático bem-sucedido!");
+        updateLastActivity();
+        
+        toast({
+          title: "Conta criada e login realizado!",
+          description: "Redirecionando para o dashboard...",
+        });
+        
+        // Aguardar um pouco antes do redirecionamento
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      }
+      
+    } catch (autoLoginError) {
+      console.warn("Erro no login automático:", autoLoginError);
+      toast({
+        title: "Conta criada com sucesso",
+        description: "Verifique seu email ou faça login manualmente.",
+      });
     }
   };
 
