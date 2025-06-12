@@ -15,20 +15,20 @@ export interface ReferralProfile {
 
 export class ReferralService {
   /**
-   * Busca ou cria o perfil do usuário
+   * Busca ou cria o perfil do usuário com tratamento robusto de erros
    */
   static async getOrCreateProfile(user: AuthUser): Promise<ReferralProfile> {
     console.log('Getting or creating profile for user:', user.id);
     
     try {
-      // Tentar buscar perfil existente
+      // Tentar buscar perfil existente primeiro
       const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('id, full_name, referral_code, total_referrals, referral_count, premium_status, premium_expiry, referred_by')
         .eq('id', user.id)
         .maybeSingle();
       
-      if (fetchError) {
+      if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching profile:', fetchError);
         throw new Error(`Erro ao buscar perfil: ${fetchError.message}`);
       }
@@ -39,23 +39,54 @@ export class ReferralService {
         // Se não tem código de referência, gerar um
         if (!existingProfile.referral_code) {
           console.log('Profile exists but no referral code, generating one...');
-          const newCode = await this.generateReferralCode(user);
-          return {
-            ...existingProfile,
-            referral_code: newCode
-          };
+          try {
+            const newCode = await this.generateReferralCode(user);
+            return {
+              ...existingProfile,
+              referral_code: newCode
+            };
+          } catch (error) {
+            console.error('Failed to generate referral code:', error);
+            // Retornar perfil mesmo sem código
+            return existingProfile;
+          }
         }
         
         return existingProfile;
       }
       
-      // Criar novo perfil
+      // Perfil não existe, criar novo
       console.log('Creating new profile');
       const userName = this.extractUserName(user);
+      
+      // Gerar código antes de criar o perfil
+      let referralCode;
+      try {
+        referralCode = ReferralCodeGenerator.generateCode({
+          userName,
+          userId: user.id
+        });
+        
+        // Verificar se é único
+        const { data: existingCode } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('referral_code', referralCode)
+          .maybeSingle();
+        
+        if (existingCode) {
+          // Se já existe, adicionar timestamp
+          referralCode = `${referralCode}${Date.now().toString().slice(-4)}`;
+        }
+      } catch (error) {
+        console.error('Error generating code, will use fallback:', error);
+        referralCode = `USER${user.id.slice(0, 8).toUpperCase()}`;
+      }
       
       const newProfile = {
         id: user.id,
         full_name: userName,
+        referral_code: referralCode,
         referral_count: 0,
         premium_status: 'inactive'
       };
@@ -68,31 +99,45 @@ export class ReferralService {
       
       if (createError) {
         console.error('Error creating profile:', createError);
+        
+        // Se o erro for de RLS, pode ser que o perfil já existe mas não conseguimos acessar
+        if (createError.code === '42501' || createError.message.includes('policy')) {
+          console.log('RLS error, trying to fetch profile again...');
+          // Tentar buscar novamente após um pequeno delay
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return this.getOrCreateProfile(user);
+        }
+        
         throw new Error(`Erro ao criar perfil: ${createError.message}`);
       }
       
       console.log('Created new profile:', createdProfile);
-      
-      // Se o trigger não gerou o código, gerar manualmente
-      if (!createdProfile.referral_code) {
-        console.log('Trigger did not generate code, generating manually...');
-        const newCode = await this.generateReferralCode(user);
-        return {
-          ...createdProfile,
-          referral_code: newCode
-        };
-      }
-      
       return createdProfile;
       
     } catch (error) {
       console.error('Error in getOrCreateProfile:', error);
+      
+      // Em caso de erro crítico, retornar um perfil básico para não travar o app
+      if (error instanceof Error && error.message.includes('policy')) {
+        console.log('Returning fallback profile due to policy error');
+        return {
+          id: user.id,
+          full_name: this.extractUserName(user),
+          referral_code: null,
+          total_referrals: 0,
+          referral_count: 0,
+          premium_status: 'inactive',
+          premium_expiry: null,
+          referred_by: null
+        };
+      }
+      
       throw error;
     }
   }
 
   /**
-   * Gera um código de referência único
+   * Gera um código de referência único com tratamento robusto
    */
   static async generateReferralCode(user: AuthUser): Promise<string> {
     console.log('Generating referral code for user:', user.id);
@@ -100,62 +145,75 @@ export class ReferralService {
     const userName = this.extractUserName(user);
     console.log('Using username:', userName);
     
-    // Gerar código base
-    const baseCode = ReferralCodeGenerator.generateCode({
-      userName,
-      userId: user.id
-    });
-    
-    console.log('Generated base code:', baseCode);
-    
-    // Verificar se o código já existe
-    let finalCode = baseCode;
-    let counter = 1;
-    
-    while (counter <= 10) {
-      console.log('Checking if code exists:', finalCode);
+    try {
+      // Gerar código base
+      const baseCode = ReferralCodeGenerator.generateCode({
+        userName,
+        userId: user.id
+      });
       
-      const { data: existingCode, error } = await supabase
+      console.log('Generated base code:', baseCode);
+      
+      // Verificar se o código já existe e gerar variações se necessário
+      let finalCode = baseCode;
+      let counter = 1;
+      
+      while (counter <= 5) { // Reduzir tentativas para evitar loops
+        console.log('Checking if code exists:', finalCode);
+        
+        const { data: existingCode, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('referral_code', finalCode)
+          .maybeSingle();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking code existence:', error);
+          // Em caso de erro, usar timestamp para garantir unicidade
+          finalCode = `${baseCode}${Date.now().toString().slice(-3)}`;
+          break;
+        }
+        
+        if (!existingCode) {
+          console.log('Code is unique:', finalCode);
+          break;
+        }
+        
+        // Código já existe, gerar uma variação
+        finalCode = `${baseCode}${counter.toString().padStart(2, '0')}`;
+        counter++;
+      }
+      
+      if (counter > 5) {
+        // Usar timestamp como fallback
+        finalCode = `${baseCode}${Date.now().toString().slice(-3)}`;
+      }
+      
+      // Salvar o código no perfil
+      const { error: updateError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('referral_code', finalCode)
-        .maybeSingle();
+        .update({ 
+          referral_code: finalCode,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
       
-      if (error) {
-        console.error('Error checking code existence:', error);
-        throw new Error(`Erro ao verificar código: ${error.message}`);
+      if (updateError) {
+        console.error('Error saving referral code:', updateError);
+        // Não falhar por isso, apenas logar
+        console.log('Failed to save code but continuing with generated code');
       }
       
-      if (!existingCode) {
-        console.log('Code is unique:', finalCode);
-        break;
-      }
+      console.log('Successfully generated code:', finalCode);
+      return finalCode;
       
-      // Código já existe, gerar uma variação
-      finalCode = `${baseCode}${counter.toString().padStart(2, '0')}`;
-      counter++;
+    } catch (error) {
+      console.error('Error in generateReferralCode:', error);
+      // Fallback: usar um código baseado no ID do usuário
+      const fallbackCode = `USER${user.id.slice(0, 8).toUpperCase()}`;
+      console.log('Using fallback code:', fallbackCode);
+      return fallbackCode;
     }
-    
-    if (counter > 10) {
-      throw new Error('Não foi possível gerar um código único');
-    }
-    
-    // Salvar o código no perfil
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ 
-        referral_code: finalCode,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', user.id);
-    
-    if (updateError) {
-      console.error('Error saving referral code:', updateError);
-      throw new Error(`Erro ao salvar código: ${updateError.message}`);
-    }
-    
-    console.log('Successfully generated and saved code:', finalCode);
-    return finalCode;
   }
 
   /**

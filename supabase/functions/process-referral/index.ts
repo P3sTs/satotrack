@@ -7,11 +7,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Função para gerar código de referência
+// Função para gerar código de referência melhorada
 function generateReferralCode(userName: string, userId: string): string {
   console.log('Generating code for:', { userName, userId });
   
-  // Limpar nome
+  // Limpar nome e criar base mais robusta
   const cleanName = userName
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -24,11 +24,14 @@ function generateReferralCode(userName: string, userId: string): string {
     ? cleanName.padEnd(3, 'X') 
     : cleanName.substring(0, 3);
   
-  // Sufixo do ID (4 caracteres)
+  // Sufixo do ID mais único
   const cleanId = userId.replace(/-/g, '').toUpperCase();
   const userSuffix = cleanId.substring(0, 2) + cleanId.substring(cleanId.length - 2);
   
-  const code = `SATO${namePart}${userSuffix}`;
+  // Adicionar timestamp para garantir unicidade
+  const timestamp = Date.now().toString().slice(-3);
+  
+  const code = `SATO${namePart}${userSuffix}${timestamp}`;
   console.log('Generated code:', code);
   
   return code;
@@ -46,7 +49,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { email, password, referral_code, full_name } = await req.json();
+    const { email, password, full_name, referral_code } = await req.json();
 
     console.log('Processing referral registration for:', email, 'with code:', referral_code);
 
@@ -103,29 +106,46 @@ serve(async (req) => {
 
     if (profileError) {
       console.error('Error creating profile:', profileError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao criar perfil: ' + profileError.message }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      
+      // Se der erro de violação de RLS, tentar novamente depois de um delay
+      if (profileError.code === '42501') {
+        console.log('RLS policy violation, retrying after delay...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const { error: retryError } = await supabase
+          .from('profiles')
+          .insert({
+            id: newUserId,
+            full_name: full_name || '',
+            referral_code: newUserReferralCode,
+            referred_by: referral_code || null,
+            referral_count: 0,
+            premium_status: 'inactive'
+          });
+        
+        if (retryError) {
+          console.error('Retry also failed:', retryError);
+          // Não falhar por isso, continuar sem perfil
         }
-      );
+      }
     }
 
     // 4. Se tiver código de referência, processar a indicação
     let referralProcessed = false;
-    if (referral_code) {
+    if (referral_code && referral_code.trim()) {
       try {
         // Buscar o referenciador
         const { data: referrer, error: referrerError } = await supabase
           .from('profiles')
           .select('id, referral_count, premium_status, premium_expiry')
-          .eq('referral_code', referral_code)
+          .eq('referral_code', referral_code.trim())
           .maybeSingle();
         
         if (referrerError) {
           console.error('Error finding referrer:', referrerError);
         } else if (referrer) {
+          console.log('Found referrer:', referrer);
+          
           // Incrementar contador
           const newCount = (referrer.referral_count || 0) + 1;
           const updateData: any = {
@@ -146,6 +166,8 @@ serve(async (req) => {
             
             updateData.premium_status = 'active';
             updateData.premium_expiry = newExpiry.toISOString();
+            
+            console.log('User reached 20 referrals, granting Premium until:', newExpiry);
           }
           
           // Atualizar referenciador
@@ -156,7 +178,7 @@ serve(async (req) => {
           
           if (!updateError) {
             // Registrar referência
-            await supabase
+            const { error: insertError } = await supabase
               .from('referrals')
               .insert({
                 referrer_user_id: referrer.id,
@@ -165,43 +187,51 @@ serve(async (req) => {
                 status: 'completed'
               });
             
-            referralProcessed = true;
-            console.log('Referral processed successfully');
+            if (!insertError) {
+              referralProcessed = true;
+              console.log('Referral processed successfully');
+            } else {
+              console.error('Error inserting referral record:', insertError);
+            }
+          } else {
+            console.error('Error updating referrer:', updateError);
           }
+        } else {
+          console.log('Referrer not found for code:', referral_code);
         }
       } catch (error) {
         console.error('Error processing referral:', error);
       }
     }
 
-    // 5. Criar configurações padrão do usuário
-    const { error: settingsError } = await supabase
-      .from('user_settings')
-      .insert({
-        user_id: newUserId,
-        telegram_notifications_enabled: false,
-        email_daily_summary: false,
-        email_weekly_summary: false,
-        push_notifications_enabled: false,
-        price_alert_threshold: 5,
-        balance_alert_threshold: 0
-      });
-
-    if (settingsError) {
-      console.error('Error creating user settings:', settingsError);
+    // 5. Criar configurações padrão do usuário (opcional, não bloquear se falhar)
+    try {
+      await supabase
+        .from('user_settings')
+        .insert({
+          user_id: newUserId,
+          telegram_notifications_enabled: false,
+          email_daily_summary: false,
+          email_weekly_summary: false,
+          push_notifications_enabled: false,
+          price_alert_threshold: 5,
+          balance_alert_threshold: 0
+        });
+    } catch (error) {
+      console.error('Error creating user settings (non-critical):', error);
     }
 
-    // 6. Criar plano padrão do usuário
-    const { error: planError } = await supabase
-      .from('user_plans')
-      .insert({
-        user_id: newUserId,
-        plan_type: 'free',
-        api_requests: 1000
-      });
-
-    if (planError) {
-      console.error('Error creating user plan:', planError);
+    // 6. Criar plano padrão do usuário (opcional, não bloquear se falhar)
+    try {
+      await supabase
+        .from('user_plans')
+        .insert({
+          user_id: newUserId,
+          plan_type: 'free',
+          api_requests: 1000
+        });
+    } catch (error) {
+      console.error('Error creating user plan (non-critical):', error);
     }
 
     return new Response(
@@ -221,7 +251,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Process referral error:', error);
     return new Response(
-      JSON.stringify({ error: 'Erro interno do servidor' }),
+      JSON.stringify({ 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

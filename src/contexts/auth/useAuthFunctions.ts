@@ -109,27 +109,53 @@ export const useAuthFunctions = (
       const sanitizedName = fullName.trim();
       
       // Se há código de referência, usar a Edge Function
-      if (referralCode) {
+      if (referralCode && referralCode.trim()) {
         console.log('Using Edge Function for referral registration');
         
-        const { data, error } = await supabase.functions.invoke('process-referral', {
-          body: {
-            email: sanitizedEmail,
-            password,
-            full_name: sanitizedName,
-            referral_code: referralCode
+        try {
+          const { data, error } = await supabase.functions.invoke('process-referral', {
+            body: {
+              email: sanitizedEmail,
+              password,
+              full_name: sanitizedName,
+              referral_code: referralCode.trim()
+            }
+          });
+          
+          if (error) {
+            console.error('Edge Function error:', error);
+            throw new Error(error.message || 'Erro ao processar indicação');
           }
-        });
-        
-        if (error) {
-          console.error('Edge Function error:', error);
-          throw new Error(error.message || 'Erro ao processar indicação');
+          
+          console.log('Registration with referral successful:', data);
+          
+          toast({
+            title: "Conta criada com sucesso!",
+            description: data?.bonus || "Indicação registrada com sucesso!",
+          });
+          
+        } catch (functionError) {
+          console.error('Edge function failed, trying normal registration:', functionError);
+          
+          // Fallback para registro normal se a Edge Function falhar
+          const { error } = await supabase.auth.signUp({ 
+            email: sanitizedEmail, 
+            password,
+            options: {
+              data: {
+                full_name: sanitizedName,
+                created_at: new Date().toISOString()
+              }
+            }
+          });
+          
+          if (error) throw error;
+          
+          toast({
+            title: "Conta criada com sucesso",
+            description: "Verifique seu email para ativar sua conta.",
+          });
         }
-        
-        toast({
-          title: "Conta criada com sucesso!",
-          description: data?.bonus || "Indicação registrada com sucesso!",
-        });
         
       } else {
         // Registro normal sem referência

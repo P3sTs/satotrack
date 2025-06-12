@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,39 +129,61 @@ export const ReferralProvider = ({ children }: { children: React.ReactNode }) =>
       setIsLoading(true);
       console.log('Refreshing referral data for user:', user.id);
       
-      // Buscar dados do perfil
-      const profile = await ReferralService.getOrCreateProfile(user);
+      // Buscar dados do perfil com retry em caso de erro
+      let profile;
+      let retries = 3;
       
-      setReferralCode(profile.referral_code || '');
-      setTotalReferrals(profile.referral_count || 0);
-      setIsPremium(profile.premium_status === 'active');
-      setPremiumExpiry(profile.premium_expiry);
+      while (retries > 0) {
+        try {
+          profile = await ReferralService.getOrCreateProfile(user);
+          break;
+        } catch (error) {
+          console.error(`Attempt ${4 - retries} failed:`, error);
+          retries--;
+          if (retries === 0) throw error;
+          // Aguardar um pouco antes de tentar novamente
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
       
-      // Buscar histórico de indicações
-      try {
-        const history = await ReferralService.getReferralHistory(user.id);
-        const typedReferrals: ReferralData[] = history.map(referral => ({
-          ...referral,
-          status: referral.status as 'completed' | 'pending'
-        }));
-        setReferralHistory(typedReferrals);
-      } catch (error) {
-        console.error('Erro na consulta de referrals:', error);
-        setReferralHistory([]);
+      if (profile) {
+        setReferralCode(profile.referral_code || '');
+        setTotalReferrals(profile.referral_count || 0);
+        setIsPremium(profile.premium_status === 'active');
+        setPremiumExpiry(profile.premium_expiry);
+        
+        // Buscar histórico de indicações de forma opcional
+        try {
+          const history = await ReferralService.getReferralHistory(user.id);
+          const typedReferrals: ReferralData[] = history.map(referral => ({
+            ...referral,
+            status: referral.status as 'completed' | 'pending'
+          }));
+          setReferralHistory(typedReferrals);
+        } catch (error) {
+          console.error('Erro na consulta de referrals (não crítico):', error);
+          setReferralHistory([]);
+        }
       }
       
     } catch (error) {
       console.error('Erro ao buscar dados de indicação:', error);
-      toast.error("Não foi possível carregar os dados de indicação.");
+      // Não mostrar toast de erro em caso de falha, apenas logar
+      console.log("Falha ao carregar dados de indicação, continuando...");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       console.log('User changed, refreshing referral data');
-      refreshReferralData();
+      // Aguardar um pouco para garantir que o usuário foi criado completamente
+      const timer = setTimeout(() => {
+        refreshReferralData();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
     } else {
       console.log('No user, resetting referral state');
       setReferralCode('');
