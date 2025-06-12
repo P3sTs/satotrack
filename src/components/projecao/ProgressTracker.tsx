@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -50,7 +51,7 @@ const ProgressTracker: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGoals(data || []);
+      setGoals((data as Goal[]) || []);
     } catch (error) {
       console.error('Error loading goals:', error);
     } finally {
