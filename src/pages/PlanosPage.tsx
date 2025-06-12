@@ -1,5 +1,5 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,29 @@ import { PlanComparisonTable } from '@/components/monetization/PlanDisplay';
 import { toast } from 'sonner';
 
 const PlanosPage = () => {
-  const { userPlan, upgradeUserPlan, isLoading } = useAuth();
+  const { userPlan, upgradeUserPlan, isLoading, checkSubscriptionStatus } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  // Check for checkout success or cancellation
+  useEffect(() => {
+    const checkoutStatus = searchParams.get('checkout');
+    const sessionId = searchParams.get('session_id');
+
+    if (checkoutStatus === 'success' && sessionId) {
+      toast.success('Pagamento processado com sucesso! Verificando seu plano...');
+      // Check subscription status after successful checkout
+      setTimeout(() => {
+        checkSubscriptionStatus();
+      }, 2000);
+    } else if (checkoutStatus === 'canceled') {
+      toast.error('Checkout cancelado. Você pode tentar novamente a qualquer momento.');
+    }
+  }, [searchParams, checkSubscriptionStatus]);
 
   const handleUpgrade = async (planType: 'premium') => {
     try {
       await upgradeUserPlan(planType);
-      toast.success('Upgrade realizado com sucesso!');
+      toast.success('Redirecionando para o checkout...');
     } catch (error) {
       console.error('Erro ao fazer upgrade:', error);
       toast.error('Erro ao processar upgrade. Tente novamente.');

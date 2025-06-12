@@ -45,7 +45,16 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
+      logStep("No customer found, updating to free plan");
+      
+      // Update profiles table
+      await supabaseClient.from("profiles").upsert({
+        id: user.id,
+        premium_status: 'inactive',
+        premium_expiry: null,
+      }, { onConflict: 'id' });
+
+      // Update user_plans table
       await supabaseClient.from("user_plans").upsert({
         user_id: user.id,
         plan_type: 'free',
@@ -78,12 +87,17 @@ serve(async (req) => {
       logStep("No active subscription found");
     }
 
-    // Update user plan in database
+    // Update profiles table
+    await supabaseClient.from("profiles").upsert({
+      id: user.id,
+      premium_status: hasActiveSub ? 'active' : 'inactive',
+      premium_expiry: subscriptionEnd,
+    }, { onConflict: 'id' });
+
+    // Update user_plans table
     await supabaseClient.from("user_plans").upsert({
       user_id: user.id,
       plan_type: hasActiveSub ? 'premium' : 'free',
-      stripe_customer_id: customerId,
-      subscription_end: subscriptionEnd,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' });
 

@@ -50,6 +50,63 @@ export const useAuthPlans = (user: AuthUser | null) => {
     }
   };
 
+  const createCheckoutSession = async (): Promise<{ url: string }> => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para fazer upgrade.",
+        variant: "destructive"
+      });
+      throw new Error('User not authenticated');
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      return { url: data.url };
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a sessão de checkout. Tente novamente.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkSubscriptionStatus = async (): Promise<void> => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      // Update local state with subscription info
+      setUserPlan(data.plan_type || 'free');
+      
+      // Refresh user plan data
+      await loadUserPlanData();
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
+
   const upgradeUserPlan = async (newPlan?: PlanType) => {
     if (!user) {
       toast({
@@ -60,20 +117,10 @@ export const useAuthPlans = (user: AuthUser | null) => {
       return;
     }
 
-    setIsLoading(true);
-    
     try {
-      // For now, we'll just simulate the upgrade process
-      // In a real implementation, this would integrate with a payment processor
-      
-      if (newPlan === 'premium' || !newPlan) {
-        toast({
-          title: "Upgrade Premium",
-          description: "Funcionalidade de pagamento em desenvolvimento. Use o programa de indicações para obter Premium gratuitamente!",
-        });
-      }
-      
-      await loadUserPlanData();
+      const { url } = await createCheckoutSession();
+      // Open Stripe checkout in a new tab
+      window.open(url, '_blank');
     } catch (error) {
       console.error('Error upgrading plan:', error);
       toast({
@@ -81,8 +128,6 @@ export const useAuthPlans = (user: AuthUser | null) => {
         description: "Não foi possível processar o upgrade. Tente novamente.",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -112,26 +157,35 @@ export const useAuthPlans = (user: AuthUser | null) => {
     return currentWallets < 1; // Free plan limited to 1 wallet
   };
 
-  const checkSubscriptionStatus = async (): Promise<void> => {
-    await loadUserPlanData();
-  };
-
-  const createCheckoutSession = async (priceId: string): Promise<{ url: string }> => {
-    // Placeholder implementation
-    toast({
-      title: "Em desenvolvimento",
-      description: "Sistema de pagamento em desenvolvimento.",
-    });
-    return { url: '' };
-  };
-
   const openCustomerPortal = async (): Promise<{ url: string }> => {
-    // Placeholder implementation
-    toast({
-      title: "Em desenvolvimento",
-      description: "Portal do cliente em desenvolvimento.",
-    });
-    return { url: '' };
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para acessar o portal.",
+        variant: "destructive"
+      });
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      return { url: data.url };
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível abrir o portal do cliente.",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
   return {

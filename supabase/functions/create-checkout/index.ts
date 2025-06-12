@@ -61,7 +61,7 @@ serve(async (req) => {
               name: "SatoTrack Premium",
               description: "Acesso completo às funcionalidades premium do SatoTrack"
             },
-            unit_amount: 1990, // R$ 19,90 em centavos
+            unit_amount: 2900, // R$ 29,00 em centavos
             recurring: { interval: "month" },
           },
           quantity: 1,
