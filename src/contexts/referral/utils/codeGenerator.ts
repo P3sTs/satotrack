@@ -7,7 +7,7 @@ export interface CodeGenerationParams {
 export class ReferralCodeGenerator {
   private static readonly PREFIX = 'SATO';
   private static readonly MIN_NAME_LENGTH = 2;
-  private static readonly MAX_RETRIES = 50;
+  private static readonly MAX_RETRIES = 10;
 
   /**
    * Gera um código de referência baseado no nome do usuário
@@ -19,32 +19,18 @@ export class ReferralCodeGenerator {
     const cleanName = this.cleanUserName(userName);
     console.log('Clean name:', cleanName);
     
-    // Criar prefixo do nome (2-4 caracteres)
-    const namePrefix = this.createNamePrefix(cleanName);
-    console.log('Name prefix:', namePrefix);
+    // Criar parte do nome (2-4 caracteres)
+    const namePart = this.createNamePart(cleanName);
+    console.log('Name part:', namePart);
     
-    // Criar sufixo único baseado no ID do usuário
+    // Criar sufixo único baseado no ID do usuário (4 caracteres)
     const userSuffix = this.createUserSuffix(userId);
     console.log('User suffix:', userSuffix);
     
-    const baseCode = `${this.PREFIX}${namePrefix}${userSuffix}`;
-    console.log('Generated base code:', baseCode);
+    const finalCode = `${this.PREFIX}${namePart}${userSuffix}`;
+    console.log('Generated final code:', finalCode);
     
-    return baseCode;
-  }
-
-  /**
-   * Gera variações do código em caso de conflito
-   */
-  static generateVariations(baseCode: string): string[] {
-    const variations: string[] = [];
-    
-    for (let i = 1; i <= this.MAX_RETRIES; i++) {
-      const suffix = i.toString().padStart(2, '0');
-      variations.push(`${baseCode}${suffix}`);
-    }
-    
-    return variations;
+    return finalCode;
   }
 
   /**
@@ -65,45 +51,34 @@ export class ReferralCodeGenerator {
   }
 
   /**
-   * Cria o prefixo baseado no nome (2-4 caracteres)
+   * Cria a parte do nome para o código (2-4 caracteres)
    */
-  private static createNamePrefix(cleanName: string): string {
+  private static createNamePart(cleanName: string): string {
     if (cleanName.length === 0) {
       return 'USER';
     }
 
-    // Se o nome for muito curto, usar como está
-    if (cleanName.length <= 4) {
-      return cleanName.padEnd(this.MIN_NAME_LENGTH, 'X');
+    // Se o nome for muito curto, usar como está e preencher
+    if (cleanName.length <= 3) {
+      return cleanName.padEnd(3, 'X');
     }
 
-    // Tentar usar as primeiras letras das palavras se houver múltiplas
-    const words = cleanName.split(/(?=[A-Z])/); // Split em camelCase
-    if (words.length > 1) {
-      const initials = words
-        .filter(word => word.length > 0)
-        .map(word => word[0])
-        .join('')
-        .substring(0, 4);
-      
-      if (initials.length >= this.MIN_NAME_LENGTH) {
-        return initials;
-      }
-    }
-
-    // Usar os primeiros 4 caracteres
-    return cleanName.substring(0, 4);
+    // Usar os primeiros 3 caracteres
+    return cleanName.substring(0, 3);
   }
 
   /**
-   * Cria sufixo único baseado no ID do usuário
+   * Cria sufixo único baseado no ID do usuário (4 caracteres)
    */
   private static createUserSuffix(userId: string): string {
-    // Usar os primeiros e últimos caracteres do UUID para criar um sufixo único
+    // Usar hash simples do UUID para criar sufixo de 4 caracteres
     const cleanId = userId.replace(/-/g, '').toUpperCase();
-    const start = cleanId.substring(0, 2);
-    const end = cleanId.substring(cleanId.length - 2);
-    return start + end;
+    
+    // Pegar caracteres específicos do UUID para garantir unicidade
+    const part1 = cleanId.substring(0, 2);   // Primeiros 2
+    const part2 = cleanId.substring(cleanId.length - 2); // Últimos 2
+    
+    return part1 + part2;
   }
 
   /**
@@ -111,7 +86,7 @@ export class ReferralCodeGenerator {
    */
   static validateCode(code: string): boolean {
     const minLength = 8;
-    const maxLength = 16;
+    const maxLength = 15;
     const validPattern = /^[A-Z0-9]+$/;
     
     return (

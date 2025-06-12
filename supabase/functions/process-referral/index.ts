@@ -7,6 +7,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Função para gerar código de referência
+function generateReferralCode(userName: string, userId: string): string {
+  console.log('Generating code for:', { userName, userId });
+  
+  // Limpar nome
+  const cleanName = userName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .trim() || 'USER';
+  
+  // Parte do nome (3 caracteres)
+  const namePart = cleanName.length <= 3 
+    ? cleanName.padEnd(3, 'X') 
+    : cleanName.substring(0, 3);
+  
+  // Sufixo do ID (4 caracteres)
+  const cleanId = userId.replace(/-/g, '').toUpperCase();
+  const userSuffix = cleanId.substring(0, 2) + cleanId.substring(cleanId.length - 2);
+  
+  const code = `SATO${namePart}${userSuffix}`;
+  console.log('Generated code:', code);
+  
+  return code;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -58,13 +85,20 @@ serve(async (req) => {
     const newUserId = authData.user.id;
     console.log('User created successfully:', newUserId);
 
-    // 2. Criar perfil do usuário (o trigger vai gerar o código automaticamente)
+    // 2. Gerar código de referência para o novo usuário
+    const newUserReferralCode = generateReferralCode(full_name, newUserId);
+    console.log('Generated referral code for new user:', newUserReferralCode);
+
+    // 3. Criar perfil do usuário
     const { error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: newUserId,
         full_name: full_name || '',
-        referred_by: referral_code || null
+        referral_code: newUserReferralCode,
+        referred_by: referral_code || null,
+        referral_count: 0,
+        premium_status: 'inactive'
       });
 
     if (profileError) {
@@ -78,24 +112,69 @@ serve(async (req) => {
       );
     }
 
-    // 3. Se tiver código de referência, processar a indicação
+    // 4. Se tiver código de referência, processar a indicação
     let referralProcessed = false;
     if (referral_code) {
-      const { error: referralError } = await supabase.rpc('process_referral', {
-        referrer_code: referral_code,
-        referred_user_id: newUserId
-      });
-
-      if (referralError) {
-        console.error('Error processing referral:', referralError);
-        // Não falha a criação da conta por causa disso
-      } else {
-        console.log('Referral processed successfully');
-        referralProcessed = true;
+      try {
+        // Buscar o referenciador
+        const { data: referrer, error: referrerError } = await supabase
+          .from('profiles')
+          .select('id, referral_count, premium_status, premium_expiry')
+          .eq('referral_code', referral_code)
+          .maybeSingle();
+        
+        if (referrerError) {
+          console.error('Error finding referrer:', referrerError);
+        } else if (referrer) {
+          // Incrementar contador
+          const newCount = (referrer.referral_count || 0) + 1;
+          const updateData: any = {
+            referral_count: newCount,
+            updated_at: new Date().toISOString()
+          };
+          
+          // Verificar se atingiu 20 referências
+          if (newCount >= 20 && (newCount % 20 === 0)) {
+            const now = new Date();
+            const premiumExpiry = referrer.premium_expiry 
+              ? new Date(referrer.premium_expiry) 
+              : now;
+            
+            const newExpiry = premiumExpiry < now 
+              ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+              : new Date(premiumExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
+            
+            updateData.premium_status = 'active';
+            updateData.premium_expiry = newExpiry.toISOString();
+          }
+          
+          // Atualizar referenciador
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', referrer.id);
+          
+          if (!updateError) {
+            // Registrar referência
+            await supabase
+              .from('referrals')
+              .insert({
+                referrer_user_id: referrer.id,
+                referred_user_id: newUserId,
+                referred_user_email: email,
+                status: 'completed'
+              });
+            
+            referralProcessed = true;
+            console.log('Referral processed successfully');
+          }
+        }
+      } catch (error) {
+        console.error('Error processing referral:', error);
       }
     }
 
-    // 4. Criar configurações padrão do usuário
+    // 5. Criar configurações padrão do usuário
     const { error: settingsError } = await supabase
       .from('user_settings')
       .insert({
@@ -110,10 +189,9 @@ serve(async (req) => {
 
     if (settingsError) {
       console.error('Error creating user settings:', settingsError);
-      // Não falha a criação da conta por causa disso
     }
 
-    // 5. Criar plano padrão do usuário
+    // 6. Criar plano padrão do usuário
     const { error: planError } = await supabase
       .from('user_plans')
       .insert({
@@ -124,13 +202,13 @@ serve(async (req) => {
 
     if (planError) {
       console.error('Error creating user plan:', planError);
-      // Não falha a criação da conta por causa disso
     }
 
     return new Response(
       JSON.stringify({
         message: 'Conta criada com sucesso!',
         user_id: newUserId,
+        referral_code: newUserReferralCode,
         referral_processed: referralProcessed,
         bonus: referralProcessed ? 'Indicação registrada com sucesso!' : null
       }),
