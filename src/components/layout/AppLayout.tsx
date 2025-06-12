@@ -10,6 +10,7 @@ import NewAppSidebar from './NewAppSidebar';
 import MobileNavigation from '../navigation/MobileNavigation';
 import ContextualHeader from './ContextualHeader';
 import Footer from '../Footer';
+import FloatingSatoAIChat from '../chat/FloatingSatoAIChat';
 
 const LoadingFallback = () => (
   <div className="p-6 space-y-6">
@@ -67,6 +68,9 @@ const AppLayout: React.FC = () => {
             {showAds && <Advertisement position="footer" />}
           </SidebarInset>
         </div>
+        
+        {/* Floating SatoAI Chat - Available globally */}
+        <FloatingSatoAIChat />
       </div>
     </SidebarProvider>
   );
