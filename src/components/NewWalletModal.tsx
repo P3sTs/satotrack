@@ -4,10 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCarteiras } from '../contexts/carteiras';
 import { detectAddressNetwork } from '../services/crypto/addressDetector';
 import { toast } from '@/components/ui/sonner';
-import { CheckCircle, AlertCircle, Wallet, Info } from 'lucide-react';
+import { CheckCircle, AlertCircle, Wallet, Info, Coins } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface NewWalletModalProps {
@@ -15,25 +16,50 @@ interface NewWalletModalProps {
   onClose: () => void;
 }
 
+const SUPPORTED_CURRENCIES = [
+  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', color: 'bg-orange-500' },
+  { id: 'eth', name: 'Ethereum', symbol: 'ETH', color: 'bg-blue-500' },
+  { id: 'ltc', name: 'Litecoin', symbol: 'LTC', color: 'bg-gray-500' },
+  { id: 'doge', name: 'Dogecoin', symbol: 'DOGE', color: 'bg-yellow-600' },
+  { id: 'sol', name: 'Solana', symbol: 'SOL', color: 'bg-green-500' },
+  { id: 'bnb', name: 'Binance Coin', symbol: 'BNB', color: 'bg-yellow-500' },
+  { id: 'matic', name: 'Polygon', symbol: 'MATIC', color: 'bg-purple-500' },
+];
+
 const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
   const { adicionarCarteira, isLoading } = useCarteiras();
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const [detectedNetwork, setDetectedNetwork] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
 
   const handleEnderecoChange = async (value: string) => {
     setEndereco(value);
     
-    if (value.trim().length > 10) { // Só validar se tiver conteúdo suficiente
+    if (value.trim().length > 10) {
       setIsValidating(true);
       
-      // Pequeno delay para evitar muitas validações
       setTimeout(() => {
         try {
           const detected = detectAddressNetwork(value.trim());
           console.log('🔍 Resultado da detecção:', detected);
           setDetectedNetwork(detected);
+          
+          // Auto-select currency based on detected network
+          if (detected) {
+            const currencyMap: Record<string, string> = {
+              'bitcoin': 'btc',
+              'ethereum': 'eth',
+              'solana': 'sol',
+              'litecoin': 'ltc',
+              'dogecoin': 'doge'
+            };
+            const detectedCurrency = currencyMap[detected.network.id.toLowerCase()];
+            if (detectedCurrency && !selectedCurrency) {
+              setSelectedCurrency(detectedCurrency);
+            }
+          }
         } catch (error) {
           console.error('❌ Erro na validação:', error);
           setDetectedNetwork(null);
@@ -60,23 +86,35 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!selectedCurrency) {
+      toast.error('Por favor, selecione o tipo de moeda');
+      return;
+    }
+
     if (!detectedNetwork) {
-      toast.error('Endereço não reconhecido. Verifique se é um endereço válido de criptomoeda.');
+      toast.error('Endereço não reconhecido. Verifique se é um endereço válido.');
       return;
     }
 
     try {
-      console.log('📝 Adicionando carteira:', { nome: nome.trim(), endereco: endereco.trim(), detectedNetwork });
+      console.log('📝 Adicionando carteira:', { 
+        nome: nome.trim(), 
+        endereco: endereco.trim(), 
+        currency: selectedCurrency,
+        detectedNetwork 
+      });
       
       await adicionarCarteira(nome.trim(), endereco.trim());
       
       // Limpar formulário
       setNome('');
       setEndereco('');
+      setSelectedCurrency('');
       setDetectedNetwork(null);
       onClose();
       
-      toast.success(`Carteira ${detectedNetwork.network.name} adicionada com sucesso!`);
+      const currency = SUPPORTED_CURRENCIES.find(c => c.id === selectedCurrency);
+      toast.success(`Carteira ${currency?.name} adicionada com sucesso!`);
     } catch (error) {
       console.error('❌ Erro ao adicionar carteira:', error);
       
@@ -86,27 +124,11 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
   };
 
   const getNetworkColor = (symbol: string) => {
-    const colors: Record<string, string> = {
-      'BTC': 'bg-orange-500',
-      'ETH': 'bg-blue-500',
-      'BNB': 'bg-yellow-500',
-      'MATIC': 'bg-purple-500',
-      'SOL': 'bg-green-500',
-      'AVAX': 'bg-red-500',
-      'ARB': 'bg-cyan-500',
-      'OP': 'bg-red-400',
-      'LTC': 'bg-gray-500',
-      'DOGE': 'bg-yellow-600'
-    };
-    return colors[symbol] || 'bg-gray-500';
+    const currency = SUPPORTED_CURRENCIES.find(c => c.symbol === symbol);
+    return currency?.color || 'bg-gray-500';
   };
 
-  // Exemplos de endereços para teste
-  const addressExamples = [
-    { network: 'Bitcoin', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', symbol: 'BTC' },
-    { network: 'Ethereum', address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', symbol: 'ETH' },
-    { network: 'Solana', address: '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj', symbol: 'SOL' },
-  ];
+  const selectedCurrencyData = SUPPORTED_CURRENCIES.find(c => c.id === selectedCurrency);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -129,13 +151,37 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="currency">
+              <Coins className="inline h-4 w-4 mr-1" />
+              Tipo de Criptomoeda
+            </Label>
+            <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a moeda..." />
+              </SelectTrigger>
+              <SelectContent>
+                {SUPPORTED_CURRENCIES.map((currency) => (
+                  <SelectItem key={currency.id} value={currency.id}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${currency.color}`}></div>
+                      <span>{currency.name} ({currency.symbol})</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="space-y-2">
             <Label htmlFor="endereco">
-              Endereço da Criptomoeda
-              <span className="text-xs text-muted-foreground ml-2">
-                (Bitcoin, Ethereum, Solana, BSC, Polygon, etc.)
-              </span>
+              Endereço da Carteira
+              {selectedCurrencyData && (
+                <Badge className={`ml-2 ${selectedCurrencyData.color} text-white text-xs`}>
+                  {selectedCurrencyData.symbol}
+                </Badge>
+              )}
             </Label>
             <Input
               id="endereco"
@@ -176,55 +222,29 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Exemplos de endereços */}
+          {/* Informações sobre processamento */}
           <div className="bg-muted/50 p-3 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Info className="h-4 w-4 text-blue-500" />
-              <p className="text-xs font-medium">Exemplos de endereços válidos:</p>
+              <p className="text-xs font-medium">Processamento Automático:</p>
             </div>
-            <div className="space-y-1">
-              {addressExamples.map((example, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => handleEnderecoChange(example.address)}
-                  className="block w-full text-left text-xs p-2 rounded bg-background hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      className={`${getNetworkColor(example.symbol)} text-white text-xs`}
-                    >
-                      {example.symbol}
-                    </Badge>
-                    <span className="font-mono truncate">{example.address}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Após adicionar, faremos uma consulta automática às APIs das redes blockchain para obter:
+              saldo atual, histórico de transações, total recebido/enviado e outras informações da carteira.
+            </p>
           </div>
 
-          {/* Informações sobre redes suportadas */}
+          {/* Moedas suportadas */}
           <div className="bg-muted/50 p-3 rounded-lg">
-            <p className="text-xs font-medium mb-2">Redes Suportadas:</p>
+            <p className="text-xs font-medium mb-2">Moedas Suportadas:</p>
             <div className="flex flex-wrap gap-1">
-              {[
-                { name: 'Bitcoin', symbol: 'BTC' },
-                { name: 'Ethereum', symbol: 'ETH' },
-                { name: 'Solana', symbol: 'SOL' },
-                { name: 'BSC', symbol: 'BNB' },
-                { name: 'Polygon', symbol: 'MATIC' },
-                { name: 'Avalanche', symbol: 'AVAX' },
-                { name: 'Arbitrum', symbol: 'ARB' },
-                { name: 'Optimism', symbol: 'OP' },
-                { name: 'Litecoin', symbol: 'LTC' },
-                { name: 'Dogecoin', symbol: 'DOGE' }
-              ].map((network) => (
+              {SUPPORTED_CURRENCIES.map((currency) => (
                 <Badge 
-                  key={network.symbol}
+                  key={currency.id}
                   variant="outline" 
-                  className={`${getNetworkColor(network.symbol)} text-white border-none text-xs`}
+                  className={`${currency.color} text-white border-none text-xs`}
                 >
-                  {network.symbol}
+                  {currency.symbol}
                 </Badge>
               ))}
             </div>
@@ -242,7 +262,7 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading || !detectedNetwork}
+              disabled={isLoading || !detectedNetwork || !selectedCurrency}
               className="flex-1"
             >
               {isLoading ? 'Adicionando...' : 'Adicionar Carteira'}
