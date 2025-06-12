@@ -14,26 +14,27 @@ export interface DetectedAddress {
   isValid: boolean;
 }
 
-// Padrões de regex melhorados para diferentes tipos de endereços
+// Padrões de regex aprimorados e mais precisos
 const ADDRESS_PATTERNS = {
-  // Bitcoin - padrões mais precisos
+  // Bitcoin - padrões mais específicos
   bitcoin: {
     legacy: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
     segwit: /^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/,
     bech32: /^(bc1|tb1)[a-zA-HJ-NP-Z0-9]{25,87}$/,
     taproot: /^(bc1p|tb1p)[a-zA-HJ-NP-Z0-9]{58}$/
   },
-  // Ethereum e redes compatíveis EVM
+  // Ethereum e redes compatíveis EVM - padrão mais específico
   ethereum: /^0x[a-fA-F0-9]{40}$/,
-  // Solana - padrão mais específico
+  // Solana - validação mais rigorosa
   solana: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
-  // Outros padrões específicos
-  avalanche: /^0x[a-fA-F0-9]{40}$/,
+  // Litecoin
   litecoin: {
     legacy: /^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/,
     segwit: /^ltc1[a-zA-HJ-NP-Z0-9]{25,87}$/
   },
+  // Dogecoin
   dogecoin: /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/,
+  // Monero
   monero: /^4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}$/
 };
 
@@ -110,61 +111,76 @@ const NETWORKS: Record<string, NetworkInfo> = {
   }
 };
 
-// Função para detectar se é um endereço Bitcoin válido
+// Função melhorada para detectar Bitcoin
 const isBitcoinAddress = (address: string): { isValid: boolean; type: string } => {
+  console.log('🔍 Verificando se é endereço Bitcoin:', address);
+  
   if (ADDRESS_PATTERNS.bitcoin.legacy.test(address)) {
+    console.log('✅ Bitcoin Legacy detectado');
     return { isValid: true, type: 'legacy' };
   }
   if (ADDRESS_PATTERNS.bitcoin.segwit.test(address)) {
+    console.log('✅ Bitcoin SegWit detectado');
     return { isValid: true, type: 'segwit' };
   }
   if (ADDRESS_PATTERNS.bitcoin.bech32.test(address)) {
+    console.log('✅ Bitcoin Bech32 detectado');
     return { isValid: true, type: 'bech32' };
   }
   if (ADDRESS_PATTERNS.bitcoin.taproot.test(address)) {
+    console.log('✅ Bitcoin Taproot detectado');
     return { isValid: true, type: 'taproot' };
   }
+  
+  console.log('❌ Não é endereço Bitcoin');
   return { isValid: false, type: '' };
 };
 
-// Função para detectar se é um endereço Solana válido
+// Função melhorada para detectar Solana
 const isSolanaAddress = (address: string): boolean => {
-  // Verificações mais rigorosas para Solana
+  console.log('🔍 Verificando se é endereço Solana:', address);
+  
+  // Verificações básicas
   if (!ADDRESS_PATTERNS.solana.test(address)) {
+    console.log('❌ Não passou no regex do Solana');
     return false;
   }
   
   // Excluir endereços que são claramente Bitcoin
   if (address.match(/^[13]/)) {
+    console.log('❌ Começa com 1 ou 3, provavelmente Bitcoin');
     return false;
   }
   
   // Verificar se não é um endereço Ethereum
   if (address.startsWith('0x')) {
+    console.log('❌ Começa com 0x, é Ethereum');
     return false;
   }
   
-  // Verificar tamanho típico de endereços Solana (32-44 caracteres)
+  // Verificar tamanho típico de endereços Solana
   if (address.length < 32 || address.length > 44) {
+    console.log('❌ Tamanho inválido para Solana');
     return false;
   }
   
+  console.log('✅ Endereço Solana válido');
   return true;
 };
 
 export const detectAddressNetwork = (address: string): DetectedAddress | null => {
   if (!address || typeof address !== 'string') {
+    console.log('❌ Endereço vazio ou inválido');
     return null;
   }
 
   const cleanAddress = address.trim();
-  
-  console.log('Detecting address:', cleanAddress);
+  console.log('🔍 Detectando rede para endereço:', cleanAddress);
 
-  // Bitcoin
+  // Bitcoin - verificação prioritária
   const bitcoinCheck = isBitcoinAddress(cleanAddress);
   if (bitcoinCheck.isValid) {
-    console.log('Detected Bitcoin address:', bitcoinCheck.type);
+    console.log('✅ Bitcoin detectado:', bitcoinCheck.type);
     return {
       address: cleanAddress,
       network: NETWORKS.bitcoin,
@@ -175,7 +191,7 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
 
   // Ethereum e redes compatíveis EVM
   if (ADDRESS_PATTERNS.ethereum.test(cleanAddress)) {
-    console.log('Detected Ethereum address');
+    console.log('✅ Ethereum/EVM detectado');
     return {
       address: cleanAddress,
       network: NETWORKS.ethereum,
@@ -184,9 +200,9 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
     };
   }
 
-  // Solana
+  // Solana - verificação mais rigorosa
   if (isSolanaAddress(cleanAddress)) {
-    console.log('Detected Solana address');
+    console.log('✅ Solana detectado');
     return {
       address: cleanAddress,
       network: NETWORKS.solana,
@@ -198,7 +214,7 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
   // Litecoin
   if (ADDRESS_PATTERNS.litecoin.legacy.test(cleanAddress) || 
       ADDRESS_PATTERNS.litecoin.segwit.test(cleanAddress)) {
-    console.log('Detected Litecoin address');
+    console.log('✅ Litecoin detectado');
     return {
       address: cleanAddress,
       network: NETWORKS.litecoin,
@@ -209,7 +225,7 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
 
   // Dogecoin
   if (ADDRESS_PATTERNS.dogecoin.test(cleanAddress)) {
-    console.log('Detected Dogecoin address');
+    console.log('✅ Dogecoin detectado');
     return {
       address: cleanAddress,
       network: NETWORKS.dogecoin,
@@ -218,7 +234,7 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
     };
   }
 
-  console.log('Address not recognized:', cleanAddress);
+  console.log('❌ Nenhuma rede reconhecida para:', cleanAddress);
   return null;
 };
 

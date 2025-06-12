@@ -1,279 +1,233 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 import { DetectedAddress } from './addressDetector';
+import { toast } from '@/components/ui/sonner';
 
-export interface WalletBalance {
+export interface WalletData {
   nativeBalance: number;
-  nativeSymbol: string;
-  tokens: TokenBalance[];
-  totalUsdValue: number;
+  totalReceived: number;
+  totalSent: number;
   transactionCount: number;
+  tokens?: any[];
 }
 
-export interface TokenBalance {
+export interface MultiChainWallet {
+  id: string;
+  name: string;
   address: string;
-  symbol: string;
-  name: string;
   balance: number;
-  decimals: number;
-  usdValue: number;
-  [key: string]: any; // Add index signature for Json compatibility
+  total_received: number;
+  total_sent: number;
+  transaction_count: number;
+  last_updated: string;
+  blockchain_networks?: any;
+  address_type?: string;
+  native_token_balance?: number;
+  tokens_data?: any[];
 }
 
-export interface NetworkApiConfig {
-  name: string;
-  symbol: string;
-  apiUrl: string;
-  apiKey?: string;
-}
-
-const NETWORK_APIS: Record<string, NetworkApiConfig> = {
-  bitcoin: {
-    name: 'Bitcoin',
-    symbol: 'BTC',
-    apiUrl: 'https://blockchain.info'
-  },
-  ethereum: {
-    name: 'Ethereum',
-    symbol: 'ETH',
-    apiUrl: 'https://api.etherscan.io/api'
-  },
-  bsc: {
-    name: 'Binance Smart Chain',
-    symbol: 'BNB',
-    apiUrl: 'https://api.bscscan.com/api'
-  },
-  polygon: {
-    name: 'Polygon',
-    symbol: 'MATIC',
-    apiUrl: 'https://api.polygonscan.com/api'
-  },
-  solana: {
-    name: 'Solana',
-    symbol: 'SOL',
-    apiUrl: 'https://api.mainnet-beta.solana.com'
-  },
-  litecoin: {
-    name: 'Litecoin',
-    symbol: 'LTC',
-    apiUrl: 'https://blockchair.com/litecoin/api'
-  },
-  dogecoin: {
-    name: 'Dogecoin',
-    symbol: 'DOGE',
-    apiUrl: 'https://blockchair.com/dogecoin/api'
-  }
-};
-
-export const fetchWalletData = async (detectedAddress: DetectedAddress): Promise<WalletBalance> => {
-  const { network, address } = detectedAddress;
+export const fetchWalletData = async (detectedAddress: DetectedAddress): Promise<WalletData> => {
+  console.log('🔍 Buscando dados da carteira para:', detectedAddress);
   
-  console.log('Fetching wallet data for network:', network.id, 'address:', address);
-  
-  // Usar edge function para buscar dados de forma unificada
-  const { data, error } = await supabase.functions.invoke('fetch-multichain-data', {
-    body: { 
-      address,
-      network: network.id,
-      chainId: network.chainId
+  try {
+    // Chamar a função Edge do Supabase para buscar dados
+    const { data, error } = await supabase.functions.invoke('fetch-wallet-data', {
+      body: {
+        address: detectedAddress.address,
+        network: detectedAddress.network.id,
+        addressType: detectedAddress.addressType
+      }
+    });
+
+    if (error) {
+      console.error('❌ Erro na função fetch-wallet-data:', error);
+      throw new Error(`Erro ao buscar dados da carteira: ${error.message}`);
     }
-  });
 
-  if (error) {
-    console.error('Erro ao buscar dados multi-chain:', error);
-    throw new Error(`Erro ao buscar dados para ${network.name}: ${error.message}`);
+    if (!data) {
+      console.log('⚠️ Nenhum dado retornado, usando valores padrão');
+      return {
+        nativeBalance: 0,
+        totalReceived: 0,
+        totalSent: 0,
+        transactionCount: 0,
+        tokens: []
+      };
+    }
+
+    console.log('✅ Dados da carteira recebidos:', data);
+    
+    return {
+      nativeBalance: Number(data.balance) || 0,
+      totalReceived: Number(data.total_received) || 0,
+      totalSent: Number(data.total_sent) || 0,
+      transactionCount: Number(data.transaction_count) || 0,
+      tokens: data.tokens || []
+    };
+  } catch (error) {
+    console.error('❌ Erro ao buscar dados da carteira:', error);
+    
+    // Retornar dados padrão em caso de erro
+    return {
+      nativeBalance: 0,
+      totalReceived: 0,
+      totalSent: 0,
+      transactionCount: 0,
+      tokens: []
+    };
   }
-
-  console.log('Received data from edge function:', data);
-
-  return {
-    nativeBalance: data.nativeBalance || 0,
-    nativeSymbol: network.symbol,
-    tokens: data.tokens || [],
-    totalUsdValue: data.totalUsdValue || 0,
-    transactionCount: data.transactionCount || 0
-  };
 };
 
-// Função para salvar dados da carteira multi-chain no banco
 export const saveMultiChainWallet = async (
   name: string, 
-  detectedAddress: DetectedAddress,
-  walletData: WalletBalance
-): Promise<any> => {
+  detectedAddress: DetectedAddress, 
+  walletData: WalletData
+): Promise<MultiChainWallet> => {
+  console.log('💾 Salvando carteira multi-chain:', { name, detectedAddress, walletData });
+  
   try {
-    console.log('Saving wallet:', { name, detectedAddress, walletData });
-    
-    // Buscar network_id do banco de dados baseado no symbol
-    const { data: networkData, error: networkError } = await supabase
+    // Primeiro, buscar ou criar a rede blockchain
+    let { data: network, error: networkError } = await supabase
       .from('blockchain_networks')
       .select('id')
-      .eq('symbol', detectedAddress.network.symbol)
+      .eq('name', detectedAddress.network.name)
       .single();
 
-    if (networkError) {
-      console.error('Network lookup error:', networkError);
-      throw new Error(`Rede ${detectedAddress.network.name} não suportada no banco de dados`);
+    if (networkError || !network) {
+      console.log('🔧 Criando nova rede blockchain:', detectedAddress.network.name);
+      
+      const { data: newNetwork, error: createNetworkError } = await supabase
+        .from('blockchain_networks')
+        .insert({
+          name: detectedAddress.network.name,
+          symbol: detectedAddress.network.symbol,
+          chain_id: detectedAddress.network.chainId,
+          explorer_url: detectedAddress.network.explorerUrl,
+          is_active: true
+        })
+        .select('id')
+        .single();
+
+      if (createNetworkError) {
+        console.error('❌ Erro ao criar rede:', createNetworkError);
+        throw new Error('Erro ao criar rede blockchain');
+      }
+      
+      network = newNetwork;
     }
 
-    console.log('Found network in database:', networkData);
-
-    // Convert tokens to JSON-compatible format
-    const tokensJson = walletData.tokens.map(token => ({
-      address: token.address,
-      symbol: token.symbol,
-      name: token.name,
-      balance: token.balance,
-      decimals: token.decimals,
-      usdValue: token.usdValue
-    }));
-
-    // Preparar dados da carteira
-    const walletInsertData = {
-      name,
-      address: detectedAddress.address,
-      network_id: networkData.id,
-      address_type: detectedAddress.addressType,
-      balance: walletData.nativeBalance,
-      native_token_balance: walletData.nativeBalance,
-      total_received: walletData.nativeBalance, // Será atualizado pela API
-      total_sent: 0, // Será calculado pela API
-      transaction_count: walletData.transactionCount,
-      tokens_data: tokensJson,
-      last_updated: new Date().toISOString()
-    };
-
-    console.log('Inserting wallet with data:', walletInsertData);
-
-    // Inserir carteira
+    // Salvar a carteira
     const { data: wallet, error: walletError } = await supabase
       .from('crypto_wallets')
-      .insert(walletInsertData)
-      .select()
+      .insert({
+        name,
+        address: detectedAddress.address,
+        network_id: network.id,
+        address_type: detectedAddress.addressType,
+        balance: walletData.nativeBalance,
+        total_received: walletData.totalReceived,
+        total_sent: walletData.totalSent,
+        transaction_count: walletData.transactionCount,
+        native_token_balance: walletData.nativeBalance,
+        tokens_data: walletData.tokens || [],
+        last_updated: new Date().toISOString()
+      })
+      .select(`
+        *,
+        blockchain_networks (
+          name,
+          symbol,
+          chain_id,
+          explorer_url
+        )
+      `)
       .single();
 
     if (walletError) {
-      console.error('Wallet insert error:', walletError);
+      console.error('❌ Erro ao salvar carteira:', walletError);
       throw new Error(`Erro ao salvar carteira: ${walletError.message}`);
     }
 
-    console.log('Wallet saved successfully:', wallet);
-
-    // Salvar tokens se existirem
-    if (walletData.tokens && walletData.tokens.length > 0) {
-      const tokenBalances = walletData.tokens.map(token => ({
-        wallet_id: wallet.id,
-        token_address: token.address,
-        token_symbol: token.symbol,
-        token_name: token.name,
-        balance: token.balance,
-        decimals: token.decimals,
-        usd_value: token.usdValue
-      }));
-
-      const { error: tokensError } = await supabase
-        .from('wallet_token_balances')
-        .insert(tokenBalances);
-
-      if (tokensError) {
-        console.error('Erro ao salvar tokens:', tokensError);
-      }
-    }
-
+    console.log('✅ Carteira salva com sucesso:', wallet);
     return wallet;
   } catch (error) {
-    console.error('Erro ao salvar carteira multi-chain:', error);
+    console.error('❌ Erro completo ao salvar carteira:', error);
     throw error;
   }
 };
 
-export const updateMultiChainWallet = async (walletId: string): Promise<any> => {
+export const updateMultiChainWallet = async (walletId: string): Promise<MultiChainWallet> => {
+  console.log('🔄 Atualizando carteira:', walletId);
+  
   try {
-    // Buscar dados da carteira
-    const { data: wallet, error: walletError } = await supabase
+    // Buscar a carteira atual
+    const { data: wallet, error: fetchError } = await supabase
       .from('crypto_wallets')
       .select(`
         *,
-        blockchain_networks (*)
+        blockchain_networks (
+          name,
+          symbol,
+          chain_id,
+          explorer_url
+        )
       `)
       .eq('id', walletId)
       .single();
 
-    if (walletError) {
-      throw new Error(`Carteira não encontrada: ${walletError.message}`);
+    if (fetchError || !wallet) {
+      throw new Error('Carteira não encontrada');
     }
 
+    // Recriar o DetectedAddress para buscar dados atualizados
     const detectedAddress: DetectedAddress = {
       address: wallet.address,
       network: {
-        id: wallet.blockchain_networks.chain_id,
+        id: wallet.blockchain_networks.name.toLowerCase(),
         name: wallet.blockchain_networks.name,
         symbol: wallet.blockchain_networks.symbol,
         chainId: wallet.blockchain_networks.chain_id,
         explorerUrl: wallet.blockchain_networks.explorer_url
       },
-      addressType: wallet.address_type,
+      addressType: wallet.address_type || 'unknown',
       isValid: true
     };
 
     // Buscar dados atualizados
     const walletData = await fetchWalletData(detectedAddress);
 
-    // Convert tokens to JSON-compatible format
-    const tokensJson = walletData.tokens.map(token => ({
-      address: token.address,
-      symbol: token.symbol,
-      name: token.name,
-      balance: token.balance,
-      decimals: token.decimals,
-      usdValue: token.usdValue
-    }));
-
-    // Atualizar carteira
+    // Atualizar a carteira
     const { data: updatedWallet, error: updateError } = await supabase
       .from('crypto_wallets')
       .update({
         balance: walletData.nativeBalance,
-        native_token_balance: walletData.nativeBalance,
+        total_received: walletData.totalReceived,
+        total_sent: walletData.totalSent,
         transaction_count: walletData.transactionCount,
-        tokens_data: tokensJson,
+        native_token_balance: walletData.nativeBalance,
+        tokens_data: walletData.tokens || [],
         last_updated: new Date().toISOString()
       })
       .eq('id', walletId)
-      .select()
+      .select(`
+        *,
+        blockchain_networks (
+          name,
+          symbol,
+          chain_id,
+          explorer_url
+        )
+      `)
       .single();
 
     if (updateError) {
       throw new Error(`Erro ao atualizar carteira: ${updateError.message}`);
     }
 
-    // Atualizar tokens
-    if (walletData.tokens && walletData.tokens.length > 0) {
-      // Deletar tokens antigos
-      await supabase
-        .from('wallet_token_balances')
-        .delete()
-        .eq('wallet_id', walletId);
-
-      // Inserir tokens atualizados
-      const tokenBalances = walletData.tokens.map(token => ({
-        wallet_id: walletId,
-        token_address: token.address,
-        token_symbol: token.symbol,
-        token_name: token.name,
-        balance: token.balance,
-        decimals: token.decimals,
-        usd_value: token.usdValue
-      }));
-
-      await supabase
-        .from('wallet_token_balances')
-        .insert(tokenBalances);
-    }
-
+    console.log('✅ Carteira atualizada com sucesso');
     return updatedWallet;
   } catch (error) {
-    console.error('Erro ao atualizar carteira multi-chain:', error);
+    console.error('❌ Erro ao atualizar carteira:', error);
     throw error;
   }
 };

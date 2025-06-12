@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCarteiras } from '../contexts/carteiras';
-import { validarEnderecoCrypto } from '../services/api';
+import { detectAddressNetwork } from '../services/crypto/addressDetector';
 import { toast } from '@/components/ui/sonner';
-import { CheckCircle, AlertCircle, Wallet } from 'lucide-react';
+import { CheckCircle, AlertCircle, Wallet, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface NewWalletModalProps {
@@ -20,15 +20,30 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
   const [detectedNetwork, setDetectedNetwork] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
-  const handleEnderecoChange = (value: string) => {
+  const handleEnderecoChange = async (value: string) => {
     setEndereco(value);
     
-    if (value.trim()) {
-      const detected = validarEnderecoCrypto(value.trim());
-      setDetectedNetwork(detected);
+    if (value.trim().length > 10) { // Só validar se tiver conteúdo suficiente
+      setIsValidating(true);
+      
+      // Pequeno delay para evitar muitas validações
+      setTimeout(() => {
+        try {
+          const detected = detectAddressNetwork(value.trim());
+          console.log('🔍 Resultado da detecção:', detected);
+          setDetectedNetwork(detected);
+        } catch (error) {
+          console.error('❌ Erro na validação:', error);
+          setDetectedNetwork(null);
+        } finally {
+          setIsValidating(false);
+        }
+      }, 300);
     } else {
       setDetectedNetwork(null);
+      setIsValidating(false);
     }
   };
 
@@ -40,35 +55,58 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!endereco.trim()) {
+      toast.error('Por favor, insira o endereço da carteira');
+      return;
+    }
+
     if (!detectedNetwork) {
-      toast.error('Por favor, insira um endereço válido de criptomoeda');
+      toast.error('Endereço não reconhecido. Verifique se é um endereço válido de criptomoeda.');
       return;
     }
 
     try {
+      console.log('📝 Adicionando carteira:', { nome: nome.trim(), endereco: endereco.trim(), detectedNetwork });
+      
       await adicionarCarteira(nome.trim(), endereco.trim());
+      
+      // Limpar formulário
       setNome('');
       setEndereco('');
       setDetectedNetwork(null);
       onClose();
+      
+      toast.success(`Carteira ${detectedNetwork.network.name} adicionada com sucesso!`);
     } catch (error) {
-      console.error('Erro ao adicionar carteira:', error);
+      console.error('❌ Erro ao adicionar carteira:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao adicionar carteira';
+      toast.error(errorMessage);
     }
   };
 
   const getNetworkColor = (symbol: string) => {
-    switch (symbol) {
-      case 'BTC': return 'bg-orange-500';
-      case 'ETH': return 'bg-blue-500';
-      case 'BNB': return 'bg-yellow-500';
-      case 'MATIC': return 'bg-purple-500';
-      case 'SOL': return 'bg-green-500';
-      case 'AVAX': return 'bg-red-500';
-      case 'ARB': return 'bg-cyan-500';
-      case 'OP': return 'bg-red-400';
-      default: return 'bg-gray-500';
-    }
+    const colors: Record<string, string> = {
+      'BTC': 'bg-orange-500',
+      'ETH': 'bg-blue-500',
+      'BNB': 'bg-yellow-500',
+      'MATIC': 'bg-purple-500',
+      'SOL': 'bg-green-500',
+      'AVAX': 'bg-red-500',
+      'ARB': 'bg-cyan-500',
+      'OP': 'bg-red-400',
+      'LTC': 'bg-gray-500',
+      'DOGE': 'bg-yellow-600'
+    };
+    return colors[symbol] || 'bg-gray-500';
   };
+
+  // Exemplos de endereços para teste
+  const addressExamples = [
+    { network: 'Bitcoin', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', symbol: 'BTC' },
+    { network: 'Ethereum', address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', symbol: 'ETH' },
+    { network: 'Solana', address: '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj', symbol: 'SOL' },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -110,11 +148,16 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
             
             {/* Feedback visual da detecção do endereço */}
             <div className="flex items-center min-h-[24px]">
-              {endereco && (
+              {isValidating ? (
+                <div className="flex items-center gap-2 text-blue-500">
+                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-500 border-t-transparent"></div>
+                  <span className="text-sm">Validando...</span>
+                </div>
+              ) : endereco.trim().length > 10 ? (
                 detectedNetwork ? (
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-green-600">Endereço válido detectado:</span>
+                    <span className="text-sm text-green-600">Endereço válido:</span>
                     <Badge 
                       className={`${getNetworkColor(detectedNetwork.network.symbol)} text-white text-xs`}
                     >
@@ -129,7 +172,34 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
                     </span>
                   </div>
                 )
-              )}
+              ) : null}
+            </div>
+          </div>
+
+          {/* Exemplos de endereços */}
+          <div className="bg-muted/50 p-3 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="h-4 w-4 text-blue-500" />
+              <p className="text-xs font-medium">Exemplos de endereços válidos:</p>
+            </div>
+            <div className="space-y-1">
+              {addressExamples.map((example, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleEnderecoChange(example.address)}
+                  className="block w-full text-left text-xs p-2 rounded bg-background hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      className={`${getNetworkColor(example.symbol)} text-white text-xs`}
+                    >
+                      {example.symbol}
+                    </Badge>
+                    <span className="font-mono truncate">{example.address}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -145,7 +215,9 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
                 { name: 'Polygon', symbol: 'MATIC' },
                 { name: 'Avalanche', symbol: 'AVAX' },
                 { name: 'Arbitrum', symbol: 'ARB' },
-                { name: 'Optimism', symbol: 'OP' }
+                { name: 'Optimism', symbol: 'OP' },
+                { name: 'Litecoin', symbol: 'LTC' },
+                { name: 'Dogecoin', symbol: 'DOGE' }
               ].map((network) => (
                 <Badge 
                   key={network.symbol}
@@ -159,7 +231,13 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
           </div>
           
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              className="flex-1"
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button 
