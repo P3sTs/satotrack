@@ -117,7 +117,7 @@ export const saveMultiChainWallet = async (
     }
 
     // Salvar a carteira
-    const { data: wallet, error: walletError } = await supabase
+    const { data: walletResponse, error: walletError } = await supabase
       .from('crypto_wallets')
       .insert({
         name,
@@ -148,6 +148,22 @@ export const saveMultiChainWallet = async (
       throw new Error(`Erro ao salvar carteira: ${walletError.message}`);
     }
 
+    // Converter o resultado para o formato esperado
+    const wallet: MultiChainWallet = {
+      id: walletResponse.id,
+      name: walletResponse.name,
+      address: walletResponse.address,
+      balance: Number(walletResponse.balance),
+      total_received: Number(walletResponse.total_received),
+      total_sent: Number(walletResponse.total_sent),
+      transaction_count: walletResponse.transaction_count,
+      last_updated: walletResponse.last_updated,
+      blockchain_networks: walletResponse.blockchain_networks,
+      address_type: walletResponse.address_type,
+      native_token_balance: Number(walletResponse.native_token_balance),
+      tokens_data: Array.isArray(walletResponse.tokens_data) ? walletResponse.tokens_data : []
+    };
+
     console.log('✅ Carteira salva com sucesso:', wallet);
     return wallet;
   } catch (error) {
@@ -161,7 +177,7 @@ export const updateMultiChainWallet = async (walletId: string): Promise<MultiCha
   
   try {
     // Buscar a carteira atual
-    const { data: wallet, error: fetchError } = await supabase
+    const { data: walletResponse, error: fetchError } = await supabase
       .from('crypto_wallets')
       .select(`
         *,
@@ -175,21 +191,21 @@ export const updateMultiChainWallet = async (walletId: string): Promise<MultiCha
       .eq('id', walletId)
       .single();
 
-    if (fetchError || !wallet) {
+    if (fetchError || !walletResponse) {
       throw new Error('Carteira não encontrada');
     }
 
     // Recriar o DetectedAddress para buscar dados atualizados
     const detectedAddress: DetectedAddress = {
-      address: wallet.address,
+      address: walletResponse.address,
       network: {
-        id: wallet.blockchain_networks.name.toLowerCase(),
-        name: wallet.blockchain_networks.name,
-        symbol: wallet.blockchain_networks.symbol,
-        chainId: wallet.blockchain_networks.chain_id,
-        explorerUrl: wallet.blockchain_networks.explorer_url
+        id: walletResponse.blockchain_networks.name.toLowerCase(),
+        name: walletResponse.blockchain_networks.name,
+        symbol: walletResponse.blockchain_networks.symbol,
+        chainId: walletResponse.blockchain_networks.chain_id,
+        explorerUrl: walletResponse.blockchain_networks.explorer_url
       },
-      addressType: wallet.address_type || 'unknown',
+      addressType: walletResponse.address_type || 'unknown',
       isValid: true
     };
 
@@ -197,7 +213,7 @@ export const updateMultiChainWallet = async (walletId: string): Promise<MultiCha
     const walletData = await fetchWalletData(detectedAddress);
 
     // Atualizar a carteira
-    const { data: updatedWallet, error: updateError } = await supabase
+    const { data: updatedWalletResponse, error: updateError } = await supabase
       .from('crypto_wallets')
       .update({
         balance: walletData.nativeBalance,
@@ -224,8 +240,24 @@ export const updateMultiChainWallet = async (walletId: string): Promise<MultiCha
       throw new Error(`Erro ao atualizar carteira: ${updateError.message}`);
     }
 
+    // Converter para o formato esperado
+    const wallet: MultiChainWallet = {
+      id: updatedWalletResponse.id,
+      name: updatedWalletResponse.name,
+      address: updatedWalletResponse.address,
+      balance: Number(updatedWalletResponse.balance),
+      total_received: Number(updatedWalletResponse.total_received),
+      total_sent: Number(updatedWalletResponse.total_sent),
+      transaction_count: updatedWalletResponse.transaction_count,
+      last_updated: updatedWalletResponse.last_updated,
+      blockchain_networks: updatedWalletResponse.blockchain_networks,
+      address_type: updatedWalletResponse.address_type,
+      native_token_balance: Number(updatedWalletResponse.native_token_balance),
+      tokens_data: Array.isArray(updatedWalletResponse.tokens_data) ? updatedWalletResponse.tokens_data : []
+    };
+
     console.log('✅ Carteira atualizada com sucesso');
-    return updatedWallet;
+    return wallet;
   } catch (error) {
     console.error('❌ Erro ao atualizar carteira:', error);
     throw error;

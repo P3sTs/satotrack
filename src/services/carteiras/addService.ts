@@ -39,7 +39,7 @@ export const addCarteira = async (nome: string, endereco: string): Promise<Carte
       endereco: novaCarteira.address,
       saldo: Number(novaCarteira.balance),
       ultimo_update: novaCarteira.last_updated,
-      total_entradas: Number(novaCarteira.total_receive || 0),
+      total_entradas: Number(novaCarteira.total_received || 0),
       total_saidas: Number(novaCarteira.total_sent || 0),
       qtde_transacoes: novaCarteira.transaction_count,
       // Campos extras para multi-chain
