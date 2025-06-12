@@ -1,3 +1,4 @@
+
 import { CarteiraBTC, TransacaoBTC } from '../../types/CarteirasTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { addCarteira } from '../../../services/carteiras/addService';
@@ -175,9 +176,11 @@ export const loadWalletTransactions = async (
     return (data || []).map(tx => ({
       id: tx.id,
       hash: tx.hash,
+      txid: tx.hash, // Add missing txid property
       valor: Number(tx.amount),
       data: tx.transaction_date,
       tipo: tx.transaction_type as ('entrada' | 'saida'),
+      endereco: `${tx.hash.substring(0, 8)}...${tx.hash.substring(tx.hash.length - 8)}`, // Add missing endereco property
       confirmacoes: 6, // Default value
       taxa: 0 // Default value
     }));
