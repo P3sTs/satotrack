@@ -152,6 +152,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
     return newToken;
   };
 
+  // Fixed: Changed parameter type to number to match usage
   const canAddMoreWallets = (currentWallets: number): boolean => {
     if (userPlan === 'premium') return true;
     return currentWallets < 1; // Free plan limited to 1 wallet
