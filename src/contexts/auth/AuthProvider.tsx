@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useAuthFunctions } from './useAuthFunctions';
@@ -6,7 +7,7 @@ import { useAuthPlans } from './useAuthPlans';
 import { usePasswordStrength } from './hooks/usePasswordStrength';
 import { AuthContextType, User, PlanType } from './types';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -22,12 +23,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [passwordResetEmailSent, setPasswordResetEmailSent] = useState(false);
   
   const {
+    session,
     user,
     loading,
-    login,
-    register,
-    logout,
-    updateProfile
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+    isAuthenticated,
+    lastActivity,
+    updateLastActivity,
+    securityStatus,
+    failedLoginAttempts,
+    resetFailedLoginAttempts,
+    checkSubscriptionStatus,
+    isLoading
   } = useAuthSession();
 
   const {
@@ -47,6 +57,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return currentWallets < 3;
   };
 
+  // Alias functions for backward compatibility
+  const login = signIn;
+  const register = signUp;
+  const logout = signOut;
+
   const value: AuthContextType = {
     isRegistering,
     setIsRegistering,
@@ -62,12 +77,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setTempPassword,
     passwordResetEmailSent,
     setPasswordResetEmailSent,
+    session,
     user,
     loading,
+    signIn,
+    signUp,
+    signOut,
     login,
     register,
     logout,
     updateProfile,
+    isAuthenticated,
+    lastActivity,
+    updateLastActivity,
+    securityStatus,
+    failedLoginAttempts,
+    resetFailedLoginAttempts,
     userPlan,
     apiRequestsUsed,
     apiRequestsRemaining,
@@ -77,6 +102,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     passwordStrength,
     createCheckoutSession,
     openCustomerPortal,
+    checkSubscriptionStatus,
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

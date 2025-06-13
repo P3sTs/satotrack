@@ -29,8 +29,8 @@ const DailySummary: React.FC = () => {
 
   // Simulando dados de abertura (seria necessário API histórica para dados reais)
   const openingPrice = bitcoinData.price_usd - (bitcoinData.price_change_24h || 0);
-  const highPrice = bitcoinData.price_high_24h || bitcoinData.price_usd * 1.02;
-  const lowPrice = bitcoinData.price_low_24h || bitcoinData.price_usd * 0.98;
+  const highPrice = bitcoinData.price_high_7d || bitcoinData.price_usd * 1.02;
+  const lowPrice = bitcoinData.price_low_7d || bitcoinData.price_usd * 0.98;
 
   const summaryItems = [
     {
