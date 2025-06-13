@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -70,7 +69,15 @@ const AlertsManager: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAlerts(data || []);
+      
+      // Cast the data to ensure proper typing
+      const typedAlerts = (data || []).map(alert => ({
+        ...alert,
+        alert_type: alert.alert_type as 'balance' | 'transaction' | 'price' | 'volume',
+        condition: alert.condition as 'above' | 'below' | 'equals'
+      }));
+      
+      setAlerts(typedAlerts);
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
       showError('Erro ao carregar alertas');

@@ -33,14 +33,18 @@ export const sendEmailSummary = async (
     // Por enquanto, apenas registrar a intenção
     console.log(`Enviando email ${type} summary para usuário ${userId}`);
 
-    // Registrar o envio
+    // Registrar o envio - convert options to plain object for JSON compatibility
     const { error } = await supabase
       .from('notification_logs')
       .insert({
         user_id: userId,
         notification_type: `email_${type}_summary`,
         status: 'sent',
-        details: options
+        details: {
+          includeTransactions: options.includeTransactions,
+          includeMarketAnalysis: options.includeMarketAnalysis,
+          includePriceAlerts: options.includePriceAlerts
+        }
       });
 
     if (error) {

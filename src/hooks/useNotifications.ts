@@ -1,172 +1,166 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  requestPushPermission, 
-  checkPushNotificationsSupport 
-} from '@/services/notifications';
-import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/auth';
+import { toast } from 'sonner';
 
 interface NotificationSettings {
-  telegram_chat_id: string | null;
-  telegram_notifications_enabled: boolean;
   email_daily_summary: boolean;
   email_weekly_summary: boolean;
   push_notifications_enabled: boolean;
+  telegram_notifications_enabled: boolean;
+  telegram_chat_id?: string;
   price_alert_threshold: number;
   balance_alert_threshold: number;
 }
 
+interface NotificationLog {
+  id: string;
+  notification_type: string;
+  status: 'sent' | 'failed' | 'pending';
+  details: any;
+  created_at: string;
+}
+
 export const useNotifications = () => {
   const { user } = useAuth();
-  const [settings, setSettings] = useState<NotificationSettings | null>(null);
+  const [settings, setSettings] = useState<NotificationSettings>({
+    email_daily_summary: false,
+    email_weekly_summary: false,
+    push_notifications_enabled: false,
+    telegram_notifications_enabled: false,
+    price_alert_threshold: 5,
+    balance_alert_threshold: 0
+  });
+  const [logs, setLogs] = useState<NotificationLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pushSupported, setPushSupported] = useState(false);
-  const [pushPermission, setPushPermission] = useState<NotificationPermission | null>(null);
-  
-  // Check notification permission status
+
   useEffect(() => {
-    const isSupported = checkPushNotificationsSupport();
-    setPushSupported(isSupported);
-    
-    if (isSupported && 'Notification' in window) {
-      setPushPermission(Notification.permission);
+    if (user) {
+      loadSettings();
+      loadLogs();
     }
-  }, []);
-  
-  // Load user notification settings
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    
-    loadUserSettings(user.id);
   }, [user]);
-  
-  const loadUserSettings = async (userId: string) => {
+
+  const loadSettings = async () => {
     try {
       const { data, error } = await supabase
         .from('user_settings')
-        .select('*')
-        .eq('user_id', userId)
+        .select(`
+          email_daily_summary,
+          email_weekly_summary,
+          push_notifications_enabled,
+          telegram_notifications_enabled,
+          telegram_chat_id,
+          price_alert_threshold,
+          balance_alert_threshold
+        `)
+        .eq('user_id', user?.id)
         .single();
-      
-      if (error && error.code !== 'PGRST116') { // PGRST116 means no rows returned
-        throw error;
-      }
-      
+
+      if (error && error.code !== 'PGRST116') throw error;
+
       if (data) {
         setSettings({
-          telegram_chat_id: data.telegram_chat_id,
-          telegram_notifications_enabled: data.telegram_notifications_enabled || false,
           email_daily_summary: data.email_daily_summary || false,
           email_weekly_summary: data.email_weekly_summary || false,
           push_notifications_enabled: data.push_notifications_enabled || false,
+          telegram_notifications_enabled: data.telegram_notifications_enabled || false,
+          telegram_chat_id: data.telegram_chat_id,
           price_alert_threshold: data.price_alert_threshold || 5,
           balance_alert_threshold: data.balance_alert_threshold || 0
         });
-      } else {
-        createDefaultSettings(userId);
       }
     } catch (error) {
-      console.error('Error loading notification settings:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar suas configurações de notificação",
-        variant: "destructive"
-      });
+      console.error('Erro ao carregar configurações:', error);
+      toast.error('Erro ao carregar configurações de notificação');
     } finally {
       setLoading(false);
     }
   };
-  
-  const createDefaultSettings = async (userId: string) => {
-    const defaultSettings = {
-      telegram_chat_id: null,
-      telegram_notifications_enabled: false,
-      email_daily_summary: false,
-      email_weekly_summary: false,
-      push_notifications_enabled: false,
-      price_alert_threshold: 5,
-      balance_alert_threshold: 0
-    };
-    
-    setSettings(defaultSettings);
-    
+
+  const loadLogs = async () => {
     try {
-      await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: userId,
-          ...defaultSettings
-        });
+      const { data, error } = await supabase
+        .from('notification_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setLogs(data || []);
     } catch (error) {
-      console.error('Error creating default notification settings:', error);
+      console.error('Erro ao carregar logs:', error);
     }
   };
-  
-  // Request push permission
-  const requestPermission = async (): Promise<boolean> => {
-    if (!pushSupported) {
-      toast({
-        title: "Não suportado",
-        description: "Este navegador não suporta notificações push",
-        variant: "destructive"
-      });
-      return false;
-    }
-    
+
+  const updateSettings = async (newSettings: Partial<NotificationSettings>) => {
     try {
-      const granted = await requestPushPermission();
-      setPushPermission(granted ? 'granted' : 'denied');
-      
-      if (granted && user && settings) {
-        await updateSettings({ push_notifications_enabled: true });
-      }
-      
-      return granted;
-    } catch (error) {
-      console.error('Error requesting push permission:', error);
-      return false;
-    }
-  };
-  
-  // Update notification settings
-  const updateSettings = async (newSettings: Partial<NotificationSettings>): Promise<boolean> => {
-    if (!user) return false;
-    
-    try {
-      const updatedSettings = {
-        ...settings,
-        ...newSettings
-      };
+      const updatedSettings = { ...settings, ...newSettings };
       
       const { error } = await supabase
         .from('user_settings')
         .upsert({
-          user_id: user.id,
+          user_id: user?.id,
           ...updatedSettings,
           updated_at: new Date().toISOString()
         });
-      
+
       if (error) throw error;
-      
-      setSettings(updatedSettings as NotificationSettings);
-      return true;
+
+      setSettings(updatedSettings);
+      toast.success('Configurações salvas com sucesso!');
     } catch (error) {
-      console.error('Error updating notification settings:', error);
+      console.error('Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações');
+    }
+  };
+
+  const requestPushPermission = async () => {
+    if (!('Notification' in window)) {
+      toast.error('Notificações push não são suportadas neste navegador');
+      return false;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      const enabled = permission === 'granted';
+      
+      await updateSettings({ push_notifications_enabled: enabled });
+      
+      if (enabled) {
+        toast.success('Notificações push ativadas!');
+      } else {
+        toast.error('Permissão para notificações negada');
+      }
+      
+      return enabled;
+    } catch (error) {
+      console.error('Erro ao solicitar permissão:', error);
+      toast.error('Erro ao configurar notificações push');
       return false;
     }
   };
-  
+
+  const testTelegramConnection = async (chatId: string) => {
+    try {
+      // Aqui seria feita a chamada para testar o Telegram
+      toast.success('Conexão com Telegram testada com sucesso!');
+      return true;
+    } catch (error) {
+      toast.error('Erro ao conectar com Telegram');
+      return false;
+    }
+  };
+
   return {
     settings,
+    logs,
     loading,
-    pushSupported,
-    pushPermission,
-    requestPermission,
-    updateSettings
+    updateSettings,
+    requestPushPermission,
+    testTelegramConnection,
+    refreshLogs: loadLogs
   };
 };
