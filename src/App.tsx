@@ -12,6 +12,9 @@ import { GamificationProvider } from './contexts/gamification/GamificationContex
 import { Web3Provider } from './contexts/web3/Web3Context';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
+import { ActionFeedbackProvider } from './components/feedback/ActionFeedback';
+import RouteValidator from './components/validation/RouteValidator';
+import QualityAssurance from './components/quality/QualityAssurance';
 
 // Pages
 import Index from './pages/Index';
@@ -48,45 +51,53 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="satotrack-theme">
         <BrowserRouter>
           <AuthProvider>
-            <Web3Provider>
-              <GamificationProvider>
-                <CarteirasProvider>
-                  <ViewModeProvider>
-                    <ReferralProvider>
-                      <I18nProvider>
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/home" element={<Home />} />
-                          <Route path="/auth" element={<Auth />} />
-                          <Route path="/planos" element={<PlanosPage />} />
+            <ActionFeedbackProvider>
+              <Web3Provider>
+                <GamificationProvider>
+                  <CarteirasProvider>
+                    <ViewModeProvider>
+                      <ReferralProvider>
+                        <I18nProvider>
+                          <RouteValidator />
                           
-                          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/carteiras" element={<WalletsManager />} />
-                            <Route path="/nova-carteira" element={<NovaCarteira />} />
-                            <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
-                            <Route path="/configuracoes" element={<Configuracoes />} />
-                            <Route path="/mercado" element={<Mercado />} />
-                            <Route path="/historico" element={<Historico />} />
-                            <Route path="/projecao" element={<ProjecaoLucros />} />
-                            <Route path="/web3" element={<Web3Dashboard />} />
-                          </Route>
+                          <Routes>
+                            <Route path="/" element={<Index />} />
+                            <Route path="/home" element={<Home />} />
+                            <Route path="/auth" element={<Auth />} />
+                            <Route path="/planos" element={<PlanosPage />} />
+                            
+                            <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                              <Route path="/dashboard" element={<Dashboard />} />
+                              <Route path="/carteiras" element={<WalletsManager />} />
+                              <Route path="/nova-carteira" element={<NovaCarteira />} />
+                              <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
+                              <Route path="/configuracoes" element={<Configuracoes />} />
+                              <Route path="/mercado" element={<Mercado />} />
+                              <Route path="/historico" element={<Historico />} />
+                              <Route path="/projecao" element={<ProjecaoLucros />} />
+                              <Route path="/web3" element={<Web3Dashboard />} />
+                            </Route>
+                            
+                            <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+                            <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
+                            <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+                            <Route path="/comparison" element={<ProtectedRoute><WalletComparisonPage /></ProtectedRoute>} />
+                            
+                            <Route path="/404" element={<NotFound />} />
+                            <Route path="*" element={<Navigate to="/404" replace />} />
+                          </Routes>
                           
-                          <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
-                          <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
-                          <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-                          <Route path="/comparison" element={<ProtectedRoute><WalletComparisonPage /></ProtectedRoute>} />
+                          {/* QA Component apenas em desenvolvimento */}
+                          {process.env.NODE_ENV === 'development' && <QualityAssurance />}
                           
-                          <Route path="/404" element={<NotFound />} />
-                          <Route path="*" element={<Navigate to="/404" replace />} />
-                        </Routes>
-                        <Toaster />
-                      </I18nProvider>
-                    </ReferralProvider>
-                  </ViewModeProvider>
-                </CarteirasProvider>
-              </GamificationProvider>
-            </Web3Provider>
+                          <Toaster />
+                        </I18nProvider>
+                      </ReferralProvider>
+                    </ViewModeProvider>
+                  </CarteirasProvider>
+                </GamificationProvider>
+              </Web3Provider>
+            </ActionFeedbackProvider>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
