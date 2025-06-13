@@ -1,102 +1,75 @@
-
-import React, { createContext, useState, useCallback } from 'react';
-import { Session } from '@supabase/supabase-js';
-import { useAuthSession } from './useAuthSession';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { useAuthFunctions } from './useAuthFunctions';
-import { useLoginAttempts } from './useLoginAttempts';
-import { useActivityMonitor } from './useActivityMonitor';
+import { useAuthSession } from './useAuthSession';
 import { useAuthPlans } from './useAuthPlans';
-import { AuthUser, PlanType, AuthContextType } from './types';
-import { useLocation } from 'react-router-dom';
-import { useWelcomeToast } from './hooks/useWelcomeToast';
 import { usePasswordStrength } from './hooks/usePasswordStrength';
-import { useUserActivityMonitoring } from './hooks/useUserActivityMonitoring';
+import { AuthContextType, User, PlanType } from './types';
 
-// Create the auth context
-export const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth provider component
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // Get session and user state from useAuthSession hook
-  const { session, user, loading, setSession, setUser } = useAuthSession();
-  const location = useLocation();
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [apiToken, setApiToken] = useState<string | null>(null);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [passwordResetEmailSent, setPasswordResetEmailSent] = useState(false);
   
-  // Additional auth-related state/functions
-  const isAuthenticated = !!session && !!user;
-  
-  // Get login security functionality
   const {
-    loginAttempts,
-    securityStatus,
-    checkFailedLoginAttempts,
-    getFailedLoginAttempts,
-    resetFailedLoginAttempts,
-    saveLoginAttempt
-  } = useLoginAttempts();
-  
-  // Criar um callback memoizado para updateLastActivity
-  const updateLastActivity = useCallback(() => {
-    const now = new Date().toISOString();
-    localStorage.setItem('lastActivity', now);
-  }, []);
-  
-  // Get activity monitoring functionality
-  const { lastActivity } = useActivityMonitor(user, async () => {
-    // Stub function for signOut - será substituído abaixo
-  });
-  
-  // Get Auth-related functionality
-  const {
-    signIn,
-    signUp,
-    signOut,
-  } = useAuthFunctions(
-    updateLastActivity, 
-    saveLoginAttempt,
-    checkFailedLoginAttempts
-  );
-  
-  const failedLoginAttempts = getFailedLoginAttempts();
-  
-  // Get plan-related functionality
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    updateProfile
+  } = useAuthSession();
+
   const {
     userPlan,
-    apiToken,
+    apiRequestsUsed,
     apiRequestsRemaining,
     upgradeUserPlan,
     generateApiToken,
-    canAddMoreWallets,
-    isLoading,
-    checkSubscriptionStatus,
     createCheckoutSession,
     openCustomerPortal
-  } = useAuthPlans(user ? user as AuthUser : null);
+  } = useAuthPlans(user);
 
-  // Boas-vindas e alertas
-  useWelcomeToast(isAuthenticated, lastActivity, user as AuthUser, userPlan);
-  
-  // Monitoramento de atividade do usuário
-  useUserActivityMonitoring(isAuthenticated, updateLastActivity, location);
-  
-  // Hook de força de senha
   const { passwordStrength } = usePasswordStrength();
 
-  // Provide context value
-  const contextValue: AuthContextType = {
-    session,
-    user: user as AuthUser,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    isAuthenticated,
-    lastActivity: lastActivity ? new Date(lastActivity) : null,
-    updateLastActivity,
-    securityStatus,
-    failedLoginAttempts,
-    resetFailedLoginAttempts,
-    userPlan,
+  const canAddMoreWallets = (currentWallets: number): boolean => {
+    if (userPlan === 'premium') return true;
+    return currentWallets < 3;
+  };
+
+  const value: AuthContextType = {
+    isRegistering,
+    setIsRegistering,
+    isLoggingIn,
+    setIsLoggingIn,
+    isLoggingOut,
+    setIsLoggingOut,
+    isUpdating,
+    setIsUpdating,
     apiToken,
+    setApiToken,
+    tempPassword,
+    setTempPassword,
+    passwordResetEmailSent,
+    setPasswordResetEmailSent,
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    updateProfile,
+    userPlan,
+    apiRequestsUsed,
     apiRequestsRemaining,
     upgradeUserPlan,
     generateApiToken,
@@ -104,14 +77,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     passwordStrength,
     createCheckoutSession,
     openCustomerPortal,
-    checkSubscriptionStatus,
-    isLoading
   };
-  
-  // Provide authentication context to child components
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
