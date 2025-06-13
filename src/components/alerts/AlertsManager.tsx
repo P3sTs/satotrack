@@ -1,31 +1,57 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bell, Plus, Trash2, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/auth';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import type { Tables } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/auth';
+import { useActionFeedback } from '@/components/feedback/ActionFeedback';
+import { 
+  Bell, 
+  Plus, 
+  TrendingUp, 
+  TrendingDown, 
+  AlertTriangle, 
+  Trash2,
+  Settings,
+  Zap,
+  Target,
+  Activity
+} from 'lucide-react';
 
-// Use the Supabase generated type instead of our local interface
-type Alert = Tables<'user_alerts'>;
+interface Alert {
+  id: string;
+  title: string;
+  alert_type: 'balance' | 'transaction' | 'price' | 'volume';
+  condition: 'above' | 'below' | 'equals';
+  threshold: number;
+  currency: string;
+  wallet_id?: string;
+  is_active: boolean;
+  notification_methods: string[];
+  created_at: string;
+}
 
 const AlertsManager: React.FC = () => {
-  const { user } = useAuth();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const { user } = useAuth();
+  const { showSuccess, showError } = useActionFeedback();
+
+  // Novos alertas form
   const [newAlert, setNewAlert] = useState({
-    alert_type: 'balance' as const,
+    title: '',
+    alert_type: 'price' as const,
     condition: 'above' as const,
     threshold: 0,
-    currency: 'BTC' as const,
-    wallet_id: '',
-    title: '',
+    currency: 'BTC',
     notification_methods: ['push']
   });
 
@@ -47,46 +73,49 @@ const AlertsManager: React.FC = () => {
       setAlerts(data || []);
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
-      toast.error('Erro ao carregar alertas');
+      showError('Erro ao carregar alertas');
     } finally {
       setIsLoading(false);
     }
   };
 
   const createAlert = async () => {
-    if (!newAlert.title.trim()) {
-      toast.error('Título é obrigatório');
+    if (!newAlert.title || !newAlert.threshold) {
+      showError('Preencha todos os campos obrigatórios');
       return;
     }
 
+    setIsCreating(true);
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_alerts')
-        .insert([{
+        .insert({
           user_id: user?.id,
-          ...newAlert,
-          is_active: true
-        }])
-        .select()
-        .single();
+          title: newAlert.title,
+          alert_type: newAlert.alert_type,
+          condition: newAlert.condition,
+          threshold: newAlert.threshold,
+          currency: newAlert.currency,
+          notification_methods: newAlert.notification_methods
+        });
 
       if (error) throw error;
 
-      setAlerts(prev => [data, ...prev]);
-      setShowCreateForm(false);
+      showSuccess('🚨 Alerta criado com sucesso!');
       setNewAlert({
-        alert_type: 'balance',
+        title: '',
+        alert_type: 'price',
         condition: 'above',
         threshold: 0,
         currency: 'BTC',
-        wallet_id: '',
-        title: '',
         notification_methods: ['push']
       });
-      toast.success('Alerta criado com sucesso!');
+      loadAlerts();
     } catch (error) {
       console.error('Erro ao criar alerta:', error);
-      toast.error('Erro ao criar alerta');
+      showError('Erro ao criar alerta');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -99,14 +128,16 @@ const AlertsManager: React.FC = () => {
 
       if (error) throw error;
 
-      setAlerts(prev => prev.map(alert => 
-        alert.id === alertId ? { ...alert, is_active: isActive } : alert
-      ));
-      
-      toast.success(`Alerta ${isActive ? 'ativado' : 'desativado'}`);
+      setAlerts(prev => 
+        prev.map(alert => 
+          alert.id === alertId ? { ...alert, is_active: isActive } : alert
+        )
+      );
+
+      showSuccess(isActive ? '🔔 Alerta ativado' : '🔕 Alerta pausado');
     } catch (error) {
       console.error('Erro ao atualizar alerta:', error);
-      toast.error('Erro ao atualizar alerta');
+      showError('Erro ao atualizar alerta');
     }
   };
 
@@ -120,211 +151,264 @@ const AlertsManager: React.FC = () => {
       if (error) throw error;
 
       setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-      toast.success('Alerta removido');
+      showSuccess('🗑️ Alerta removido');
     } catch (error) {
       console.error('Erro ao remover alerta:', error);
-      toast.error('Erro ao remover alerta');
+      showError('Erro ao remover alerta');
     }
   };
 
-  const getAlertDescription = (alert: Alert) => {
-    const thresholdText = alert.currency === 'BTC' 
-      ? `${alert.threshold} BTC`
-      : alert.currency === 'BRL'
-      ? `R$ ${alert.threshold.toLocaleString('pt-BR')}`
-      : `$ ${alert.threshold.toLocaleString('en-US')}`;
+  const getAlertIcon = (type: string) => {
+    switch (type) {
+      case 'price': return <TrendingUp className="h-4 w-4" />;
+      case 'balance': return <Target className="h-4 w-4" />;
+      case 'transaction': return <Activity className="h-4 w-4" />;
+      case 'volume': return <Zap className="h-4 w-4" />;
+      default: return <Bell className="h-4 w-4" />;
+    }
+  };
 
-    const typeText = {
-      balance: 'saldo',
-      transaction: 'transação',
-      price: 'preço do Bitcoin',
-      volume: 'volume'
-    }[alert.alert_type as 'balance' | 'transaction' | 'price' | 'volume'];
-
-    const conditionText = {
-      above: 'acima de',
-      below: 'abaixo de',
-      equals: 'igual a'
-    }[alert.condition as 'above' | 'below' | 'equals'];
-
-    return `Quando ${typeText} estiver ${conditionText} ${thresholdText}`;
+  const getConditionText = (condition: string, threshold: number, currency: string) => {
+    const symbols = {
+      above: '↗️ acima de',
+      below: '↘️ abaixo de',
+      equals: '🎯 igual a'
+    };
+    return `${symbols[condition as keyof typeof symbols]} ${threshold} ${currency}`;
   };
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Alertas Personalizados
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">Carregando alertas...</div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-satotrack-neon"></div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-satotrack-neon" />
-            Alertas Personalizados ({alerts.length})
-          </CardTitle>
-          <Button 
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-satotrack-neon hover:bg-satotrack-neon/80"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Alerta
-          </Button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-satotrack-neon to-bitcoin bg-clip-text text-transparent">
+            🚨 SatoAlerta
+          </h2>
+          <p className="text-muted-foreground">
+            Monitoramento inteligente 24/7 das suas criptomoedas
+          </p>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-4">
-        {showCreateForm && (
-          <Card className="bg-dashboard-medium border-satotrack-neon/20">
-            <CardHeader>
-              <CardTitle className="text-lg">Criar Novo Alerta</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-satotrack-neon text-black hover:bg-satotrack-neon/80">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Alerta
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Criar Alerta Personalizado</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Nome do Alerta</Label>
+                <Input
+                  id="title"
+                  placeholder="Ex: Bitcoin acima de R$350.000"
+                  value={newAlert.title}
+                  onChange={(e) => setNewAlert(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título do Alerta</Label>
+                  <Label>Tipo de Alerta</Label>
+                  <Select
+                    value={newAlert.alert_type}
+                    onValueChange={(value: any) => setNewAlert(prev => ({ ...prev, alert_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="price">💰 Preço</SelectItem>
+                      <SelectItem value="balance">🎯 Saldo</SelectItem>
+                      <SelectItem value="transaction">📊 Transação</SelectItem>
+                      <SelectItem value="volume">⚡ Volume</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Condição</Label>
+                  <Select
+                    value={newAlert.condition}
+                    onValueChange={(value: any) => setNewAlert(prev => ({ ...prev, condition: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="above">↗️ Acima de</SelectItem>
+                      <SelectItem value="below">↘️ Abaixo de</SelectItem>
+                      <SelectItem value="equals">🎯 Igual a</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="threshold">Valor</Label>
                   <Input
-                    id="title"
-                    value={newAlert.title}
-                    onChange={(e) => setNewAlert(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Ex: Saldo baixo, Grande recebimento..."
+                    id="threshold"
+                    type="number"
+                    placeholder="0"
+                    value={newAlert.threshold}
+                    onChange={(e) => setNewAlert(prev => ({ ...prev, threshold: Number(e.target.value) }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="alert_type">Tipo de Alerta</Label>
-                  <Select 
-                    value={newAlert.alert_type} 
-                    onValueChange={(value) => setNewAlert(prev => ({ ...prev, alert_type: value as any }))}
+                  <Label>Moeda</Label>
+                  <Select
+                    value={newAlert.currency}
+                    onValueChange={(value) => setNewAlert(prev => ({ ...prev, currency: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="balance">Saldo da Carteira</SelectItem>
-                      <SelectItem value="transaction">Transação Recebida</SelectItem>
-                      <SelectItem value="price">Preço do Bitcoin</SelectItem>
-                      <SelectItem value="volume">Volume de Transações</SelectItem>
+                      <SelectItem value="BTC">₿ Bitcoin</SelectItem>
+                      <SelectItem value="BRL">💵 Real (BRL)</SelectItem>
+                      <SelectItem value="USD">💵 Dólar (USD)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="condition">Condição</Label>
-                  <Select 
-                    value={newAlert.condition} 
-                    onValueChange={(value) => setNewAlert(prev => ({ ...prev, condition: value as any }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="above">Acima de</SelectItem>
-                      <SelectItem value="below">Abaixo de</SelectItem>
-                      <SelectItem value="equals">Igual a</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="threshold">Valor Limite</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="threshold"
-                      type="number"
-                      step="0.00000001"
-                      value={newAlert.threshold}
-                      onChange={(e) => setNewAlert(prev => ({ ...prev, threshold: parseFloat(e.target.value) || 0 }))}
-                      placeholder="0.00000000"
-                    />
-                    <Select 
-                      value={newAlert.currency} 
-                      onValueChange={(value) => setNewAlert(prev => ({ ...prev, currency: value as any }))}
-                    >
-                      <SelectTrigger className="w-24">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BTC">BTC</SelectItem>
-                        <SelectItem value="BRL">BRL</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button onClick={createAlert} className="bg-satotrack-neon hover:bg-satotrack-neon/80">
-                  Criar Alerta
-                </Button>
-                <Button variant="outline" onClick={() => setShowCreateForm(false)}>
-                  Cancelar
-                </Button>
-              </div>
+              <Button 
+                onClick={createAlert} 
+                disabled={isCreating}
+                className="w-full bg-satotrack-neon text-black hover:bg-satotrack-neon/80"
+              >
+                {isCreating ? 'Criando...' : '🚨 Criar Alerta'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Lista de Alertas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {alerts.length === 0 ? (
+          <Card className="col-span-full bg-dashboard-dark border-satotrack-neon/20">
+            <CardContent className="flex flex-col items-center justify-center p-8">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-center">
+                Nenhum alerta configurado ainda.
+                <br />
+                Crie seu primeiro alerta para monitoramento 24/7!
+              </p>
             </CardContent>
           </Card>
-        )}
-
-        {alerts.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum alerta configurado ainda.</p>
-            <p className="text-sm">Crie seu primeiro alerta para ser notificado sobre eventos importantes!</p>
-          </div>
         ) : (
-          <div className="space-y-3">
-            {alerts.map((alert) => (
-              <Card key={alert.id} className={`border-l-4 ${alert.is_active ? 'border-l-satotrack-neon' : 'border-l-gray-500'}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-lg">{alert.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {getAlertDescription(alert)}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className={`text-xs px-2 py-1 rounded ${alert.is_active ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-500'}`}>
-                          {alert.is_active ? 'Ativo' : 'Inativo'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Criado em {new Date(alert.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={alert.is_active}
-                        onCheckedChange={(checked) => toggleAlert(alert.id, checked)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteAlert(alert.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+          alerts.map((alert) => (
+            <Card 
+              key={alert.id} 
+              className={`bg-dashboard-dark border-satotrack-neon/20 transition-all duration-300 ${
+                alert.is_active ? 'border-satotrack-neon/40' : 'border-gray-600/40'
+              }`}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {getAlertIcon(alert.alert_type)}
+                    <CardTitle className="text-lg">{alert.title}</CardTitle>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant={alert.is_active ? "default" : "secondary"}
+                      className={alert.is_active ? "bg-satotrack-neon text-black" : ""}
+                    >
+                      {alert.is_active ? 'Ativo' : 'Pausado'}
+                    </Badge>
+                    
+                    <Switch
+                      checked={alert.is_active}
+                      onCheckedChange={(checked) => toggleAlert(alert.id, checked)}
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {getConditionText(alert.condition, alert.threshold, alert.currency)}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">
+                      {alert.alert_type.charAt(0).toUpperCase() + alert.alert_type.slice(1)}
+                    </Badge>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteAlert(alert.id)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Estatísticas */}
+      {alerts.length > 0 && (
+        <Card className="bg-dashboard-dark border-satotrack-neon/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Estatísticas dos Alertas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-satotrack-neon">{alerts.length}</div>
+                <div className="text-sm text-muted-foreground">Total</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400">
+                  {alerts.filter(a => a.is_active).length}
+                </div>
+                <div className="text-sm text-muted-foreground">Ativos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-400">
+                  {alerts.filter(a => !a.is_active).length}
+                </div>
+                <div className="text-sm text-muted-foreground">Pausados</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-bitcoin">
+                  {alerts.filter(a => a.alert_type === 'price').length}
+                </div>
+                <div className="text-sm text-muted-foreground">Preço</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

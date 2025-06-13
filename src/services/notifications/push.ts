@@ -1,51 +1,56 @@
 
-import { toast } from '@/components/ui/sonner';
-
-// Function to check if push notifications are supported and enabled
-export const checkPushNotificationsSupport = () => {
-  return 'Notification' in window && 'serviceWorker' in navigator;
+// Verificar se o navegador suporta notificações push
+export const checkPushNotificationsSupport = (): boolean => {
+  return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 };
 
-// Function to request push notification permission
-export const requestPushPermission = async (): Promise<boolean> => {
+// Solicitar permissão para notificações
+export const requestPushPermission = async (): Promise<NotificationPermission> => {
   if (!checkPushNotificationsSupport()) {
-    toast.error('Este navegador não suporta notificações push');
-    return false;
+    throw new Error('Push notifications não são suportadas neste navegador');
   }
 
-  try {
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return false;
-  }
-};
-
-// Function to send a browser notification
-export const sendPushNotification = (
-  title: string,
-  options: NotificationOptions = {}
-) => {
-  if (Notification.permission === 'granted') {
-    try {
-      const notification = new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...options
-      });
-
-      notification.onclick = function() {
-        window.focus();
-        notification.close();
-      };
-
-      return true;
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      return false;
-    }
+  if (Notification.permission === 'default') {
+    return await Notification.requestPermission();
   }
   
-  return false;
+  return Notification.permission;
+};
+
+// Enviar notificação push local
+export const sendPushNotification = (title: string, options: NotificationOptions = {}) => {
+  if (!checkPushNotificationsSupport()) {
+    console.warn('Push notifications não são suportadas');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    const defaultOptions: NotificationOptions = {
+      icon: '/icon-192x192.png',
+      badge: '/icon-72x72.png',
+      vibrate: [200, 100, 200],
+      timestamp: Date.now(),
+      requireInteraction: true,
+      ...options
+    };
+
+    try {
+      new Notification(title, defaultOptions);
+    } catch (error) {
+      console.error('Erro ao enviar notificação:', error);
+    }
+  }
+};
+
+// Registrar service worker para notificações (futura implementação)
+export const registerServiceWorker = async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registrado:', registration);
+      return registration;
+    } catch (error) {
+      console.error('Erro ao registrar Service Worker:', error);
+    }
+  }
 };

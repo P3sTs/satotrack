@@ -1,92 +1,76 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Interface para configuração de relatório Telegram
-export interface TelegramReportConfig {
-  includeCharts: boolean;
-  includeSummary: boolean;
-  includeRecommendations: boolean;
-}
+const TELEGRAM_BOT_TOKEN = '7826526912:AAG-7hTgiBjGc_kWG7ev4ik96RmRnBORwesKf7yZPrpn7XsIuXVX9Ft1CN7oHUmrqszRKTl1jlERewYvWzWwhpQ8KBPaTwNWdFD'; // Deve ser movido para variável de ambiente
 
-// Função para enviar uma notificação Telegram via Edge Function
 export const sendTelegramNotification = async (
   userId: string,
   message: string,
-  notificationType: string,
-  details: any = {}
+  alertType: string,
+  details?: any
 ) => {
   try {
-    const { data, error } = await supabase.functions.invoke('send-telegram', {
-      body: {
-        user_id: userId,
-        message,
-        notification_type: notificationType,
-        details
-      }
+    // Obter chat_id do usuário
+    const { data: settings } = await supabase
+      .from('user_settings')
+      .select('telegram_chat_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (!settings?.telegram_chat_id) {
+      console.log('Chat ID do Telegram não configurado para o usuário');
+      return false;
+    }
+
+    const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    const response = await fetch(telegramApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: settings.telegram_chat_id,
+        text: message,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
     });
 
-    if (error) throw error;
-    return data.success;
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('Erro na API do Telegram:', result);
+      return false;
+    }
+
+    console.log('Notificação Telegram enviada com sucesso');
+    return true;
   } catch (error) {
-    console.error('Erro ao enviar notificação Telegram:', error);
+    console.error('Erro ao enviar notificação via Telegram:', error);
     return false;
   }
 };
 
-// Nova função para enviar relatório periódico via Telegram
-export const sendTelegramReport = async (
-  userId: string, 
-  reportType: 'daily' | 'weekly' | 'monthly',
-  config: Partial<TelegramReportConfig> = {}
-) => {
+// Função para configurar webhook do Telegram (futura implementação)
+export const setupTelegramWebhook = async (webhookUrl: string) => {
   try {
-    // Configuração padrão
-    const defaultConfig: TelegramReportConfig = {
-      includeCharts: true,
-      includeSummary: true,
-      includeRecommendations: false
-    };
-    
-    // Mesclar configuração
-    const finalConfig = { ...defaultConfig, ...config };
-    
-    const { data, error } = await supabase.functions.invoke('send-telegram-report', {
-      body: {
-        user_id: userId,
-        report_type: reportType,
-        config: finalConfig
-      }
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: webhookUrl,
+        allowed_updates: ['message', 'callback_query']
+      }),
     });
 
-    if (error) throw error;
-    return data.success;
+    const result = await response.json();
+    console.log('Webhook do Telegram configurado:', result);
+    return result.ok;
   } catch (error) {
-    console.error(`Erro ao enviar relatório Telegram (${reportType}):`, error);
+    console.error('Erro ao configurar webhook do Telegram:', error);
     return false;
-  }
-};
-
-// Função para configurar bot Telegram para o usuário
-export const configureTelegramBot = async (
-  userId: string,
-  telegramUsername: string
-) => {
-  try {
-    const { data, error } = await supabase.functions.invoke('configure-telegram-bot', {
-      body: {
-        user_id: userId,
-        telegram_username: telegramUsername
-      }
-    });
-    
-    if (error) throw error;
-    return {
-      success: data.success,
-      chatId: data.chat_id,
-      instructions: data.instructions
-    };
-  } catch (error) {
-    console.error('Erro ao configurar bot Telegram:', error);
-    return { success: false };
   }
 };
