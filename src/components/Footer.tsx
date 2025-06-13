@@ -23,8 +23,8 @@ const Footer: React.FC = () => {
             <Link to="/" className="hover:text-satotrack-neon transition-colors">Home</Link>
             <Link to="/dashboard" className="hover:text-satotrack-neon transition-colors">Dashboard</Link>
             <Link to="/auth" className="hover:text-satotrack-neon transition-colors">Login</Link>
-            <Link to="/sobre" className="hover:text-satotrack-neon transition-colors">Sobre</Link>
-            <Link to="/privacidade" className="hover:text-satotrack-neon transition-colors">Privacidade</Link>
+            <Link to="/sobre" className="hover:text-satotrack-neon transition-colors">Quem Somos</Link>
+            <Link to="/privacidade" className="hover:text-satotrack-neon transition-colors">Política</Link>
           </div>
           
           <div className="flex gap-3">
@@ -59,10 +59,10 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="mt-4 md:mt-6 text-center text-xs md:text-xs text-satotrack-text">
-          <p>© {new Date().getFullYear()} SatoTrack. <span className="hidden sm:inline">Sistema avançado de monitoramento de transações blockchain.</span></p>
+          <p>© {new Date().getFullYear()} SatoTrack. <span className="hidden sm:inline">SatoTrack: sua visão clara do mercado de criptomoedas 🇧🇷💰</span></p>
           <p className="mt-1">
             <span className="inline-block h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-satotrack-neon mr-1 md:mr-2 animate-pulse-slow"></span>
-            Acompanhando transações em tempo real com alta precisão
+            Gerencie. Acompanhe. Cresça.
           </p>
           <p className="mt-2 text-satotrack-neon">Feito com ❤️🇧🇷</p>
         </div>

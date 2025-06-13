@@ -21,11 +21,11 @@ const MainNav: React.FC = () => {
     { path: '/mercado', label: 'Mercado BTC' },
     { path: '/crypto', label: 'Redes Crypto' },
     { path: '/referral', label: 'Indicações' },
+    { path: '/historico', label: 'Minhas Transações' },
     { path: '/configuracoes', label: 'Configurações' },
     // Itens Premium condicionais
     ...(isPremium ? [
       { path: '/api', label: 'API', premium: true },
-      { path: '/historico', label: 'Histórico', premium: true },
       { path: '/notificacoes', label: 'Alertas', premium: true },
     ] : [])
   ];

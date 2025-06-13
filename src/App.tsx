@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -26,6 +27,8 @@ import Auth from './pages/Auth';
 import Configuracoes from './pages/Configuracoes';
 import Mercado from './pages/Mercado';
 import Historico from './pages/Historico';
+import Sobre from './pages/Sobre';
+import Privacidade from './pages/Privacidade';
 import ProjecaoLucros from './pages/ProjecaoLucros';
 import NotFound from './pages/NotFound';
 import Alerts from './pages/Alerts';
@@ -65,6 +68,8 @@ function App() {
                             <Route path="/home" element={<Home />} />
                             <Route path="/auth" element={<Auth />} />
                             <Route path="/planos" element={<PlanosPage />} />
+                            <Route path="/sobre" element={<Sobre />} />
+                            <Route path="/privacidade" element={<Privacidade />} />
                             
                             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                               <Route path="/dashboard" element={<Dashboard />} />
