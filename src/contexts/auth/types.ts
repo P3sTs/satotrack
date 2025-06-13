@@ -23,7 +23,7 @@ export interface AuthContextType {
   apiRequestsRemaining: number;
   upgradeUserPlan: (newPlan?: PlanType) => Promise<void>;
   generateApiToken: () => Promise<string>;
-  canAddMoreWallets: () => boolean;
+  canAddMoreWallets: (currentWallets: number) => boolean;
   passwordStrength: (password: string) => { score: number; feedback: string };
   createCheckoutSession: (priceId: string) => Promise<{ url: string }>;
   openCustomerPortal: () => Promise<{ url: string }>;
