@@ -2,7 +2,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBar from '../NavBar';
-import MobileNavigation from '../mobile/MobileNavigation';
+import MobileNavigation from '../navigation/MobileNavigation';
 import GlobalErrorBoundary from '../error/GlobalErrorBoundary';
 import NavigationAudit from '../navigation/NavigationAudit';
 import { Toaster } from '@/components/ui/sonner';
