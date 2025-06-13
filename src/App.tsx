@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -32,6 +31,7 @@ import Achievements from './pages/Achievements';
 import WalletComparisonPage from './pages/WalletComparison';
 import Web3Dashboard from './pages/Web3Dashboard';
 import PlanosPage from './pages/PlanosPage';
+import NovaCarteira from './pages/NovaCarteira';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +63,7 @@ function App() {
                           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/carteiras" element={<WalletsManager />} />
+                            <Route path="/nova-carteira" element={<NovaCarteira />} />
                             <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
                             <Route path="/configuracoes" element={<Configuracoes />} />
                             <Route path="/mercado" element={<Mercado />} />

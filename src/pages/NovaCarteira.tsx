@@ -1,145 +1,86 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useCarteiras } from '../contexts/CarteirasContext';
-import { useForm } from 'react-hook-form';
-import { ArrowLeft, Check, AlertCircle } from 'lucide-react';
+import { useCarteiras } from '../contexts/carteiras';
+import { ArrowLeft, Wallet, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { validarEnderecoBitcoin } from '../services/api';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-
-interface FormValues {
-  nome: string;
-  endereco: string;
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import NewWalletModal from '../components/NewWalletModal';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import DebugLogger from '../components/debug/DebugLogger';
 
 const NovaCarteira: React.FC = () => {
-  const { adicionarCarteira, isLoading } = useCarteiras();
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch
-  } = useForm<FormValues>({
-    defaultValues: {
-      nome: '',
-      endereco: ''
-    }
-  });
-  
-  const endereco = watch('endereco');
-  const enderecoValido = endereco ? validarEnderecoBitcoin(endereco) : false;
-  
-  const onSubmit = async (data: FormValues) => {
-    try {
-      setError(null);
-      await adicionarCarteira(data.nome, data.endereco);
-      navigate('/');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao adicionar carteira');
-    }
+  const { carteiras } = useCarteiras();
+  const { executeWithErrorHandling } = useErrorHandler();
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    navigate('/carteiras');
   };
-  
+
+  const handleSuccess = async () => {
+    await executeWithErrorHandling(
+      async () => {
+        setIsModalOpen(false);
+        navigate('/carteiras');
+      },
+      undefined,
+      '✅ Carteira adicionada com sucesso!'
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
-      <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        Voltar para o Dashboard
-      </Link>
+      <DebugLogger 
+        data={{ route: '/nova-carteira', walletsCount: carteiras.length }}
+        label="Nova Carteira Page"
+      />
       
-      <div className="w-full max-w-md mx-auto">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-xl md:text-2xl">Adicionar Nova Carteira</CardTitle>
-            <CardDescription className="text-sm">
-              Insira os detalhes da carteira Bitcoin que você deseja monitorar
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {error}
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome da Carteira</Label>
-                <Input
-                  id="nome"
-                  placeholder="Ex: Carteira Principal"
-                  {...register('nome', { 
-                    required: 'O nome da carteira é obrigatório',
-                    minLength: {
-                      value: 3,
-                      message: 'O nome deve ter pelo menos 3 caracteres'
-                    }
-                  })}
-                />
-                {errors.nome && (
-                  <p className="text-sm text-red-500">{errors.nome.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="endereco">Endereço Bitcoin</Label>
-                <Input
-                  id="endereco"
-                  placeholder="Ex: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
-                  className="font-mono text-sm"
-                  {...register('endereco', { 
-                    required: 'O endereço Bitcoin é obrigatório',
-                    validate: {
-                      valido: (value) => 
-                        validarEnderecoBitcoin(value) || 'Endereço Bitcoin inválido'
-                    }
-                  })}
-                />
-                
-                <div className="flex items-center">
-                  {endereco && (
-                    enderecoValido ? (
-                      <p className="text-xs md:text-sm text-green-500 flex items-center">
-                        <Check className="h-3 w-3 mr-1" />
-                        Endereço válido
-                      </p>
-                    ) : (
-                      <p className="text-xs md:text-sm text-red-500 flex items-center">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Endereço inválido
-                      </p>
-                    )
-                  )}
-                </div>
-                
-                {errors.endereco && (
-                  <p className="text-xs md:text-sm text-red-500">{errors.endereco.message}</p>
-                )}
-              </div>
-            </CardContent>
-            
-            <CardFooter>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? 'Adicionando...' : 'Adicionar Carteira'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          className="mr-3"
+          asChild
+        >
+          <Link to="/carteiras">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar para Carteiras
+          </Link>
+        </Button>
       </div>
+
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 w-16 h-16 bg-bitcoin/10 rounded-full flex items-center justify-center">
+            <Wallet className="h-8 w-8 text-bitcoin" />
+          </div>
+          <CardTitle className="text-2xl">
+            <Plus className="inline h-6 w-6 mr-2" />
+            Adicionar Nova Carteira
+          </CardTitle>
+          <CardDescription>
+            Monitore suas criptomoedas em tempo real
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <Button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-bitcoin hover:bg-bitcoin-dark text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Começar Agora
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <NewWalletModal 
+        isOpen={isModalOpen}
+        onClose={handleClose}
+      />
     </div>
   );
 };

@@ -1,78 +1,28 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/contexts/auth';
-import { Advertisement } from '../monetization/Advertisement';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SidebarProvider, SidebarRail, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import NewAppSidebar from './NewAppSidebar';
-import MobileNavigation from '../navigation/MobileNavigation';
-import ContextualHeader from './ContextualHeader';
-import Footer from '../Footer';
-import FloatingSatoAIChat from '../chat/FloatingSatoAIChat';
-
-const LoadingFallback = () => (
-  <div className="p-6 space-y-6">
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-full max-w-md" />
-      <Skeleton className="h-4 w-full max-w-lg" />
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-32 w-full" />
-    </div>
-  </div>
-);
+import NavBar from '../NavBar';
+import MobileNavigation from '../mobile/MobileNavigation';
+import GlobalErrorBoundary from '../error/GlobalErrorBoundary';
+import NavigationAudit from '../navigation/NavigationAudit';
+import { Toaster } from '@/components/ui/sonner';
 
 const AppLayout: React.FC = () => {
-  const { userPlan } = useAuth();
-  const isMobile = useIsMobile();
-  const showAds = userPlan === 'free';
-  
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex flex-col min-h-screen w-full bg-dashboard-dark">
-        {/* Mobile Navigation - only shown on mobile devices */}
-        {isMobile && <MobileNavigation />}
+    <GlobalErrorBoundary>
+      <div className="min-h-screen bg-dashboard-dark text-satotrack-text">
+        <NavBar />
         
-        <div className="flex flex-1 relative w-full">
-          {/* Desktop sidebar - hidden on mobile */}
-          {!isMobile && <NewAppSidebar />}
-          <SidebarRail className={isMobile ? "hidden" : "block"} />
-          
-          <SidebarInset className="bg-dashboard-dark text-white flex flex-col">
-            {/* Contextual Header */}
-            {!isMobile && (
-              <div className="flex items-center border-b border-dashboard-medium/30">
-                <div className="p-2">
-                  <SidebarTrigger />
-                </div>
-                <div className="flex-1">
-                  <ContextualHeader />
-                </div>
-              </div>
-            )}
-            
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-auto">
-              <div className="p-4 sm:p-6">
-                <Suspense fallback={<LoadingFallback />}>
-                  <Outlet />
-                </Suspense>
-              </div>
-            </div>
-            
-            <Footer />
-            {showAds && <Advertisement position="footer" />}
-          </SidebarInset>
-        </div>
+        <main className="pb-20 md:pb-0">
+          <Outlet />
+        </main>
         
-        {/* Floating SatoAI Chat - Available globally */}
-        <FloatingSatoAIChat />
+        <MobileNavigation />
+        
+        {process.env.NODE_ENV === 'development' && <NavigationAudit />}
       </div>
-    </SidebarProvider>
+      <Toaster />
+    </GlobalErrorBoundary>
   );
 };
 
