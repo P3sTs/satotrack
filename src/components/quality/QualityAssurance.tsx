@@ -26,6 +26,10 @@ interface QualityCheck {
 }
 
 const QualityAssurance: React.FC = () => {
+  // Temporariamente desabilitado - não mostrar na interface
+  return null;
+
+  // Código mantido para futuro uso em desenvolvimento
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -132,7 +136,7 @@ const QualityAssurance: React.FC = () => {
     return acc;
   }, {} as Record<string, any>);
 
-  // Não mostrar em produção
+  // Não mostrar em produção nem em desenvolvimento por enquanto
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }

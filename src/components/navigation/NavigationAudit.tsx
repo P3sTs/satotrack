@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,9 @@ interface RouteConfig {
 }
 
 const NavigationAudit: React.FC = () => {
+  // Temporariamente desabilitado - não mostrar na interface
+  return null;
+
   const location = useLocation();
 
   const routes: RouteConfig[] = [
