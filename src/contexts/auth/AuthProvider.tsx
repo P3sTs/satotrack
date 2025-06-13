@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     updateProfile,
     isAuthenticated,
-    lastActivity,
+    lastActivity: lastActivityTimestamp,
     updateLastActivity,
     securityStatus,
     failedLoginAttempts,
@@ -60,6 +60,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = signIn;
   const register = signUp;
   const logout = signOut;
+
+  // Convert timestamp to Date for context
+  const lastActivity = lastActivityTimestamp ? new Date(lastActivityTimestamp) : null;
 
   const value: AuthContextType = {
     isRegistering,
