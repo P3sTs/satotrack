@@ -10,12 +10,19 @@ import {
 import InteractiveChart from '@/components/charts/InteractiveChart';
 import { TimeRange } from '@/components/charts/selectors/TimeRangeSelector';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, TrendingUp, TrendingDown, BarChart2, History, DollarSign } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, BarChart2, DollarSign } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketTrendAlerts from '@/components/home/MarketTrendAlerts';
 import { useAuth } from '@/contexts/auth';
 import PremiumFeatureGate from '@/components/monetization/PremiumFeatureGate';
 import RealtimeDashboard from '@/components/dynamic/RealtimeDashboard';
+
+// Importar os novos componentes
+import BTCConverter from '@/components/market/BTCConverter';
+import VariationCalculator from '@/components/market/VariationCalculator';
+import VolatilityMeter from '@/components/market/VolatilityMeter';
+import DailySummary from '@/components/market/DailySummary';
+import SmartInsights from '@/components/market/SmartInsights';
 
 const Mercado = () => {
   const { data: bitcoinData, loading, isRefreshing, refresh } = useBitcoinPrice();
@@ -72,7 +79,7 @@ const Mercado = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-orbitron satotrack-gradient-text mb-2">Mercado Bitcoin</h1>
-          <p className="text-muted-foreground">Acompanhe o preço e as tendências do Bitcoin em tempo real</p>
+          <p className="text-muted-foreground">Ferramentas avançadas para análise de mercado</p>
         </div>
         
         <Button 
@@ -88,6 +95,7 @@ const Mercado = () => {
       
       <MarketTrendAlerts bitcoinData={bitcoinData} />
       
+      {/* Cards principais de preço */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card className="cyberpunk-card">
           <CardHeader className="pb-3">
@@ -157,6 +165,17 @@ const Mercado = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ferramentas Avançadas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+        <BTCConverter />
+        <VariationCalculator />
+        <VolatilityMeter />
+        <DailySummary />
+        <div className="xl:col-span-2">
+          <SmartInsights />
+        </div>
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
         <TabsList className="mb-4 overflow-x-auto flex-nowrap">
@@ -200,7 +219,7 @@ const Mercado = () => {
           <Card className="cyberpunk-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5 text-satotrack-neon" />
+                <BarChart2 className="h-5 w-5 text-satotrack-neon" />
                 Dados Históricos
               </CardTitle>
               <CardDescription>Preço do Bitcoin em períodos anteriores</CardDescription>
@@ -222,27 +241,27 @@ const Mercado = () => {
                       <tbody>
                         <tr>
                           <td className="py-2">7 dias</td>
-                          <td className={`text-right ${bitcoinData.price_change_percentage_7d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {bitcoinData.price_change_percentage_7d >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_7d.toFixed(2)}%
+                          <td className={`text-right ${bitcoinData.price_change_percentage_7d && bitcoinData.price_change_percentage_7d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {bitcoinData.price_change_percentage_7d && bitcoinData.price_change_percentage_7d >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_7d?.toFixed(2) || 'N/A'}%
                           </td>
-                          <td className="text-right">${bitcoinData.price_low_7d.toLocaleString('pt-BR')}</td>
-                          <td className="text-right">${bitcoinData.price_high_7d.toLocaleString('pt-BR')}</td>
+                          <td className="text-right">${bitcoinData.price_low_7d?.toLocaleString('pt-BR') || 'N/A'}</td>
+                          <td className="text-right">${bitcoinData.price_high_7d?.toLocaleString('pt-BR') || 'N/A'}</td>
                         </tr>
                         <tr>
                           <td className="py-2">30 dias</td>
-                          <td className={`text-right ${bitcoinData.price_change_percentage_30d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {bitcoinData.price_change_percentage_30d >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_30d.toFixed(2)}%
+                          <td className={`text-right ${bitcoinData.price_change_percentage_30d && bitcoinData.price_change_percentage_30d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {bitcoinData.price_change_percentage_30d && bitcoinData.price_change_percentage_30d >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_30d?.toFixed(2) || 'N/A'}%
                           </td>
-                          <td className="text-right">${bitcoinData.price_low_30d.toLocaleString('pt-BR')}</td>
-                          <td className="text-right">${bitcoinData.price_high_30d.toLocaleString('pt-BR')}</td>
+                          <td className="text-right">${bitcoinData.price_low_30d?.toLocaleString('pt-BR') || 'N/A'}</td>
+                          <td className="text-right">${bitcoinData.price_high_30d?.toLocaleString('pt-BR') || 'N/A'}</td>
                         </tr>
                         <tr>
                           <td className="py-2">1 ano</td>
-                          <td className={`text-right ${bitcoinData.price_change_percentage_1y >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {bitcoinData.price_change_percentage_1y >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_1y.toFixed(2)}%
+                          <td className={`text-right ${bitcoinData.price_change_percentage_1y && bitcoinData.price_change_percentage_1y >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {bitcoinData.price_change_percentage_1y && bitcoinData.price_change_percentage_1y >= 0 ? '+' : ''}{bitcoinData.price_change_percentage_1y?.toFixed(2) || 'N/A'}%
                           </td>
-                          <td className="text-right">${bitcoinData.price_low_1y.toLocaleString('pt-BR')}</td>
-                          <td className="text-right">${bitcoinData.price_high_1y.toLocaleString('pt-BR')}</td>
+                          <td className="text-right">${bitcoinData.price_low_1y?.toLocaleString('pt-BR') || 'N/A'}</td>
+                          <td className="text-right">${bitcoinData.price_high_1y?.toLocaleString('pt-BR') || 'N/A'}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -354,7 +373,7 @@ const Mercado = () => {
                       </div>
                     </div>
                     
-                    <Button variant="neon" className="w-full mt-4">
+                    <Button variant="outline" className="w-full mt-4 border-satotrack-neon text-satotrack-neon hover:bg-satotrack-neon/10">
                       Gerar Relatório Detalhado
                     </Button>
                   </div>
