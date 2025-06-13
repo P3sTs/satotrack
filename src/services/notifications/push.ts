@@ -28,7 +28,6 @@ export const sendPushNotification = (title: string, options: NotificationOptions
     const defaultOptions: NotificationOptions = {
       icon: '/icon-192x192.png',
       badge: '/icon-72x72.png',
-      timestamp: Date.now(),
       requireInteraction: true,
       ...options
     };

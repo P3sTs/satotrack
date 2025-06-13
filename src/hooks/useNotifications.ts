@@ -89,7 +89,14 @@ export const useNotifications = () => {
         .limit(50);
 
       if (error) throw error;
-      setLogs(data || []);
+      
+      // Transform the data to match our interface types
+      const transformedLogs = (data || []).map(log => ({
+        ...log,
+        status: log.status as 'sent' | 'failed' | 'pending'
+      }));
+      
+      setLogs(transformedLogs);
     } catch (error) {
       console.error('Erro ao carregar logs:', error);
     }
