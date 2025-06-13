@@ -20,10 +20,10 @@ export const useAuthSession = () => {
 
   // Login attempts tracking
   const {
-    failedLoginAttempts,
     resetFailedLoginAttempts,
     saveLoginAttempt,
-    checkFailedLoginAttempts
+    checkFailedLoginAttempts,
+    getFailedLoginAttempts
   } = useLoginAttempts();
 
   // Auth functions
@@ -41,6 +41,7 @@ export const useAuthSession = () => {
 
   const isAuthenticated = Boolean(session && user);
   const isLoading = loading || authLoading;
+  const failedLoginAttempts = getFailedLoginAttempts();
 
   const updateProfile = async (data: any) => {
     if (!user) throw new Error('No user logged in');
