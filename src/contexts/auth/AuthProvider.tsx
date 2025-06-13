@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { useAuthFunctions } from './useAuthFunctions';
 import { useAuthSession } from './useAuthSession';
 import { useAuthPlans } from './useAuthPlans';
 import { usePasswordStrength } from './hooks/usePasswordStrength';

@@ -2,11 +2,71 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
+import { useAuthFunctions } from './useAuthFunctions';
+import { useActivityMonitor } from './useActivityMonitor';
+import { useLoginAttempts } from './useLoginAttempts';
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Activity monitoring
+  const {
+    lastActivity,
+    updateLastActivity,
+    securityStatus
+  } = useActivityMonitor();
+
+  // Login attempts tracking
+  const {
+    failedLoginAttempts,
+    resetFailedLoginAttempts,
+    saveLoginAttempt,
+    checkFailedLoginAttempts
+  } = useLoginAttempts();
+
+  // Auth functions
+  const {
+    signIn,
+    signOut,
+    signUp,
+    loading: authLoading,
+    setLoading: setAuthLoading
+  } = useAuthFunctions(
+    updateLastActivity,
+    saveLoginAttempt,
+    checkFailedLoginAttempts
+  );
+
+  const isAuthenticated = Boolean(session && user);
+  const isLoading = loading || authLoading;
+
+  const updateProfile = async (data: any) => {
+    if (!user) throw new Error('No user logged in');
+    
+    const { error } = await supabase.auth.updateUser({
+      data
+    });
+    
+    if (error) throw error;
+  };
+
+  const checkSubscriptionStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
 
   // Verificar a sessão inicial ao montar o componente
   useEffect(() => {
@@ -88,5 +148,23 @@ export const useAuthSession = () => {
     };
   }, []);
 
-  return { session, user, loading, setSession, setUser };
+  return { 
+    session, 
+    user, 
+    loading,
+    setSession, 
+    setUser,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+    isAuthenticated,
+    lastActivity,
+    updateLastActivity,
+    securityStatus,
+    failedLoginAttempts,
+    resetFailedLoginAttempts,
+    checkSubscriptionStatus,
+    isLoading
+  };
 };

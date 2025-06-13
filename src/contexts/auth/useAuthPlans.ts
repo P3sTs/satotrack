@@ -8,6 +8,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
   const [userPlan, setUserPlan] = useState<PlanType>('free');
   const [apiToken, setApiToken] = useState<string | null>(null);
   const [apiRequestsRemaining, setApiRequestsRemaining] = useState(1000);
+  const [apiRequestsUsed, setApiRequestsUsed] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   // Load user plan and API info
@@ -43,7 +44,12 @@ export const useAuthPlans = (user: AuthUser | null) => {
 
       if (planData) {
         setApiToken(planData.api_token);
-        setApiRequestsRemaining(planData.api_requests || 1000);
+        const remaining = planData.api_requests || 1000;
+        const totalLimit = userPlan === 'premium' ? 10000 : 1000;
+        const used = totalLimit - remaining;
+        
+        setApiRequestsRemaining(remaining);
+        setApiRequestsUsed(Math.max(0, used));
       }
     } catch (error) {
       console.error('Error loading user plan data:', error);
@@ -152,12 +158,6 @@ export const useAuthPlans = (user: AuthUser | null) => {
     return newToken;
   };
 
-  // Fixed: Changed parameter type to number to match usage
-  const canAddMoreWallets = (currentWallets: number): boolean => {
-    if (userPlan === 'premium') return true;
-    return currentWallets < 1; // Free plan limited to 1 wallet
-  };
-
   const openCustomerPortal = async (): Promise<{ url: string }> => {
     if (!user) {
       toast({
@@ -193,9 +193,9 @@ export const useAuthPlans = (user: AuthUser | null) => {
     userPlan,
     apiToken,
     apiRequestsRemaining,
+    apiRequestsUsed,
     upgradeUserPlan,
     generateApiToken,
-    canAddMoreWallets,
     isLoading,
     checkSubscriptionStatus,
     createCheckoutSession,
