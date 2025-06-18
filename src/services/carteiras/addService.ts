@@ -7,24 +7,38 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Adiciona uma nova carteira multi-chain ao banco de dados com busca automática de dados
  */
-export const addCarteira = async (nome: string, endereco: string, currency?: string): Promise<CarteiraBTC> => {
+export const addCarteira = async (endereco: string, nome: string, currency?: string): Promise<CarteiraBTC> => {
   console.log('🚀 Iniciando adição de carteira:', { nome, endereco, currency });
   
+  if (!endereco?.trim() || !nome?.trim()) {
+    throw new Error('Nome e endereço são obrigatórios');
+  }
+
   // Detectar automaticamente o tipo de endereço
-  const detectedAddress = detectAddressNetwork(endereco);
+  const detectedAddress = detectAddressNetwork(endereco.trim());
   
   if (!detectedAddress) {
-    const errorMsg = 'Endereço de criptomoeda não reconhecido. Verifique se é um endereço válido de Bitcoin, Ethereum, Solana, Litecoin, Dogecoin, etc.';
-    console.error('❌', errorMsg);
-    throw new Error(errorMsg);
+    throw new Error('Endereço de criptomoeda não reconhecido. Verifique se é um endereço válido de Bitcoin, Ethereum, Solana, Litecoin, Dogecoin, etc.');
   }
 
   console.log('✅ Endereço detectado:', detectedAddress);
 
   try {
+    // Verificar se o endereço já existe para este usuário
+    const { data: existingWallet } = await supabase
+      .from('crypto_wallets')
+      .select('id')
+      .eq('address', endereco.trim())
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+      .single();
+
+    if (existingWallet) {
+      throw new Error('Este endereço já foi adicionado anteriormente.');
+    }
+
     // Salvar carteira no banco primeiro para obter o ID
     console.log('💾 Salvando carteira no banco...');
-    const novaCarteira = await saveMultiChainWallet(nome, detectedAddress, {
+    const novaCarteira = await saveMultiChainWallet(nome.trim(), detectedAddress, {
       nativeBalance: 0,
       totalReceived: 0,
       totalSent: 0,
@@ -41,7 +55,7 @@ export const addCarteira = async (nome: string, endereco: string, currency?: str
     try {
       const { data: walletData, error: fetchError } = await supabase.functions.invoke('fetch-wallet-data', {
         body: {
-          address: endereco,
+          address: endereco.trim(),
           wallet_id: novaCarteira.id,
           currency: currencyToUse
         }
@@ -104,7 +118,7 @@ export const addCarteira = async (nome: string, endereco: string, currency?: str
     
     if (error instanceof Error) {
       // Tratar erros específicos
-      if (error.message.includes('duplicate') || error.message.includes('constraint')) {
+      if (error.message.includes('duplicate') || error.message.includes('já foi adicionado')) {
         throw new Error('Este endereço já foi adicionado anteriormente.');
       }
       if (error.message.includes('network') || error.message.includes('connection')) {

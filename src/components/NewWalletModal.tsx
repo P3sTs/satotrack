@@ -30,6 +30,7 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [detectedNetwork, setDetectedNetwork] = useState<DetectedAddress | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [addressError, setAddressError] = useState<string>('');
   
   const { adicionarCarteira } = useCarteiras();
   const { userPlan } = useAuth();
@@ -39,32 +40,40 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!endereco.trim()) {
       setDetectedNetwork(null);
+      setAddressError('');
       return;
     }
 
     const validateAddress = async () => {
       setIsValidating(true);
+      setAddressError('');
+      
       try {
         // Aguardar um pouco para evitar validações excessivas
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         const detected = detectAddressNetwork(endereco.trim());
         setDetectedNetwork(detected);
         
         if (detected) {
           console.log('✅ Rede detectada:', detected.network.name);
+          setAddressError('');
         } else {
           console.log('❌ Endereço não reconhecido');
+          if (endereco.trim().length > 10) {
+            setAddressError('Endereço não reconhecido. Verifique se é um endereço válido.');
+          }
         }
       } catch (error) {
         console.error('Erro na validação:', error);
         setDetectedNetwork(null);
+        setAddressError('Erro ao validar endereço');
       } finally {
         setIsValidating(false);
       }
     };
 
-    const timeoutId = setTimeout(validateAddress, 300);
+    const timeoutId = setTimeout(validateAddress, 500);
     return () => clearTimeout(timeoutId);
   }, [endereco]);
 
@@ -74,6 +83,8 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(false);
     setIsDuplicate(false);
     setDetectedNetwork(null);
+    setIsValidating(false);
+    setAddressError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,13 +108,14 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     
     try {
+      console.log('🚀 Tentando adicionar carteira:', { endereco: endereco.trim(), nome: nome.trim() });
       await adicionarCarteira(endereco.trim(), nome.trim());
       showSuccess(`✅ Carteira ${detectedNetwork.network.name} adicionada com sucesso!`);
       reset();
       onClose();
     } catch (error) {
-      console.error('Erro ao adicionar carteira:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      console.error('❌ Erro ao adicionar carteira:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao adicionar carteira';
       showError(`❌ ${errorMessage}`);
     } finally {
       setIsLoading(false);
@@ -116,6 +128,8 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
       onClose();
     }
   };
+
+  const isFormValid = endereco.trim() && nome.trim() && detectedNetwork && !isDuplicate && !isValidating;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -138,7 +152,7 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
               placeholder="Ex: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa ou 0x742d3..."
               value={endereco}
               onChange={(e) => setEndereco(e.target.value)}
-              className={isDuplicate ? 'border-red-500' : detectedNetwork ? 'border-green-500' : ''}
+              className={`${isDuplicate ? 'border-red-500' : detectedNetwork ? 'border-green-500' : ''} ${addressError ? 'border-red-500' : ''}`}
               disabled={isLoading}
             />
             
@@ -151,23 +165,23 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
             )}
             
             {/* Rede detectada */}
-            {detectedNetwork && !isValidating && (
+            {detectedNetwork && !isValidating && !addressError && (
               <Alert className="border-green-500/50 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-700 dark:text-green-300">
                   <strong>{detectedNetwork.network.name} ({detectedNetwork.network.symbol})</strong> detectado
                   <br />
-                  <span className="text-xs">Tipo: {detectedNetwork.addressType}</span>
+                  <span className="text-xs">Tipo: {detectedAddress.addressType}</span>
                 </AlertDescription>
               </Alert>
             )}
             
             {/* Endereço inválido */}
-            {!detectedNetwork && !isValidating && endereco.trim().length > 10 && (
+            {addressError && !isValidating && (
               <Alert className="border-red-500/50 bg-red-50 dark:bg-red-950">
                 <AlertCircle className="h-4 w-4 text-red-600" />
                 <AlertDescription className="text-red-700 dark:text-red-300">
-                  Endereço não reconhecido. Verifique se é um endereço válido de Bitcoin, Ethereum, Solana, etc.
+                  {addressError}
                 </AlertDescription>
               </Alert>
             )}
@@ -208,7 +222,7 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading || isDuplicate || !endereco.trim() || !nome.trim() || !detectedNetwork}
+              disabled={!isFormValid || isLoading}
               className="bg-bitcoin hover:bg-bitcoin-dark"
             >
               {isLoading ? (
