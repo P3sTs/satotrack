@@ -29,6 +29,10 @@
   .animate-glow {
     animation: glow 3s infinite;
   }
+  
+  .animate-confetti {
+    animation: fall 3s linear infinite;
+  }
 }
 
 /* Keyframes para animações */
@@ -105,5 +109,16 @@
   }
   50% {
     filter: drop-shadow(0 0 6px #00FFC2);
+  }
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
   }
 }

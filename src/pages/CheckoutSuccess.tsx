@@ -90,7 +90,34 @@ const CheckoutSuccess = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 max-w-2xl relative overflow-hidden">
+      {/* Confetti Animation */}
+      {verificationStatus === 'success' && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`,
+                top: '-10px'
+              }}
+            >
+              <div
+                className="w-3 h-3 rotate-45"
+                style={{
+                  backgroundColor: ['#F7931A', '#00D4AA', '#8B5CF6', '#F59E0B', '#EF4444', '#10B981'][Math.floor(Math.random() * 6)],
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                  animation: `fall ${3 + Math.random() * 2}s linear infinite`
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       <Card className="text-center">
         <CardHeader>
           <div className="mx-auto mb-4">
@@ -112,7 +139,7 @@ const CheckoutSuccess = () => {
             )}
             
             {verificationStatus === 'success' && (
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto animate-pulse" />
             )}
             
             {(verificationStatus === 'error' || verificationStatus === 'timeout') && (
@@ -122,7 +149,7 @@ const CheckoutSuccess = () => {
 
           <CardTitle className="text-2xl">
             {verificationStatus === 'loading' && 'Ativando sua assinatura...'}
-            {verificationStatus === 'success' && 'Pagamento Confirmado!'}
+            {verificationStatus === 'success' && '🎉 Pagamento Confirmado! 🎉'}
             {verificationStatus === 'error' && 'Erro na Verificação'}
             {verificationStatus === 'timeout' && 'Verificação Demorada'}
           </CardTitle>
@@ -144,7 +171,7 @@ const CheckoutSuccess = () => {
           {verificationStatus === 'success' && (
             <div>
               <p className="text-lg text-green-600 font-medium mb-2">
-                Bem-vindo ao SatoTrack Premium! 🎉
+                Bem-vindo ao SatoTrack Premium! 🚀
               </p>
               <p className="text-muted-foreground mb-4">
                 Sua assinatura foi ativada com sucesso. Agora você tem acesso a todos os recursos premium:
@@ -156,6 +183,11 @@ const CheckoutSuccess = () => {
                 <li>✅ Acesso à API</li>
                 <li>✅ Suporte prioritário</li>
               </ul>
+              <div className="bg-gradient-to-r from-bitcoin/10 to-green-500/10 p-4 rounded-lg border border-bitcoin/20">
+                <p className="text-sm font-medium text-bitcoin">
+                  🎁 Obrigado por escolher o SatoTrack Premium!
+                </p>
+              </div>
             </div>
           )}
 
@@ -187,9 +219,10 @@ const CheckoutSuccess = () => {
             {verificationStatus === 'success' && (
               <Button 
                 onClick={handleGoToDashboard}
-                className="bg-bitcoin hover:bg-bitcoin/90 text-white"
+                className="bg-bitcoin hover:bg-bitcoin/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                size="lg"
               >
-                Ir para Dashboard
+                🚀 Ir para Dashboard
               </Button>
             )}
 
@@ -232,6 +265,19 @@ const CheckoutSuccess = () => {
           )}
         </CardContent>
       </Card>
+
+      <style jsx>{`
+        @keyframes fall {
+          0% {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 };
