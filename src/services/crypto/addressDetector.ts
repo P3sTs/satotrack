@@ -14,7 +14,7 @@ export interface DetectedAddress {
   isValid: boolean;
 }
 
-// Padrões de regex aprimorados e mais precisos
+// Padrões de regex melhorados e mais específicos
 const ADDRESS_PATTERNS = {
   // Bitcoin - padrões mais específicos
   bitcoin: {
@@ -23,9 +23,9 @@ const ADDRESS_PATTERNS = {
     bech32: /^(bc1|tb1)[a-zA-HJ-NP-Z0-9]{25,87}$/,
     taproot: /^(bc1p|tb1p)[a-zA-HJ-NP-Z0-9]{58}$/
   },
-  // Ethereum e redes compatíveis EVM - padrão mais específico
+  // Ethereum e redes compatíveis EVM
   ethereum: /^0x[a-fA-F0-9]{40}$/,
-  // Solana - validação mais rigorosa
+  // Solana
   solana: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
   // Litecoin
   litecoin: {
@@ -33,9 +33,7 @@ const ADDRESS_PATTERNS = {
     segwit: /^ltc1[a-zA-HJ-NP-Z0-9]{25,87}$/
   },
   // Dogecoin
-  dogecoin: /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/,
-  // Monero
-  monero: /^4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}$/
+  dogecoin: /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/
 };
 
 const NETWORKS: Record<string, NetworkInfo> = {
@@ -111,7 +109,6 @@ const NETWORKS: Record<string, NetworkInfo> = {
   }
 };
 
-// Função melhorada para detectar Bitcoin
 const isBitcoinAddress = (address: string): { isValid: boolean; type: string } => {
   console.log('🔍 Verificando se é endereço Bitcoin:', address);
   
@@ -136,29 +133,24 @@ const isBitcoinAddress = (address: string): { isValid: boolean; type: string } =
   return { isValid: false, type: '' };
 };
 
-// Função melhorada para detectar Solana
 const isSolanaAddress = (address: string): boolean => {
   console.log('🔍 Verificando se é endereço Solana:', address);
   
-  // Verificações básicas
   if (!ADDRESS_PATTERNS.solana.test(address)) {
     console.log('❌ Não passou no regex do Solana');
     return false;
   }
   
-  // Excluir endereços que são claramente Bitcoin
   if (address.match(/^[13]/)) {
     console.log('❌ Começa com 1 ou 3, provavelmente Bitcoin');
     return false;
   }
   
-  // Verificar se não é um endereço Ethereum
   if (address.startsWith('0x')) {
     console.log('❌ Começa com 0x, é Ethereum');
     return false;
   }
   
-  // Verificar tamanho típico de endereços Solana
   if (address.length < 32 || address.length > 44) {
     console.log('❌ Tamanho inválido para Solana');
     return false;
@@ -200,7 +192,7 @@ export const detectAddressNetwork = (address: string): DetectedAddress | null =>
     };
   }
 
-  // Solana - verificação mais rigorosa
+  // Solana
   if (isSolanaAddress(cleanAddress)) {
     console.log('✅ Solana detectado');
     return {

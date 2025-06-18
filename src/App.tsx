@@ -67,6 +67,7 @@ function App() {
                           <Web3Provider>
                             <div className="min-h-screen bg-background font-sans antialiased">
                               <Routes>
+                                {/* Rotas públicas */}
                                 <Route path="/" element={<Index />} />
                                 <Route path="/auth" element={<Auth />} />
                                 <Route path="/planos" element={<PlanosPage />} />
@@ -75,10 +76,24 @@ function App() {
                                 <Route path="/privacidade" element={<Privacidade />} />
                                 <Route path="/termos" element={<TermosUso />} />
                                 
-                                {/* Protected Routes */}
+                                {/* Rotas do mercado e crypto (parcialmente públicas) */}
+                                <Route path="/mercado" element={<Mercado />} />
+                                <Route path="/crypto" element={<Crypto />} />
+                                <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
+                                <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
+                                <Route path="/api-docs" element={<ApiDocs />} />
+                                
+                                {/* Rotas protegidas - Dashboard */}
                                 <Route path="/dashboard" element={
                                   <ProtectedRoute>
                                     <Dashboard />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Rotas protegidas - Carteiras */}
+                                <Route path="/carteiras" element={
+                                  <ProtectedRoute>
+                                    <WalletsManager />
                                   </ProtectedRoute>
                                 } />
                                 <Route path="/nova-carteira" element={
@@ -91,47 +106,8 @@ function App() {
                                     <CarteiraDetalhes />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/carteiras" element={
-                                  <ProtectedRoute>
-                                    <WalletsManager />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/mercado" element={<Mercado />} />
-                                <Route path="/configuracoes" element={
-                                  <ProtectedRoute>
-                                    <Configuracoes />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/notificacoes" element={
-                                  <ProtectedRoute>
-                                    <Notificacoes />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/notificacoes-premium" element={
-                                  <ProtectedRoute>
-                                    <NotificacoesPremium />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/historico" element={
-                                  <ProtectedRoute>
-                                    <Historico />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/historico-premium" element={
-                                  <ProtectedRoute>
-                                    <HistoricoPremium />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/projecao-lucros" element={
-                                  <ProtectedRoute>
-                                    <ProjecaoLucros />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/projecao-lucros-premium" element={
-                                  <ProtectedRoute>
-                                    <ProjecaoLucrosPremium />
-                                  </ProtectedRoute>
-                                } />
+                                
+                                {/* Rotas protegidas - Análises */}
                                 <Route path="/projections" element={
                                   <ProtectedRoute>
                                     <Projections />
@@ -147,8 +123,47 @@ function App() {
                                     <WalletComparison />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/crypto" element={<Crypto />} />
-                                <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
+                                <Route path="/projecao-lucros" element={
+                                  <ProtectedRoute>
+                                    <ProjecaoLucros />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/projecao-lucros-premium" element={
+                                  <ProtectedRoute>
+                                    <ProjecaoLucrosPremium />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Rotas protegidas - Histórico */}
+                                <Route path="/historico" element={
+                                  <ProtectedRoute>
+                                    <Historico />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/historico-premium" element={
+                                  <ProtectedRoute>
+                                    <HistoricoPremium />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Rotas protegidas - Notificações e Alertas */}
+                                <Route path="/notificacoes" element={
+                                  <ProtectedRoute>
+                                    <Notificacoes />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/notificacoes-premium" element={
+                                  <ProtectedRoute>
+                                    <NotificacoesPremium />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/alerts" element={
+                                  <ProtectedRoute>
+                                    <Alerts />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Rotas protegidas - Web3 e OnChain */}
                                 <Route path="/web3" element={
                                   <ProtectedRoute>
                                     <Web3Dashboard />
@@ -159,12 +174,8 @@ function App() {
                                     <OnChainDashboard />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
-                                <Route path="/alerts" element={
-                                  <ProtectedRoute>
-                                    <Alerts />
-                                  </ProtectedRoute>
-                                } />
+                                
+                                {/* Rotas protegidas - Gamificação e Social */}
                                 <Route path="/referral" element={
                                   <ProtectedRoute>
                                     <ReferralProgram />
@@ -180,13 +191,20 @@ function App() {
                                     <GrowthDashboard />
                                   </ProtectedRoute>
                                 } />
+                                
+                                {/* Rotas protegidas - API e Configurações */}
                                 <Route path="/api" element={
                                   <ProtectedRoute>
                                     <ApiDashboard />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/api-docs" element={<ApiDocs />} />
+                                <Route path="/configuracoes" element={
+                                  <ProtectedRoute>
+                                    <Configuracoes />
+                                  </ProtectedRoute>
+                                } />
                                 
+                                {/* Rota 404 */}
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                               <Toaster />

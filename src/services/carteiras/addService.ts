@@ -1,11 +1,11 @@
 
 import { CarteiraBTC } from '../../types/types';
 import { detectAddressNetwork } from '../crypto/addressDetector';
-import { saveMultiChainWallet, fetchWalletData } from '../crypto/multiChainService';
+import { saveMultiChainWallet } from '../crypto/multiChainService';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Adds a new multi-chain wallet to the database with automatic data fetching
+ * Adiciona uma nova carteira multi-chain ao banco de dados com busca automática de dados
  */
 export const addCarteira = async (nome: string, endereco: string, currency?: string): Promise<CarteiraBTC> => {
   console.log('🚀 Iniciando adição de carteira:', { nome, endereco, currency });
@@ -14,7 +14,7 @@ export const addCarteira = async (nome: string, endereco: string, currency?: str
   const detectedAddress = detectAddressNetwork(endereco);
   
   if (!detectedAddress) {
-    const errorMsg = 'Endereço de criptomoeda não reconhecido. Verifique se é um endereço válido.';
+    const errorMsg = 'Endereço de criptomoeda não reconhecido. Verifique se é um endereço válido de Bitcoin, Ethereum, Solana, Litecoin, Dogecoin, etc.';
     console.error('❌', errorMsg);
     throw new Error(errorMsg);
   }
@@ -33,46 +33,50 @@ export const addCarteira = async (nome: string, endereco: string, currency?: str
     });
     console.log('✅ Carteira salva:', novaCarteira);
 
-    // Agora fazer a requisição para buscar dados reais via edge function
+    // Buscar dados reais via edge function
     console.log('📡 Buscando dados da carteira via API...');
     
     const currencyToUse = currency || detectedAddress.network.symbol.toLowerCase();
     
-    const { data: walletData, error: fetchError } = await supabase.functions.invoke('fetch-wallet-data', {
-      body: {
-        address: endereco,
-        wallet_id: novaCarteira.id,
-        currency: currencyToUse
-      }
-    });
+    try {
+      const { data: walletData, error: fetchError } = await supabase.functions.invoke('fetch-wallet-data', {
+        body: {
+          address: endereco,
+          wallet_id: novaCarteira.id,
+          currency: currencyToUse
+        }
+      });
 
-    if (fetchError) {
-      console.warn('⚠️ Erro ao buscar dados via API, usando dados padrão:', fetchError);
-    } else if (walletData) {
-      console.log('📊 Dados da API recebidos:', walletData);
-      
-      // Atualizar a carteira com os dados reais
-      const { error: updateError } = await supabase
-        .from('crypto_wallets')
-        .update({
-          balance: walletData.balance || 0,
-          total_received: walletData.total_received || 0,
-          total_sent: walletData.total_sent || 0,
-          transaction_count: walletData.transaction_count || 0,
-          last_updated: new Date().toISOString()
-        })
-        .eq('id', novaCarteira.id);
+      if (fetchError) {
+        console.warn('⚠️ Erro ao buscar dados via API, usando dados padrão:', fetchError);
+      } else if (walletData) {
+        console.log('📊 Dados da API recebidos:', walletData);
+        
+        // Atualizar a carteira com os dados reais
+        const { error: updateError } = await supabase
+          .from('crypto_wallets')
+          .update({
+            balance: walletData.balance || 0,
+            total_received: walletData.total_received || 0,
+            total_sent: walletData.total_sent || 0,
+            transaction_count: walletData.transaction_count || 0,
+            last_updated: new Date().toISOString()
+          })
+          .eq('id', novaCarteira.id);
 
-      if (updateError) {
-        console.warn('⚠️ Erro ao atualizar dados da carteira:', updateError);
-      } else {
-        // Atualizar objeto local com dados reais
-        novaCarteira.balance = walletData.balance || 0;
-        novaCarteira.total_received = walletData.total_received || 0;
-        novaCarteira.total_sent = walletData.total_sent || 0;
-        novaCarteira.transaction_count = walletData.transaction_count || 0;
-        novaCarteira.last_updated = new Date().toISOString();
+        if (updateError) {
+          console.warn('⚠️ Erro ao atualizar dados da carteira:', updateError);
+        } else {
+          // Atualizar objeto local com dados reais
+          novaCarteira.balance = walletData.balance || 0;
+          novaCarteira.total_received = walletData.total_received || 0;
+          novaCarteira.total_sent = walletData.total_sent || 0;
+          novaCarteira.transaction_count = walletData.transaction_count || 0;
+          novaCarteira.last_updated = new Date().toISOString();
+        }
       }
+    } catch (apiError) {
+      console.warn('⚠️ Erro na API externa, carteira criada com dados padrão:', apiError);
     }
     
     // Retornar a nova carteira formatada para compatibilidade
@@ -100,11 +104,14 @@ export const addCarteira = async (nome: string, endereco: string, currency?: str
     
     if (error instanceof Error) {
       // Tratar erros específicos
-      if (error.message.includes('constraint')) {
-        throw new Error('Este endereço já foi adicionado ou não é válido para nossa plataforma.');
+      if (error.message.includes('duplicate') || error.message.includes('constraint')) {
+        throw new Error('Este endereço já foi adicionado anteriormente.');
       }
-      if (error.message.includes('network')) {
+      if (error.message.includes('network') || error.message.includes('connection')) {
         throw new Error('Erro de conectividade. Verifique sua conexão e tente novamente.');
+      }
+      if (error.message.includes('unauthorized') || error.message.includes('authentication')) {
+        throw new Error('Erro de autenticação. Faça login novamente.');
       }
       throw error;
     } else {
