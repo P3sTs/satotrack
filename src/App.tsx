@@ -47,7 +47,7 @@ import Privacidade from "./pages/Privacidade";
 import TermosUso from "./pages/TermosUso";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { GlobalErrorBoundary } from "./components/error/GlobalErrorBoundary";
+import GlobalErrorBoundary from "./components/error/GlobalErrorBoundary";
 
 const queryClient = new QueryClient();
 
