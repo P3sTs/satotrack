@@ -171,7 +171,7 @@ const NewWalletModal: React.FC<NewWalletModalProps> = ({ isOpen, onClose }) => {
                 <AlertDescription className="text-green-700 dark:text-green-300">
                   <strong>{detectedNetwork.network.name} ({detectedNetwork.network.symbol})</strong> detectado
                   <br />
-                  <span className="text-xs">Tipo: {detectedAddress.addressType}</span>
+                  <span className="text-xs">Tipo: {detectedNetwork.addressType}</span>
                 </AlertDescription>
               </Alert>
             )}
