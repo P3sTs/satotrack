@@ -196,6 +196,84 @@ export type Database = {
           },
         ]
       }
+      diary_security_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_setup: boolean
+          last_access: string | null
+          password_hash: string
+          salt: string
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_setup?: boolean
+          last_access?: string | null
+          password_hash: string
+          salt: string
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_setup?: boolean
+          last_access?: string | null
+          password_hash?: string
+          salt?: string
+          updated_at?: string
+          user_phone?: string
+        }
+        Relationships: []
+      }
+      love_memories: {
+        Row: {
+          category: string
+          created_at: string
+          date: string | null
+          description: string | null
+          id: string
+          image_size: number | null
+          image_url: string
+          location: string | null
+          time: string | null
+          title: string
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          image_size?: number | null
+          image_url: string
+          location?: string | null
+          time?: string | null
+          title: string
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          image_size?: number | null
+          image_url?: string
+          location?: string | null
+          time?: string | null
+          title?: string
+          updated_at?: string
+          user_phone?: string
+        }
+        Relationships: []
+      }
       love_messages: {
         Row: {
           created_at: string
@@ -463,6 +541,42 @@ export type Database = {
           snapshot_data?: Json
           total_value_usdt?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      private_diary_entries: {
+        Row: {
+          content_encrypted: string
+          created_at: string
+          id: string
+          is_menstrual_entry: boolean
+          iv: string
+          menstrual_cycle_data_encrypted: string | null
+          title_encrypted: string
+          updated_at: string
+          user_phone: string
+        }
+        Insert: {
+          content_encrypted: string
+          created_at?: string
+          id?: string
+          is_menstrual_entry?: boolean
+          iv: string
+          menstrual_cycle_data_encrypted?: string | null
+          title_encrypted: string
+          updated_at?: string
+          user_phone: string
+        }
+        Update: {
+          content_encrypted?: string
+          created_at?: string
+          id?: string
+          is_menstrual_entry?: boolean
+          iv?: string
+          menstrual_cycle_data_encrypted?: string | null
+          title_encrypted?: string
+          updated_at?: string
+          user_phone?: string
         }
         Relationships: []
       }

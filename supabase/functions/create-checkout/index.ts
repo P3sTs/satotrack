@@ -50,6 +50,8 @@ serve(async (req) => {
       logStep("Creating new customer");
     }
 
+    const origin = req.headers.get("origin") || "https://cwmzzdwoagtmxdmgtfzj.supabase.co";
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -68,8 +70,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/planos?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/planos?checkout=canceled`,
+      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/planos?checkout=canceled`,
       metadata: {
         user_id: user.id,
       },

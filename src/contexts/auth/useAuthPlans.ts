@@ -110,6 +110,7 @@ export const useAuthPlans = (user: AuthUser | null) => {
       await loadUserPlanData();
     } catch (error) {
       console.error('Error checking subscription status:', error);
+      throw error;
     }
   };
 

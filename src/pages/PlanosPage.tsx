@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,15 +19,22 @@ const PlanosPage = () => {
     const sessionId = searchParams.get('session_id');
 
     if (checkoutStatus === 'success' && sessionId) {
-      toast.success('Pagamento processado com sucesso! Verificando seu plano...');
-      // Check subscription status after successful checkout
-      setTimeout(() => {
-        checkSubscriptionStatus();
-      }, 2000);
+      // Redirect to dedicated success page
+      window.location.href = `/checkout/success?session_id=${sessionId}`;
+      return;
     } else if (checkoutStatus === 'canceled') {
       toast.error('Checkout cancelado. Você pode tentar novamente a qualquer momento.');
     }
-  }, [searchParams, checkSubscriptionStatus]);
+  }, [searchParams]);
+
+  // Auto-refresh subscription status periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkSubscriptionStatus();
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [checkSubscriptionStatus]);
 
   const handleUpgrade = async (planType: 'premium') => {
     try {
@@ -35,6 +43,15 @@ const PlanosPage = () => {
     } catch (error) {
       console.error('Erro ao fazer upgrade:', error);
       toast.error('Erro ao processar upgrade. Tente novamente.');
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    try {
+      await checkSubscriptionStatus();
+      toast.success('Status da assinatura atualizado!');
+    } catch (error) {
+      toast.error('Erro ao verificar status da assinatura.');
     }
   };
 
@@ -95,6 +112,18 @@ const PlanosPage = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Monitore suas carteiras Bitcoin com as ferramentas mais avançadas do mercado
           </p>
+          
+          {/* Status refresh button */}
+          <div className="mt-4">
+            <Button 
+              onClick={handleRefreshStatus}
+              variant="outline"
+              size="sm"
+              disabled={isLoading}
+            >
+              Verificar Status da Assinatura
+            </Button>
+          </div>
         </div>
 
         {/* Planos */}
