@@ -97,7 +97,7 @@ const CheckoutSuccess = () => {
           {[...Array(50)].map((_, i) => (
             <div
               key={i}
-              className="absolute animate-bounce"
+              className="absolute animate-confetti"
               style={{
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
@@ -109,8 +109,7 @@ const CheckoutSuccess = () => {
                 className="w-3 h-3 rotate-45"
                 style={{
                   backgroundColor: ['#F7931A', '#00D4AA', '#8B5CF6', '#F59E0B', '#EF4444', '#10B981'][Math.floor(Math.random() * 6)],
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                  animation: `fall ${3 + Math.random() * 2}s linear infinite`
+                  transform: `rotate(${Math.random() * 360}deg)`
                 }}
               />
             </div>
@@ -231,7 +230,6 @@ const CheckoutSuccess = () => {
                 <Button 
                   onClick={handleManualRetry}
                   className="bg-bitcoin hover:bg-bitcoin/90 text-white"
-                  disabled={verificationStatus === 'loading'}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Tentar Novamente
@@ -265,19 +263,6 @@ const CheckoutSuccess = () => {
           )}
         </CardContent>
       </Card>
-
-      <style jsx>{`
-        @keyframes fall {
-          0% {
-            transform: translateY(-100vh) rotate(0deg);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh) rotate(360deg);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 };
