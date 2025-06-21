@@ -12,7 +12,7 @@ import {
   Legend,
   ChartOptions,
 } from 'chart.js';
-import { useRealtimeData } from '@/hooks/useRealtimeData';
+import { useRealtimeData, RealtimeChartData, WalletPerformanceData } from '@/hooks/useRealtimeData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 
@@ -62,12 +62,17 @@ const RealtimeChart: React.FC<RealtimeChartProps> = ({
 
   const currentValue = data[data.length - 1];
   const previousValue = data[data.length - 2];
+
+  // Type-safe access to price/totalValue
+  const getCurrentPrice = (item: RealtimeChartData | WalletPerformanceData) => {
+    return type === 'price' ? (item as RealtimeChartData).price : (item as WalletPerformanceData).totalValue;
+  };
+
   const change = currentValue && previousValue 
-    ? ((type === 'price' ? currentValue.price : currentValue.totalValue) - 
-       (type === 'price' ? previousValue.price : previousValue.totalValue))
+    ? getCurrentPrice(currentValue) - getCurrentPrice(previousValue)
     : 0;
   const changePercent = previousValue 
-    ? (change / (type === 'price' ? previousValue.price : previousValue.totalValue) * 100)
+    ? (change / getCurrentPrice(previousValue) * 100)
     : 0;
 
   const chartOptions: ChartOptions<'line'> = {
@@ -155,7 +160,7 @@ const RealtimeChart: React.FC<RealtimeChartProps> = ({
     datasets: [
       {
         label: type === 'price' ? 'Preço BTC' : 'Valor Total',
-        data: data.map(item => type === 'price' ? item.price : item.totalValue),
+        data: data.map(item => getCurrentPrice(item)),
         borderColor: change >= 0 ? '#22c55e' : '#ef4444',
         backgroundColor: change >= 0 
           ? 'rgba(34, 197, 94, 0.1)' 

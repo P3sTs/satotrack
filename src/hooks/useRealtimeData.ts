@@ -17,6 +17,8 @@ export interface WalletPerformanceData {
   profitLoss: number;
 }
 
+export type ValueChangeState = 'positive' | 'negative' | 'neutral';
+
 export const useRealtimeData = () => {
   const { data: bitcoinData } = useBitcoinPrice();
   const { carteiras } = useCarteiras();
@@ -92,4 +94,32 @@ export const useRealtimeData = () => {
     isLoading: !bitcoinData,
     lastUpdate: new Date().toISOString()
   };
+};
+
+export const useRealtimeBitcoinPrice = () => {
+  const { data: bitcoinData, loading, error } = useBitcoinPrice();
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (bitcoinData && previousPrice === null) {
+      setPreviousPrice(bitcoinData.price_brl);
+    } else if (bitcoinData && previousPrice !== bitcoinData.price_brl) {
+      setPreviousPrice(bitcoinData.price_brl);
+    }
+  }, [bitcoinData, previousPrice]);
+
+  return {
+    data: bitcoinData,
+    previousData: previousPrice ? { price_brl: previousPrice } : null,
+    isLoading: loading,
+    error,
+    isRefreshing: false,
+    refresh: () => {},
+    lastUpdated: new Date()
+  };
+};
+
+export const useValueChange = (currentValue: number, previousValue?: number): ValueChangeState => {
+  if (!previousValue || currentValue === previousValue) return 'neutral';
+  return currentValue > previousValue ? 'positive' : 'negative';
 };
