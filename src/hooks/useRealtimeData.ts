@@ -23,7 +23,7 @@ export type ValueChangeState = 'positive' | 'negative' | 'neutral' | 'initial' |
 export function useRealtimeData<T>(
   fetchFunction: () => Promise<T>,
   initialData: T,
-  refreshInterval: number
+  refreshInterval?: number
 ): {
   data: T;
   previousData?: T;
@@ -148,7 +148,7 @@ export function useRealtimeData<T>(
   }, [fetchFunction, refreshInterval]);
 
   // Return different shapes based on usage
-  if (fetchFunction && initialData !== undefined && refreshInterval !== undefined) {
+  if (fetchFunction && initialData !== undefined) {
     return {
       data: data as T,
       previousData: previousData as T,
@@ -167,7 +167,7 @@ export function useRealtimeData<T>(
   };
 }
 
-export const useRealtimeBitcoinPrice = (refreshInterval?: number) => {
+export const useRealtimeBitcoinPrice = () => {
   const { data: bitcoinData, loading, error } = useBitcoinPrice();
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 
