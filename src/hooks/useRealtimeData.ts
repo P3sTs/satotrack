@@ -19,11 +19,11 @@ export interface WalletPerformanceData {
 
 export type ValueChangeState = 'positive' | 'negative' | 'neutral' | 'initial' | 'increased' | 'decreased' | 'unchanged';
 
-// Generic hook for real-time data
+// Generic hook overload
 export function useRealtimeData<T>(
   fetchFunction: () => Promise<T>,
   initialData: T,
-  refreshInterval?: number
+  refreshInterval: number
 ): {
   data: T;
   previousData?: T;
@@ -33,7 +33,7 @@ export function useRealtimeData<T>(
   lastUpdated: Date;
 };
 
-// Default chart data hook
+// Default chart data overload
 export function useRealtimeData(): {
   chartData: RealtimeChartData[];
   walletData: WalletPerformanceData[];
@@ -41,6 +41,7 @@ export function useRealtimeData(): {
   lastUpdate: string;
 };
 
+// Implementation
 export function useRealtimeData<T>(
   fetchFunction?: () => Promise<T>,
   initialData?: T,
@@ -147,7 +148,7 @@ export function useRealtimeData<T>(
   }, [fetchFunction, refreshInterval]);
 
   // Return different shapes based on usage
-  if (fetchFunction) {
+  if (fetchFunction && initialData !== undefined && refreshInterval !== undefined) {
     return {
       data: data as T,
       previousData: previousData as T,
