@@ -4,14 +4,44 @@
 @layer components {
   /* Navegação */
   .nav-link {
-    @apply px-2 py-1 text-sm font-medium rounded-md transition-colors whitespace-nowrap;
+    @apply px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap;
+    background-color: rgba(34, 35, 40, 0.8);
+    border: 1px solid transparent;
   }
   
   .nav-link-active {
-    @apply text-primary bg-dashboard-light;
+    @apply text-white bg-gradient-to-r from-dashboard-light to-dashboard-medium;
+    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
   }
   
   .nav-link-inactive {
-    @apply text-muted-foreground hover:text-white hover:bg-dashboard-light/50;
+    @apply text-satotrack-text hover:text-white hover:bg-dashboard-medium/60;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Menu mobile melhorado */
+  .mobile-menu {
+    @apply bg-dashboard-dark border-dashboard-medium;
+    backdrop-filter: blur(20px);
+  }
+
+  .mobile-menu-item {
+    @apply w-full justify-start text-satotrack-text hover:bg-dashboard-medium/50 transition-all duration-200;
+    border-left: 3px solid transparent;
+  }
+
+  .mobile-menu-item:hover {
+    border-left-color: rgba(0, 212, 255, 0.6);
+  }
+
+  /* Scrollbar personalizada para navegação */
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 }

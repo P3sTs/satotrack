@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Star } from 'lucide-react';
+import { Star, Menu } from 'lucide-react';
 import MainNav from './MainNav';
 import UserMenu from './navigation/UserMenu';
 import { PlanBadge } from './monetization/PlanDisplay';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const NavBar: React.FC = () => {
   const { user, signOut, userPlan, isAuthenticated } = useAuth();
@@ -16,6 +17,7 @@ const NavBar: React.FC = () => {
   const location = useLocation();
   const isPremium = userPlan === 'premium';
   const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Debug log para acompanhar o status de autenticação
   useEffect(() => {
@@ -26,6 +28,7 @@ const NavBar: React.FC = () => {
     try {
       signOut();
       navigate('/');
+      setMobileMenuOpen(false);
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso",
@@ -49,6 +52,7 @@ const NavBar: React.FC = () => {
   // Lidar com o clique no botão premium
   const handlePremiumClick = () => {
     navigate('/planos');
+    setMobileMenuOpen(false);
     toast({
       title: isPremium ? "Painel Premium" : "Upgrade disponível",
       description: isPremium ? "Bem-vindo ao seu painel exclusivo premium!" : "Conheça os benefícios do plano Premium!",
@@ -56,10 +60,10 @@ const NavBar: React.FC = () => {
     });
   };
 
-  // Não renderizar em dispositivos móveis, pois temos o MobileNavigation
-  if (isMobile) {
-    return null;
-  }
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="bg-dashboard-dark text-satotrack-text sticky top-0 z-50 border-b border-dashboard-medium/30">
@@ -81,31 +85,99 @@ const NavBar: React.FC = () => {
           </div>
           
           {/* Navegação Desktop - Centralizada */}
-          <div className="hidden md:flex items-center justify-center flex-1 px-4">
-            <MainNav />
-          </div>
+          {!isMobile && (
+            <div className="hidden md:flex items-center justify-center flex-1 px-4">
+              <MainNav />
+            </div>
+          )}
           
-          {/* Botão Premium para todos os usuários */}
-          <Button 
-            variant={isPremium ? "bitcoin" : "outline"} 
-            size="sm"
-            className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
-            onClick={handlePremiumClick}
-          >
-            <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
-            {isPremium ? 'Premium' : 'Quero ser Premium'}
-          </Button>
+          {/* Mobile Menu */}
+          {isMobile && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6 text-satotrack-text" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] bg-dashboard-dark border-dashboard-medium">
+                <div className="flex flex-col h-full">
+                  <div className="py-4">
+                    <h2 className="text-lg font-semibold text-satotrack-text mb-4">Menu</h2>
+                    <nav className="space-y-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
+                        onClick={() => handleNavigation('/dashboard')}
+                      >
+                        Dashboard
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
+                        onClick={() => handleNavigation('/carteiras')}
+                      >
+                        Carteiras
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
+                        onClick={() => handleNavigation('/mercado')}
+                      >
+                        Mercado
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
+                        onClick={() => handleNavigation('/configuracoes')}
+                      >
+                        Configurações
+                      </Button>
+                    </nav>
+                  </div>
+                  
+                  {user && (
+                    <div className="mt-auto pb-4">
+                      <div className="border-t border-dashboard-medium pt-4">
+                        <p className="text-sm text-satotrack-text mb-2">{user.email}</p>
+                        <PlanBadge />
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-2"
+                          onClick={handleLogout}
+                        >
+                          Sair
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
           
-          {/* Ações de autenticação */}
-          <div className="hidden md:flex items-center gap-2">
-            {user && <PlanBadge />}
-            <UserMenu 
-              user={user} 
-              getUserInitials={getUserInitials} 
-              handleLogout={handleLogout}
-              navigate={navigate} 
-            />
-          </div>
+          {/* Desktop Actions */}
+          {!isMobile && (
+            <div className="flex items-center gap-2">
+              {/* Botão Premium para todos os usuários */}
+              <Button 
+                variant={isPremium ? "bitcoin" : "outline"} 
+                size="sm"
+                className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
+                onClick={handlePremiumClick}
+              >
+                <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
+                {isPremium ? 'Premium' : 'Quero ser Premium'}
+              </Button>
+              
+              {user && <PlanBadge />}
+              <UserMenu 
+                user={user} 
+                getUserInitials={getUserInitials} 
+                handleLogout={handleLogout}
+                navigate={navigate} 
+              />
+            </div>
+          )}
         </div>
       </div>
     </header>

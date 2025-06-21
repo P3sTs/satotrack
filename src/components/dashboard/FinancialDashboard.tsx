@@ -12,7 +12,7 @@ import InteractiveWidgets from './InteractiveWidgets';
 import ImmersiveTools from './ImmersiveTools';
 import AdvancedControlPanel from './AdvancedControlPanel';
 import AchievementsPanel from './AchievementsPanel';
-import StaticChart from './StaticChart';
+import RealtimeChart from '@/components/charts/RealtimeChart';
 import { GamificationProvider } from '@/contexts/gamification/GamificationContext';
 import { useCarteiras } from '@/contexts/carteiras';
 import { useAuth } from '@/contexts/auth';
@@ -66,13 +66,13 @@ const FinancialDashboard: React.FC = () => {
         />
         
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="widgets">Widgets</TabsTrigger>
-            <TabsTrigger value="tools">Ferramentas</TabsTrigger>
-            <TabsTrigger value="projections">Projeções</TabsTrigger>
-            <TabsTrigger value="comparison">Comparação</TabsTrigger>
-            <TabsTrigger value="achievements">Conquistas</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 bg-dashboard-medium">
+            <TabsTrigger value="overview" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Visão Geral</TabsTrigger>
+            <TabsTrigger value="widgets" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Widgets</TabsTrigger>
+            <TabsTrigger value="tools" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Ferramentas</TabsTrigger>
+            <TabsTrigger value="projections" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Projeções</TabsTrigger>
+            <TabsTrigger value="comparison" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Comparação</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-satotrack-text data-[state=active]:bg-satotrack-neon data-[state=active]:text-black">Conquistas</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
@@ -114,16 +114,14 @@ const FinancialDashboard: React.FC = () => {
               </div>
               
               <div className="space-y-6">
-                <StaticChart 
-                  title="Bitcoin Price (24h)" 
-                  type="area" 
-                  color="#f7931a"
+                <RealtimeChart 
+                  title="Bitcoin Price (Real-time)" 
+                  type="price"
                   height={300}
                 />
-                <StaticChart 
+                <RealtimeChart 
                   title="Portfolio Balance" 
-                  type="line" 
-                  color="#00d4ff"
+                  type="wallet"
                   height={200}
                 />
                 <AdvancedControlPanel onSettingsChange={handleSettingsChange} />

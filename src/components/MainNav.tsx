@@ -31,16 +31,16 @@ const MainNav: React.FC = () => {
   ];
   
   return (
-    <nav className="flex space-x-1 md:space-x-2 overflow-x-auto scrollbar-hidden">
+    <nav className="flex space-x-1 md:space-x-2 overflow-x-auto scrollbar-hidden bg-dashboard-dark/50 rounded-lg p-2">
       {navItems.map(({ path, label, premium }) => (
         <Link
           key={path}
           to={path}
           className={cn(
-            "px-2 py-1 text-sm font-medium rounded-md transition-colors whitespace-nowrap relative",
+            "px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap relative min-w-fit",
             isActive(path)
-              ? 'text-satotrack-neon bg-dashboard-light'
-              : 'text-muted-foreground hover:text-white hover:bg-dashboard-light/50',
+              ? 'text-white bg-satotrack-neon/20 border border-satotrack-neon/30 shadow-sm'
+              : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50 border border-transparent',
             premium && 'border border-bitcoin/30'
           )}
           aria-current={isActive(path) ? 'page' : undefined}
