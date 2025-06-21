@@ -19,7 +19,14 @@ export interface WalletPerformanceData {
 
 export type ValueChangeState = 'positive' | 'negative' | 'neutral' | 'initial' | 'increased' | 'decreased' | 'unchanged';
 
-// Generic hook overload
+// Function overloads
+export function useRealtimeData(): {
+  chartData: RealtimeChartData[];
+  walletData: WalletPerformanceData[];
+  isLoading: boolean;
+  lastUpdate: string;
+};
+
 export function useRealtimeData<T>(
   fetchFunction: () => Promise<T>,
   initialData: T,
@@ -33,20 +40,12 @@ export function useRealtimeData<T>(
   lastUpdated: Date;
 };
 
-// Default chart data overload
-export function useRealtimeData(): {
-  chartData: RealtimeChartData[];
-  walletData: WalletPerformanceData[];
-  isLoading: boolean;
-  lastUpdate: string;
-};
-
 // Implementation
 export function useRealtimeData<T>(
   fetchFunction?: () => Promise<T>,
   initialData?: T,
   refreshInterval?: number
-) {
+): any {
   const { data: bitcoinData } = useBitcoinPrice();
   const { carteiras } = useCarteiras();
   const [chartData, setChartData] = useState<RealtimeChartData[]>([]);
