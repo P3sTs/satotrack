@@ -13,18 +13,15 @@ interface RealtimeDashboardProps {
   walletRefreshInterval?: number;
 }
 
-/**
- * Painel de dashboard que reúne todos os componentes em tempo real
- */
 const RealtimeDashboard: React.FC<RealtimeDashboardProps> = ({
   walletId,
-  bitcoinRefreshInterval = 30000, // 30 segundos
-  walletRefreshInterval = 60000,  // 1 minuto
+  bitcoinRefreshInterval = 30000,
+  walletRefreshInterval = 60000,
 }) => {
   const { 
     data: bitcoinData, 
     isLoading: bitcoinLoading 
-  } = useRealtimeBitcoinPrice(bitcoinRefreshInterval);
+  } = useRealtimeBitcoinPrice();
   
   return (
     <div className="space-y-6">
@@ -80,7 +77,6 @@ const RealtimeDashboard: React.FC<RealtimeDashboardProps> = ({
           <TabsContent value="history" className="mt-0">
             <Card>
               <CardContent className="pt-6">
-                {/* Aqui poderia ir um componente de histórico mais completo */}
                 <p className="text-muted-foreground text-center py-4">
                   Histórico completo de transações
                 </p>

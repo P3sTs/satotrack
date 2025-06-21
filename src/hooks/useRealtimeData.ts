@@ -17,15 +17,63 @@ export interface WalletPerformanceData {
   profitLoss: number;
 }
 
-export type ValueChangeState = 'positive' | 'negative' | 'neutral';
+export type ValueChangeState = 'positive' | 'negative' | 'neutral' | 'initial' | 'increased' | 'decreased' | 'unchanged';
 
-export const useRealtimeData = () => {
+// Generic hook for real-time data
+export function useRealtimeData<T>(
+  fetchFunction: () => Promise<T>,
+  initialData: T,
+  refreshInterval?: number
+): {
+  data: T;
+  previousData?: T;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  refresh: () => void;
+  lastUpdated: Date;
+};
+
+// Default chart data hook
+export function useRealtimeData(): {
+  chartData: RealtimeChartData[];
+  walletData: WalletPerformanceData[];
+  isLoading: boolean;
+  lastUpdate: string;
+};
+
+export function useRealtimeData<T>(
+  fetchFunction?: () => Promise<T>,
+  initialData?: T,
+  refreshInterval?: number
+) {
   const { data: bitcoinData } = useBitcoinPrice();
   const { carteiras } = useCarteiras();
   const [chartData, setChartData] = useState<RealtimeChartData[]>([]);
   const [walletData, setWalletData] = useState<WalletPerformanceData[]>([]);
+  const [data, setData] = useState<T | null>(initialData || null);
+  const [previousData, setPreviousData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Atualizar dados do Bitcoin em tempo real
+  // Generic data fetching
+  const fetchData = async () => {
+    if (fetchFunction) {
+      try {
+        setIsRefreshing(true);
+        const newData = await fetchFunction();
+        setPreviousData(data);
+        setData(newData);
+        setLastUpdated(new Date());
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    }
+  };
+
+  // Bitcoin data updates
   useEffect(() => {
     if (bitcoinData) {
       const newDataPoint: RealtimeChartData = {
@@ -36,18 +84,18 @@ export const useRealtimeData = () => {
       };
 
       setChartData(prev => {
-        const updated = [...prev, newDataPoint].slice(-50); // Manter apenas últimos 50 pontos
+        const updated = [...prev, newDataPoint].slice(-50);
         return updated;
       });
     }
   }, [bitcoinData]);
 
-  // Atualizar dados das carteiras
+  // Wallet data updates
   useEffect(() => {
     if (carteiras.length > 0 && bitcoinData) {
       const totalBalance = carteiras.reduce((acc, carteira) => acc + carteira.saldo, 0);
       const totalValue = totalBalance * bitcoinData.price_brl;
-      const avgPrice = 50000; // Preço médio estimado para cálculo de P&L
+      const avgPrice = 50000;
       const profitLoss = totalValue - (totalBalance * avgPrice);
 
       const newWalletPoint: WalletPerformanceData = {
@@ -58,13 +106,13 @@ export const useRealtimeData = () => {
       };
 
       setWalletData(prev => {
-        const updated = [...prev, newWalletPoint].slice(-30); // Manter últimos 30 pontos
+        const updated = [...prev, newWalletPoint].slice(-30);
         return updated;
       });
     }
   }, [carteiras, bitcoinData]);
 
-  // Gerar dados históricos simulados se não houver dados suficientes
+  // Generate historical data if needed
   useEffect(() => {
     if (chartData.length === 0 && bitcoinData) {
       const historicalData: RealtimeChartData[] = [];
@@ -73,7 +121,7 @@ export const useRealtimeData = () => {
       for (let i = 24; i >= 0; i--) {
         const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
         const basePrice = bitcoinData.price_brl;
-        const variation = (Math.random() - 0.5) * 0.1; // ±5% variação
+        const variation = (Math.random() - 0.5) * 0.1;
         const price = basePrice * (1 + variation);
         
         historicalData.push({
@@ -86,7 +134,29 @@ export const useRealtimeData = () => {
       
       setChartData(historicalData);
     }
+    setIsLoading(false);
   }, [bitcoinData]);
+
+  // Set up interval for generic fetching
+  useEffect(() => {
+    if (fetchFunction && refreshInterval) {
+      fetchData();
+      const interval = setInterval(fetchData, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [fetchFunction, refreshInterval]);
+
+  // Return different shapes based on usage
+  if (fetchFunction) {
+    return {
+      data: data as T,
+      previousData: previousData as T,
+      isLoading,
+      isRefreshing,
+      refresh: fetchData,
+      lastUpdated
+    };
+  }
 
   return {
     chartData,
@@ -94,9 +164,9 @@ export const useRealtimeData = () => {
     isLoading: !bitcoinData,
     lastUpdate: new Date().toISOString()
   };
-};
+}
 
-export const useRealtimeBitcoinPrice = () => {
+export const useRealtimeBitcoinPrice = (refreshInterval?: number) => {
   const { data: bitcoinData, loading, error } = useBitcoinPrice();
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 
@@ -110,7 +180,7 @@ export const useRealtimeBitcoinPrice = () => {
 
   return {
     data: bitcoinData,
-    previousData: previousPrice ? { price_brl: previousPrice } : null,
+    previousData: previousPrice ? { price_brl: previousPrice, price_usd: previousPrice / 5.5 } : null,
     isLoading: loading,
     error,
     isRefreshing: false,
@@ -119,7 +189,8 @@ export const useRealtimeBitcoinPrice = () => {
   };
 };
 
-export const useValueChange = (currentValue: number, previousValue?: number): ValueChangeState => {
+export const useValueChange = (currentValue?: number, previousValue?: number): ValueChangeState => {
+  if (currentValue === undefined || currentValue === null) return 'initial';
   if (!previousValue || currentValue === previousValue) return 'neutral';
   return currentValue > previousValue ? 'positive' : 'negative';
 };

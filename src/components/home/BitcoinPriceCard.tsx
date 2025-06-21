@@ -29,12 +29,11 @@ const BitcoinPriceCard = ({
 }: BitcoinPriceCardProps) => {
   const isNegative = changePercentage !== undefined && changePercentage < 0;
   
-  // Determinar estado de mudança para o DynamicValue
   const getChangeState = (): ValueChangeState => {
     if (previousPrice === undefined || previousPrice === null) return 'initial';
-    if (price > previousPrice) return 'increased';
-    if (price < previousPrice) return 'decreased';
-    return 'unchanged';
+    if (price > previousPrice) return 'positive';
+    if (price < previousPrice) return 'negative';
+    return 'neutral';
   };
   
   const changeState = getChangeState();

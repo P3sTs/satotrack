@@ -15,9 +15,6 @@ interface RealtimeBitcoinPriceProps {
   currency?: 'USD' | 'BRL';
 }
 
-/**
- * Componente que exibe o preço do Bitcoin em tempo real
- */
 export const RealtimeBitcoinPrice: React.FC<RealtimeBitcoinPriceProps> = ({
   refreshInterval = 30000,
   showRefreshButton = true,
@@ -32,15 +29,12 @@ export const RealtimeBitcoinPrice: React.FC<RealtimeBitcoinPriceProps> = ({
     isRefreshing,
     lastUpdated,
     refresh 
-  } = useRealtimeBitcoinPrice(refreshInterval);
+  } = useRealtimeBitcoinPrice();
   
   const currentPrice = currency === 'USD' ? bitcoinData?.price_usd : bitcoinData?.price_brl;
   const prevPrice = currency === 'USD' ? previousData?.price_usd : previousData?.price_brl;
   const priceChangeState = useValueChange(currentPrice, prevPrice);
   
-  const currencySymbol = currency === 'USD' ? '$' : 'R$';
-  
-  // Formatação específica para cada moeda
   const formatPrice = (price: number) => {
     return formatCurrency(price, currency);
   };
@@ -94,8 +88,8 @@ export const RealtimeBitcoinPrice: React.FC<RealtimeBitcoinPriceProps> = ({
           <DynamicValue
             value={bitcoinData.price_change_percentage_24h}
             formatFunc={(val) => `${val > 0 ? '+' : ''}${val.toFixed(2)}%`}
-            changeState={bitcoinData.price_change_percentage_24h > 0 ? 'increased' : 
-                        bitcoinData.price_change_percentage_24h < 0 ? 'decreased' : 'unchanged'}
+            changeState={bitcoinData.price_change_percentage_24h > 0 ? 'positive' : 
+                        bitcoinData.price_change_percentage_24h < 0 ? 'negative' : 'neutral'}
             size="sm"
           />
           <span className="text-xs text-muted-foreground ml-1">24h</span>
