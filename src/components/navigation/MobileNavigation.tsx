@@ -5,13 +5,20 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 import { toast } from '@/hooks/use-toast';
 import MobileMenuContainer from './MobileMenuContainer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MobileNavigation: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, userPlan, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const isPremium = userPlan === 'premium';
+  
+  // Só renderiza no mobile
+  if (!isMobile) {
+    return null;
+  }
   
   const handleLogout = async () => {
     try {
@@ -65,8 +72,8 @@ const MobileNavigation: React.FC = () => {
   };
 
   return (
-    <div className="bg-dashboard-dark border-b border-dashboard-light/10 sticky top-0 z-50">
-      <div className="flex justify-between items-center h-14 px-4">
+    <div className="fixed bottom-0 left-0 right-0 bg-dashboard-dark border-t border-dashboard-medium/30 md:hidden z-50">
+      <div className="flex justify-between items-center h-16 px-4">
         {/* Logo */}
         <div className="flex items-center">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
@@ -76,11 +83,11 @@ const MobileNavigation: React.FC = () => {
               </div>
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
             </div>
-            <span className="font-orbitron font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-300">SatoTrack</span>
+            <span className="font-orbitron font-bold text-sm text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-300">SatoTrack</span>
           </button>
         </div>
         
-        {/* Gatilho do menu mobile */}
+        {/* Menu Button */}
         <MobileMenuContainer
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}

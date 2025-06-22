@@ -37,6 +37,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     { path: '/configuracoes', label: 'Configurações', icon: Settings },
   ];
 
+  const handleItemClick = (path: string) => {
+    handleNavigation(path);
+    onClose();
+  };
+
   return (
     <div className="flex flex-col h-full bg-dashboard-dark text-satotrack-text">
       {/* Header do Menu */}
@@ -74,9 +79,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             className={`w-full justify-start gap-3 text-left mobile-menu-item ${
               isActive(item.path) 
                 ? 'bg-dashboard-medium text-white' 
-                : 'text-satotrack-text hover:text-white'
+                : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50'
             }`}
-            onClick={() => handleNavigation(item.path)}
+            onClick={() => handleItemClick(item.path)}
           >
             <item.icon className="h-4 w-4" />
             {item.label}
@@ -90,10 +95,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               variant="ghost"
               className={`w-full justify-start gap-3 text-left mobile-menu-item ${
                 isPremium 
-                  ? 'border border-bitcoin/30 text-bitcoin' 
-                  : 'text-satotrack-text hover:text-white'
+                  ? 'border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10' 
+                  : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50'
               }`}
-              onClick={onPremiumClick}
+              onClick={() => {
+                onPremiumClick();
+                onClose();
+              }}
             >
               <Star className={`h-4 w-4 ${isPremium ? 'fill-bitcoin' : ''}`} />
               {isPremium ? 'Painel Premium' : 'Ser Premium'}
@@ -108,7 +116,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              onClose();
+            }}
           >
             <LogOut className="h-4 w-4" />
             Sair

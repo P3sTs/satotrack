@@ -65,6 +65,11 @@ const NavBar: React.FC = () => {
     setMobileMenuOpen(false);
   };
 
+  // Só renderiza no desktop
+  if (isMobile) {
+    return null;
+  }
+
   return (
     <header className="bg-dashboard-dark text-satotrack-text sticky top-0 z-50 border-b border-dashboard-medium/30">
       <div className="container mx-auto px-4">
@@ -85,99 +90,31 @@ const NavBar: React.FC = () => {
           </div>
           
           {/* Navegação Desktop - Centralizada */}
-          {!isMobile && (
-            <div className="hidden md:flex items-center justify-center flex-1 px-4">
-              <MainNav />
-            </div>
-          )}
-          
-          {/* Mobile Menu */}
-          {isMobile && (
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-6 w-6 text-satotrack-text" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] bg-dashboard-dark border-dashboard-medium">
-                <div className="flex flex-col h-full">
-                  <div className="py-4">
-                    <h2 className="text-lg font-semibold text-satotrack-text mb-4">Menu</h2>
-                    <nav className="space-y-2">
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
-                        onClick={() => handleNavigation('/dashboard')}
-                      >
-                        Dashboard
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
-                        onClick={() => handleNavigation('/carteiras')}
-                      >
-                        Carteiras
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
-                        onClick={() => handleNavigation('/mercado')}
-                      >
-                        Mercado
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-satotrack-text hover:bg-dashboard-medium"
-                        onClick={() => handleNavigation('/configuracoes')}
-                      >
-                        Configurações
-                      </Button>
-                    </nav>
-                  </div>
-                  
-                  {user && (
-                    <div className="mt-auto pb-4">
-                      <div className="border-t border-dashboard-medium pt-4">
-                        <p className="text-sm text-satotrack-text mb-2">{user.email}</p>
-                        <PlanBadge />
-                        <Button 
-                          variant="outline" 
-                          className="w-full mt-2"
-                          onClick={handleLogout}
-                        >
-                          Sair
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
+          <div className="hidden md:flex items-center justify-center flex-1 px-4">
+            <MainNav />
+          </div>
           
           {/* Desktop Actions */}
-          {!isMobile && (
-            <div className="flex items-center gap-2">
-              {/* Botão Premium para todos os usuários */}
-              <Button 
-                variant={isPremium ? "bitcoin" : "outline"} 
-                size="sm"
-                className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
-                onClick={handlePremiumClick}
-              >
-                <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
-                {isPremium ? 'Premium' : 'Quero ser Premium'}
-              </Button>
-              
-              {user && <PlanBadge />}
-              <UserMenu 
-                user={user} 
-                getUserInitials={getUserInitials} 
-                handleLogout={handleLogout}
-                navigate={navigate} 
-              />
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Botão Premium para todos os usuários */}
+            <Button 
+              variant={isPremium ? "bitcoin" : "outline"} 
+              size="sm"
+              className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
+              onClick={handlePremiumClick}
+            >
+              <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
+              {isPremium ? 'Premium' : 'Quero ser Premium'}
+            </Button>
+            
+            {user && <PlanBadge />}
+            <UserMenu 
+              user={user} 
+              getUserInitials={getUserInitials} 
+              handleLogout={handleLogout}
+              navigate={navigate} 
+            />
+          </div>
         </div>
       </div>
     </header>
