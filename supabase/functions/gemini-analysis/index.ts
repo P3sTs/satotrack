@@ -11,7 +11,18 @@ const corsHeaders = {
 
 const getSystemPrompt = (type: string) => {
   const basePrompt = `Você é um assistente especialista em criptomoedas e análise financeira do SatoTrack. 
-  Sempre responda em português brasileiro de forma clara e objetiva.`;
+  Sempre responda em português brasileiro de forma clara e objetiva.
+  
+  IMPORTANTE: Formate sua resposta preferencialmente como JSON válido com esta estrutura:
+  {
+    "risco": "Alto/Moderado/Baixo",
+    "sugestao": "Sua principal recomendação em uma frase clara",
+    "projecao": "Previsão objetiva para próximos dias/semanas",
+    "alerta": "Aviso importante se houver algum",
+    "score": 85
+  }
+  
+  Se não conseguir JSON, use texto simples mas organize em tópicos claros.`;
 
   const typePrompts = {
     market_analysis: `${basePrompt} Analise tendências de mercado, padrões técnicos e fatores fundamentalistas.`,
@@ -101,10 +112,10 @@ serve(async (req) => {
     let prompt = '';
     switch (type) {
       case 'market_analysis':
-        prompt = 'Analise os dados de mercado e forneça insights sobre tendências, suporte/resistência e recomendações.';
+        prompt = 'Analise os dados de mercado e forneça insights sobre tendências, suporte/resistência e recomendações estratégicas.';
         break;
       case 'portfolio_risk':
-        prompt = 'Analise o risco do portfólio, calcule score de risco (1-10) e sugira melhorias na diversificação.';
+        prompt = 'Analise o risco do portfólio, calcule score de risco (1-100) e sugira melhorias na diversificação.';
         break;
       case 'opportunity_detection':
         prompt = 'Identifique oportunidades de trading baseadas nos dados. Foque em sinais de entrada e saída.';

@@ -5,12 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Shield, AlertTriangle, TrendingUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useCarteiras } from '@/contexts/carteiras';
-import { useSatoAI } from '@/hooks/useSatoAI';
+import GeminiAnalysisDisplay from '@/components/ai/GeminiAnalysisDisplay';
 
 const RiskAnalyzer: React.FC = () => {
   const { carteiras } = useCarteiras();
-  const { askSatoAI, isLoading } = useSatoAI();
-  const [analysis, setAnalysis] = useState<string>('');
   const [riskProfile, setRiskProfile] = useState<'conservative' | 'moderate' | 'aggressive'>('moderate');
 
   // Mock data for portfolio distribution
@@ -19,24 +17,6 @@ const RiskAnalyzer: React.FC = () => {
     { name: 'Ethereum', value: 20, color: '#627eea' },
     { name: 'Altcoins', value: 12, color: '#3cc3f0' }
   ];
-
-  const analyzeRisk = async () => {
-    const portfolioInfo = {
-      totalWallets: carteiras.length,
-      distribution: portfolioData,
-      totalBalance: carteiras.reduce((acc, w) => acc + w.saldo, 0)
-    };
-    
-    const result = await askSatoAI(
-      `Analise meu perfil de risco baseado na seguinte distribuição de portfólio: ${JSON.stringify(portfolioInfo)}. 
-      Classifique como conservador, moderado ou agressivo e sugira rebalanceamento.`,
-      'Análise de Risco'
-    );
-    
-    if (result) {
-      setAnalysis(result);
-    }
-  };
 
   const getRiskColor = () => {
     switch (riskProfile) {
@@ -54,6 +34,12 @@ const RiskAnalyzer: React.FC = () => {
       case 'aggressive': return <TrendingUp className="h-5 w-5" />;
       default: return <AlertTriangle className="h-5 w-5" />;
     }
+  };
+
+  const portfolioInfo = {
+    totalWallets: carteiras.length,
+    distribution: portfolioData,
+    totalBalance: carteiras.reduce((acc, w) => acc + w.saldo, 0)
   };
 
   return (
@@ -120,20 +106,13 @@ const RiskAnalyzer: React.FC = () => {
           </div>
         </div>
 
-        <Button 
-          onClick={analyzeRisk} 
-          disabled={isLoading}
-          className="w-full bg-orange-600 hover:bg-orange-700"
-        >
-          {isLoading ? 'Analisando...' : 'Analisar com SatoAI'}
-        </Button>
-
-        {analysis && (
-          <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/30">
-            <h5 className="font-medium text-orange-400 mb-2">📊 Análise da IA</h5>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{analysis}</p>
-          </div>
-        )}
+        {/* Análise IA Integrada */}
+        <GeminiAnalysisDisplay
+          analysisType="portfolio_risk"
+          data={portfolioInfo}
+          context="Análise de Risco de Portfólio"
+          title="🛡️ Análise de Risco com IA"
+        />
       </CardContent>
     </Card>
   );
