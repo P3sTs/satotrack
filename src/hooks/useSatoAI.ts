@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 interface SatoAIResponse {
   response: string;
   timestamp: string;
+  provider?: string;
 }
 
 interface AIProvider {
@@ -22,14 +23,18 @@ export const useSatoAI = () => {
 
   const askSatoAI = async (message: string, context?: string, preferredProvider?: string): Promise<string | null> => {
     if (!message.trim()) {
-      toast.error('Por favor, digite uma mensagem para o SatoAI');
+      toast.error('Digite uma mensagem para o SatoAI');
       return null;
     }
 
     setIsLoading(true);
     
     try {
-      console.log('🤖 Enviando mensagem para SatoAI:', { message: message.substring(0, 50) + '...', context, preferredProvider });
+      console.log('🤖 Enviando para SatoAI:', { 
+        message: message.substring(0, 50) + '...',
+        context,
+        provider: preferredProvider || 'gemini'
+      });
       
       const { data, error } = await supabase.functions.invoke('satoai-chat', {
         body: {
@@ -39,32 +44,37 @@ export const useSatoAI = () => {
         }
       });
 
-      console.log('📡 Resposta do SatoAI:', { data, error });
+      console.log('📡 Resposta recebida:', { 
+        success: !error,
+        hasData: !!data,
+        provider: data?.provider
+      });
 
       if (error) {
-        console.error('❌ Erro na função Supabase:', error);
-        throw new Error(error.message || 'Erro na comunicação com SatoAI');
+        console.error('❌ Erro Supabase:', error);
+        throw new Error('Erro na comunicação com SatoAI');
       }
 
       if (data?.error) {
-        console.error('⚠️ Erro interno do SatoAI:', data.error);
+        console.error('⚠️ Erro SatoAI:', data.error);
         throw new Error(data.error);
       }
 
       if (!data?.response) {
-        console.error('📭 Resposta vazia do SatoAI:', data);
-        throw new Error('SatoAI retornou uma resposta vazia');
+        console.error('📭 Resposta vazia:', data);
+        throw new Error('SatoAI não respondeu');
       }
 
-      console.log('✅ SatoAI respondeu com sucesso via', data.provider || 'desconhecido');
-      toast.success(`Resposta gerada via ${data.provider || 'IA'}`);
+      console.log('✅ Sucesso via', data.provider || 'desconhecido');
+      toast.success(`Resposta do SatoAI via ${data.provider || 'IA'}`);
+      
       return data.response;
       
     } catch (error) {
-      console.error('💥 Erro ao consultar SatoAI:', error);
+      console.error('💥 Erro askSatoAI:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      toast.error(`Erro do SatoAI: ${errorMessage}`);
+      toast.error(`SatoAI: ${errorMessage}`);
       
       return null;
     } finally {
@@ -74,33 +84,35 @@ export const useSatoAI = () => {
 
   const getQuickInsight = async (walletData?: any): Promise<string | null> => {
     const context = walletData 
-      ? `Análise de carteira com saldo: ${walletData.saldo} BTC`
-      : 'Insight geral do mercado';
+      ? `Análise de carteira - Saldo: ${walletData.saldo} BTC`
+      : 'Insight de mercado Bitcoin';
       
     return askSatoAI(
-      'Me dê um insight rápido sobre o mercado de Bitcoin atual e uma recomendação.',
+      'Dê um insight rápido sobre Bitcoin e uma recomendação para hoje.',
       context
     );
   };
 
   const analyzePortfolio = async (portfolioData: any): Promise<string | null> => {
-    const context = `Portfolio: ${JSON.stringify(portfolioData)}`;
-    
     return askSatoAI(
-      'Analise meu portfolio e dê recomendações de otimização e diversificação.',
-      context
+      'Analise meu portfolio e dê recomendações de otimização.',
+      `Portfolio: ${JSON.stringify(portfolioData)}`
     );
   };
 
   const testConnection = async (): Promise<boolean> => {
     try {
-      console.log('🔧 Testando conexão com SatoAI...');
-      const response = await askSatoAI('Teste de conexão. Responda apenas "Conectado!" se estiver funcionando.', 'Teste de Conectividade');
+      console.log('🔧 Testando SatoAI...');
+      const response = await askSatoAI(
+        'Teste. Responda apenas "Conectado!" se funcionando.',
+        'Teste de Conectividade'
+      );
+      
       const isConnected = response !== null && response.toLowerCase().includes('conectado');
-      console.log('🔗 Resultado do teste:', isConnected ? 'Sucesso' : 'Falhou');
+      console.log('🔗 Teste resultado:', isConnected ? 'Sucesso' : 'Falhou');
       return isConnected;
     } catch (error) {
-      console.error('🚫 Teste de conexão falhou:', error);
+      console.error('🚫 Teste falhou:', error);
       return false;
     }
   };

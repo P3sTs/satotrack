@@ -15,6 +15,8 @@ const callOpenAI = async (systemPrompt: string, message: string) => {
     throw new Error('OpenAI API key não configurada');
   }
 
+  console.log('🤖 Chamando OpenAI API...');
+  
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -34,11 +36,12 @@ const callOpenAI = async (systemPrompt: string, message: string) => {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('OpenAI API error:', response.status, errorText);
-    throw new Error(`OpenAI API error: ${response.status}`);
+    console.error('❌ OpenAI API erro:', response.status, errorText);
+    throw new Error(`OpenAI indisponível (${response.status})`);
   }
 
   const data = await response.json();
+  console.log('✅ OpenAI respondeu com sucesso');
   return data.choices[0].message.content;
 };
 
@@ -47,9 +50,11 @@ const callGemini = async (systemPrompt: string, message: string) => {
     throw new Error('Gemini API key não configurada');
   }
 
+  console.log('🤖 Chamando Gemini API...');
+  
   const prompt = `${systemPrompt}\n\nUsuário: ${message}`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -71,129 +76,111 @@ const callGemini = async (systemPrompt: string, message: string) => {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Gemini API error:', response.status, errorText);
-    throw new Error(`Gemini API error: ${response.status}`);
+    console.error('❌ Gemini API erro:', response.status, errorText);
+    throw new Error(`Gemini indisponível (${response.status})`);
   }
 
   const data = await response.json();
+  
+  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+    console.error('❌ Resposta inválida do Gemini:', data);
+    throw new Error('Gemini retornou resposta inválida');
+  }
+
+  console.log('✅ Gemini respondeu com sucesso');
   return data.candidates[0].content.parts[0].text;
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('SatoAI Chat function called');
+    console.log('🚀 SatoAI Chat iniciado');
 
-    let requestBody;
-    try {
-      requestBody = await req.json();
-    } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
-      return new Response(JSON.stringify({ 
-        error: 'Formato de dados inválido',
-        details: 'Invalid JSON in request body' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
+    const requestBody = await req.json();
     const { message, context, provider = 'gemini' } = requestBody;
 
-    console.log('SatoAI Chat request received:', { 
-      message: message?.substring(0, 100) + '...', 
-      context,
+    console.log('📥 Dados recebidos:', { 
+      messageLength: message?.length || 0,
+      context: context || 'N/A',
       provider,
       hasOpenAIKey: !!openAIApiKey,
       hasGeminiKey: !!geminiApiKey
     });
 
-    if (!message || typeof message !== 'string') {
+    if (!message || typeof message !== 'string' || message.trim() === '') {
+      console.error('❌ Mensagem inválida');
       return new Response(JSON.stringify({ 
-        error: 'Mensagem é obrigatória e deve ser uma string',
-        details: 'Message is required and must be a string' 
+        error: 'Mensagem é obrigatória e não pode estar vazia' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const systemPrompt = `Você é o SatoAI, um assistente especializado em Bitcoin e criptomoedas da plataforma SatoTrack. 
-    
-    Características:
-    - Você é expert em análise de Bitcoin, blockchain e mercado de criptomoedas
-    - Fornece insights precisos sobre movimentos de preço, análise técnica e tendências
-    - Oferece recomendações de investimento baseadas em dados
-    - Sempre menciona os riscos envolvidos em investimentos
-    - Usa linguagem clara e acessível
-    - Pode analisar dados de carteiras e transações quando fornecidos
-    - Mantém um tom profissional mas amigável
-    - Seja conciso e direto nas respostas
-    
-    Contexto atual do usuário: ${context || 'Usuário navegando no dashboard SatoTrack'}
-    
-    Responda sempre em português brasileiro e seja conciso mas informativo.`;
+    const systemPrompt = `Você é o SatoAI, um assistente especializado em Bitcoin e criptomoedas da plataforma SatoTrack.
+
+CARACTERÍSTICAS:
+- Expert em análise de Bitcoin, blockchain e mercado de criptomoedas
+- Fornece insights sobre preços, análise técnica e tendências
+- Oferece recomendações baseadas em dados
+- Sempre menciona riscos em investimentos
+- Linguagem clara e acessível
+- Tom profissional mas amigável
+- Respostas concisas e informativas
+
+Contexto: ${context || 'Dashboard SatoTrack'}
+
+Responda SEMPRE em português brasileiro de forma direta e útil.`;
 
     let aiResponse;
     let usedProvider = provider;
 
+    // Tentar provider preferido primeiro
     try {
       if (provider === 'gemini' && geminiApiKey) {
-        console.log('Tentando Gemini...');
-        aiResponse = await callGemini(systemPrompt, message);
+        console.log('🔄 Tentando Gemini (preferido)...');
+        aiResponse = await callGemini(systemPrompt, message.trim());
         usedProvider = 'gemini';
       } else if (provider === 'openai' && openAIApiKey) {
-        console.log('Tentando OpenAI...');
-        aiResponse = await callOpenAI(systemPrompt, message);
+        console.log('🔄 Tentando OpenAI (preferido)...');
+        aiResponse = await callOpenAI(systemPrompt, message.trim());
         usedProvider = 'openai';
       } else {
-        // Fallback: tentar qualquer API disponível
-        if (geminiApiKey) {
-          console.log('Fallback para Gemini...');
-          aiResponse = await callGemini(systemPrompt, message);
-          usedProvider = 'gemini';
-        } else if (openAIApiKey) {
-          console.log('Fallback para OpenAI...');
-          aiResponse = await callOpenAI(systemPrompt, message);
-          usedProvider = 'openai';
-        } else {
-          throw new Error('Nenhuma API de IA configurada');
-        }
+        throw new Error(`Provider ${provider} não configurado`);
       }
-    } catch (error) {
-      console.error(`Erro com ${provider}:`, error);
+    } catch (primaryError) {
+      console.log(`⚠️ Erro com ${provider}:`, primaryError.message);
       
-      // Tentar provider alternativo
+      // Fallback para o outro provider
       try {
         if (provider === 'openai' && geminiApiKey) {
-          console.log('Tentando Gemini como fallback...');
-          aiResponse = await callGemini(systemPrompt, message);
+          console.log('🔄 Fallback para Gemini...');
+          aiResponse = await callGemini(systemPrompt, message.trim());
           usedProvider = 'gemini';
         } else if (provider === 'gemini' && openAIApiKey) {
-          console.log('Tentando OpenAI como fallback...');
-          aiResponse = await callOpenAI(systemPrompt, message);
+          console.log('🔄 Fallback para OpenAI...');
+          aiResponse = await callOpenAI(systemPrompt, message.trim());
           usedProvider = 'openai';
         } else {
-          throw error;
+          throw new Error('Nenhum provider de IA disponível');
         }
       } catch (fallbackError) {
-        console.error('Todos os providers falharam:', fallbackError);
-        throw new Error('Todos os modelos de IA estão indisponíveis no momento');
+        console.error('💥 Todos os providers falharam:', fallbackError.message);
+        throw new Error('Serviços de IA temporariamente indisponíveis');
       }
     }
 
-    if (!aiResponse) {
-      throw new Error('Resposta vazia da IA');
+    if (!aiResponse || typeof aiResponse !== 'string' || aiResponse.trim() === '') {
+      throw new Error('IA retornou resposta vazia');
     }
 
-    console.log(`SatoAI response generated successfully via ${usedProvider}, length:`, aiResponse.length);
+    console.log(`✅ Resposta gerada via ${usedProvider}, tamanho: ${aiResponse.length} chars`);
 
     return new Response(JSON.stringify({ 
-      response: aiResponse,
+      response: aiResponse.trim(),
       provider: usedProvider,
       timestamp: new Date().toISOString()
     }), {
@@ -201,10 +188,11 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Erro geral na função satoai-chat:', error);
+    console.error('💥 Erro geral:', error.message);
+    
     return new Response(JSON.stringify({ 
-      error: error.message || 'Erro interno do SatoAI. Tente novamente em alguns instantes.',
-      details: error.message 
+      error: error.message || 'Erro interno do SatoAI',
+      details: 'Verifique sua conexão e tente novamente'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
