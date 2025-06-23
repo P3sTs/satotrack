@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,8 @@ const MobileNavigation: React.FC = () => {
   if (!isMobile) {
     return null;
   }
+
+  console.log('MobileNavigation renderizando - isMobile:', isMobile, 'isAuthenticated:', isAuthenticated);
 
   const handleLogout = async () => {
     try {
@@ -124,7 +125,7 @@ const MobileNavigation: React.FC = () => {
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="text-satotrack-text hover:text-satotrack-neon"
+                className="text-satotrack-text hover:text-satotrack-neon relative z-50"
               >
                 <Menu className="h-6 w-6" />
               </Button>
@@ -132,7 +133,7 @@ const MobileNavigation: React.FC = () => {
             
             <SheetContent 
               side="right" 
-              className="w-80 bg-dashboard-dark border-dashboard-medium p-0"
+              className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-50"
             >
               <div className="flex flex-col h-full">
                 {/* Header */}

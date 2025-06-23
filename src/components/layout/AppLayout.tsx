@@ -18,7 +18,7 @@ const AppLayout: React.FC = () => {
         {/* NavBar para Desktop */}
         <NavBar />
         
-        {/* Mobile Navigation (top header + bottom bar) */}
+        {/* Mobile Navigation */}
         <MobileNavigation />
         
         {/* Conteúdo Principal */}
