@@ -10,7 +10,9 @@ import {
   Bot,
   Loader2,
   X,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  WifiOff
 } from 'lucide-react';
 import { useSatoAI } from '@/hooks/useSatoAI';
 import { toast } from 'sonner';
@@ -20,7 +22,14 @@ interface ChatMessage {
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  provider?: string;
   isTyping?: boolean;
+}
+
+interface ConnectionStatus {
+  isConnected: boolean;
+  provider: string | null;
+  lastTest: Date | null;
 }
 
 const FloatingSatoAIChat: React.FC = () => {
@@ -30,11 +39,17 @@ const FloatingSatoAIChat: React.FC = () => {
       id: '1',
       content: 'Olá! Sou o SatoAI, seu assistente especializado em Bitcoin e criptomoedas. Como posso ajudá-lo hoje?',
       sender: 'ai',
-      timestamp: new Date()
+      timestamp: new Date(),
+      provider: 'system'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const { askSatoAI, isLoading } = useSatoAI();
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
+    isConnected: false,
+    provider: null,
+    lastTest: null
+  });
+  const { askSatoAI, testConnection, isLoading } = useSatoAI();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [typingMessage, setTypingMessage] = useState<string>('');
 
@@ -104,6 +119,7 @@ const FloatingSatoAIChat: React.FC = () => {
         };
 
         setMessages(prev => [...prev, aiMessage]);
+        setConnectionStatus(prev => ({ ...prev, isConnected: true, lastTest: new Date() }));
 
         // Animar a digitação da resposta
         typeMessage(response, () => {
@@ -119,11 +135,12 @@ const FloatingSatoAIChat: React.FC = () => {
         // Erro já foi tratado pelo hook useSatoAI
         const errorAiMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          content: 'Desculpe, não consegui processar sua mensagem. Verifique se sua API key está configurada corretamente e tente novamente.',
+          content: 'Desculpe, não consegui processar sua mensagem. Verifique sua conexão e tente novamente.',
           sender: 'ai',
           timestamp: new Date()
         };
         setMessages(prev => [...prev, errorAiMessage]);
+        setConnectionStatus(prev => ({ ...prev, isConnected: false }));
       }
 
     } catch (error) {
@@ -136,6 +153,7 @@ const FloatingSatoAIChat: React.FC = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorAiMessage]);
+      setConnectionStatus(prev => ({ ...prev, isConnected: false }));
     }
   };
 
@@ -146,18 +164,28 @@ const FloatingSatoAIChat: React.FC = () => {
     }
   };
 
-  const testConnection = async () => {
-    const testMessage = "Teste de conexão. Responda apenas 'Conectado!' se estiver funcionando.";
-    
+  const performConnectionTest = async () => {
     toast.info('Testando conexão com SatoAI...');
     
-    const response = await askSatoAI(testMessage, 'Teste de conexão');
+    const isConnected = await testConnection();
     
-    if (response) {
+    setConnectionStatus({
+      isConnected,
+      provider: isConnected ? 'IA' : null,
+      lastTest: new Date()
+    });
+
+    if (isConnected) {
       toast.success('Conexão com SatoAI funcionando!');
     } else {
-      toast.error('Falha na conexão com SatoAI. Verifique sua API key.');
+      toast.error('Falha na conexão com SatoAI. Verifique as configurações.');
     }
+  };
+
+  const getStatusIcon = () => {
+    if (isLoading) return <Loader2 className="h-4 w-4 animate-spin text-yellow-400" />;
+    if (connectionStatus.isConnected) return <CheckCircle className="h-4 w-4 text-green-400" />;
+    return <WifiOff className="h-4 w-4 text-red-400" />;
   };
 
   if (!isOpen) {
@@ -182,14 +210,16 @@ const FloatingSatoAIChat: React.FC = () => {
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-cyan-400" />
             <span className="font-semibold text-cyan-400">SatoAI</span>
+            {getStatusIcon()}
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={testConnection}
+              onClick={performConnectionTest}
               className="h-8 w-8 p-0 text-white/60 hover:text-white"
               title="Testar conexão"
+              disabled={isLoading}
             >
               <AlertCircle className="h-4 w-4" />
             </Button>
@@ -204,6 +234,20 @@ const FloatingSatoAIChat: React.FC = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Status Bar */}
+        {connectionStatus.lastTest && (
+          <div className="px-4 py-2 bg-black/20 border-b border-cyan-500/10">
+            <div className="text-xs text-cyan-300">
+              Status: {connectionStatus.isConnected ? 'Conectado' : 'Desconectado'}
+              {connectionStatus.lastTest && (
+                <span className="text-white/60 ml-2">
+                  • Último teste: {connectionStatus.lastTest.toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Messages Area */}
         <ScrollArea className="h-80 w-full p-4" ref={scrollAreaRef}>
@@ -241,6 +285,11 @@ const FloatingSatoAIChat: React.FC = () => {
                         <span className="animate-pulse">|</span>
                       )}
                     </p>
+                    {message.provider && message.provider !== 'system' && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        via {message.provider}
+                      </div>
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 block">
                     {message.timestamp.toLocaleTimeString()}
@@ -293,6 +342,9 @@ const FloatingSatoAIChat: React.FC = () => {
         <div className="px-4 pb-3">
           <div className="text-xs text-center text-muted-foreground border-t border-cyan-500/10 pt-2">
             Powered by <span className="text-cyan-400 font-medium">SatoAI</span>
+            {connectionStatus.provider && (
+              <span className="text-white/60"> • {connectionStatus.provider}</span>
+            )}
           </div>
         </div>
       </div>

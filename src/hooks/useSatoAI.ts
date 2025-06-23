@@ -8,10 +8,19 @@ interface SatoAIResponse {
   timestamp: string;
 }
 
+interface AIProvider {
+  name: string;
+  available: boolean;
+}
+
 export const useSatoAI = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [providers, setProviders] = useState<AIProvider[]>([
+    { name: 'gemini', available: true },
+    { name: 'openai', available: true }
+  ]);
 
-  const askSatoAI = async (message: string, context?: string): Promise<string | null> => {
+  const askSatoAI = async (message: string, context?: string, preferredProvider?: string): Promise<string | null> => {
     if (!message.trim()) {
       toast.error('Por favor, digite uma mensagem para o SatoAI');
       return null;
@@ -20,12 +29,13 @@ export const useSatoAI = () => {
     setIsLoading(true);
     
     try {
-      console.log('Enviando mensagem para SatoAI:', { message, context });
+      console.log('Enviando mensagem para SatoAI:', { message, context, preferredProvider });
       
       const { data, error } = await supabase.functions.invoke('satoai-chat', {
         body: {
           message: message.trim(),
-          context: context || 'SatoTrack App'
+          context: context || 'SatoTrack App',
+          provider: preferredProvider || 'gemini' // Gemini como padrão
         }
       });
 
@@ -33,12 +43,27 @@ export const useSatoAI = () => {
 
       if (error) {
         console.error('Erro na função Supabase:', error);
+        
+        // Se for erro de quota do OpenAI, tentar Gemini
+        if (error.message?.includes('quota') || error.message?.includes('429')) {
+          console.log('Tentando com Gemini devido a erro de quota OpenAI...');
+          return askSatoAI(message, context, 'gemini');
+        }
+        
         toast.error(`Erro na comunicação: ${error.message}`);
         return null;
       }
 
       if (data?.error) {
         console.error('Erro na função SatoAI:', data.error);
+        
+        // Se OpenAI falhou, tentar Gemini
+        if (data.error.includes('quota') || data.error.includes('OpenAI')) {
+          console.log('OpenAI falhou, tentando Gemini...');
+          toast.info('Conectando com modelo alternativo...');
+          return askSatoAI(message, context, 'gemini');
+        }
+        
         toast.error(`Erro do SatoAI: ${data.error}`);
         return null;
       }
@@ -50,6 +75,7 @@ export const useSatoAI = () => {
       }
 
       console.log('SatoAI respondeu com sucesso:', data.response);
+      toast.success(`Resposta gerada via ${data.provider || 'IA'}`);
       return data.response;
       
     } catch (error) {
@@ -57,10 +83,11 @@ export const useSatoAI = () => {
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
-      if (errorMessage.includes('sobrecarregado') || errorMessage.includes('Rate limit')) {
-        toast.error('SatoAI está sobrecarregado. Tente novamente em alguns segundos.');
-      } else if (errorMessage.includes('API key')) {
-        toast.error('Configuração da IA não encontrada. Verifique sua API key.');
+      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+        toast.error('Limite de uso atingido. Tentando modelo alternativo...');
+        if (!preferredProvider || preferredProvider === 'openai') {
+          return askSatoAI(message, context, 'gemini');
+        }
       } else if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
         toast.error('Erro de conexão. Verifique sua internet e tente novamente.');
       } else {
@@ -93,10 +120,21 @@ export const useSatoAI = () => {
     );
   };
 
+  const testConnection = async (): Promise<boolean> => {
+    try {
+      const response = await askSatoAI('Teste de conexão. Responda apenas "Conectado!" se estiver funcionando.', 'Teste');
+      return response !== null;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     askSatoAI,
     getQuickInsight,
     analyzePortfolio,
-    isLoading
+    testConnection,
+    isLoading,
+    providers
   };
 };
