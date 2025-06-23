@@ -2,7 +2,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBar from '../NavBar';
-import MobileNavigation from '../navigation/MobileNavigation';
+import MobileNavigation from '../MobileNavigation';
 import GlobalErrorBoundary from '../error/GlobalErrorBoundary';
 import NavigationAudit from '../navigation/NavigationAudit';
 import FloatingSatoAIChat from '../chat/FloatingSatoAIChat';
@@ -18,13 +18,13 @@ const AppLayout: React.FC = () => {
         {/* NavBar para Desktop */}
         <NavBar />
         
+        {/* Mobile Navigation (top header + bottom bar) */}
+        <MobileNavigation />
+        
         {/* Conteúdo Principal */}
-        <main className={`${isMobile ? "pb-20" : "pb-0"} min-h-screen`}>
+        <main className={`min-h-screen ${isMobile ? "pt-14 pb-16" : "pt-0 pb-0"}`}>
           <Outlet />
         </main>
-        
-        {/* Navegação Mobile (bottom bar) */}
-        <MobileNavigation />
         
         {/* Chat SatoAI Flutuante */}
         <FloatingSatoAIChat />
