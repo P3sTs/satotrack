@@ -6,8 +6,8 @@ export interface Achievement {
   icon: string;
   requirement: number;
   requirement_value: number;
-  unlocked: boolean;
-  unlockedAt: Date | null;
+  unlocked?: boolean;
+  unlockedAt?: Date | null;
   unlocked_at?: string;
   xpReward?: number;
   xp_reward: number;

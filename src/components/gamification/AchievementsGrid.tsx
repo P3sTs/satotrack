@@ -5,6 +5,7 @@ import { achievementService } from './services/achievementService';
 import AchievementCard from './components/AchievementCard';
 import AchievementsLoading from './components/AchievementsLoading';
 import AchievementsProgressOverview from './components/AchievementsProgressOverview';
+import { Achievement } from './types/achievementTypes';
 
 const AchievementsGrid: React.FC = () => {
   const { userStats, achievements, loading } = useGamification();
@@ -14,7 +15,15 @@ const AchievementsGrid: React.FC = () => {
   }
 
   const totalLikes = userStats?.total_likes || 0;
-  const allAchievements = achievementService.getExtendedAchievements(achievements, userStats);
+  
+  // Convert context achievements to component Achievement type
+  const convertedAchievements: Achievement[] = achievements.map(achievement => ({
+    ...achievement,
+    unlocked: achievement.unlocked || false,
+    unlockedAt: achievement.unlockedAt || null
+  }));
+  
+  const allAchievements = achievementService.getExtendedAchievements(convertedAchievements, userStats);
 
   return (
     <div className="space-y-6">
