@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Wallet, Mail, BarChart3, Bell, Settings, Home, PlusCircle, History, Star, Crown } from 'lucide-react';
+import { LogOut, User, Wallet, BarChart3, Bell, Settings, Home, PlusCircle, History, Star, Crown, X } from 'lucide-react';
 import { AuthUser } from '@/contexts/auth/types';
 import { Separator } from '@/components/ui/separator';
 
@@ -45,6 +45,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   return (
     <div className="flex flex-col h-full bg-dashboard-dark text-satotrack-text">
       {/* Header do Menu */}
+      <div className="flex items-center justify-between p-4 border-b border-dashboard-medium">
+        <h2 className="text-lg font-semibold text-white">Menu</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="h-8 w-8 p-0 text-white/60 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* User Info */}
       <div className="p-4 border-b border-dashboard-medium">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
@@ -76,15 +89,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <Button
             key={item.path}
             variant="ghost"
-            className={`w-full justify-start gap-3 text-left mobile-menu-item ${
+            className={`w-full justify-start gap-3 text-left h-12 ${
               isActive(item.path) 
-                ? 'bg-dashboard-medium text-white' 
+                ? 'bg-dashboard-medium text-white border-l-2 border-l-satotrack-neon' 
                 : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50'
             }`}
             onClick={() => handleItemClick(item.path)}
           >
-            <item.icon className="h-4 w-4" />
-            {item.label}
+            <item.icon className="h-5 w-5" />
+            <span className="text-sm">{item.label}</span>
           </Button>
         ))}
 
@@ -93,7 +106,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <Separator className="my-2 bg-dashboard-medium" />
             <Button
               variant="ghost"
-              className={`w-full justify-start gap-3 text-left mobile-menu-item ${
+              className={`w-full justify-start gap-3 text-left h-12 ${
                 isPremium 
                   ? 'border border-bitcoin/30 text-bitcoin hover:bg-bitcoin/10' 
                   : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50'
@@ -103,8 +116,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 onClose();
               }}
             >
-              <Star className={`h-4 w-4 ${isPremium ? 'fill-bitcoin' : ''}`} />
-              {isPremium ? 'Painel Premium' : 'Ser Premium'}
+              <Star className={`h-5 w-5 ${isPremium ? 'fill-bitcoin' : ''}`} />
+              <span className="text-sm">{isPremium ? 'Painel Premium' : 'Ser Premium'}</span>
             </Button>
           </>
         )}
@@ -115,14 +128,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         <div className="p-4 border-t border-dashboard-medium">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 h-12"
             onClick={() => {
               handleLogout();
               onClose();
             }}
           >
-            <LogOut className="h-4 w-4" />
-            Sair
+            <LogOut className="h-5 w-5" />
+            <span className="text-sm">Sair</span>
           </Button>
         </div>
       )}

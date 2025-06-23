@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
-import { toast } from '@/hooks/use-toast';
-import MobileMenuContainer from './MobileMenuContainer';
+import { toast } from 'sonner';
+import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const MobileNavigation: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,17 +26,10 @@ const MobileNavigation: React.FC = () => {
       await signOut();
       navigate('/');
       setIsMobileMenuOpen(false);
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso",
-      });
+      toast.success("Logout realizado com sucesso");
     } catch (error) {
       console.error('Erro de logout:', error);
-      toast({
-        title: "Erro ao sair",
-        description: "Não foi possível realizar o logout",
-        variant: "destructive"
-      });
+      toast.error("Erro ao realizar logout");
     }
   };
   
@@ -56,18 +50,10 @@ const MobileNavigation: React.FC = () => {
   const handlePremiumClick = () => {
     if (isPremium) {
       handleNavigation('/premium-dashboard');
-      toast({
-        title: "Painel Premium",
-        description: "Bem-vindo ao seu painel exclusivo premium!",
-        variant: "default"
-      });
+      toast.success("Bem-vindo ao painel Premium!");
     } else {
       handleNavigation('/planos');
-      toast({
-        title: "Upgrade disponível",
-        description: "Conheça os benefícios do plano Premium!",
-        variant: "default"
-      });
+      toast.info("Conheça os benefícios do plano Premium!");
     }
   };
 
@@ -88,18 +74,31 @@ const MobileNavigation: React.FC = () => {
         </div>
         
         {/* Menu Button */}
-        <MobileMenuContainer
-          isMobileMenuOpen={isMobileMenuOpen}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-          user={user}
-          isActive={isActive}
-          handleNavigation={handleNavigation}
-          handleLogout={handleLogout}
-          getUserInitials={getUserInitials}
-          trigger={<Menu className="h-6 w-6" />}
-          isPremium={isPremium}
-          onPremiumClick={handlePremiumClick}
-        />
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <button 
+              className="p-2 text-satotrack-text hover:text-white transition-colors"
+              aria-label="Abrir menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </SheetTrigger>
+          <SheetContent 
+            side="right" 
+            className="w-[300px] bg-dashboard-dark border-dashboard-medium p-0"
+          >
+            <MobileMenu
+              user={user}
+              isActive={isActive}
+              handleNavigation={handleNavigation}
+              handleLogout={handleLogout}
+              getUserInitials={getUserInitials}
+              onClose={() => setIsMobileMenuOpen(false)}
+              isPremium={isPremium}
+              onPremiumClick={handlePremiumClick}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );

@@ -15,17 +15,25 @@ const AppLayout: React.FC = () => {
   return (
     <GlobalErrorBoundary>
       <div className="min-h-screen bg-dashboard-dark text-satotrack-text">
+        {/* NavBar para Desktop */}
         <NavBar />
         
-        <main className={isMobile ? "pb-20" : "pb-0"}>
+        {/* Conteúdo Principal */}
+        <main className={`${isMobile ? "pb-20" : "pb-0"} min-h-screen`}>
           <Outlet />
         </main>
         
+        {/* Navegação Mobile (bottom bar) */}
         <MobileNavigation />
+        
+        {/* Chat SatoAI Flutuante */}
         <FloatingSatoAIChat />
         
+        {/* Audit de Navegação (apenas em desenvolvimento) */}
         {process.env.NODE_ENV === 'development' && <NavigationAudit />}
       </div>
+      
+      {/* Toaster para notificações */}
       <Toaster />
     </GlobalErrorBoundary>
   );

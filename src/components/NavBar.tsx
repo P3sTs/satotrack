@@ -7,9 +7,8 @@ import { Star, Menu } from 'lucide-react';
 import MainNav from './MainNav';
 import UserMenu from './navigation/UserMenu';
 import { PlanBadge } from './monetization/PlanDisplay';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const NavBar: React.FC = () => {
   const { user, signOut, userPlan, isAuthenticated } = useAuth();
@@ -17,7 +16,6 @@ const NavBar: React.FC = () => {
   const location = useLocation();
   const isPremium = userPlan === 'premium';
   const isMobile = useIsMobile();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Debug log para acompanhar o status de autenticação
   useEffect(() => {
@@ -28,18 +26,10 @@ const NavBar: React.FC = () => {
     try {
       signOut();
       navigate('/');
-      setMobileMenuOpen(false);
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso",
-      });
+      toast.success("Logout realizado com sucesso");
     } catch (error) {
       console.error('Erro ao sair:', error);
-      toast({
-        title: "Erro ao sair",
-        description: "Não foi possível realizar o logout",
-        variant: "destructive"
-      });
+      toast.error("Erro ao realizar logout");
     }
   };
 
@@ -52,17 +42,7 @@ const NavBar: React.FC = () => {
   // Lidar com o clique no botão premium
   const handlePremiumClick = () => {
     navigate('/planos');
-    setMobileMenuOpen(false);
-    toast({
-      title: isPremium ? "Painel Premium" : "Upgrade disponível",
-      description: isPremium ? "Bem-vindo ao seu painel exclusivo premium!" : "Conheça os benefícios do plano Premium!",
-      variant: "default"
-    });
-  };
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setMobileMenuOpen(false);
+    toast.info(isPremium ? "Bem-vindo ao painel Premium!" : "Conheça os benefícios do plano Premium!");
   };
 
   // Só renderiza no desktop
@@ -98,7 +78,7 @@ const NavBar: React.FC = () => {
           <div className="flex items-center gap-2">
             {/* Botão Premium para todos os usuários */}
             <Button 
-              variant={isPremium ? "bitcoin" : "outline"} 
+              variant={isPremium ? "default" : "outline"} 
               size="sm"
               className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
               onClick={handlePremiumClick}
