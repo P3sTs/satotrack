@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Star, Menu } from 'lucide-react';
+import { Star } from 'lucide-react';
 import MainNav from './MainNav';
 import UserMenu from './navigation/UserMenu';
+import MobileNavigation from './MobileNavigation';
 import { PlanBadge } from './monetization/PlanDisplay';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -45,15 +46,15 @@ const NavBar: React.FC = () => {
     toast.info(isPremium ? "Bem-vindo ao painel Premium!" : "Conheça os benefícios do plano Premium!");
   };
 
-  // Só renderiza no desktop
-  if (isMobile) {
-    return null;
-  }
-
   return (
     <header className="bg-dashboard-dark text-satotrack-text sticky top-0 z-50 border-b border-dashboard-medium/30">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-14 md:h-16">
+          {/* Mobile Menu - apenas no mobile */}
+          {isMobile && isAuthenticated && (
+            <MobileNavigation />
+          )}
+          
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2">
@@ -69,31 +70,38 @@ const NavBar: React.FC = () => {
             </Link>
           </div>
           
-          {/* Navegação Desktop - Centralizada */}
-          <div className="hidden md:flex items-center justify-center flex-1 px-4">
-            <MainNav />
-          </div>
+          {/* Navegação Desktop - Centralizada - apenas no desktop e quando autenticado */}
+          {!isMobile && isAuthenticated && (
+            <div className="hidden md:flex items-center justify-center flex-1 px-4">
+              <MainNav />
+            </div>
+          )}
           
           {/* Desktop Actions */}
           <div className="flex items-center gap-2">
-            {/* Botão Premium para todos os usuários */}
-            <Button 
-              variant={isPremium ? "default" : "outline"} 
-              size="sm"
-              className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
-              onClick={handlePremiumClick}
-            >
-              <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
-              {isPremium ? 'Premium' : 'Quero ser Premium'}
-            </Button>
+            {/* Botão Premium para todos os usuários - apenas no desktop */}
+            {!isMobile && (
+              <Button 
+                variant={isPremium ? "default" : "outline"} 
+                size="sm"
+                className={`mr-2 hidden md:flex items-center ${isPremium ? 'bg-bitcoin hover:bg-bitcoin/90 text-white' : 'border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10'}`}
+                onClick={handlePremiumClick}
+              >
+                <Star className={`h-4 w-4 mr-1 ${isPremium ? 'fill-white' : ''}`} />
+                {isPremium ? 'Premium' : 'Quero ser Premium'}
+              </Button>
+            )}
             
-            {user && <PlanBadge />}
-            <UserMenu 
-              user={user} 
-              getUserInitials={getUserInitials} 
-              handleLogout={handleLogout}
-              navigate={navigate} 
-            />
+            {/* Plan Badge e User Menu - apenas no desktop */}
+            {!isMobile && user && <PlanBadge />}
+            {!isMobile && (
+              <UserMenu 
+                user={user} 
+                getUserInitials={getUserInitials} 
+                handleLogout={handleLogout}
+                navigate={navigate} 
+              />
+            )}
           </div>
         </div>
       </div>
