@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -97,7 +96,7 @@ const SmartInsights: React.FC = () => {
         - Variação 24h: ${bitcoinData.price_change_percentage_24h?.toFixed(2)}%
         - Volume 24h: $${bitcoinData.volume_24h_usd ? (bitcoinData.volume_24h_usd / 1e9).toFixed(2) + 'B' : 'N/A'}
         - Market Cap: $${bitcoinData.market_cap_usd ? (bitcoinData.market_cap_usd / 1e12).toFixed(2) + 'T' : 'N/A'}
-        - Dominância: ${bitcoinData.market_cap_percentage?.toFixed(1)}%
+        - Supply em circulação: ${bitcoinData.circulating_supply ? bitcoinData.circulating_supply.toLocaleString() : 'N/A'} BTC
       `;
 
       const aiResponse = await askSatoAI(
