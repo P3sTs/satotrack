@@ -12,10 +12,13 @@ export interface Achievement {
   xp_reward: number;
   requirement_type: string;
   requirement_value: number;
+  requirement: number; // Add for compatibility
   unlocked?: boolean;
   unlocked_at?: string;
+  unlockedAt?: Date | null; // Add for compatibility
   progress?: number;
   category: 'trading' | 'portfolio' | 'social' | 'streak' | 'special';
+  xpReward?: number; // Add for compatibility
 }
 
 export interface UserStats {
@@ -39,6 +42,11 @@ interface GamificationContextType {
   updateUserStats: (xpGain?: number) => Promise<void>;
   unlockAchievement: (achievementId: string) => Promise<void>;
   generatePersonalizedAchievements: () => Promise<void>;
+  widgetLikes: Record<string, number>;
+  isWidgetLiked: (widgetId: string) => boolean;
+  likeWidget: (widgetId: string) => Promise<void>;
+  unlikeWidget: (widgetId: string) => Promise<void>;
+  addXP: (amount: number, reason?: string) => Promise<void>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -58,6 +66,8 @@ interface GamificationProviderProps {
 export const GamificationProvider: React.FC<GamificationProviderProps> = ({ children }) => {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [widgetLikes, setWidgetLikes] = useState<Record<string, number>>({});
+  const [likedWidgets, setLikedWidgets] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { suggestAchievements } = useGeminiAI();
@@ -69,8 +79,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Cadastre sua primeira carteira Bitcoin',
       icon: 'wallet',
       xp_reward: 100,
+      xpReward: 100,
       requirement_type: 'wallets_count',
       requirement_value: 1,
+      requirement: 1,
       category: 'portfolio'
     },
     {
@@ -79,8 +91,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Cadastre 5 carteiras Bitcoin',
       icon: 'briefcase',
       xp_reward: 500,
+      xpReward: 500,
       requirement_type: 'wallets_count',
       requirement_value: 5,
+      requirement: 5,
       category: 'portfolio'
     },
     {
@@ -89,8 +103,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Tenha um ROI positivo pela primeira vez',
       icon: 'trending-up',
       xp_reward: 200,
+      xpReward: 200,
       requirement_type: 'positive_roi',
       requirement_value: 1,
+      requirement: 1,
       category: 'trading'
     },
     {
@@ -99,8 +115,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Acesse o SatoTrack por 7 dias consecutivos',
       icon: 'calendar',
       xp_reward: 300,
+      xpReward: 300,
       requirement_type: 'streak_days',
       requirement_value: 7,
+      requirement: 7,
       category: 'streak'
     },
     {
@@ -109,8 +127,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Receba 10 curtidas da comunidade',
       icon: 'heart',
       xp_reward: 150,
+      xpReward: 150,
       requirement_type: 'total_likes',
       requirement_value: 10,
+      requirement: 10,
       category: 'social'
     },
     {
@@ -119,8 +139,10 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       description: 'Alcance o nível 10',
       icon: 'star',
       xp_reward: 1000,
+      xpReward: 1000,
       requirement_type: 'level',
       requirement_value: 10,
+      requirement: 10,
       category: 'special'
     }
   ];
@@ -177,11 +199,36 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
         return;
       }
 
+      // Carregar curtidas de widgets
+      const { data: widgetLikesData, error: likesError } = await supabase
+        .from('widget_likes')
+        .select('widget_id, likes_count')
+        .eq('user_id', user.id);
+
+      if (likesError) {
+        console.error('Erro ao carregar curtidas:', likesError);
+      } else {
+        const likesMap: Record<string, number> = {};
+        const likedSet = new Set<string>();
+        
+        widgetLikesData?.forEach(like => {
+          likesMap[like.widget_id] = like.likes_count;
+          if (like.likes_count > 0) {
+            likedSet.add(like.widget_id);
+          }
+        });
+        
+        setWidgetLikes(likesMap);
+        setLikedWidgets(likedSet);
+      }
+
       // Marcar conquistas como desbloqueadas
       const achievementsWithProgress = defaultAchievements.map(achievement => ({
         ...achievement,
         unlocked: unlockedAchievements?.some(ua => ua.achievement_id === achievement.id),
         unlocked_at: unlockedAchievements?.find(ua => ua.achievement_id === achievement.id)?.unlocked_at,
+        unlockedAt: unlockedAchievements?.find(ua => ua.achievement_id === achievement.id)?.unlocked_at ? 
+          new Date(unlockedAchievements.find(ua => ua.achievement_id === achievement.id)!.unlocked_at) : null,
         progress: calculateProgress(achievement, stats)
       }));
 
@@ -244,6 +291,11 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
     }
   };
 
+  const addXP = async (amount: number, reason?: string) => {
+    console.log(`Adicionando ${amount} XP: ${reason || 'Sem motivo especificado'}`);
+    await updateUserStats(amount);
+  };
+
   const checkForNewAchievements = async (stats: UserStats) => {
     const unlockedAchievements = achievements.filter(a => 
       !a.unlocked && calculateProgress(a, stats) >= 100
@@ -274,7 +326,12 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       setAchievements(prev => 
         prev.map(a => 
           a.id === achievementId 
-            ? { ...a, unlocked: true, unlocked_at: new Date().toISOString() }
+            ? { 
+                ...a, 
+                unlocked: true, 
+                unlocked_at: new Date().toISOString(),
+                unlockedAt: new Date()
+              }
             : a
         )
       );
@@ -287,6 +344,117 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
 
     } catch (error) {
       console.error('Erro ao desbloquear conquista:', error);
+    }
+  };
+
+  const isWidgetLiked = (widgetId: string): boolean => {
+    return likedWidgets.has(widgetId);
+  };
+
+  const likeWidget = async (widgetId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const { data: existing } = await supabase
+        .from('widget_likes')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('widget_id', widgetId)
+        .single();
+
+      if (existing) {
+        // Incrementar curtida existente
+        const { error } = await supabase
+          .from('widget_likes')
+          .update({
+            likes_count: existing.likes_count + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (!error) {
+          setWidgetLikes(prev => ({
+            ...prev,
+            [widgetId]: existing.likes_count + 1
+          }));
+          setLikedWidgets(prev => new Set([...prev, widgetId]));
+          await addXP(10, 'Widget curtido');
+        }
+      } else {
+        // Criar nova curtida
+        const { error } = await supabase
+          .from('widget_likes')
+          .insert({
+            user_id: user.id,
+            widget_id: widgetId,
+            likes_count: 1
+          });
+
+        if (!error) {
+          setWidgetLikes(prev => ({
+            ...prev,
+            [widgetId]: 1
+          }));
+          setLikedWidgets(prev => new Set([...prev, widgetId]));
+          await addXP(10, 'Widget curtido');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao curtir widget:', error);
+    }
+  };
+
+  const unlikeWidget = async (widgetId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const { data: existing } = await supabase
+        .from('widget_likes')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('widget_id', widgetId)
+        .single();
+
+      if (!existing) return;
+
+      if (existing.likes_count > 1) {
+        // Decrementar curtida
+        const { error } = await supabase
+          .from('widget_likes')
+          .update({
+            likes_count: existing.likes_count - 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (!error) {
+          setWidgetLikes(prev => ({
+            ...prev,
+            [widgetId]: existing.likes_count - 1
+          }));
+        }
+      } else {
+        // Remover curtida completamente
+        const { error } = await supabase
+          .from('widget_likes')
+          .delete()
+          .eq('id', existing.id);
+
+        if (!error) {
+          setWidgetLikes(prev => {
+            const newLikes = { ...prev };
+            delete newLikes[widgetId];
+            return newLikes;
+          });
+          setLikedWidgets(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(widgetId);
+            return newSet;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao remover curtida:', error);
     }
   };
 
@@ -321,7 +489,12 @@ export const GamificationProvider: React.FC<GamificationProviderProps> = ({ chil
       loading,
       updateUserStats,
       unlockAchievement,
-      generatePersonalizedAchievements
+      generatePersonalizedAchievements,
+      widgetLikes,
+      isWidgetLiked,
+      likeWidget,
+      unlikeWidget,
+      addXP
     }}>
       {children}
     </GamificationContext.Provider>
