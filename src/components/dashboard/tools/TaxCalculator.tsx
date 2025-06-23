@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileText, Download, Calculator, AlertCircle } from 'lucide-react';
+import { FileText, Download, Calculator, AlertCircle, Brain, Loader2 } from 'lucide-react';
+import { useSatoAI } from '@/hooks/useSatoAI';
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 
 interface TaxCalculation {
   totalGains: number;
@@ -11,6 +13,7 @@ interface TaxCalculation {
   taxableAmount: number;
   taxOwed: number;
   exemption: boolean;
+  aiInsights?: string;
 }
 
 const TaxCalculator: React.FC = () => {
@@ -19,11 +22,15 @@ const TaxCalculator: React.FC = () => {
     { type: 'sell', amount: 500, date: '2024-03-20', price: 45000 }
   ]);
   const [calculation, setCalculation] = useState<TaxCalculation | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  const { askSatoAI } = useSatoAI();
+  const { data: bitcoinData } = useBitcoinPrice();
 
   const EXEMPT_LIMIT = 35000; // R$ 35.000 limite de isenção
   const TAX_RATE = 0.15; // 15% de imposto sobre ganho de capital
 
-  const calculateTax = () => {
+  const calculateTax = async () => {
     let totalGains = 0;
     let totalSales = 0;
 
@@ -40,13 +47,44 @@ const TaxCalculator: React.FC = () => {
     const taxableAmount = exemption ? 0 : Math.max(0, totalGains);
     const taxOwed = taxableAmount * TAX_RATE;
 
-    setCalculation({
+    const basicCalculation = {
       totalGains,
       exemptAmount: Math.min(totalSales, EXEMPT_LIMIT),
       taxableAmount,
       taxOwed,
       exemption
-    });
+    };
+
+    setCalculation(basicCalculation);
+
+    // Usar IA para análise inteligente
+    if (bitcoinData) {
+      setIsAnalyzing(true);
+      try {
+        const context = `
+          Análise de Impostos sobre Criptomoedas:
+          - Total de vendas: R$ ${totalSales.toLocaleString()}
+          - Ganhos calculados: R$ ${totalGains.toLocaleString()}
+          - Imposto devido: R$ ${taxOwed.toLocaleString()}
+          - Isento: ${exemption ? 'Sim' : 'Não'}
+          - Preço atual BTC: R$ ${bitcoinData.price_brl.toLocaleString()}
+          - Variação 24h: ${bitcoinData.price_change_percentage_24h?.toFixed(2)}%
+        `;
+
+        const aiResponse = await askSatoAI(
+          'Analise minha situação tributária com criptomoedas e dê recomendações para otimização fiscal. Considere o cenário atual do mercado.',
+          context
+        );
+
+        if (aiResponse) {
+          setCalculation(prev => prev ? { ...prev, aiInsights: aiResponse } : null);
+        }
+      } catch (error) {
+        console.error('Erro na análise de IA:', error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }
   };
 
   const exportReport = () => {
@@ -73,6 +111,7 @@ const TaxCalculator: React.FC = () => {
         <CardTitle className="flex items-center gap-2 text-yellow-400">
           <Calculator className="h-5 w-5" />
           Calculadora de Imposto (Brasil)
+          <Brain className="h-4 w-4 text-satotrack-neon" />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,8 +150,22 @@ const TaxCalculator: React.FC = () => {
           </div>
         </div>
 
-        <Button onClick={calculateTax} className="w-full bg-yellow-600 hover:bg-yellow-700">
-          Calcular Imposto
+        <Button 
+          onClick={calculateTax} 
+          className="w-full bg-yellow-600 hover:bg-yellow-700"
+          disabled={isAnalyzing}
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Analisando com IA...
+            </>
+          ) : (
+            <>
+              <Brain className="mr-2 h-4 w-4" />
+              Calcular com IA
+            </>
+          )}
         </Button>
 
         {calculation && (
@@ -153,6 +206,16 @@ const TaxCalculator: React.FC = () => {
                 <p className="text-sm text-muted-foreground mt-1">
                   Suas vendas não ultrapassaram o limite de R$ 35.000 mensais.
                 </p>
+              </div>
+            )}
+
+            {calculation.aiInsights && (
+              <div className="p-4 rounded-lg bg-satotrack-neon/10 border border-satotrack-neon/30">
+                <div className="flex items-center gap-2 text-satotrack-neon mb-2">
+                  <Brain className="h-5 w-5" />
+                  <span className="font-medium">Análise Inteligente SatoAI</span>
+                </div>
+                <p className="text-sm whitespace-pre-wrap">{calculation.aiInsights}</p>
               </div>
             )}
 

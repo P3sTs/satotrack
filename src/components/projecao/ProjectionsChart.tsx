@@ -5,14 +5,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { useCarteiras } from '@/contexts/carteiras';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
-import { TrendingUp, Calculator, Target } from 'lucide-react';
+import { useSatoAI } from '@/hooks/useSatoAI';
+import { TrendingUp, Calculator, Target, Brain, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const ProjectionsChart: React.FC = () => {
   const { carteiras } = useCarteiras();
   const { data: bitcoinData } = useBitcoinPrice();
+  const { askSatoAI } = useSatoAI();
   const [timeframe, setTimeframe] = useState('6m');
   const [scenario, setScenario] = useState('moderate');
   const [projectionData, setProjectionData] = useState<any[]>([]);
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     generateProjections();
@@ -61,6 +66,46 @@ const ProjectionsChart: React.FC = () => {
     setProjectionData(data);
   };
 
+  const generateAIAnalysis = async () => {
+    if (!bitcoinData || !projectionData.length) return;
+
+    setIsAnalyzing(true);
+    try {
+      const currentBalance = carteiras.reduce((acc, carteira) => acc + carteira.saldo, 0);
+      const finalProjection = projectionData[projectionData.length - 1];
+      const growthPercentage = ((finalProjection.value - projectionData[0].value) / projectionData[0].value) * 100;
+
+      const context = `
+        Análise de Projeções de Portfólio:
+        - Saldo atual: ${currentBalance.toFixed(6)} BTC
+        - Valor atual: R$ ${projectionData[0]?.value.toLocaleString()}
+        - Projeção ${timeframe}: R$ ${finalProjection?.value.toLocaleString()}
+        - Crescimento projetado: ${growthPercentage.toFixed(2)}%
+        - Cenário: ${scenario}
+        - Preço atual BTC: R$ ${bitcoinData.price_brl.toLocaleString()}
+        - Variação 24h: ${bitcoinData.price_change_percentage_24h?.toFixed(2)}%
+        - Volume 24h: ${bitcoinData.volume_24h_usd ? (bitcoinData.volume_24h_usd / 1e9).toFixed(2) + 'B USD' : 'N/A'}
+      `;
+
+      const aiResponse = await askSatoAI(
+        `Analise minhas projeções de portfólio e forneça insights detalhados sobre:
+        1. Viabilidade das projeções considerando o mercado atual
+        2. Fatores de risco que podem afetar essas projeções
+        3. Recomendações estratégicas para maximizar ganhos
+        4. Momentos ideais para entrada/saída baseado nas tendências`,
+        context
+      );
+
+      if (aiResponse) {
+        setAiAnalysis(aiResponse);
+      }
+    } catch (error) {
+      console.error('Erro na análise de IA:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -94,7 +139,7 @@ const ProjectionsChart: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Período</label>
               <Select value={timeframe} onValueChange={setTimeframe}>
@@ -122,9 +167,44 @@ const ProjectionsChart: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-end">
+              <Button 
+                onClick={generateAIAnalysis}
+                disabled={isAnalyzing || !projectionData.length}
+                className="w-full bg-satotrack-neon hover:bg-satotrack-neon/80"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analisando...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="mr-2 h-4 w-4" />
+                    Análise IA
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Analysis */}
+      {aiAnalysis && (
+        <Card className="bg-gradient-to-r from-satotrack-neon/10 to-blue-900/20 border-satotrack-neon/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-satotrack-neon">
+              <Brain className="h-5 w-5" />
+              Análise Inteligente das Projeções
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm whitespace-pre-wrap">{aiAnalysis}</div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Projection Chart */}
       <Card className="bg-gradient-to-br from-dashboard-dark to-dashboard-medium border-dashboard-light">
