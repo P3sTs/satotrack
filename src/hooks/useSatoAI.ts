@@ -20,7 +20,7 @@ export const useSatoAI = () => {
     setIsLoading(true);
     
     try {
-      console.log('Sending message to SatoAI:', { message, context });
+      console.log('Enviando mensagem para SatoAI:', { message, context });
       
       const { data, error } = await supabase.functions.invoke('satoai-chat', {
         body: {
@@ -29,34 +29,40 @@ export const useSatoAI = () => {
         }
       });
 
-      console.log('SatoAI response:', { data, error });
+      console.log('Resposta bruta do SatoAI:', { data, error });
 
       if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Erro na comunicação com o SatoAI');
+        console.error('Erro na função Supabase:', error);
+        toast.error(`Erro na comunicação: ${error.message}`);
+        return null;
       }
 
       if (data?.error) {
-        console.error('SatoAI function error:', data.error);
-        throw new Error(data.error);
+        console.error('Erro na função SatoAI:', data.error);
+        toast.error(`Erro do SatoAI: ${data.error}`);
+        return null;
       }
 
       if (!data?.response) {
-        throw new Error('Resposta inválida do SatoAI');
+        console.error('Resposta inválida do SatoAI:', data);
+        toast.error('Resposta inválida do SatoAI');
+        return null;
       }
 
-      const result = data as SatoAIResponse;
-      return result.response;
+      console.log('SatoAI respondeu com sucesso:', data.response);
+      return data.response;
       
     } catch (error) {
-      console.error('Erro ao consultar SatoAI:', error);
+      console.error('Erro inesperado ao consultar SatoAI:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
       if (errorMessage.includes('sobrecarregado') || errorMessage.includes('Rate limit')) {
         toast.error('SatoAI está sobrecarregado. Tente novamente em alguns segundos.');
       } else if (errorMessage.includes('API key')) {
-        toast.error('Configuração da IA não encontrada. Contate o suporte.');
+        toast.error('Configuração da IA não encontrada. Verifique sua API key.');
+      } else if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
+        toast.error('Erro de conexão. Verifique sua internet e tente novamente.');
       } else {
         toast.error('Erro ao se comunicar com o SatoAI. Tente novamente.');
       }

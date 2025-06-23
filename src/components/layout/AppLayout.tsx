@@ -5,6 +5,7 @@ import NavBar from '../NavBar';
 import MobileNavigation from '../navigation/MobileNavigation';
 import GlobalErrorBoundary from '../error/GlobalErrorBoundary';
 import NavigationAudit from '../navigation/NavigationAudit';
+import FloatingSatoAIChat from '../chat/FloatingSatoAIChat';
 import { Toaster } from '@/components/ui/sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -21,6 +22,7 @@ const AppLayout: React.FC = () => {
         </main>
         
         <MobileNavigation />
+        <FloatingSatoAIChat />
         
         {process.env.NODE_ENV === 'development' && <NavigationAudit />}
       </div>

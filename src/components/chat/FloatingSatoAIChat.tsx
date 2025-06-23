@@ -10,9 +10,9 @@ import {
   Bot,
   Loader2,
   X,
-  MessageCircle
+  AlertCircle
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSatoAI } from '@/hooks/useSatoAI';
 import { toast } from 'sonner';
 
 interface ChatMessage {
@@ -34,7 +34,7 @@ const FloatingSatoAIChat: React.FC = () => {
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { askSatoAI, isLoading } = useSatoAI();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [typingMessage, setTypingMessage] = useState<string>('');
 
@@ -84,81 +84,58 @@ const FloatingSatoAIChat: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     const currentMessage = inputMessage;
     setInputMessage('');
-    setIsLoading(true);
 
     try {
       const currentPath = window.location.pathname;
       const context = `Usuário navegando em ${currentPath}`;
       
-      console.log('Enviando mensagem para SatoAI:', { message: currentMessage, context });
+      console.log('Enviando mensagem para SatoAI via hook:', { message: currentMessage, context });
       
-      const { data, error } = await supabase.functions.invoke('satoai-chat', {
-        body: {
-          message: currentMessage.trim(),
-          context: context
-        }
-      });
+      const response = await askSatoAI(currentMessage, context);
 
-      console.log('Resposta do SatoAI:', { data, error });
+      if (response) {
+        // Adicionar mensagem da IA com animação de digitação
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: '',
+          sender: 'ai',
+          timestamp: new Date(),
+          isTyping: true
+        };
 
-      if (error) {
-        console.error('Erro na função Supabase:', error);
-        throw new Error(error.message || 'Erro na comunicação com o SatoAI');
+        setMessages(prev => [...prev, aiMessage]);
+
+        // Animar a digitação da resposta
+        typeMessage(response, () => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === aiMessage.id 
+                ? { ...msg, content: response, isTyping: false }
+                : msg
+            )
+          );
+        });
+      } else {
+        // Erro já foi tratado pelo hook useSatoAI
+        const errorAiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: 'Desculpe, não consegui processar sua mensagem. Verifique se sua API key está configurada corretamente e tente novamente.',
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorAiMessage]);
       }
-
-      if (data?.error) {
-        console.error('Erro na função SatoAI:', data.error);
-        throw new Error(data.error);
-      }
-
-      if (!data?.response) {
-        throw new Error('Resposta inválida do SatoAI');
-      }
-
-      // Adicionar mensagem da IA com animação de digitação
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: '',
-        sender: 'ai',
-        timestamp: new Date(),
-        isTyping: true
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-
-      // Animar a digitação da resposta
-      typeMessage(data.response, () => {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === aiMessage.id 
-              ? { ...msg, content: data.response, isTyping: false }
-              : msg
-          )
-        );
-      });
 
     } catch (error) {
-      console.error('Erro ao consultar SatoAI:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      
-      if (errorMessage.includes('sobrecarregado') || errorMessage.includes('Rate limit')) {
-        toast.error('SatoAI está sobrecarregado. Tente novamente em alguns segundos.');
-      } else if (errorMessage.includes('API key')) {
-        toast.error('Configuração da IA não encontrada. Contate o suporte.');
-      } else {
-        toast.error('Erro ao se comunicar com o SatoAI. Tente novamente.');
-      }
+      console.error('Erro inesperado no chat:', error);
 
       const errorAiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: 'Desculpe, não consegui processar sua mensagem. Tente novamente.',
+        content: 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.',
         sender: 'ai',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorAiMessage]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -169,17 +146,18 @@ const FloatingSatoAIChat: React.FC = () => {
     }
   };
 
-  const getCurrentContext = () => {
-    const path = window.location.pathname;
-    const contextMap: { [key: string]: string } = {
-      '/': 'Página inicial',
-      '/dashboard': 'Dashboard',
-      '/carteiras': 'Gerenciamento de carteiras',
-      '/mercado': 'Análise de mercado',
-      '/projecoes': 'Projeções de lucro',
-      '/configuracoes': 'Configurações'
-    };
-    return contextMap[path] || `Navegando em ${path}`;
+  const testConnection = async () => {
+    const testMessage = "Teste de conexão. Responda apenas 'Conectado!' se estiver funcionando.";
+    
+    toast.info('Testando conexão com SatoAI...');
+    
+    const response = await askSatoAI(testMessage, 'Teste de conexão');
+    
+    if (response) {
+      toast.success('Conexão com SatoAI funcionando!');
+    } else {
+      toast.error('Falha na conexão com SatoAI. Verifique sua API key.');
+    }
   };
 
   if (!isOpen) {
@@ -205,15 +183,26 @@ const FloatingSatoAIChat: React.FC = () => {
             <Brain className="h-5 w-5 text-cyan-400" />
             <span className="font-semibold text-cyan-400">SatoAI</span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="h-8 w-8 p-0 text-white/60 hover:text-white"
-            aria-label="Fechar chat"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={testConnection}
+              className="h-8 w-8 p-0 text-white/60 hover:text-white"
+              title="Testar conexão"
+            >
+              <AlertCircle className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8 p-0 text-white/60 hover:text-white"
+              aria-label="Fechar chat"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Messages Area */}

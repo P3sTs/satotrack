@@ -16,17 +16,47 @@ serve(async (req) => {
   }
 
   try {
-    const { message, context } = await req.json();
-
-    console.log('SatoAI Chat request:', { message, context });
-
+    console.log('SatoAI Chat function called');
+    
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found');
+      console.error('OpenAI API key not found in environment');
       return new Response(JSON.stringify({ 
-        error: 'Configuração da IA não encontrada. Tente novamente mais tarde.',
-        details: 'API key missing' 
+        error: 'Configuração da IA não encontrada. A API key não está configurada.',
+        details: 'OPENAI_API_KEY missing from environment' 
       }), {
         status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      return new Response(JSON.stringify({ 
+        error: 'Formato de dados inválido',
+        details: 'Invalid JSON in request body' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { message, context } = requestBody;
+
+    console.log('SatoAI Chat request received:', { 
+      message: message?.substring(0, 100) + '...', 
+      context,
+      hasApiKey: !!openAIApiKey 
+    });
+
+    if (!message || typeof message !== 'string') {
+      return new Response(JSON.stringify({ 
+        error: 'Mensagem é obrigatória e deve ser uma string',
+        details: 'Message is required and must be a string' 
+      }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -54,7 +84,7 @@ serve(async (req) => {
 
     while (attempts < maxAttempts) {
       try {
-        console.log(`Attempt ${attempts + 1} to call OpenAI API`);
+        console.log(`Tentativa ${attempts + 1} de chamar a API OpenAI`);
         
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -73,11 +103,13 @@ serve(async (req) => {
           }),
         });
 
+        console.log('OpenAI response status:', response.status);
+
         if (response.status === 429) {
           // Rate limiting - wait and retry
           attempts++;
           lastError = 'Rate limit exceeded';
-          console.log(`Rate limit hit, waiting before retry ${attempts}/${maxAttempts}`);
+          console.log(`Rate limit atingido, aguardando antes da tentativa ${attempts}/${maxAttempts}`);
           
           if (attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 2000 * attempts)); // Exponential backoff
@@ -86,19 +118,38 @@ serve(async (req) => {
         }
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          const errorText = await response.text();
+          console.error('OpenAI API error response:', response.status, errorText);
+          
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { error: { message: errorText } };
+          }
+          
           throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('OpenAI response structure:', { 
+          hasChoices: !!data.choices, 
+          choicesLength: data.choices?.length,
+          hasMessage: !!data.choices?.[0]?.message,
+          hasContent: !!data.choices?.[0]?.message?.content
+        });
         
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-          throw new Error('Invalid response format from OpenAI');
+          throw new Error('Formato de resposta inválido da OpenAI');
         }
 
         const aiResponse = data.choices[0].message.content;
 
-        console.log('SatoAI response generated successfully');
+        if (!aiResponse) {
+          throw new Error('Resposta vazia da OpenAI');
+        }
+
+        console.log('SatoAI response generated successfully, length:', aiResponse.length);
 
         return new Response(JSON.stringify({ 
           response: aiResponse,
@@ -110,7 +161,7 @@ serve(async (req) => {
       } catch (error) {
         lastError = error;
         attempts++;
-        console.error(`Attempt ${attempts} failed:`, error.message);
+        console.error(`Tentativa ${attempts} falhou:`, error.message);
         
         if (attempts < maxAttempts) {
           await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
@@ -119,10 +170,10 @@ serve(async (req) => {
     }
 
     // All attempts failed
-    console.error('All attempts failed, last error:', lastError);
+    console.error('Todas as tentativas falharam, último erro:', lastError);
     
     return new Response(JSON.stringify({ 
-      error: 'O SatoAI está temporariamente sobrecarregado. Tente novamente em alguns instantes.',
+      error: 'O SatoAI está temporariamente indisponível. Tente novamente em alguns instantes.',
       details: lastError?.message || 'Multiple attempts failed'
     }), {
       status: 503,
@@ -130,7 +181,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in satoai-chat function:', error);
+    console.error('Erro geral na função satoai-chat:', error);
     return new Response(JSON.stringify({ 
       error: 'Erro interno do SatoAI. Tente novamente em alguns instantes.',
       details: error.message 
