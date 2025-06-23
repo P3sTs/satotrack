@@ -1,5 +1,4 @@
 
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Brain } from 'lucide-react';
 import { Insight, InsightGenerationParams } from './types';
 
 export class InsightGenerator {
@@ -14,7 +13,7 @@ export class InsightGenerator {
         title: 'Tendência de alta detectada',
         message: `O Bitcoin subiu ${change24h.toFixed(2)}% nas últimas 24h. Volume elevado sugere interesse dos compradores.`,
         confidence: Math.min(90, 60 + Math.abs(change24h) * 2),
-        icon: React.createElement(TrendingUp, { className: "h-4 w-4" })
+        iconName: 'TrendingUp'
       });
     } else if (change24h < -5) {
       insights.push({
@@ -22,7 +21,7 @@ export class InsightGenerator {
         title: 'Correção em andamento',
         message: `Queda de ${Math.abs(change24h).toFixed(2)}% indica pressão vendedora. Evite compras por impulso.`,
         confidence: Math.min(85, 50 + Math.abs(change24h) * 2),
-        icon: React.createElement(TrendingDown, { className: "h-4 w-4" })
+        iconName: 'TrendingDown'
       });
     }
 
@@ -33,7 +32,7 @@ export class InsightGenerator {
         title: 'Volume excepcional',
         message: 'Alto volume de negociação indica forte interesse institucional e liquidez saudável.',
         confidence: 75,
-        icon: React.createElement(CheckCircle, { className: "h-4 w-4" })
+        iconName: 'CheckCircle'
       });
     } else if (volume < 10000000000) { // < 10 bilhões
       insights.push({
@@ -41,7 +40,7 @@ export class InsightGenerator {
         title: 'Volume baixo',
         message: 'Pouca liquidez pode causar volatilidade. Aguarde maior volume antes de grandes operações.',
         confidence: 65,
-        icon: React.createElement(AlertTriangle, { className: "h-4 w-4" })
+        iconName: 'AlertTriangle'
       });
     }
 
@@ -53,7 +52,7 @@ export class InsightGenerator {
         title: 'Próximo de nível psicológico',
         message: `O preço está próximo de $${roundNumber.toLocaleString()}. Observe possível resistência ou suporte.`,
         confidence: 60,
-        icon: React.createElement(Brain, { className: "h-4 w-4" })
+        iconName: 'Brain'
       });
     }
 

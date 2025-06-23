@@ -4,7 +4,7 @@ export interface Insight {
   title: string;
   message: string;
   confidence: number;
-  icon: React.ReactNode;
+  iconName: string; // Changed from React.ReactNode to string
 }
 
 export interface InsightGenerationParams {

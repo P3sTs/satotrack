@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Brain } from 'lucide-react';
 import { Insight } from './types';
 
 interface InsightCardProps {
@@ -23,6 +24,25 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, index }) => {
     }
   };
 
+  const getIcon = (iconName: string) => {
+    const iconProps = { className: "h-4 w-4" };
+    
+    switch (iconName) {
+      case 'TrendingUp':
+        return <TrendingUp {...iconProps} />;
+      case 'TrendingDown':
+        return <TrendingDown {...iconProps} />;
+      case 'AlertTriangle':
+        return <AlertTriangle {...iconProps} />;
+      case 'CheckCircle':
+        return <CheckCircle {...iconProps} />;
+      case 'Brain':
+        return <Brain {...iconProps} />;
+      default:
+        return <Brain {...iconProps} />;
+    }
+  };
+
   return (
     <div
       key={index}
@@ -30,7 +50,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, index }) => {
     >
       <div className="flex items-start gap-3">
         <div className="mt-1">
-          {insight.icon}
+          {getIcon(insight.iconName)}
         </div>
         <div className="flex-1">
           <div className="font-semibold mb-1">{insight.title}</div>
