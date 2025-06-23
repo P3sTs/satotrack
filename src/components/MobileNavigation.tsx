@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sheet } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileHeader from './mobile/MobileHeader';
@@ -25,7 +25,7 @@ const MobileNavigation: React.FC = () => {
     return null;
   }
 
-  console.log('MobileNavigation renderizando - isMobile:', isMobile, 'isAuthenticated:', isAuthenticated);
+  console.log('MobileNavigation renderizando - isMobile:', isMobile, 'isAuthenticated:', isAuthenticated, 'isMenuOpen:', isMenuOpen);
 
   return (
     <>
@@ -37,12 +37,17 @@ const MobileNavigation: React.FC = () => {
 
       {/* Side Menu */}
       <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <MobileMenuContent 
-          setIsMenuOpen={setIsMenuOpen}
-          handleLogout={handleLogout}
-          getUserInitials={getUserInitials}
-          navigationItems={navigationItems}
-        />
+        <SheetContent 
+          side="right" 
+          className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-[60]"
+        >
+          <MobileMenuContent 
+            setIsMenuOpen={setIsMenuOpen}
+            handleLogout={handleLogout}
+            getUserInitials={getUserInitials}
+            navigationItems={navigationItems}
+          />
+        </SheetContent>
       </Sheet>
 
       {/* Bottom Navigation Bar (Quick Access) */}

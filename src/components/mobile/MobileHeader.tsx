@@ -2,7 +2,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
 interface MobileHeaderProps {
@@ -29,17 +28,14 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ isMenuOpen, setIsMenuOpen }
         </Link>
 
         {/* Menu Button */}
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="text-satotrack-text hover:text-satotrack-neon relative z-50"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-        </Sheet>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="text-satotrack-text hover:text-satotrack-neon relative z-50"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
       </div>
     </header>
   );
