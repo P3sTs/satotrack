@@ -12,7 +12,8 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  WifiOff
+  WifiOff,
+  Zap
 } from 'lucide-react';
 import { useSatoAI } from '@/hooks/useSatoAI';
 import { toast } from 'sonner';
@@ -53,6 +54,7 @@ const FloatingSatoAIChat: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [typingMessage, setTypingMessage] = useState<string>('');
 
+  // Auto-scroll para última mensagem
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -66,6 +68,7 @@ const FloatingSatoAIChat: React.FC = () => {
     scrollToBottom();
   }, [messages, typingMessage]);
 
+  // Animação de digitação
   const typeMessage = (message: string, callback: () => void) => {
     let index = 0;
     setTypingMessage('');
@@ -74,7 +77,7 @@ const FloatingSatoAIChat: React.FC = () => {
       if (index < message.length) {
         setTypingMessage(message.slice(0, index + 1));
         index++;
-        setTimeout(typeChar, 30);
+        setTimeout(typeChar, 20);
       } else {
         setTimeout(() => {
           setTypingMessage('');
@@ -85,6 +88,13 @@ const FloatingSatoAIChat: React.FC = () => {
     
     typeChar();
   };
+
+  // Teste automático de conexão quando abre o chat
+  useEffect(() => {
+    if (isOpen && !connectionStatus.lastTest) {
+      performConnectionTest();
+    }
+  }, [isOpen]);
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -102,14 +112,14 @@ const FloatingSatoAIChat: React.FC = () => {
 
     try {
       const currentPath = window.location.pathname;
-      const context = `Usuário navegando em ${currentPath}`;
+      const context = `Usuário navegando em ${currentPath === '/' ? 'página inicial' : currentPath}`;
       
-      console.log('Enviando mensagem para SatoAI via hook:', { message: currentMessage, context });
+      console.log('💬 Enviando mensagem:', { message: currentMessage.substring(0, 50) + '...', context });
       
       const response = await askSatoAI(currentMessage, context);
 
       if (response) {
-        // Adicionar mensagem da IA com animação de digitação
+        // Adicionar mensagem da IA com animação
         const aiMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           content: '',
@@ -132,28 +142,26 @@ const FloatingSatoAIChat: React.FC = () => {
           );
         });
       } else {
-        // Erro já foi tratado pelo hook useSatoAI
-        const errorAiMessage: ChatMessage = {
+        // Mensagem de erro
+        const errorMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          content: 'Desculpe, não consegui processar sua mensagem. Verifique sua conexão e tente novamente.',
+          content: 'Desculpe, não consegui processar sua mensagem. Verifique a conexão e tente novamente.',
           sender: 'ai',
           timestamp: new Date()
         };
-        setMessages(prev => [...prev, errorAiMessage]);
+        setMessages(prev => [...prev, errorMessage]);
         setConnectionStatus(prev => ({ ...prev, isConnected: false }));
       }
 
     } catch (error) {
-      console.error('Erro inesperado no chat:', error);
-
-      const errorAiMessage: ChatMessage = {
+      console.error('❌ Erro no chat:', error);
+      const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         content: 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.',
         sender: 'ai',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorAiMessage]);
-      setConnectionStatus(prev => ({ ...prev, isConnected: false }));
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
@@ -165,6 +173,7 @@ const FloatingSatoAIChat: React.FC = () => {
   };
 
   const performConnectionTest = async () => {
+    console.log('🔧 Iniciando teste de conexão...');
     toast.info('Testando conexão com SatoAI...');
     
     const isConnected = await testConnection();
@@ -176,9 +185,9 @@ const FloatingSatoAIChat: React.FC = () => {
     });
 
     if (isConnected) {
-      toast.success('Conexão com SatoAI funcionando!');
+      toast.success('✅ SatoAI conectado e funcionando!');
     } else {
-      toast.error('Falha na conexão com SatoAI. Verifique as configurações.');
+      toast.error('❌ Falha na conexão. Verifique as configurações.');
     }
   };
 
@@ -221,14 +230,13 @@ const FloatingSatoAIChat: React.FC = () => {
               title="Testar conexão"
               disabled={isLoading}
             >
-              <AlertCircle className="h-4 w-4" />
+              <Zap className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
               className="h-8 w-8 p-0 text-white/60 hover:text-white"
-              aria-label="Fechar chat"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -239,12 +247,12 @@ const FloatingSatoAIChat: React.FC = () => {
         {connectionStatus.lastTest && (
           <div className="px-4 py-2 bg-black/20 border-b border-cyan-500/10">
             <div className="text-xs text-cyan-300">
-              Status: {connectionStatus.isConnected ? 'Conectado' : 'Desconectado'}
-              {connectionStatus.lastTest && (
-                <span className="text-white/60 ml-2">
-                  • Último teste: {connectionStatus.lastTest.toLocaleTimeString()}
-                </span>
-              )}
+              Status: <span className={connectionStatus.isConnected ? 'text-green-400' : 'text-red-400'}>
+                {connectionStatus.isConnected ? '🟢 Conectado' : '🔴 Desconectado'}
+              </span>
+              <span className="text-white/60 ml-2">
+                • {connectionStatus.lastTest.toLocaleTimeString()}
+              </span>
             </div>
           </div>
         )}
@@ -331,7 +339,6 @@ const FloatingSatoAIChat: React.FC = () => {
               onClick={sendMessage}
               disabled={isLoading || !inputMessage.trim()}
               className="bg-cyan-500 hover:bg-cyan-600 text-white px-3"
-              aria-label="Enviar mensagem"
             >
               <Send className="h-4 w-4" />
             </Button>

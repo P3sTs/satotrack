@@ -29,70 +29,42 @@ export const useSatoAI = () => {
     setIsLoading(true);
     
     try {
-      console.log('Enviando mensagem para SatoAI:', { message, context, preferredProvider });
+      console.log('🤖 Enviando mensagem para SatoAI:', { message: message.substring(0, 50) + '...', context, preferredProvider });
       
       const { data, error } = await supabase.functions.invoke('satoai-chat', {
         body: {
           message: message.trim(),
           context: context || 'SatoTrack App',
-          provider: preferredProvider || 'gemini' // Gemini como padrão
+          provider: preferredProvider || 'gemini'
         }
       });
 
-      console.log('Resposta bruta do SatoAI:', { data, error });
+      console.log('📡 Resposta do SatoAI:', { data, error });
 
       if (error) {
-        console.error('Erro na função Supabase:', error);
-        
-        // Se for erro de quota do OpenAI, tentar Gemini
-        if (error.message?.includes('quota') || error.message?.includes('429')) {
-          console.log('Tentando com Gemini devido a erro de quota OpenAI...');
-          return askSatoAI(message, context, 'gemini');
-        }
-        
-        toast.error(`Erro na comunicação: ${error.message}`);
-        return null;
+        console.error('❌ Erro na função Supabase:', error);
+        throw new Error(error.message || 'Erro na comunicação com SatoAI');
       }
 
       if (data?.error) {
-        console.error('Erro na função SatoAI:', data.error);
-        
-        // Se OpenAI falhou, tentar Gemini
-        if (data.error.includes('quota') || data.error.includes('OpenAI')) {
-          console.log('OpenAI falhou, tentando Gemini...');
-          toast.info('Conectando com modelo alternativo...');
-          return askSatoAI(message, context, 'gemini');
-        }
-        
-        toast.error(`Erro do SatoAI: ${data.error}`);
-        return null;
+        console.error('⚠️ Erro interno do SatoAI:', data.error);
+        throw new Error(data.error);
       }
 
       if (!data?.response) {
-        console.error('Resposta inválida do SatoAI:', data);
-        toast.error('Resposta inválida do SatoAI');
-        return null;
+        console.error('📭 Resposta vazia do SatoAI:', data);
+        throw new Error('SatoAI retornou uma resposta vazia');
       }
 
-      console.log('SatoAI respondeu com sucesso:', data.response);
+      console.log('✅ SatoAI respondeu com sucesso via', data.provider || 'desconhecido');
       toast.success(`Resposta gerada via ${data.provider || 'IA'}`);
       return data.response;
       
     } catch (error) {
-      console.error('Erro inesperado ao consultar SatoAI:', error);
+      console.error('💥 Erro ao consultar SatoAI:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      
-      if (errorMessage.includes('quota') || errorMessage.includes('429')) {
-        toast.error('Limite de uso atingido. Tentando modelo alternativo...');
-        if (!preferredProvider || preferredProvider === 'openai') {
-          return askSatoAI(message, context, 'gemini');
-        }
-      } else if (errorMessage.includes('NetworkError') || errorMessage.includes('fetch')) {
-        toast.error('Erro de conexão. Verifique sua internet e tente novamente.');
-      } else {
-        toast.error('Erro ao se comunicar com o SatoAI. Tente novamente.');
-      }
+      toast.error(`Erro do SatoAI: ${errorMessage}`);
       
       return null;
     } finally {
@@ -122,9 +94,13 @@ export const useSatoAI = () => {
 
   const testConnection = async (): Promise<boolean> => {
     try {
-      const response = await askSatoAI('Teste de conexão. Responda apenas "Conectado!" se estiver funcionando.', 'Teste');
-      return response !== null;
-    } catch {
+      console.log('🔧 Testando conexão com SatoAI...');
+      const response = await askSatoAI('Teste de conexão. Responda apenas "Conectado!" se estiver funcionando.', 'Teste de Conectividade');
+      const isConnected = response !== null && response.toLowerCase().includes('conectado');
+      console.log('🔗 Resultado do teste:', isConnected ? 'Sucesso' : 'Falhou');
+      return isConnected;
+    } catch (error) {
+      console.error('🚫 Teste de conexão falhou:', error);
       return false;
     }
   };
