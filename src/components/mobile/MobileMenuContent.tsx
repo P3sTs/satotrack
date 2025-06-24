@@ -9,7 +9,7 @@ import {
   LogOut,
   User,
   Star,
-  ArrowLeft
+  X
 } from 'lucide-react';
 
 interface MobileMenuContentProps {
@@ -38,9 +38,9 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-dashboard-dark">
       {/* Header */}
-      <SheetHeader className="p-6 border-b border-dashboard-medium">
+      <SheetHeader className="p-6 border-b border-dashboard-medium/50">
         <div className="flex items-center justify-between">
           <SheetTitle className="flex items-center gap-3">
             <div className="relative h-10 w-10 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
@@ -59,15 +59,15 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
             variant="ghost"
             size="icon"
             onClick={() => setIsMenuOpen(false)}
-            className="text-muted-foreground hover:text-satotrack-neon"
+            className="text-muted-foreground hover:text-satotrack-neon h-8 w-8"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
         
         {/* User Info */}
         {user && (
-          <div className="flex items-center gap-3 mt-4 p-3 bg-dashboard-medium rounded-lg">
+          <div className="flex items-center gap-3 mt-4 p-3 bg-dashboard-medium/30 rounded-lg border border-dashboard-medium/20">
             <div className="h-10 w-10 rounded-full bg-gradient-to-r from-satotrack-neon to-bitcoin flex items-center justify-center">
               <span className="text-sm font-bold text-black">
                 {getUserInitials()}
@@ -89,7 +89,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
       </SheetHeader>
 
       {/* Navigation Items */}
-      <div className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <div className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.to);
@@ -101,10 +101,10 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
               to={item.to}
               onClick={() => setIsMenuOpen(false)}
               className={`
-                flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                flex items-center gap-3 p-3 rounded-lg transition-all duration-200 group
                 ${active 
-                  ? 'bg-satotrack-neon text-black' 
-                  : 'text-satotrack-text hover:bg-dashboard-medium hover:text-satotrack-neon'
+                  ? 'bg-satotrack-neon/20 text-satotrack-neon border border-satotrack-neon/30' 
+                  : 'text-satotrack-text hover:bg-dashboard-medium/40 hover:text-satotrack-neon border border-transparent hover:border-dashboard-medium/30'
                 }
                 ${isPremiumFeature ? 'opacity-60' : ''}
               `}
@@ -117,7 +117,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
                     <Star className="h-3 w-3 text-bitcoin fill-bitcoin" />
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5 truncate group-hover:text-muted-foreground/80">
                   {item.description}
                 </p>
               </div>
@@ -127,7 +127,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
       </div>
 
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-dashboard-medium space-y-2">
+      <div className="p-4 border-t border-dashboard-medium/50 space-y-2 bg-dashboard-dark">
         {/* Premium Button */}
         {!isPremium && (
           <Button
@@ -135,10 +135,10 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
             onClick={() => {
               setIsMenuOpen(false);
             }}
-            className="w-full justify-start gap-3 border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10"
+            className="w-full justify-start gap-3 border-bitcoin/50 text-bitcoin hover:bg-bitcoin/10 hover:border-bitcoin"
           >
             <Star className="h-5 w-5" />
-            <span>Quero ser Premium</span>
+            <span>Upgrade para Premium</span>
           </Button>
         )}
 
@@ -150,7 +150,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
               onClick={() => {
                 setIsMenuOpen(false);
               }}
-              className="w-full justify-start gap-3 text-satotrack-text hover:text-satotrack-neon"
+              className="w-full justify-start gap-3 text-satotrack-text hover:text-satotrack-neon hover:bg-dashboard-medium/30"
             >
               <User className="h-5 w-5" />
               <span>Meu Perfil</span>
@@ -162,7 +162,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
               className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
             >
               <LogOut className="h-5 w-5" />
-              <span>Sair</span>
+              <span>Sair da Conta</span>
             </Button>
           </>
         )}

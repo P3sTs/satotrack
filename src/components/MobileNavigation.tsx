@@ -25,8 +25,6 @@ const MobileNavigation: React.FC = () => {
     return null;
   }
 
-  console.log('MobileNavigation renderizando - isMobile:', isMobile, 'isAuthenticated:', isAuthenticated, 'isMenuOpen:', isMenuOpen);
-
   return (
     <>
       {/* Top Header Mobile */}
@@ -39,7 +37,7 @@ const MobileNavigation: React.FC = () => {
       <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <SheetContent 
           side="right" 
-          className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-[60]"
+          className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-[70]"
         >
           <MobileMenuContent 
             setIsMenuOpen={setIsMenuOpen}

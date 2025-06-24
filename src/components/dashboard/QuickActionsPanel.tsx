@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { 
   Plus, 
   ArrowUpCircle, 
-  ArrowDownCircle, 
   FileText, 
   Settings,
   TrendingUp,
-  Download
+  Download,
+  Zap,
+  Wallet,
+  Shield
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -21,11 +23,19 @@ const QuickActionsPanel: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Nova Carteira',
+      title: 'Nova Carteira Bitcoin',
       description: 'Adicionar carteira Bitcoin',
       icon: Plus,
       onClick: () => navigate('/carteiras'),
       color: 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+    },
+    {
+      title: 'Carteira Web3',
+      description: 'Criar carteira cripto (BTC/ETH/MATIC)',
+      icon: Zap,
+      onClick: () => navigate('/web3'),
+      color: 'bg-satotrack-neon/20 text-satotrack-neon hover:bg-satotrack-neon/30',
+      highlight: true
     },
     {
       title: 'Mercado',
@@ -75,22 +85,32 @@ const QuickActionsPanel: React.FC = () => {
               <Button
                 key={index}
                 variant="ghost"
-                className={`${action.color} w-full justify-start h-auto p-4 ${
+                className={`${action.color} w-full justify-start h-auto p-4 relative ${
                   isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                } ${action.highlight ? 'ring-2 ring-satotrack-neon/30' : ''}`}
                 onClick={isDisabled ? undefined : action.onClick}
                 disabled={isDisabled}
               >
                 <div className="flex items-center gap-3 w-full">
                   <action.icon className="h-5 w-5" />
                   <div className="text-left flex-1">
-                    <div className="font-medium">{action.title}</div>
+                    <div className="font-medium flex items-center gap-2">
+                      {action.title}
+                      {action.highlight && (
+                        <Shield className="h-3 w-3 text-satotrack-neon" />
+                      )}
+                    </div>
                     <div className="text-xs opacity-70">{action.description}</div>
                     {action.premium && !isPremium && (
                       <div className="text-xs text-yellow-400 mt-1">Premium</div>
                     )}
                   </div>
                 </div>
+                {action.highlight && (
+                  <div className="absolute top-1 right-1">
+                    <div className="h-2 w-2 bg-satotrack-neon rounded-full animate-pulse"></div>
+                  </div>
+                )}
               </Button>
             );
           })}

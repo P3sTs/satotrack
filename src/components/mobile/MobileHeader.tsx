@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface MobileHeaderProps {
   isMenuOpen: boolean;
@@ -11,10 +11,10 @@ interface MobileHeaderProps {
 
 const MobileHeader: React.FC<MobileHeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   return (
-    <header className="fixed top-0 left-0 right-0 bg-dashboard-dark border-b border-dashboard-medium/30 z-50 md:hidden">
+    <header className="fixed top-0 left-0 right-0 bg-dashboard-dark/95 backdrop-blur-md border-b border-dashboard-medium/30 z-50 md:hidden">
       <div className="flex items-center justify-between h-14 px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
           <div className="relative h-8 w-8 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
             <img 
               src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
@@ -32,9 +32,9 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ isMenuOpen, setIsMenuOpen }
           variant="ghost" 
           size="icon"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="text-satotrack-text hover:text-satotrack-neon relative z-50"
+          className="text-satotrack-text hover:text-satotrack-neon relative z-[60] hover:bg-dashboard-medium/50"
         >
-          <Menu className="h-6 w-6" />
+          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </div>
     </header>
