@@ -28,3 +28,8 @@ verify_jwt = false
 [functions.crypto-prices]
 verify_jwt = false
 
+[functions.tatum-wallet-api]
+verify_jwt = true
+
+[functions.crypto-wallet-manager]
+verify_jwt = true

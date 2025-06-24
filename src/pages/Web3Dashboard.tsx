@@ -1,9 +1,9 @@
 
 import React from 'react';
-import Web3Dashboard from '@/components/web3/Web3Dashboard';
+import CryptoDashboardNew from '@/components/crypto/CryptoDashboardNew';
 
 const Web3DashboardPage: React.FC = () => {
-  return <Web3Dashboard />;
+  return <CryptoDashboardNew />;
 };
 
 export default Web3DashboardPage;

@@ -137,6 +137,65 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_transactions: {
+        Row: {
+          amount: number
+          block_number: number | null
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          from_address: string
+          gas_fee: number | null
+          id: string
+          status: string
+          to_address: string
+          transaction_hash: string
+          transaction_type: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          block_number?: number | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency: string
+          from_address: string
+          gas_fee?: number | null
+          id?: string
+          status?: string
+          to_address: string
+          transaction_hash: string
+          transaction_type: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          block_number?: number | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          from_address?: string
+          gas_fee?: number | null
+          id?: string
+          status?: string
+          to_address?: string
+          transaction_hash?: string
+          transaction_type?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "crypto_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crypto_wallets: {
         Row: {
           address: string
