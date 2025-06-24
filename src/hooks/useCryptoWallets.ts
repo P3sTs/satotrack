@@ -56,7 +56,7 @@ export const useCryptoWallets = () => {
     try {
       const { data, error } = await supabase
         .from('crypto_wallets')
-        .select('*')
+        .select('id, user_id, currency, address, xpub, created_at')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -68,7 +68,7 @@ export const useCryptoWallets = () => {
         currency: wallet.currency,
         address: wallet.address,
         xpub: wallet.xpub,
-        balance: wallet.balance?.toString() || '0',
+        balance: '0', // Will be updated when balance is fetched
         created_at: wallet.created_at
       }));
 
