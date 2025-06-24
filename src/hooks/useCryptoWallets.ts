@@ -61,7 +61,18 @@ export const useCryptoWallets = () => {
 
       if (error) throw error;
 
-      setWallets(data || []);
+      // Transform database records to match CryptoWallet interface
+      const transformedWallets = (data || []).map(wallet => ({
+        id: wallet.id,
+        user_id: wallet.user_id,
+        currency: wallet.currency,
+        address: wallet.address,
+        xpub: wallet.xpub,
+        balance: wallet.balance?.toString() || '0',
+        created_at: wallet.created_at
+      }));
+
+      setWallets(transformedWallets);
     } catch (error) {
       console.error('Error loading wallets:', error);
       toast.error('Erro ao carregar carteiras');
