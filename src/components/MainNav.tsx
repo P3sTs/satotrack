@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth';
+import { Home, Wallet, Plus, Zap, BarChart3, Clock, Bell, Settings } from 'lucide-react';
 
 const MainNav: React.FC = () => {
   const location = useLocation();
@@ -14,25 +14,19 @@ const MainNav: React.FC = () => {
   };
   
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/carteiras', label: 'Carteiras' },
-    { path: '/bitcoin-lookup', label: 'Consulta BTC' },
-    { path: '/nova-carteira', label: 'Nova Carteira' },
-    { path: '/mercado', label: 'Mercado BTC' },
-    { path: '/crypto', label: 'Redes Crypto' },
-    { path: '/referral', label: 'Indicações' },
-    { path: '/historico', label: 'Minhas Transações' },
-    { path: '/configuracoes', label: 'Configurações' },
-    // Itens Premium condicionais
-    ...(isPremium ? [
-      { path: '/api', label: 'API', premium: true },
-      { path: '/notificacoes', label: 'Alertas', premium: true },
-    ] : [])
+    { path: '/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/carteiras', label: 'Carteiras', icon: Wallet },
+    { path: '/nova-carteira', label: 'Nova Carteira', icon: Plus },
+    { path: '/web3', label: 'Web3', icon: Zap, premium: false }, // Nova rota Web3
+    { path: '/mercado', label: 'Mercado', icon: BarChart3 },
+    { path: '/historico', label: 'Histórico', icon: Clock },
+    { path: '/notificacoes', label: 'Notificações', icon: Bell, premium: true },
+    { path: '/configuracoes', label: 'Configurações', icon: Settings }
   ];
   
   return (
     <nav className="flex space-x-1 md:space-x-2 overflow-x-auto scrollbar-hidden bg-dashboard-dark/50 rounded-lg p-2">
-      {navItems.map(({ path, label, premium }) => (
+      {navItems.map(({ path, label, icon, premium }) => (
         <Link
           key={path}
           to={path}
