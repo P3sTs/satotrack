@@ -39,43 +39,66 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
 
-  const getCurrencyConfig = (currency: string) => {
-    const configs = {
-      BTC: { 
+  const getCurrencyConfig = (walletName: string) => {
+    // Extract currency from wallet name
+    const name = walletName.toLowerCase();
+    if (name.includes('bitcoin') || name.includes('btc')) {
+      return { 
         name: 'Bitcoin', 
         color: 'from-orange-500 to-yellow-600',
         icon: '₿',
-        explorer: 'https://blockstream.info/address/'
-      },
-      ETH: { 
+        explorer: 'https://blockstream.info/address/',
+        currency: 'BTC'
+      };
+    }
+    if (name.includes('ethereum') || name.includes('eth')) {
+      return { 
         name: 'Ethereum', 
         color: 'from-blue-500 to-purple-600',
         icon: 'Ξ',
-        explorer: 'https://etherscan.io/address/'
-      },
-      MATIC: { 
+        explorer: 'https://etherscan.io/address/',
+        currency: 'ETH'
+      };
+    }
+    if (name.includes('polygon') || name.includes('matic')) {
+      return { 
         name: 'Polygon', 
         color: 'from-purple-500 to-pink-600',
         icon: '⬟',
-        explorer: 'https://polygonscan.com/address/'
-      },
-      USDT: { 
+        explorer: 'https://polygonscan.com/address/',
+        currency: 'MATIC'
+      };
+    }
+    if (name.includes('tether') || name.includes('usdt')) {
+      return { 
         name: 'Tether', 
         color: 'from-green-500 to-emerald-600',
         icon: '₮',
-        explorer: 'https://etherscan.io/address/'
-      },
-      SOL: { 
+        explorer: 'https://etherscan.io/address/',
+        currency: 'USDT'
+      };
+    }
+    if (name.includes('solana') || name.includes('sol')) {
+      return { 
         name: 'Solana', 
         color: 'from-purple-600 to-blue-500',
         icon: '◎',
-        explorer: 'https://explorer.solana.com/account/'
-      }
+        explorer: 'https://explorer.solana.com/account/',
+        currency: 'SOL'
+      };
+    }
+    
+    // Default fallback
+    return { 
+      name: walletName, 
+      color: 'from-gray-500 to-gray-600',
+      icon: '●',
+      explorer: '#',
+      currency: walletName
     };
-    return configs[currency as keyof typeof configs] || configs.BTC;
   };
 
-  const config = getCurrencyConfig(wallet.currency);
+  const config = getCurrencyConfig(wallet.name);
 
   const handleRefresh = async () => {
     if (wallet.address === 'pending_generation') {
@@ -85,9 +108,9 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
 
     setIsRefreshing(true);
     try {
-      const newBalance = await getBalance(wallet.currency);
+      const newBalance = await getBalance(wallet);
       setLocalBalance(newBalance);
-      toast.success(`Saldo ${wallet.currency} atualizado`);
+      toast.success(`Saldo ${config.currency} atualizado`);
     } catch (error) {
       toast.error('Erro ao atualizar saldo');
     } finally {
@@ -144,7 +167,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
                   {config.name}
                 </h3>
                 <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                  {wallet.currency}
+                  {config.currency}
                 </Badge>
               </div>
             </div>
@@ -161,7 +184,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
           <div className="text-center mb-6 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
             <p className="text-sm text-white/80 mb-1">Saldo Disponível</p>
             <p className="text-2xl font-bold text-white drop-shadow-lg">
-              {formatBalance(localBalance)} {wallet.currency}
+              {formatBalance(localBalance)} {config.currency}
             </p>
           </div>
 
@@ -243,7 +266,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <QrCode className="h-5 w-5 text-satotrack-neon" />
-              Receber {wallet.currency}
+              Receber {config.currency}
             </DialogTitle>
             <DialogDescription>
               Use este endereço ou QR Code para receber {config.name}
@@ -281,7 +304,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             {/* Warning */}
             <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
               <p className="text-sm text-yellow-600">
-                ⚠️ Certifique-se de enviar apenas {wallet.currency} para este endereço.
+                ⚠️ Certifique-se de enviar apenas {config.currency} para este endereço.
                 Enviar outras moedas pode resultar em perda permanente.
               </p>
             </div>

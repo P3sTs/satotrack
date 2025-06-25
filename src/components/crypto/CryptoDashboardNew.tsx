@@ -40,7 +40,7 @@ const CryptoDashboardNew: React.FC = () => {
     // Check if wallets need generation
     const hasPendingWallets = wallets.some(w => w.address === 'pending_generation');
     const hasAllWallets = supportedCurrencies.every(curr => 
-      wallets.some(w => w.currency === curr)
+      wallets.some(w => w.name.includes(curr) || w.name === curr)
     );
 
     if (hasAllWallets && hasPendingWallets && !hasGenerated && !isLoading) {
@@ -59,11 +59,11 @@ const CryptoDashboardNew: React.FC = () => {
     await generateWallets();
   };
 
-  const handleSendTransaction = (currency: string) => {
-    toast.info(`Funcionalidade de envio ${currency} em desenvolvimento`);
+  const handleSendTransaction = (walletName: string) => {
+    toast.info(`Funcionalidade de envio ${walletName} em desenvolvimento`);
   };
 
-  const handleReceiveTransaction = (currency: string) => {
+  const handleReceiveTransaction = (walletName: string) => {
     // Handled by individual card modals
   };
 
@@ -201,8 +201,8 @@ const CryptoDashboardNew: React.FC = () => {
             <CryptoWalletCard
               key={wallet.id}
               wallet={wallet}
-              onSend={() => handleSendTransaction(wallet.currency)}
-              onReceive={() => handleReceiveTransaction(wallet.currency)}
+              onSend={() => handleSendTransaction(wallet.name)}
+              onReceive={() => handleReceiveTransaction(wallet.name)}
             />
           ))}
         </div>
