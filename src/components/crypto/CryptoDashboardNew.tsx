@@ -14,7 +14,10 @@ import {
   Zap,
   Shield,
   TrendingUp,
-  ArrowLeft
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +36,8 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets 
   } = useCryptoWallets();
   
-  const [showGenerateButton, setShowGenerateButton] = useState(true);
+  const [generationStatus, setGenerationStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
+  const [generationErrors, setGenerationErrors] = useState<string[]>([]);
   
   const isPremium = userPlan === 'premium';
   const supportedCurrencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL'];
@@ -42,45 +46,46 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets();
   }, []);
 
-  useEffect(() => {
-    // Hide generate button if wallets are generated
-    if (hasGeneratedWallets) {
-      setShowGenerateButton(false);
-    }
-  }, [hasGeneratedWallets]);
-
   const handleGenerateWallets = async () => {
     if (hasGeneratedWallets) {
       toast.error('Você já possui carteiras geradas. Cada usuário pode ter apenas 1 endereço por moeda.');
       return;
     }
 
+    setGenerationStatus('generating');
+    setGenerationErrors([]);
+
     try {
-      console.log('Starting wallet generation process...');
+      console.log('Iniciando geração de carteiras...');
       const result = await generateWallets();
-      console.log('Generation completed:', result);
+      console.log('Resultado da geração:', result);
       
-      // Hide the generate button immediately
-      setShowGenerateButton(false);
+      if (result?.errors && result.errors.length > 0) {
+        setGenerationErrors(result.errors);
+        setGenerationStatus('error');
+        toast.error(`Algumas carteiras não puderam ser geradas: ${result.errors.join(', ')}`);
+      } else {
+        setGenerationStatus('success');
+        toast.success(`${result?.walletsGenerated || 0} carteiras geradas com sucesso!`);
+      }
       
-      // Force a reload after a short delay to ensure UI updates
+      // Recarregar carteiras após geração
       setTimeout(() => {
         loadWallets();
       }, 2000);
       
     } catch (error) {
-      console.error('Error generating wallets:', error);
-      // Show generate button again if there was an error
-      setShowGenerateButton(true);
+      console.error('Erro na geração de carteiras:', error);
+      setGenerationStatus('error');
+      setGenerationErrors([error.message || 'Erro desconhecido']);
+      toast.error(`Falha na geração de carteiras: ${error.message}`);
     }
   };
 
-  const handleSendTransaction = (walletName: string) => {
-    toast.info(`Funcionalidade de envio ${walletName} em desenvolvimento`);
-  };
-
-  const handleReceiveTransaction = (walletName: string) => {
-    // Handled by individual card modals
+  const handleRetryGeneration = () => {
+    setGenerationStatus('idle');
+    setGenerationErrors([]);
+    handleGenerateWallets();
   };
 
   const handleGoBack = () => {
@@ -94,11 +99,23 @@ const CryptoDashboardNew: React.FC = () => {
     return sum + parseFloat(wallet.balance || '0');
   }, 0);
 
-  // Determine if we should show the generate button
-  const shouldShowGenerateButton = showGenerateButton && 
-    wallets.length === 0 && 
-    !isGenerating && 
-    !hasGeneratedWallets;
+  // Status da geração
+  const getGenerationStatusIcon = () => {
+    switch (generationStatus) {
+      case 'generating':
+        return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
+      case 'success':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'error':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Zap className="h-5 w-5 text-satotrack-neon" />;
+    }
+  };
+
+  // Deve mostrar o botão de gerar apenas se não há carteiras geradas
+  const shouldShowGenerateButton = wallets.length === 0 || 
+    (wallets.length > 0 && wallets.every(w => w.address === 'pending_generation'));
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -117,7 +134,7 @@ const CryptoDashboardNew: React.FC = () => {
           
           <div>
             <h1 className="text-3xl font-bold text-satotrack-text mb-2 flex items-center gap-2">
-              <Zap className="h-8 w-8 text-satotrack-neon" />
+              {getGenerationStatusIcon()}
               Carteiras Cripto
             </h1>
             <p className="text-muted-foreground">
@@ -140,15 +157,61 @@ const CryptoDashboardNew: React.FC = () => {
           {shouldShowGenerateButton && (
             <Button
               onClick={handleGenerateWallets}
-              disabled={isGenerating}
+              disabled={generationStatus === 'generating'}
               className="gap-2 bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
             >
-              <Plus className="h-4 w-4" />
-              {isGenerating ? 'Gerando...' : 'Gerar Carteiras'}
+              {generationStatus === 'generating' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+              {generationStatus === 'generating' ? 'Gerando...' : 'Gerar Carteiras'}
             </Button>
           )}
         </div>
       </div>
+
+      {/* Status da Geração */}
+      {generationStatus === 'generating' && (
+        <Alert className="border-blue-500/30 bg-blue-500/10">
+          <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+          <AlertDescription className="text-blue-600">
+            <strong>Gerando carteiras...</strong> Conectando com a API Tatum para criar seus endereços Web3.
+            Este processo pode levar alguns segundos.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {generationStatus === 'success' && (
+        <Alert className="border-green-500/30 bg-green-500/10">
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <AlertDescription className="text-green-600">
+            <strong>Carteiras geradas com sucesso!</strong> Suas carteiras Web3 estão prontas para uso.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {generationStatus === 'error' && generationErrors.length > 0 && (
+        <Alert className="border-red-500/30 bg-red-500/10">
+          <XCircle className="h-4 w-4 text-red-500" />
+          <AlertDescription className="text-red-600">
+            <strong>Erro na geração de carteiras:</strong>
+            <ul className="mt-2 list-disc list-inside">
+              {generationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+            <Button
+              onClick={handleRetryGeneration}
+              variant="outline"
+              size="sm"
+              className="mt-3"
+            >
+              Tentar Novamente
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -187,6 +250,7 @@ const CryptoDashboardNew: React.FC = () => {
               </div>
               <Shield className="h-8 w-8 text-purple-400" />
             </div>
+
           </CardContent>
         </Card>
 
@@ -196,7 +260,8 @@ const CryptoDashboardNew: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>
                 <p className="text-lg font-bold text-orange-400">
-                  {isGenerating ? 'Gerando...' : pendingWallets.length > 0 ? 'Processando...' : 'Ativo'}
+                  {generationStatus === 'generating' ? 'Gerando...' : 
+                   pendingWallets.length > 0 ? 'Processando...' : 'Ativo'}
                 </p>
               </div>
               <Zap className="h-8 w-8 text-orange-400" />
@@ -215,7 +280,7 @@ const CryptoDashboardNew: React.FC = () => {
       </Alert>
 
       {/* Wallets Grid */}
-      {wallets.length === 0 && !isGenerating ? (
+      {wallets.length === 0 && generationStatus !== 'generating' ? (
         <Card className="p-8 text-center">
           <CardContent>
             <Wallet className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -225,11 +290,15 @@ const CryptoDashboardNew: React.FC = () => {
             </p>
             <Button
               onClick={handleGenerateWallets}
-              disabled={isGenerating}
+              disabled={generationStatus === 'generating'}
               className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              {isGenerating ? 'Gerando Carteiras...' : 'Gerar Minhas Carteiras'}
+              {generationStatus === 'generating' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              {generationStatus === 'generating' ? 'Gerando Carteiras...' : 'Gerar Minhas Carteiras'}
             </Button>
           </CardContent>
         </Card>
@@ -239,20 +308,22 @@ const CryptoDashboardNew: React.FC = () => {
             <CryptoWalletCard
               key={wallet.id}
               wallet={wallet}
-              onSend={() => handleSendTransaction(wallet.name)}
-              onReceive={() => handleReceiveTransaction(wallet.name)}
+              onSend={() => toast.info(`Funcionalidade de envio ${wallet.name} em desenvolvimento`)}
+              onReceive={() => toast.info(`Funcionalidade de recebimento ${wallet.name} em desenvolvimento`)}
             />
           ))}
         </div>
       )}
 
       {/* Pending Generation Alert */}
-      {(pendingWallets.length > 0 || isGenerating) && (
+      {(pendingWallets.length > 0 || generationStatus === 'generating') && (
         <Alert className="border-yellow-500/30 bg-yellow-500/10">
           <AlertCircle className="h-4 w-4 text-yellow-500" />
           <AlertDescription className="text-yellow-600">
-            <strong>Gerando carteiras...</strong> {isGenerating ? 'Processando geração via Tatum API.' : 'Algumas carteiras ainda estão sendo geradas via Tatum API.'}
-            Isso pode levar alguns segundos. A página será atualizada automaticamente.
+            <strong>Processando carteiras...</strong> {generationStatus === 'generating' ? 
+              'Gerando endereços via Tatum API.' : 
+              'Algumas carteiras ainda estão sendo processadas via Tatum API.'
+            } A página será atualizada automaticamente.
           </AlertDescription>
         </Alert>
       )}

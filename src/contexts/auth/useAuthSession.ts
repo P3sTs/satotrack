@@ -70,6 +70,31 @@ export const useAuthSession = () => {
     }
   };
 
+  // Auto-generate crypto wallets for new users
+  const generateCryptoWallets = async (userId: string) => {
+    try {
+      console.log('Iniciando geração automática de carteiras cripto para usuário:', userId);
+      
+      const { data, error } = await supabase.functions.invoke('generate-crypto-wallets', {
+        body: { userId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Erro ao gerar carteiras cripto:', error);
+        throw error;
+      }
+
+      console.log('Carteiras cripto geradas com sucesso:', data);
+      return data;
+    } catch (error) {
+      console.error('Erro na geração de carteiras:', error);
+      throw error;
+    }
+  };
+
   // Verificar a sessão inicial ao montar o componente
   useEffect(() => {
     console.log("Inicializando useAuthSession...");
@@ -96,8 +121,16 @@ export const useAuthSession = () => {
       // Inicializar dados do usuário se for um registro novo
       if (event === 'SIGNED_UP' && currentSession?.user) {
         console.log("Novo usuário registrado, inicializando dados...");
-        setTimeout(() => {
-          initializeUserData(currentSession.user.id);
+        setTimeout(async () => {
+          try {
+            // Primeiro inicializar dados básicos do usuário
+            await initializeUserData(currentSession.user.id);
+            
+            // Depois gerar carteiras cripto automaticamente
+            await generateCryptoWallets(currentSession.user.id);
+          } catch (error) {
+            console.error('Erro na inicialização completa do usuário:', error);
+          }
         }, 1000);
       }
       
@@ -165,6 +198,7 @@ export const useAuthSession = () => {
     failedLoginAttempts,
     resetFailedLoginAttempts,
     checkSubscriptionStatus,
-    isLoading
+    isLoading,
+    generateCryptoWallets
   };
 };
