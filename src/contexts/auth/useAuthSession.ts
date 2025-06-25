@@ -1,11 +1,12 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
 import { useActivityMonitor } from './useActivityMonitor';
 import { useLoginAttempts } from './useLoginAttempts';
-import { initializeUserData } from './userInitialization';
+import { useAuthEvents } from './hooks/useAuthEvents';
+import { useUserInitialization } from './hooks/useUserInitialization';
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -40,6 +41,17 @@ export const useAuthSession = () => {
     checkFailedLoginAttempts
   );
 
+  // User initialization
+  const { initializeNewUser } = useUserInitialization();
+
+  // Auth events handling
+  const { setupAuthStateListener } = useAuthEvents({
+    setSession,
+    setUser,
+    setLoading,
+    initializeNewUser
+  });
+
   const isAuthenticated = Boolean(session && user);
   const isLoading = loading || authLoading;
   const failedLoginAttempts = getFailedLoginAttempts();
@@ -70,82 +82,13 @@ export const useAuthSession = () => {
     }
   };
 
-  // Auto-generate crypto wallets for new users
-  const generateCryptoWallets = async (userId: string) => {
-    try {
-      console.log('Iniciando geração automática de carteiras cripto para usuário:', userId);
-      
-      const { data, error } = await supabase.functions.invoke('generate-crypto-wallets', {
-        body: { userId },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
-
-      if (error) {
-        console.error('Erro ao gerar carteiras cripto:', error);
-        throw error;
-      }
-
-      console.log('Carteiras cripto geradas com sucesso:', data);
-      return data;
-    } catch (error) {
-      console.error('Erro na geração de carteiras:', error);
-      throw error;
-    }
-  };
-
-  // Verificar a sessão inicial ao montar o componente
+  // Session initialization
   useEffect(() => {
     console.log("Inicializando useAuthSession...");
     
-    // Primeiro, configurar o listener de eventos de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, currentSession: Session | null) => {
-      console.log("Auth state changed:", event, !!currentSession);
-      
-      // Log detalhado para debug
-      if (currentSession) {
-        console.log("Sessão ativa:", {
-          hasAccessToken: !!currentSession.access_token,
-          hasUser: !!currentSession.user,
-          userEmail: currentSession.user?.email,
-          expiresAt: currentSession.expires_at
-        });
-      }
-      
-      // Atualizar o estado local com a sessão e usuário
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
+    const subscription = setupAuthStateListener();
 
-      // Fix: Use string literals instead of AuthChangeEvent enum values
-      if (event === 'SIGNED_UP' && currentSession?.user) {
-        console.log("Novo usuário registrado, inicializando dados...");
-        setTimeout(async () => {
-          try {
-            // Primeiro inicializar dados básicos do usuário
-            await initializeUserData(currentSession.user.id);
-            
-            // Depois gerar carteiras cripto automaticamente
-            await generateCryptoWallets(currentSession.user.id);
-          } catch (error) {
-            console.error('Erro na inicialização completa do usuário:', error);
-          }
-        }, 1000);
-      }
-      
-      // Log quando usuário faz login
-      if (event === 'SIGNED_IN' && currentSession) {
-        console.log("Usuário logado com sucesso");
-      }
-      
-      // Log quando usuário sai
-      if (event === 'SIGNED_OUT') {
-        console.log("Usuário deslogado");
-      }
-    });
-
-    // Depois, verificar se há uma sessão ativa
+    // Check for existing session
     const checkSession = async () => {
       try {
         console.log("Verificando sessão existente...");
@@ -156,14 +99,6 @@ export const useAuthSession = () => {
         }
         
         console.log("Sessão inicial encontrada:", !!initialSession);
-        if (initialSession) {
-          console.log("Detalhes da sessão inicial:", {
-            hasAccessToken: !!initialSession.access_token,
-            hasUser: !!initialSession.user,
-            userEmail: initialSession.user?.email
-          });
-        }
-        
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
         setLoading(false);
@@ -179,7 +114,7 @@ export const useAuthSession = () => {
       console.log("Limpando subscription do useAuthSession");
       subscription.unsubscribe();
     };
-  }, []);
+  }, [setupAuthStateListener]);
 
   return { 
     session, 
@@ -199,6 +134,5 @@ export const useAuthSession = () => {
     resetFailedLoginAttempts,
     checkSubscriptionStatus,
     isLoading,
-    generateCryptoWallets
   };
 };
