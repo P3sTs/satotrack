@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -304,14 +303,22 @@ const CryptoDashboardNew: React.FC = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wallets.map((wallet) => (
-            <CryptoWalletCard
-              key={wallet.id}
-              wallet={wallet}
-              onSend={() => toast.info(`Funcionalidade de envio ${wallet.name} em desenvolvimento`)}
-              onReceive={() => toast.info(`Funcionalidade de recebimento ${wallet.name} em desenvolvimento`)}
-            />
-          ))}
+          {wallets.map((wallet) => {
+            // Add currency field from name if missing
+            const walletWithCurrency = {
+              ...wallet,
+              currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN'
+            };
+            
+            return (
+              <CryptoWalletCard
+                key={wallet.id}
+                wallet={walletWithCurrency}
+                onSend={() => toast.info(`Funcionalidade de envio ${wallet.name} em desenvolvimento`)}
+                onReceive={() => toast.info(`Funcionalidade de recebimento ${wallet.name} em desenvolvimento`)}
+              />
+            );
+          })}
         </div>
       )}
 

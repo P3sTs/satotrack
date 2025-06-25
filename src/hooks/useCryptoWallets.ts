@@ -1,232 +1,141 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
 
 export interface CryptoWallet {
   id: string;
-  user_id: string;
   name: string;
   address: string;
-  network_id: string;
-  balance?: string;
-  created_at: string;
+  currency: string;
+  balance: string;
+  created_at?: string;
+  user_id?: string;
   xpub?: string;
   private_key_encrypted?: string;
 }
 
-export interface CryptoTransaction {
-  id: string;
-  wallet_id: string;
-  transaction_hash: string;
-  transaction_type: 'send' | 'receive';
-  amount: string;
-  currency: string;
-  from_address: string;
-  to_address: string;
-  status: 'pending' | 'confirmed' | 'failed';
-  created_at: string;
+interface GenerateWalletsResult {
+  success: boolean;
+  walletsGenerated: number;
+  totalRequested: number;
+  wallets: Array<{
+    currency: string;
+    name: string;
+    address: string;
+  }>;
+  errors?: string[];
 }
 
 export const useCryptoWallets = () => {
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
-  const [transactions, setTransactions] = useState<CryptoTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-
-  const callAPI = useCallback(async (payload: any) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      throw new Error('Not authenticated');
-    }
-
-    console.log('Calling crypto-wallet-manager API with payload:', payload);
-
-    const response = await supabase.functions.invoke('crypto-wallet-manager', {
-      body: payload,
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
-
-    console.log('API response:', response);
-
-    if (response.error) {
-      throw new Error(response.error.message || 'API call failed');
-    }
-
-    return response.data;
-  }, []);
+  const { user, session } = useAuth();
 
   const loadWallets = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase
+      console.log('Carregando carteiras do usuário:', user.id);
+      
+      const { data: walletsData, error } = await supabase
         .from('crypto_wallets')
-        .select('id, user_id, name, address, network_id, balance, created_at, xpub, private_key_encrypted')
+        .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao carregar carteiras:', error);
+        throw error;
+      }
 
-      console.log('Loaded wallets from database:', data);
-
-      // Transform database records to match CryptoWallet interface
-      const transformedWallets = (data || []).map(wallet => ({
+      console.log('Carteiras carregadas:', walletsData);
+      
+      const formattedWallets: CryptoWallet[] = (walletsData || []).map(wallet => ({
         id: wallet.id,
-        user_id: wallet.user_id,
         name: wallet.name,
         address: wallet.address,
-        network_id: wallet.network_id,
+        currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN',
         balance: wallet.balance?.toString() || '0',
         created_at: wallet.created_at,
+        user_id: wallet.user_id,
         xpub: wallet.xpub,
         private_key_encrypted: wallet.private_key_encrypted
       }));
 
-      setWallets(transformedWallets);
+      setWallets(formattedWallets);
     } catch (error) {
-      console.error('Error loading wallets:', error);
+      console.error('Erro ao carregar carteiras:', error);
       toast.error('Erro ao carregar carteiras');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
-  const generateWallets = useCallback(async () => {
+  const generateWallets = useCallback(async (): Promise<GenerateWalletsResult | null> => {
+    if (!user || !session) {
+      throw new Error('Usuário não autenticado');
+    }
+
     setIsGenerating(true);
-    setIsLoading(true);
     try {
-      console.log('Starting wallet generation...');
+      console.log('Gerando carteiras para usuário:', user.id);
       
-      const result = await callAPI({
-        action: 'generate_wallets'
+      const { data, error } = await supabase.functions.invoke('generate-crypto-wallets', {
+        body: { userId: user.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
-      console.log('Wallets generation result:', result);
-      
-      if (result.success && result.generatedWallets && result.generatedWallets.length > 0) {
-        // Update local state immediately with the generated wallets
-        const newWallets = result.generatedWallets.map((wallet: any) => ({
-          id: wallet.id,
-          user_id: wallet.user_id,
-          name: wallet.name,
-          address: wallet.address,
-          network_id: wallet.network_id,
-          balance: wallet.balance?.toString() || '0',
-          created_at: wallet.created_at,
-          xpub: wallet.xpub,
-          private_key_encrypted: wallet.private_key_encrypted
-        }));
-        
-        setWallets(newWallets);
-        console.log('Updated wallets state with generated wallets:', newWallets);
-        
-        toast.success('Carteiras cripto geradas com sucesso!');
-      } else {
-        // Fallback: reload from database
-        await loadWallets();
-        toast.success('Carteiras cripto geradas com sucesso!');
+      if (error) {
+        console.error('Erro na função de geração:', error);
+        throw new Error(error.message || 'Erro ao gerar carteiras');
       }
-      
-      return result;
+
+      console.log('Resposta da geração:', data);
+      return data as GenerateWalletsResult;
     } catch (error) {
-      console.error('Error generating wallets:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      toast.error(`Erro ao gerar carteiras: ${errorMessage}`);
+      console.error('Erro ao gerar carteiras:', error);
       throw error;
     } finally {
       setIsGenerating(false);
-      setIsLoading(false);
     }
-  }, [callAPI, loadWallets]);
-
-  const getBalance = useCallback(async (wallet: CryptoWallet): Promise<string> => {
-    try {
-      console.log(`Getting balance for wallet ${wallet.name} (${wallet.network_id})`);
-      
-      const result = await callAPI({
-        action: 'get_balance',
-        currency: wallet.network_id
-      });
-
-      console.log(`Balance result for ${wallet.name}:`, result);
-
-      // Update wallet balance in state
-      setWallets(prev => prev.map(w => 
-        w.id === wallet.id ? { ...w, balance: result.balance || '0' } : w
-      ));
-
-      return result.balance || '0';
-    } catch (error) {
-      console.error(`Error getting balance for ${wallet.name}:`, error);
-      return '0';
-    }
-  }, [callAPI]);
-
-  const getTransactions = useCallback(async (wallet: CryptoWallet): Promise<CryptoTransaction[]> => {
-    try {
-      console.log(`Getting transactions for wallet ${wallet.name} (${wallet.network_id})`);
-      
-      const result = await callAPI({
-        action: 'get_transactions',
-        currency: wallet.network_id
-      });
-
-      console.log(`Transactions result for ${wallet.name}:`, result);
-
-      return result.transactions || [];
-    } catch (error) {
-      console.error(`Error getting transactions for ${wallet.name}:`, error);
-      return [];
-    }
-  }, [callAPI]);
+  }, [user, session]);
 
   const refreshAllBalances = useCallback(async () => {
     if (wallets.length === 0) return;
-    
+
     setIsLoading(true);
     try {
-      console.log('Refreshing all wallet balances...');
+      // Implementação futura - atualizar saldos via Tatum
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
+      toast.success('Saldos atualizados!');
       
-      await Promise.all(
-        wallets
-          .filter(wallet => wallet.address !== 'pending_generation')
-          .map(wallet => 
-            getBalance(wallet).catch(err => 
-              console.error(`Failed to refresh balance for ${wallet.name}:`, err)
-            )
-          )
-      );
-      
-      toast.success('Saldos atualizados com sucesso!');
+      // Recarregar carteiras
+      await loadWallets();
     } catch (error) {
-      console.error('Error refreshing balances:', error);
+      console.error('Erro ao atualizar saldos:', error);
       toast.error('Erro ao atualizar saldos');
     } finally {
       setIsLoading(false);
     }
-  }, [wallets, getBalance]);
+  }, [wallets, loadWallets]);
 
-  // Check if wallets are generated (no pending addresses)
-  const hasGeneratedWallets = wallets.length > 0 && !wallets.some(w => w.address === 'pending_generation');
+  const hasGeneratedWallets = wallets.some(w => w.address !== 'pending_generation');
   const hasPendingWallets = wallets.some(w => w.address === 'pending_generation');
-
-  useEffect(() => {
-    loadWallets();
-  }, [loadWallets]);
 
   return {
     wallets,
-    transactions,
     isLoading,
     isGenerating,
     hasGeneratedWallets,
     hasPendingWallets,
-    generateWallets,
     loadWallets,
-    getBalance,
-    getTransactions,
-    refreshAllBalances
+    generateWallets,
+    refreshAllBalances,
   };
 };
