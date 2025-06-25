@@ -1,28 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCryptoWallets } from '@/hooks/useCryptoWallets';
 import { useAuth } from '@/contexts/auth';
-import CryptoWalletCard from './CryptoWalletCard';
-import { 
-  Wallet, 
-  Plus, 
-  RefreshCw, 
-  AlertCircle,
-  Zap,
-  Shield,
-  TrendingUp,
-  ArrowLeft,
-  Loader2,
-  CheckCircle2,
-  XCircle
-} from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
-// Extract components
+// Import dashboard components
 import { CryptoDashboardHeader } from './dashboard/CryptoDashboardHeader';
 import { CryptoDashboardStats } from './dashboard/CryptoDashboardStats';
 import { CryptoDashboardAlerts } from './dashboard/CryptoDashboardAlerts';
