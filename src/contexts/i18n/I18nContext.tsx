@@ -25,8 +25,13 @@ const DEFAULT_LANGUAGE = 'pt-BR';
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<string>(() => {
     // Carregar idioma do localStorage ou usar padrão
-    const savedLanguage = localStorage.getItem(STORAGE_KEY);
-    return savedLanguage && savedLanguage in translations ? savedLanguage : DEFAULT_LANGUAGE;
+    try {
+      const savedLanguage = localStorage.getItem(STORAGE_KEY);
+      return savedLanguage && savedLanguage in translations ? savedLanguage : DEFAULT_LANGUAGE;
+    } catch (error) {
+      console.warn('Error accessing localStorage:', error);
+      return DEFAULT_LANGUAGE;
+    }
   });
 
   const availableLanguages = [
@@ -37,7 +42,11 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLanguage = (lang: string) => {
     if (lang in translations) {
       setLanguageState(lang);
-      localStorage.setItem(STORAGE_KEY, lang);
+      try {
+        localStorage.setItem(STORAGE_KEY, lang);
+      } catch (error) {
+        console.warn('Error setting localStorage:', error);
+      }
     }
   };
 
@@ -45,7 +54,11 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Garantir que o idioma seja persistido
-    localStorage.setItem(STORAGE_KEY, language);
+    try {
+      localStorage.setItem(STORAGE_KEY, language);
+    } catch (error) {
+      console.warn('Error persisting language:', error);
+    }
   }, [language]);
 
   const contextValue: I18nContextType = {
