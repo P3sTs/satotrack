@@ -7,17 +7,10 @@ import TransactionList from '../../TransacoesList';
 import WalletBalanceInsights from '../WalletBalanceInsights';
 import WalletAdvancedMetrics from '../WalletAdvancedMetrics';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
-import { TransacaoBTC } from '@/types/types';
-
-interface Carteira {
-  id: string;
-  nome: string;
-  endereco: string;
-  saldo: string;
-}
+import { TransacaoBTC, CarteiraBTC } from '@/types/types';
 
 interface WalletDetailContentProps {
-  carteira: Carteira;
+  carteira: CarteiraBTC;
   bitcoinData?: BitcoinPriceData | null;
   transacoes: TransacaoBTC[];
 }

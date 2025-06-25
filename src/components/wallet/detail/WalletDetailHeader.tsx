@@ -4,14 +4,10 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
-interface Carteira {
-  id: string;
-  nome: string;
-}
+import { CarteiraBTC } from '@/types/types';
 
 interface WalletDetailHeaderProps {
-  carteira: Carteira;
+  carteira: CarteiraBTC;
   isDeleting: boolean;
   onDelete: () => void;
 }

@@ -112,7 +112,7 @@ const SendCryptoModal: React.FC<SendCryptoModalProps> = ({
 
           <SendModalActions
             isLoading={isLoading}
-            canSend={recipient.trim() && amount.trim()}
+            canSend={!!(recipient.trim() && amount.trim())}
             onCancel={handleClose}
             onSend={handleSend}
           />
