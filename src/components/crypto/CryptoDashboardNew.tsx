@@ -40,7 +40,7 @@ const CryptoDashboardNew: React.FC = () => {
     // Check if wallets need generation
     const hasPendingWallets = wallets.some(w => w.address === 'pending_generation');
     const hasAllWallets = supportedCurrencies.every(curr => 
-      wallets.some(w => w.name.includes(curr) || w.name === curr)
+      wallets.some(w => w.network_id === curr)
     );
 
     if (hasAllWallets && hasPendingWallets && !hasGenerated && !isLoading) {
@@ -130,7 +130,7 @@ const CryptoDashboardNew: React.FC = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
+                <p className="text-sm text-mused-foreground">Valor Total</p>
                 <p className="text-2xl font-bold text-green-400">
                   ${totalBalance.toFixed(6)}
                 </p>

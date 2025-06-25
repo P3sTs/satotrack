@@ -39,66 +39,60 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
 
-  const getCurrencyConfig = (walletName: string) => {
-    // Extract currency from wallet name
-    const name = walletName.toLowerCase();
-    if (name.includes('bitcoin') || name.includes('btc')) {
-      return { 
-        name: 'Bitcoin', 
-        color: 'from-orange-500 to-yellow-600',
-        icon: '₿',
-        explorer: 'https://blockstream.info/address/',
-        currency: 'BTC'
-      };
+  const getCurrencyConfig = (networkId: string) => {
+    switch (networkId) {
+      case 'BTC':
+        return { 
+          name: 'Bitcoin', 
+          color: 'from-orange-500 to-yellow-600',
+          icon: '₿',
+          explorer: 'https://blockstream.info/address/',
+          currency: 'BTC'
+        };
+      case 'ETH':
+        return { 
+          name: 'Ethereum', 
+          color: 'from-blue-500 to-purple-600',
+          icon: 'Ξ',
+          explorer: 'https://etherscan.io/address/',
+          currency: 'ETH'
+        };
+      case 'MATIC':
+        return { 
+          name: 'Polygon', 
+          color: 'from-purple-500 to-pink-600',
+          icon: '⬟',
+          explorer: 'https://polygonscan.com/address/',
+          currency: 'MATIC'
+        };
+      case 'USDT':
+        return { 
+          name: 'Tether', 
+          color: 'from-green-500 to-emerald-600',
+          icon: '₮',
+          explorer: 'https://etherscan.io/address/',
+          currency: 'USDT'
+        };
+      case 'SOL':
+        return { 
+          name: 'Solana', 
+          color: 'from-purple-600 to-blue-500',
+          icon: '◎',
+          explorer: 'https://explorer.solana.com/account/',
+          currency: 'SOL'
+        };
+      default:
+        return { 
+          name: wallet.name, 
+          color: 'from-gray-500 to-gray-600',
+          icon: '●',
+          explorer: '#',
+          currency: wallet.network_id
+        };
     }
-    if (name.includes('ethereum') || name.includes('eth')) {
-      return { 
-        name: 'Ethereum', 
-        color: 'from-blue-500 to-purple-600',
-        icon: 'Ξ',
-        explorer: 'https://etherscan.io/address/',
-        currency: 'ETH'
-      };
-    }
-    if (name.includes('polygon') || name.includes('matic')) {
-      return { 
-        name: 'Polygon', 
-        color: 'from-purple-500 to-pink-600',
-        icon: '⬟',
-        explorer: 'https://polygonscan.com/address/',
-        currency: 'MATIC'
-      };
-    }
-    if (name.includes('tether') || name.includes('usdt')) {
-      return { 
-        name: 'Tether', 
-        color: 'from-green-500 to-emerald-600',
-        icon: '₮',
-        explorer: 'https://etherscan.io/address/',
-        currency: 'USDT'
-      };
-    }
-    if (name.includes('solana') || name.includes('sol')) {
-      return { 
-        name: 'Solana', 
-        color: 'from-purple-600 to-blue-500',
-        icon: '◎',
-        explorer: 'https://explorer.solana.com/account/',
-        currency: 'SOL'
-      };
-    }
-    
-    // Default fallback
-    return { 
-      name: walletName, 
-      color: 'from-gray-500 to-gray-600',
-      icon: '●',
-      explorer: '#',
-      currency: walletName
-    };
   };
 
-  const config = getCurrencyConfig(wallet.name);
+  const config = getCurrencyConfig(wallet.network_id);
 
   const handleRefresh = async () => {
     if (wallet.address === 'pending_generation') {

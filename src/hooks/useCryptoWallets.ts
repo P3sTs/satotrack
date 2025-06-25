@@ -11,6 +11,8 @@ export interface CryptoWallet {
   network_id: string;
   balance?: string;
   created_at: string;
+  xpub?: string;
+  private_key_encrypted?: string;
 }
 
 export interface CryptoTransaction {
@@ -56,7 +58,7 @@ export const useCryptoWallets = () => {
     try {
       const { data, error } = await supabase
         .from('crypto_wallets')
-        .select('id, user_id, name, address, network_id, balance, created_at')
+        .select('id, user_id, name, address, network_id, balance, created_at, xpub, private_key_encrypted')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -69,7 +71,9 @@ export const useCryptoWallets = () => {
         address: wallet.address,
         network_id: wallet.network_id,
         balance: wallet.balance?.toString() || '0',
-        created_at: wallet.created_at
+        created_at: wallet.created_at,
+        xpub: wallet.xpub,
+        private_key_encrypted: wallet.private_key_encrypted
       }));
 
       setWallets(transformedWallets);
@@ -102,20 +106,9 @@ export const useCryptoWallets = () => {
 
   const getBalance = useCallback(async (wallet: CryptoWallet): Promise<string> => {
     try {
-      // For now, we'll get the network name from the wallet name or use a mapping
-      const networkMapping: { [key: string]: string } = {
-        'Bitcoin': 'BTC',
-        'Ethereum': 'ETH',
-        'Polygon': 'MATIC',
-        'Tether': 'USDT',
-        'Solana': 'SOL'
-      };
-
-      const currency = networkMapping[wallet.name] || wallet.name;
-
       const result = await callAPI({
         action: 'get_balance',
-        currency
+        currency: wallet.network_id
       });
 
       // Update wallet balance in state
@@ -132,19 +125,9 @@ export const useCryptoWallets = () => {
 
   const getTransactions = useCallback(async (wallet: CryptoWallet): Promise<CryptoTransaction[]> => {
     try {
-      const networkMapping: { [key: string]: string } = {
-        'Bitcoin': 'BTC',
-        'Ethereum': 'ETH',
-        'Polygon': 'MATIC',
-        'Tether': 'USDT',
-        'Solana': 'SOL'
-      };
-
-      const currency = networkMapping[wallet.name] || wallet.name;
-
       const result = await callAPI({
         action: 'get_transactions',
-        currency
+        currency: wallet.network_id
       });
 
       return result.transactions || [];

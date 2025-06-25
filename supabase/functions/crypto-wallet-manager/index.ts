@@ -53,7 +53,13 @@ serve(async (req) => {
       case 'generate_wallets': {
         console.log(`Generating wallets for user: ${user.user.id}`)
         
-        const currencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL']
+        const currencies = [
+          { name: 'Bitcoin', network_id: 'BTC' },
+          { name: 'Ethereum', network_id: 'ETH' },
+          { name: 'Polygon', network_id: 'MATIC' },
+          { name: 'Tether', network_id: 'USDT' },
+          { name: 'Solana', network_id: 'SOL' }
+        ]
         const generatedWallets = []
 
         for (const curr of currencies) {
@@ -63,11 +69,11 @@ serve(async (req) => {
               .from('crypto_wallets')
               .select('*')
               .eq('user_id', user.user.id)
-              .eq('currency', curr)
+              .eq('name', curr.name)
               .single()
 
             if (existingWallet && existingWallet.address !== 'pending_generation') {
-              console.log(`Wallet for ${curr} already exists`)
+              console.log(`Wallet for ${curr.name} already exists`)
               generatedWallets.push(existingWallet)
               continue
             }
@@ -76,22 +82,22 @@ serve(async (req) => {
             let walletResponse
             let addressResponse
             
-            if (curr === 'BTC') {
+            if (curr.network_id === 'BTC') {
               walletResponse = await fetch(`${baseUrl}/bitcoin/wallet`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'ETH' || curr === 'USDT') {
+            } else if (curr.network_id === 'ETH' || curr.network_id === 'USDT') {
               walletResponse = await fetch(`${baseUrl}/ethereum/wallet`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'MATIC') {
+            } else if (curr.network_id === 'MATIC') {
               walletResponse = await fetch(`${baseUrl}/polygon/wallet`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'SOL') {
+            } else if (curr.network_id === 'SOL') {
               walletResponse = await fetch(`${baseUrl}/solana/wallet`, {
                 method: 'GET',
                 headers
@@ -99,29 +105,29 @@ serve(async (req) => {
             }
 
             if (!walletResponse?.ok) {
-              console.error(`Failed to generate ${curr} wallet`)
+              console.error(`Failed to generate ${curr.name} wallet`)
               continue
             }
 
             const walletData = await walletResponse.json()
             
             // Generate address from wallet
-            if (curr === 'BTC') {
+            if (curr.network_id === 'BTC') {
               addressResponse = await fetch(`${baseUrl}/bitcoin/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'ETH' || curr === 'USDT') {
+            } else if (curr.network_id === 'ETH' || curr.network_id === 'USDT') {
               addressResponse = await fetch(`${baseUrl}/ethereum/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'MATIC') {
+            } else if (curr.network_id === 'MATIC') {
               addressResponse = await fetch(`${baseUrl}/polygon/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr === 'SOL') {
+            } else if (curr.network_id === 'SOL') {
               // Solana uses different structure
               addressResponse = { ok: true, json: async () => ({ address: walletData.address }) }
             }
@@ -137,19 +143,19 @@ serve(async (req) => {
                 private_key_encrypted: btoa(walletData.privateKey) // Simple encoding for demo
               })
               .eq('user_id', user.user.id)
-              .eq('currency', curr)
+              .eq('name', curr.name)
               .select()
               .single()
 
             if (error) {
-              console.error(`Error updating ${curr} wallet:`, error)
+              console.error(`Error updating ${curr.name} wallet:`, error)
             } else {
-              console.log(`${curr} wallet generated successfully`)
+              console.log(`${curr.name} wallet generated successfully`)
               generatedWallets.push(updatedWallet)
             }
 
           } catch (error) {
-            console.error(`Error generating ${curr} wallet:`, error)
+            console.error(`Error generating ${curr.name} wallet:`, error)
           }
         }
 
@@ -164,7 +170,7 @@ serve(async (req) => {
           .from('crypto_wallets')
           .select('*')
           .eq('user_id', user.user.id)
-          .eq('currency', currency)
+          .eq('network_id', currency)
           .single()
 
         if (!wallet || wallet.address === 'pending_generation') {
@@ -221,7 +227,7 @@ serve(async (req) => {
           .from('crypto_wallets')
           .select('*')
           .eq('user_id', user.user.id)
-          .eq('currency', currency)
+          .eq('network_id', currency)
           .single()
 
         if (!wallet) throw new Error('Wallet not found')

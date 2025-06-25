@@ -207,11 +207,13 @@ export type Database = {
           name: string
           native_token_balance: number | null
           network_id: string
+          private_key_encrypted: string | null
           tokens_data: Json | null
           total_received: number | null
           total_sent: number | null
           transaction_count: number | null
           user_id: string | null
+          xpub: string | null
         }
         Insert: {
           address: string
@@ -223,11 +225,13 @@ export type Database = {
           name: string
           native_token_balance?: number | null
           network_id: string
+          private_key_encrypted?: string | null
           tokens_data?: Json | null
           total_received?: number | null
           total_sent?: number | null
           transaction_count?: number | null
           user_id?: string | null
+          xpub?: string | null
         }
         Update: {
           address?: string
@@ -239,11 +243,13 @@ export type Database = {
           name?: string
           native_token_balance?: number | null
           network_id?: string
+          private_key_encrypted?: string | null
           tokens_data?: Json | null
           total_received?: number | null
           total_sent?: number | null
           transaction_count?: number | null
           user_id?: string | null
+          xpub?: string | null
         }
         Relationships: [
           {
