@@ -43,7 +43,7 @@ const CryptoDashboardNew: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Ocultar botão de gerar se já existem carteiras geradas
+    // Hide generate button if wallets are generated
     if (hasGeneratedWallets) {
       setShowGenerateButton(false);
     }
@@ -56,14 +56,22 @@ const CryptoDashboardNew: React.FC = () => {
     }
 
     try {
-      await generateWallets();
+      console.log('Starting wallet generation process...');
+      const result = await generateWallets();
+      console.log('Generation completed:', result);
+      
+      // Hide the generate button immediately
       setShowGenerateButton(false);
-      // Recarregar as carteiras após geração
+      
+      // Force a reload after a short delay to ensure UI updates
       setTimeout(() => {
         loadWallets();
       }, 2000);
+      
     } catch (error) {
       console.error('Error generating wallets:', error);
+      // Show generate button again if there was an error
+      setShowGenerateButton(true);
     }
   };
 
@@ -85,6 +93,12 @@ const CryptoDashboardNew: React.FC = () => {
   const totalBalance = activeWallets.reduce((sum, wallet) => {
     return sum + parseFloat(wallet.balance || '0');
   }, 0);
+
+  // Determine if we should show the generate button
+  const shouldShowGenerateButton = showGenerateButton && 
+    wallets.length === 0 && 
+    !isGenerating && 
+    !hasGeneratedWallets;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -123,7 +137,7 @@ const CryptoDashboardNew: React.FC = () => {
             Atualizar Tudo
           </Button>
           
-          {showGenerateButton && wallets.length === 0 && (
+          {shouldShowGenerateButton && (
             <Button
               onClick={handleGenerateWallets}
               disabled={isGenerating}

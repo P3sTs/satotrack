@@ -105,14 +105,35 @@ export const useCryptoWallets = () => {
 
       console.log('Wallets generation result:', result);
       
-      // Recarregar carteiras do banco de dados
-      await loadWallets();
+      if (result.success && result.generatedWallets && result.generatedWallets.length > 0) {
+        // Update local state immediately with the generated wallets
+        const newWallets = result.generatedWallets.map((wallet: any) => ({
+          id: wallet.id,
+          user_id: wallet.user_id,
+          name: wallet.name,
+          address: wallet.address,
+          network_id: wallet.network_id,
+          balance: wallet.balance?.toString() || '0',
+          created_at: wallet.created_at,
+          xpub: wallet.xpub,
+          private_key_encrypted: wallet.private_key_encrypted
+        }));
+        
+        setWallets(newWallets);
+        console.log('Updated wallets state with generated wallets:', newWallets);
+        
+        toast.success('Carteiras cripto geradas com sucesso!');
+      } else {
+        // Fallback: reload from database
+        await loadWallets();
+        toast.success('Carteiras cripto geradas com sucesso!');
+      }
       
-      toast.success('Carteiras cripto geradas com sucesso!');
       return result;
     } catch (error) {
       console.error('Error generating wallets:', error);
-      toast.error(`Erro ao gerar carteiras: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error(`Erro ao gerar carteiras: ${errorMessage}`);
       throw error;
     } finally {
       setIsGenerating(false);

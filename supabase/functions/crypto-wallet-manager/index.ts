@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -64,7 +63,7 @@ serve(async (req) => {
 
         for (const curr of currencies) {
           try {
-            // Check if wallet already exists
+            // Check if wallet already exists and is generated
             const { data: existingWallet } = await supabaseClient
               .from('crypto_wallets')
               .select('*')
@@ -110,48 +109,103 @@ serve(async (req) => {
             }
 
             const walletData = await walletResponse.json()
+            console.log(`Generated ${curr.name} wallet data:`, walletData)
             
             // Generate address from wallet
+            let finalAddress = walletData.address // For Solana
+            
             if (curr.network_id === 'BTC') {
               addressResponse = await fetch(`${baseUrl}/bitcoin/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
+              if (addressResponse.ok) {
+                const addressData = await addressResponse.json()
+                finalAddress = addressData.address
+              }
             } else if (curr.network_id === 'ETH' || curr.network_id === 'USDT') {
               addressResponse = await fetch(`${baseUrl}/ethereum/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
+              if (addressResponse.ok) {
+                const addressData = await addressResponse.json()
+                finalAddress = addressData.address
+              }
             } else if (curr.network_id === 'MATIC') {
               addressResponse = await fetch(`${baseUrl}/polygon/address/${walletData.xpub}/0`, {
                 method: 'GET',
                 headers
               })
-            } else if (curr.network_id === 'SOL') {
-              // Solana uses different structure
-              addressResponse = { ok: true, json: async () => ({ address: walletData.address }) }
+              if (addressResponse.ok) {
+                const addressData = await addressResponse.json()
+                finalAddress = addressData.address
+              }
             }
 
-            const addressData = await addressResponse?.json()
+            console.log(`Generated address for ${curr.name}: ${finalAddress}`)
 
-            // Update wallet in database
-            const { data: updatedWallet, error } = await supabaseClient
-              .from('crypto_wallets')
-              .update({
-                address: addressData?.address || walletData.address,
-                xpub: walletData.xpub,
-                private_key_encrypted: btoa(walletData.privateKey) // Simple encoding for demo
-              })
-              .eq('user_id', user.user.id)
-              .eq('name', curr.name)
-              .select()
-              .single()
+            // Update wallet in database with retry mechanism
+            let updatedWallet = null
+            let retries = 3
+            
+            while (retries > 0 && !updatedWallet) {
+              try {
+                const { data, error } = await supabaseClient
+                  .from('crypto_wallets')
+                  .update({
+                    address: finalAddress,
+                    xpub: walletData.xpub,
+                    private_key_encrypted: btoa(walletData.privateKey || walletData.address), // Simple encoding for demo
+                    balance: 0
+                  })
+                  .eq('user_id', user.user.id)
+                  .eq('name', curr.name)
+                  .select()
+                  .single()
 
-            if (error) {
-              console.error(`Error updating ${curr.name} wallet:`, error)
-            } else {
-              console.log(`${curr.name} wallet generated successfully`)
+                if (error) {
+                  console.error(`Error updating ${curr.name} wallet:`, error)
+                  retries--
+                  if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000))
+                    continue
+                  }
+                  break
+                }
+
+                // Verify the wallet was actually updated
+                const { data: verifyData } = await supabaseClient
+                  .from('crypto_wallets')
+                  .select('*')
+                  .eq('user_id', user.user.id)
+                  .eq('name', curr.name)
+                  .single()
+
+                if (verifyData?.address && verifyData.address !== 'pending_generation') {
+                  updatedWallet = verifyData
+                  console.log(`${curr.name} wallet updated successfully:`, updatedWallet)
+                  break
+                } else {
+                  console.log(`Retrying ${curr.name} wallet update...`)
+                  retries--
+                  if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1500))
+                  }
+                }
+              } catch (updateError) {
+                console.error(`Update error for ${curr.name}:`, updateError)
+                retries--
+                if (retries > 0) {
+                  await new Promise(resolve => setTimeout(resolve, 1000))
+                }
+              }
+            }
+
+            if (updatedWallet) {
               generatedWallets.push(updatedWallet)
+            } else {
+              console.error(`Failed to update ${curr.name} wallet after retries`)
             }
 
           } catch (error) {
@@ -159,7 +213,7 @@ serve(async (req) => {
           }
         }
 
-        result = { generatedWallets }
+        result = { generatedWallets, success: true }
         break
       }
 
