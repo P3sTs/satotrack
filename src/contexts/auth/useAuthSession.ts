@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
 import { useActivityMonitor } from './useActivityMonitor';
@@ -94,7 +94,7 @@ export const useAuthSession = () => {
       setLoading(false);
 
       // Inicializar dados do usuário se for um registro novo
-      if (event === 'SIGNED_UP' && currentSession?.user) {
+      if (event === AuthChangeEvent.SIGNED_UP && currentSession?.user) {
         console.log("Novo usuário registrado, inicializando dados...");
         setTimeout(() => {
           initializeUserData(currentSession.user.id);
@@ -102,12 +102,12 @@ export const useAuthSession = () => {
       }
       
       // Log quando usuário faz login
-      if (event === 'SIGNED_IN' && currentSession) {
+      if (event === AuthChangeEvent.SIGNED_IN && currentSession) {
         console.log("Usuário logado com sucesso");
       }
       
       // Log quando usuário sai
-      if (event === 'SIGNED_OUT') {
+      if (event === AuthChangeEvent.SIGNED_OUT) {
         console.log("Usuário deslogado");
       }
     });
