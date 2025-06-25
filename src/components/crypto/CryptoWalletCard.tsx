@@ -130,6 +130,11 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
 
   const isPending = wallet.address === 'pending_generation';
 
+  // Update local balance when wallet balance changes
+  useEffect(() => {
+    setLocalBalance(wallet.balance || '0');
+  }, [wallet.balance]);
+
   return (
     <>
       <Card className={`
@@ -255,56 +260,58 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
       </Card>
 
       {/* Receive Modal */}
-      <Dialog open={showReceiveModal} onOpenChange={setShowReceiveModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <QrCode className="h-5 w-5 text-satotrack-neon" />
-              Receber {config.currency}
-            </DialogTitle>
-            <DialogDescription>
-              Use este endereço ou QR Code para receber {config.name}
-            </DialogDescription>
-          </DialogHeader>
+      {!isPending && (
+        <Dialog open={showReceiveModal} onOpenChange={setShowReceiveModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <QrCode className="h-5 w-5 text-satotrack-neon" />
+                Receber {config.currency}
+              </DialogTitle>
+              <DialogDescription>
+                Use este endereço ou QR Code para receber {config.name}
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4">
-            {/* QR Code */}
-            <div className="flex justify-center p-4 bg-white rounded-lg">
-              <QRCode 
-                value={wallet.address} 
-                size={200}
-                level="M"
-                includeMargin={true}
-              />
-            </div>
+            <div className="space-y-4">
+              {/* QR Code */}
+              <div className="flex justify-center p-4 bg-white rounded-lg">
+                <QRCode 
+                  value={wallet.address} 
+                  size={200}
+                  level="M"
+                  includeMargin={true}
+                />
+              </div>
 
-            {/* Address */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Endereço da Carteira:</label>
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <code className="text-sm flex-1 break-all">
-                  {wallet.address}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyToClipboard(wallet.address, 'Endereço')}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+              {/* Address */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Endereço da Carteira:</label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <code className="text-sm flex-1 break-all">
+                    {wallet.address}
+                  </code>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(wallet.address, 'Endereço')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <p className="text-sm text-yellow-600">
+                  ⚠️ Certifique-se de enviar apenas {config.currency} para este endereço.
+                  Enviar outras moedas pode resultar em perda permanente.
+                </p>
               </div>
             </div>
-
-            {/* Warning */}
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-              <p className="text-sm text-yellow-600">
-                ⚠️ Certifique-se de enviar apenas {config.currency} para este endereço.
-                Enviar outras moedas pode resultar em perda permanente.
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
