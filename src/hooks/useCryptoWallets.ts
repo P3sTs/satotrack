@@ -54,11 +54,12 @@ export const useCryptoWallets = () => {
 
       console.log('Carteiras carregadas:', walletsData);
       
+      // Fix: Map the database fields correctly to include currency
       const formattedWallets: CryptoWallet[] = (walletsData || []).map(wallet => ({
         id: wallet.id,
         name: wallet.name,
         address: wallet.address,
-        currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN',
+        currency: wallet.name?.split(' ')[0] || 'UNKNOWN', // Extract currency from name
         balance: wallet.balance?.toString() || '0',
         created_at: wallet.created_at,
         user_id: wallet.user_id,

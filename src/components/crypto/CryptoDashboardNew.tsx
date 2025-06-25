@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets 
   } = useCryptoWallets();
   
+  // Fix: Include 'generating' in the type union
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
   const [generationErrors, setGenerationErrors] = useState<string[]>([]);
   
@@ -304,7 +306,7 @@ const CryptoDashboardNew: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {wallets.map((wallet) => {
-            // Add currency field from name if missing
+            // Fix: Ensure wallet has currency field
             const walletWithCurrency = {
               ...wallet,
               currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN'

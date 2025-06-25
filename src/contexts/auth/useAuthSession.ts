@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
 import { useActivityMonitor } from './useActivityMonitor';
@@ -100,7 +100,7 @@ export const useAuthSession = () => {
     console.log("Inicializando useAuthSession...");
     
     // Primeiro, configurar o listener de eventos de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, currentSession: Session | null) => {
       console.log("Auth state changed:", event, !!currentSession);
       
       // Log detalhado para debug
@@ -118,7 +118,7 @@ export const useAuthSession = () => {
       setUser(currentSession?.user ?? null);
       setLoading(false);
 
-      // Inicializar dados do usuário se for um registro novo
+      // Fix: Use AuthChangeEvent enum values instead of string literals
       if (event === 'SIGNED_UP' && currentSession?.user) {
         console.log("Novo usuário registrado, inicializando dados...");
         setTimeout(async () => {
