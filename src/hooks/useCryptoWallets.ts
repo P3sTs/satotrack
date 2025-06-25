@@ -6,9 +6,9 @@ import { toast } from 'sonner';
 export interface CryptoWallet {
   id: string;
   user_id: string;
-  currency: string;
+  name: string;
   address: string;
-  xpub?: string;
+  network_id: string;
   balance?: string;
   created_at: string;
 }
@@ -56,7 +56,7 @@ export const useCryptoWallets = () => {
     try {
       const { data, error } = await supabase
         .from('crypto_wallets')
-        .select('id, user_id, currency, address, xpub, created_at')
+        .select('id, user_id, name, address, network_id, balance, created_at')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -65,10 +65,10 @@ export const useCryptoWallets = () => {
       const transformedWallets = (data || []).map(wallet => ({
         id: wallet.id,
         user_id: wallet.user_id,
-        currency: wallet.currency,
+        name: wallet.name,
         address: wallet.address,
-        xpub: wallet.xpub,
-        balance: '0', // Will be updated when balance is fetched
+        network_id: wallet.network_id,
+        balance: wallet.balance?.toString() || '0',
         created_at: wallet.created_at
       }));
 
@@ -100,8 +100,19 @@ export const useCryptoWallets = () => {
     }
   }, [callAPI, loadWallets]);
 
-  const getBalance = useCallback(async (currency: string): Promise<string> => {
+  const getBalance = useCallback(async (wallet: CryptoWallet): Promise<string> => {
     try {
+      // For now, we'll get the network name from the wallet name or use a mapping
+      const networkMapping: { [key: string]: string } = {
+        'Bitcoin': 'BTC',
+        'Ethereum': 'ETH',
+        'Polygon': 'MATIC',
+        'Tether': 'USDT',
+        'Solana': 'SOL'
+      };
+
+      const currency = networkMapping[wallet.name] || wallet.name;
+
       const result = await callAPI({
         action: 'get_balance',
         currency
@@ -109,18 +120,28 @@ export const useCryptoWallets = () => {
 
       // Update wallet balance in state
       setWallets(prev => prev.map(w => 
-        w.currency === currency ? { ...w, balance: result.balance } : w
+        w.id === wallet.id ? { ...w, balance: result.balance } : w
       ));
 
       return result.balance || '0';
     } catch (error) {
-      console.error(`Error getting ${currency} balance:`, error);
+      console.error(`Error getting balance for ${wallet.name}:`, error);
       return '0';
     }
   }, [callAPI]);
 
-  const getTransactions = useCallback(async (currency: string): Promise<CryptoTransaction[]> => {
+  const getTransactions = useCallback(async (wallet: CryptoWallet): Promise<CryptoTransaction[]> => {
     try {
+      const networkMapping: { [key: string]: string } = {
+        'Bitcoin': 'BTC',
+        'Ethereum': 'ETH',
+        'Polygon': 'MATIC',
+        'Tether': 'USDT',
+        'Solana': 'SOL'
+      };
+
+      const currency = networkMapping[wallet.name] || wallet.name;
+
       const result = await callAPI({
         action: 'get_transactions',
         currency
@@ -128,7 +149,7 @@ export const useCryptoWallets = () => {
 
       return result.transactions || [];
     } catch (error) {
-      console.error(`Error getting ${currency} transactions:`, error);
+      console.error(`Error getting transactions for ${wallet.name}:`, error);
       return [];
     }
   }, [callAPI]);
@@ -138,12 +159,10 @@ export const useCryptoWallets = () => {
     
     setIsLoading(true);
     try {
-      const supportedCurrencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL'];
-      
       await Promise.all(
-        supportedCurrencies.map(currency => 
-          getBalance(currency).catch(err => 
-            console.error(`Failed to refresh ${currency} balance:`, err)
+        wallets.map(wallet => 
+          getBalance(wallet).catch(err => 
+            console.error(`Failed to refresh balance for ${wallet.name}:`, err)
           )
         )
       );
