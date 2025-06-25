@@ -118,8 +118,8 @@ export const useAuthSession = () => {
       setUser(currentSession?.user ?? null);
       setLoading(false);
 
-      // Fix: Use AuthChangeEvent enum values instead of string literals
-      if (event === 'SIGNED_UP' && currentSession?.user) {
+      // Fix: Use proper AuthChangeEvent enum comparison
+      if (event === AuthChangeEvent.SIGNED_UP && currentSession?.user) {
         console.log("Novo usuário registrado, inicializando dados...");
         setTimeout(async () => {
           try {
@@ -135,12 +135,12 @@ export const useAuthSession = () => {
       }
       
       // Log quando usuário faz login
-      if (event === 'SIGNED_IN' && currentSession) {
+      if (event === AuthChangeEvent.SIGNED_IN && currentSession) {
         console.log("Usuário logado com sucesso");
       }
       
       // Log quando usuário sai
-      if (event === 'SIGNED_OUT') {
+      if (event === AuthChangeEvent.SIGNED_OUT) {
         console.log("Usuário deslogado");
       }
     });

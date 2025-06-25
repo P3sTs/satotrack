@@ -36,7 +36,7 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets 
   } = useCryptoWallets();
   
-  // Fix: Include 'generating' in the type union
+  // Fix: Include 'generating' in the type union - this is the correct type definition
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
   const [generationErrors, setGenerationErrors] = useState<string[]>([]);
   
