@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
 import { useActivityMonitor } from './useActivityMonitor';
