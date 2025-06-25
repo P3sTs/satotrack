@@ -5,6 +5,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
 import { useActivityMonitor } from './useActivityMonitor';
 import { useLoginAttempts } from './useLoginAttempts';
+import { initializeUserData } from './userInitialization';
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -92,16 +93,22 @@ export const useAuthSession = () => {
       setUser(currentSession?.user ?? null);
       setLoading(false);
 
-      // Redirecionamento não forçado - deixar o roteamento natural acontecer
+      // Inicializar dados do usuário se for um registro novo
+      if (event === 'SIGNED_UP' && currentSession?.user) {
+        console.log("Novo usuário registrado, inicializando dados...");
+        setTimeout(() => {
+          initializeUserData(currentSession.user.id);
+        }, 1000);
+      }
+      
+      // Log quando usuário faz login
       if (event === 'SIGNED_IN' && currentSession) {
         console.log("Usuário logado com sucesso");
-        // Não fazer redirecionamento forçado aqui
       }
       
       // Log quando usuário sai
       if (event === 'SIGNED_OUT') {
         console.log("Usuário deslogado");
-        // Não fazer redirecionamento forçado aqui
       }
     });
 

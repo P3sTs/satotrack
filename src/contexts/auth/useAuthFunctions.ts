@@ -125,48 +125,40 @@ export const useAuthFunctions = (
       console.log("Email sanitizado:", sanitizedEmail);
       console.log("Código de referência:", referralCode || "nenhum");
       
-      // Se há código de referência, usar a Edge Function
+      // Primeiro, realizar o registro padrão
+      await performStandardSignUp(sanitizedEmail, password, sanitizedName);
+      
+      // Aguardar um pouco para garantir que o trigger foi executado
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Se há código de referência, processar depois do registro
       if (referralCode && referralCode.trim()) {
-        console.log('Usando Edge Function para registro com referência');
+        console.log('Processando código de referência após registro...');
         
         try {
           const { data, error } = await supabase.functions.invoke('process-referral', {
             body: {
               email: sanitizedEmail,
-              password,
-              full_name: sanitizedName,
               referral_code: referralCode.trim()
             }
           });
           
           if (error) {
-            console.error('Erro na Edge Function:', error);
-            throw new Error(error.message || 'Erro ao processar indicação');
+            console.warn('Erro ao processar indicação, mas conta foi criada:', error);
+          } else {
+            console.log('Indicação processada com sucesso:', data);
+            toast({
+              title: "Conta criada com bônus!",
+              description: data?.bonus || "Indicação registrada com sucesso!",
+            });
           }
-          
-          console.log('Registro com referência bem-sucedido:', data);
-          
-          // Login automático após registro com referência
-          await performAutoLogin(sanitizedEmail, password);
-          
-          toast({
-            title: "Conta criada com sucesso!",
-            description: data?.bonus || "Indicação registrada com sucesso!",
-          });
-          
-        } catch (functionError) {
-          console.error('Edge function falhou, tentando registro normal:', functionError);
-          
-          // Fallback para registro normal
-          await performStandardSignUp(sanitizedEmail, password, sanitizedName);
-          await performAutoLogin(sanitizedEmail, password);
+        } catch (referralError) {
+          console.warn('Falha ao processar indicação, mas conta foi criada:', referralError);
         }
-        
-      } else {
-        // Registro normal sem referência
-        await performStandardSignUp(sanitizedEmail, password, sanitizedName);
-        await performAutoLogin(sanitizedEmail, password);
       }
+      
+      // Login automático após registro
+      await performAutoLogin(sanitizedEmail, password);
       
     } catch (error) {
       const authError = error as AuthError;
@@ -224,7 +216,6 @@ export const useAuthFunctions = (
       
       if (loginError) {
         console.warn("Login automático falhou:", loginError.message);
-        // Não quebrar o fluxo se o login automático falhar
         toast({
           title: "Conta criada com sucesso",
           description: "Faça login para acessar sua conta.",
