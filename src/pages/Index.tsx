@@ -8,18 +8,22 @@ const Index = () => {
   const { user, loading, updateLastActivity, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Redirecionamento mais flexível
+  // Redirecionamento mais inteligente
   useEffect(() => {
-    console.log("Index - Estado de autenticação:", !!user, "Carregando:", loading, "isAuthenticated:", isAuthenticated);
+    console.log("Index - Estado de autenticação:", {
+      user: !!user,
+      loading,
+      isAuthenticated
+    });
     
     if (!loading) {
-      // Se usuário está autenticado, apenas atualizar atividade e ir para dashboard
+      // Se usuário está autenticado, ir para dashboard
       if (user && isAuthenticated) {
         console.log("Usuário autenticado, redirecionando para dashboard");
         updateLastActivity();
         navigate('/dashboard', { replace: true });
       } else {
-        // Se não autenticado, ir para home (não forçar)
+        // Se não autenticado, ir para home
         console.log("Usuário não autenticado, redirecionando para home");
         navigate('/home', { replace: true });
       }

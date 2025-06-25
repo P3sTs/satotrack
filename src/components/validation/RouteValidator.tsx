@@ -7,9 +7,12 @@ import { toast } from 'sonner';
 const RouteValidator: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
+    // Não fazer nada se ainda está carregando
+    if (loading) return;
+
     const currentPath = location.pathname;
     
     // Rotas que precisam de autenticação
@@ -58,10 +61,11 @@ const RouteValidator: React.FC = () => {
       console.log('🧭 Navegação validada:', {
         path: currentPath,
         authenticated: isAuthenticated,
-        userId: user?.id?.substring(0, 8) + '...'
+        userId: user?.id?.substring(0, 8) + '...',
+        loading
       });
     }
-  }, [location.pathname, isAuthenticated, user, navigate]);
+  }, [location.pathname, isAuthenticated, user, navigate, loading]);
 
   return null;
 };

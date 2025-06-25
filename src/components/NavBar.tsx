@@ -26,7 +26,7 @@ const NavBar: React.FC = () => {
     try {
       await signOut();
       toast.success("Logout realizado com sucesso");
-      // Permitir navegação natural sem forçar redirecionamento
+      navigate('/home');
     } catch (error) {
       console.error('Erro ao sair:', error);
       toast.error("Erro ao realizar logout");
@@ -45,7 +45,7 @@ const NavBar: React.FC = () => {
     toast.info(isPremium ? "Bem-vindo ao painel Premium!" : "Conheça os benefícios do plano Premium!");
   };
 
-  // Se for mobile, não renderizar NavBar (a navegação será feita pelo componente mobile na parte inferior)
+  // Se for mobile, não renderizar NavBar (a navegação será feita pelo componente mobile)
   if (isMobile) {
     return null;
   }
@@ -56,7 +56,7 @@ const NavBar: React.FC = () => {
         <div className="flex justify-between items-center h-14 md:h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to={isAuthenticated ? "/dashboard" : "/home"} className="flex items-center gap-2">
               <div className="relative h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" alt="Logo SatoTrack" className="h-6 w-6 md:h-7 md:w-7 opacity-80" />
