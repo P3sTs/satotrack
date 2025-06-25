@@ -23,16 +23,20 @@ const STORAGE_KEY = 'satotrack_language';
 const DEFAULT_LANGUAGE = 'pt-BR';
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<string>(() => {
-    // Carregar idioma do localStorage ou usar padrão
+  // Initialize language state with a safe default
+  const [language, setLanguageState] = useState<string>(DEFAULT_LANGUAGE);
+
+  // Load saved language from localStorage after component mounts
+  useEffect(() => {
     try {
       const savedLanguage = localStorage.getItem(STORAGE_KEY);
-      return savedLanguage && savedLanguage in translations ? savedLanguage : DEFAULT_LANGUAGE;
+      if (savedLanguage && savedLanguage in translations) {
+        setLanguageState(savedLanguage);
+      }
     } catch (error) {
       console.warn('Error accessing localStorage:', error);
-      return DEFAULT_LANGUAGE;
     }
-  });
+  }, []);
 
   const availableLanguages = [
     { code: 'pt-BR', name: 'Português', flag: '🇧🇷' },
