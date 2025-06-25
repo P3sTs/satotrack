@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Send, AlertCircle, Loader2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { SendModalHeader } from './send/SendModalHeader';
+import { SendModalForm } from './send/SendModalForm';
+import { SendModalActions } from './send/SendModalActions';
 
 interface CryptoWallet {
   id: string;
@@ -81,7 +80,9 @@ const SendCryptoModal: React.FC<SendCryptoModalProps> = ({
     onClose();
   };
 
-  const maxAmount = parseFloat(wallet.balance || '0');
+  const setMaxAmount = () => {
+    setAmount(wallet.balance);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -94,115 +95,27 @@ const SendCryptoModal: React.FC<SendCryptoModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Wallet Info */}
-          <div className="p-3 bg-muted/30 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Carteira:</span>
-              <span className="font-medium">{wallet.name}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Saldo disponível:</span>
-              <span className="font-medium">{wallet.balance} {wallet.currency}</span>
-            </div>
-          </div>
+          <SendModalHeader wallet={wallet} />
+          
+          <SendModalForm
+            recipient={recipient}
+            amount={amount}
+            memo={memo}
+            wallet={wallet}
+            errors={errors}
+            isLoading={isLoading}
+            onRecipientChange={setRecipient}
+            onAmountChange={setAmount}
+            onMemoChange={setMemo}
+            onSetMaxAmount={setMaxAmount}
+          />
 
-          {/* Recipient Address */}
-          <div className="space-y-2">
-            <Label htmlFor="recipient">Endereço de destino</Label>
-            <Input
-              id="recipient"
-              placeholder={`Cole o endereço ${wallet.currency} aqui`}
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          {/* Amount */}
-          <div className="space-y-2">
-            <Label htmlFor="amount">Valor</Label>
-            <div className="flex gap-2">
-              <Input
-                id="amount"
-                type="number"
-                step="any"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={isLoading}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAmount(wallet.balance)}
-                disabled={isLoading || maxAmount <= 0}
-              >
-                Máximo
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Máximo: {wallet.balance} {wallet.currency}
-            </p>
-          </div>
-
-          {/* Memo (Optional) */}
-          <div className="space-y-2">
-            <Label htmlFor="memo">Memo (opcional)</Label>
-            <Input
-              id="memo"
-              placeholder="Descrição da transação"
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          {/* Errors */}
-          {errors.length > 0 && (
-            <Alert className="border-red-500/30 bg-red-500/10">
-              <AlertCircle className="h-4 w-4 text-red-500" />
-              <AlertDescription className="text-red-600">
-                <ul className="list-disc list-inside">
-                  {errors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Warning */}
-          <Alert className="border-yellow-500/30 bg-yellow-500/10">
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
-            <AlertDescription className="text-yellow-600">
-              <strong>Atenção:</strong> Transações em blockchain são irreversíveis. 
-              Verifique cuidadosamente o endereço de destino antes de enviar.
-            </AlertDescription>
-          </Alert>
-
-          {/* Actions */}
-          <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSend}
-              disabled={isLoading || !recipient.trim() || !amount.trim()}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              {isLoading ? 'Enviando...' : 'Enviar'}
-            </Button>
-          </div>
+          <SendModalActions
+            isLoading={isLoading}
+            canSend={recipient.trim() && amount.trim()}
+            onCancel={handleClose}
+            onSend={handleSend}
+          />
         </div>
       </DialogContent>
     </Dialog>
