@@ -92,24 +92,16 @@ export const useAuthSession = () => {
       setUser(currentSession?.user ?? null);
       setLoading(false);
 
-      // Redirecionar automaticamente após login bem-sucedido
+      // Redirecionamento não forçado - deixar o roteamento natural acontecer
       if (event === 'SIGNED_IN' && currentSession) {
-        console.log("Usuário logado com sucesso, redirecionando para dashboard...");
-        
-        // Aguardar um pouco para garantir que o estado foi atualizado
-        setTimeout(() => {
-          if (window.location.pathname !== '/dashboard') {
-            window.location.href = '/dashboard';
-          }
-        }, 1000);
+        console.log("Usuário logado com sucesso");
+        // Não fazer redirecionamento forçado aqui
       }
       
       // Log quando usuário sai
       if (event === 'SIGNED_OUT') {
         console.log("Usuário deslogado");
-        if (window.location.pathname !== '/home' && window.location.pathname !== '/') {
-          window.location.href = '/home';
-        }
+        // Não fazer redirecionamento forçado aqui
       }
     });
 

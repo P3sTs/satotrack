@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/auth';
 import { Star } from 'lucide-react';
 import MainNav from './MainNav';
 import UserMenu from './navigation/UserMenu';
-import MobileNavigation from './MobileNavigation';
 import { PlanBadge } from './monetization/PlanDisplay';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -23,11 +22,11 @@ const NavBar: React.FC = () => {
     console.log("NavBar: Status de autenticação =", isAuthenticated, "Usuário =", !!user);
   }, [isAuthenticated, user]);
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      signOut();
-      navigate('/');
+      await signOut();
       toast.success("Logout realizado com sucesso");
+      // Permitir navegação natural sem forçar redirecionamento
     } catch (error) {
       console.error('Erro ao sair:', error);
       toast.error("Erro ao realizar logout");

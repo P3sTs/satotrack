@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const RouteValidator: React.FC = () => {
   const location = useLocation();
@@ -19,10 +19,14 @@ const RouteValidator: React.FC = () => {
       '/nova-carteira',
       '/carteira',
       '/configuracoes',
-      '/mercado',
       '/historico',
       '/projecao',
-      '/web3'
+      '/web3',
+      '/api',
+      '/alerts',
+      '/referral',
+      '/achievements',
+      '/growth'
     ];
 
     // Verificar se a rota atual requer autenticação
@@ -30,17 +34,11 @@ const RouteValidator: React.FC = () => {
       currentPath.startsWith(route)
     );
 
+    // Apenas bloquear acesso se for rota protegida E usuário não autenticado
     if (requiresAuth && !isAuthenticated) {
       console.log('🔒 Acesso negado - usuário não autenticado:', currentPath);
       toast.error('Você precisa estar logado para acessar esta página');
       navigate('/auth');
-      return;
-    }
-
-    // Redirecionar usuários logados da página de auth
-    if (currentPath === '/auth' && isAuthenticated) {
-      console.log('✅ Usuário já autenticado, redirecionando para dashboard');
-      navigate('/dashboard');
       return;
     }
 

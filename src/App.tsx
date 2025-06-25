@@ -45,8 +45,11 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Sobre from "./pages/Sobre";
 import Privacidade from "./pages/Privacidade";
 import TermosUso from "./pages/TermosUso";
+import Home from "./pages/Home";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RouteValidator from "./components/validation/RouteValidator";
 import GlobalErrorBoundary from "./components/error/GlobalErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -65,10 +68,15 @@ function App() {
                       <GamificationProvider>
                         <ReferralProvider>
                           <Web3Provider>
+                            <RouteValidator />
                             <div className="min-h-screen bg-background font-sans antialiased">
                               <Routes>
-                                {/* Rotas públicas */}
+                                {/* Rota principal */}
                                 <Route path="/" element={<Index />} />
+                                
+                                {/* Rotas públicas */}
+                                <Route path="/home" element={<Home />} />
+                                <Route path="/landing" element={<LandingPage />} />
                                 <Route path="/auth" element={<Auth />} />
                                 <Route path="/planos" element={<PlanosPage />} />
                                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
@@ -76,7 +84,7 @@ function App() {
                                 <Route path="/privacidade" element={<Privacidade />} />
                                 <Route path="/termos" element={<TermosUso />} />
                                 
-                                {/* Rotas do mercado e crypto (parcialmente públicas) */}
+                                {/* Rotas do mercado e crypto (públicas) */}
                                 <Route path="/mercado" element={<Mercado />} />
                                 <Route path="/crypto" element={<Crypto />} />
                                 <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
