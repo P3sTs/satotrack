@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -105,7 +106,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
 
       {/* Status de carteiras pendentes */}
       {pendingWallets.length > 0 && (
-        <Card className="p-4 bg-yellow-500/10 border-yellow-500/20">
+        <Card className="p-4 bg-yellow-500/10 border border-yellow-500/20">
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-yellow-500" />
             <div>

@@ -33,3 +33,9 @@ verify_jwt = true
 
 [functions.crypto-wallet-manager]
 verify_jwt = true
+
+[functions.generate-crypto-wallets]
+verify_jwt = true
+
+[functions.secure-wallet-operations]
+verify_jwt = true
