@@ -53,7 +53,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
             </p>
             <div className="flex items-center gap-2 mt-1">
               <PlanBadge />
-              {securityStatus === 'high' && (
+              {securityStatus === 'secure' && (
                 <Shield className="h-3 w-3 text-green-500" />
               )}
             </div>

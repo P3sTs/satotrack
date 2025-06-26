@@ -45,7 +45,21 @@ export const useCryptoWallets = () => {
       }
 
       console.log('Carteiras carregadas:', data);
-      setWallets(data || []);
+      
+      // Map database response to CryptoWallet interface, ensuring currency is set
+      const mappedWallets: CryptoWallet[] = (data || []).map(wallet => ({
+        id: wallet.id,
+        name: wallet.name,
+        address: wallet.address,
+        currency: wallet.name?.split(' ')[0] || 'UNKNOWN', // Extract currency from name or default
+        balance: wallet.balance?.toString() || '0',
+        created_at: wallet.created_at,
+        user_id: wallet.user_id,
+        xpub: wallet.xpub,
+        private_key_encrypted: wallet.private_key_encrypted
+      }));
+      
+      setWallets(mappedWallets);
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
       toast.error('Erro ao carregar carteiras');
