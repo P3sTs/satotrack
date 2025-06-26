@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,7 +71,6 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Status de geração em andamento */}
       {generationStatus === 'generating' && (
         <Card className="p-4 bg-blue-500/10 border-blue-500/20">
           <div className="flex items-center gap-3">
@@ -85,7 +83,6 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
         </Card>
       )}
 
-      {/* Grid de carteiras ativas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activeWallets.map((wallet) => {
           const walletWithCurrency = {
@@ -104,7 +101,6 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
         })}
       </div>
 
-      {/* Status de carteiras pendentes */}
       {pendingWallets.length > 0 && (
         <Card className="p-4 bg-yellow-500/10 border border-yellow-500/20">
           <div className="flex items-center gap-3">

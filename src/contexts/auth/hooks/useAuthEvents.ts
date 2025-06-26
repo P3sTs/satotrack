@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../../integrations/supabase/client';
 
 interface UseAuthEventsProps {
@@ -18,7 +18,7 @@ export const useAuthEvents = ({
 }: UseAuthEventsProps) => {
   const setupAuthStateListener = useCallback(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, currentSession) => {
+      async (event, currentSession) => {
         console.log("Auth state changed:", event, !!currentSession);
         
         if (currentSession) {
@@ -35,7 +35,7 @@ export const useAuthEvents = ({
         setLoading(false);
 
         // Handle new user registration - check for SIGNED_UP event
-        if (event === AuthChangeEvent.SIGNED_UP && currentSession?.user) {
+        if (event === 'SIGNED_UP' && currentSession?.user) {
           console.log("Novo usuário registrado, inicializando dados...");
           setTimeout(async () => {
             try {
@@ -47,11 +47,11 @@ export const useAuthEvents = ({
           }, 1000);
         }
         
-        if (event === AuthChangeEvent.SIGNED_IN && currentSession) {
+        if (event === 'SIGNED_IN' && currentSession) {
           console.log("Usuário logado com sucesso");
         }
         
-        if (event === AuthChangeEvent.SIGNED_OUT) {
+        if (event === 'SIGNED_OUT') {
           console.log("Usuário deslogado");
         }
       }

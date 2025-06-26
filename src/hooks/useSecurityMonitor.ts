@@ -13,22 +13,24 @@ export const useSecurityMonitor = () => {
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
 
-  // Log security events
+  // Log security events using notification_logs table as fallback
   const logSecurityEvent = async (eventType: string, details: any) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await supabase
-        .from('security_logs')
+        .from('notification_logs')
         .insert({
           user_id: user.id,
-          event_type: eventType,
+          notification_type: 'security_event',
+          status: 'logged',
           details: {
+            event_type: eventType,
             ...details,
             timestamp: new Date().toISOString(),
             user_agent: navigator.userAgent,
-            ip_address: 'client-side' // Would be set server-side in production
+            ip_address: 'client-side'
           }
         });
 
@@ -58,21 +60,31 @@ export const useSecurityMonitor = () => {
     }
   };
 
-  // Load recent security events
+  // Load recent security events from notification_logs
   const loadSecurityEvents = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('security_logs')
+        .from('notification_logs')
         .select('*')
         .eq('user_id', user.id)
+        .eq('notification_type', 'security_event')
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      setSecurityEvents(data || []);
+      
+      // Map notification_logs to SecurityEvent format
+      const mappedEvents: SecurityEvent[] = (data || []).map(log => ({
+        id: log.id,
+        event_type: log.details?.event_type || log.notification_type,
+        details: log.details,
+        created_at: log.created_at || new Date().toISOString()
+      }));
+      
+      setSecurityEvents(mappedEvents);
     } catch (error) {
       console.error('Failed to load security events:', error);
     }
