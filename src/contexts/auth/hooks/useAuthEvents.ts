@@ -34,7 +34,7 @@ export const useAuthEvents = ({
         setUser(currentSession?.user ?? null);
         setLoading(false);
 
-        // Handle new user registration
+        // Handle new user registration - usando o enum correto
         if (event === 'SIGNED_UP' && currentSession?.user) {
           console.log("Novo usuário registrado, inicializando dados...");
           setTimeout(async () => {
