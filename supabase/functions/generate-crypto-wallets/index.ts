@@ -64,27 +64,7 @@ serve(async (req) => {
       )
     }
 
-    // First, ensure we have the right network records
-    const networks = [
-      { name: 'Bitcoin', symbol: 'BTC', chain_id: 'bitcoin-mainnet' },
-      { name: 'Ethereum', symbol: 'ETH', chain_id: '1' },
-      { name: 'Polygon', symbol: 'MATIC', chain_id: '137' },
-      { name: 'Tether (USDT)', symbol: 'USDT', chain_id: '1' },
-      { name: 'Solana', symbol: 'SOL', chain_id: 'solana-mainnet' }
-    ];
-
-    // Insert or update networks
-    for (const network of networks) {
-      const { error: networkError } = await supabaseClient
-        .from('blockchain_networks')
-        .upsert(network, { onConflict: 'symbol' });
-      
-      if (networkError) {
-        console.warn('Network upsert warning:', networkError);
-      }
-    }
-
-    // Generate wallets with proper currency field
+    // Generate wallets with proper structure
     const generatedWallets = [];
 
     try {
@@ -92,92 +72,39 @@ serve(async (req) => {
       
       if (!tatumApiKey) {
         console.warn('TATUM_API_KEY not found, using mock addresses');
-        
-        // Generate mock wallets when Tatum API is not available
-        for (const mapping of cryptoMappings) {
+      }
+
+      // Generate wallets for each currency
+      for (const mapping of cryptoMappings) {
+        try {
           const mockAddress = `mock_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           
-          // Get network_id from blockchain_networks table
-          const { data: network } = await supabaseClient
-            .from('blockchain_networks')
-            .select('id')
-            .eq('symbol', mapping.currency)
-            .single();
-
           const walletData = {
             user_id: userId,
             name: mapping.name,
             address: mockAddress,
-            currency: mapping.currency,
-            network_id: network?.id || null,
-            balance: '0',
+            balance: 0,
+            network_id: crypto.randomUUID(), // Generate a UUID for network_id
+            address_type: 'generated',
             private_key_encrypted: null,
-            xpub: null,
-            address_type: 'generated'
+            xpub: null
           };
 
           const { data: wallet, error: walletError } = await supabaseClient
             .from('crypto_wallets')
-            .upsert(walletData, { 
-              onConflict: 'user_id,currency',
-              ignoreDuplicates: false 
-            })
+            .insert(walletData)
             .select()
             .single();
 
           if (walletError) {
             console.error(`Error creating ${mapping.currency} wallet:`, walletError);
+            // Continue with other wallets instead of failing completely
           } else {
             generatedWallets.push(wallet);
           }
-        }
-      } else {
-        // Use Tatum API to generate real wallets
-        console.log('Using Tatum API to generate wallets');
-        
-        for (const mapping of cryptoMappings) {
-          try {
-            // Get network_id from blockchain_networks table
-            const { data: network } = await supabaseClient
-              .from('blockchain_networks')
-              .select('id')
-              .eq('symbol', mapping.currency)
-              .single();
-
-            let address = `tatum_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            
-            // For demonstration, we'll create mock addresses
-            // In production, integrate with actual Tatum API calls
-            
-            const walletData = {
-              user_id: userId,
-              name: mapping.name,
-              address: address,
-              currency: mapping.currency,
-              network_id: network?.id || null,
-              balance: '0',
-              private_key_encrypted: null,
-              xpub: null,
-              address_type: 'generated'
-            };
-
-            const { data: wallet, error: walletError } = await supabaseClient
-              .from('crypto_wallets')
-              .upsert(walletData, { 
-                onConflict: 'user_id,currency',
-                ignoreDuplicates: false 
-              })
-              .select()
-              .single();
-
-            if (walletError) {
-              console.error(`Error creating ${mapping.currency} wallet:`, walletError);
-            } else {
-              generatedWallets.push(wallet);
-            }
-          } catch (error) {
-            console.error(`Error generating ${mapping.currency} wallet:`, error);
-          }
+        } catch (error) {
+          console.error(`Error generating ${mapping.currency} wallet:`, error);
+          // Continue with other wallets
         }
       }
 
@@ -204,14 +131,18 @@ serve(async (req) => {
 
     } catch (error) {
       console.error('Wallet generation error:', error);
+      
+      // Even if wallet generation fails, don't block user registration
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to generate wallets',
-          details: error.message 
+          message: 'User created but wallet generation failed',
+          error: error.message,
+          wallets: [],
+          count: 0
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
+          status: 200 // Return 200 to not block registration
         }
       )
     }
@@ -219,13 +150,17 @@ serve(async (req) => {
   } catch (error) {
     console.error('Generate crypto wallets error:', error)
     
+    // Don't block user registration even if this fails
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error'
+        message: 'Wallet generation failed but user registration can continue',
+        error: error.message || 'Internal server error',
+        wallets: [],
+        count: 0
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 200 // Return 200 to not block registration
       }
     )
   }

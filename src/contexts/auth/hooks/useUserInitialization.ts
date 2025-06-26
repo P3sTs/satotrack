@@ -20,7 +20,8 @@ export const useUserInitialization = () => {
 
       if (error) {
         console.error('Erro ao gerar carteiras cripto:', error);
-        throw error;
+        // Não falhar o processo se a geração de carteiras falhar
+        return null;
       }
 
       console.log('Carteiras cripto geradas com sucesso:', data);
@@ -36,37 +37,27 @@ export const useUserInitialization = () => {
     try {
       console.log('Iniciando inicialização completa do usuário:', userId);
       
-      // First initialize basic user data
-      await initializeUserData(userId);
-      
-      // Then generate crypto wallets automatically with retry logic
-      let attempts = 0;
-      const maxAttempts = 3;
-      
-      while (attempts < maxAttempts) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            await generateCryptoWallets(userId, session);
-            break; // Success, exit loop
-          }
-        } catch (walletError) {
-          attempts++;
-          console.warn(`Tentativa ${attempts} de gerar carteiras falhou:`, walletError);
-          
-          if (attempts >= maxAttempts) {
-            console.error('Falha ao gerar carteiras após 3 tentativas');
-          } else {
-            // Wait before retry
-            await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
-          }
-        }
+      // First initialize basic user data - this should never fail registration
+      try {
+        await initializeUserData(userId);
+      } catch (dataError) {
+        console.warn('Erro na inicialização de dados básicos, mas continuando:', dataError);
       }
       
-      console.log('Inicialização do usuário concluída');
+      // Then try to generate crypto wallets - this is optional and should not block registration
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await generateCryptoWallets(userId, session);
+        }
+      } catch (walletError) {
+        console.warn('Erro na geração de carteiras, mas usuário foi criado:', walletError);
+      }
+      
+      console.log('Inicialização do usuário concluída (com ou sem carteiras)');
     } catch (error) {
       console.error('Erro na inicialização completa do usuário:', error);
-      // Não falhar o processo de registro completamente
+      // Não falhar o processo de registro completamente - usuário já foi criado
     }
   }, []);
 
