@@ -3,9 +3,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Send, Download, RefreshCw, Eye, EyeOff, Clock } from 'lucide-react';
-import SendCryptoModal from './SendCryptoModal';
-import ReceiveCryptoModal from './ReceiveCryptoModal';
+import { 
+  Send, 
+  Download, 
+  Copy, 
+  QrCode, 
+  Eye, 
+  EyeOff,
+  RefreshCw,
+  Wallet
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CryptoWallet {
@@ -14,180 +21,153 @@ interface CryptoWallet {
   address: string;
   currency: string;
   balance: string;
-  created_at?: string;
+  xpub?: string;
 }
 
 interface CryptoWalletCardProps {
   wallet: CryptoWallet;
-  onSend?: () => void;
-  onReceive?: () => void;
+  onSend: () => void;
+  onReceive: () => void;
+  onRefresh?: () => void;
+  isLoading?: boolean;
 }
 
 const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   wallet,
   onSend,
-  onReceive
+  onReceive,
+  onRefresh,
+  isLoading = false
 }) => {
-  const [showSendModal, setShowSendModal] = useState(false);
-  const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [showFullAddress, setShowFullAddress] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const formatAddress = (address: string) => {
-    if (showFullAddress || address.length <= 20) return address;
-    return `${address.slice(0, 8)}...${address.slice(-8)}`;
-  };
 
   const getCurrencyColor = (currency: string) => {
     const colors = {
-      BTC: 'bg-orange-500',
-      ETH: 'bg-blue-500',
-      MATIC: 'bg-purple-500',
-      USDT: 'bg-green-500',
-      SOL: 'bg-gradient-to-r from-purple-400 to-pink-400'
+      'BTC': 'text-orange-500 border-orange-500/20 bg-orange-500/10',
+      'ETH': 'text-blue-500 border-blue-500/20 bg-blue-500/10',
+      'MATIC': 'text-purple-500 border-purple-500/20 bg-purple-500/10',
+      'USDT': 'text-green-500 border-green-500/20 bg-green-500/10',
+      'SOL': 'text-cyan-500 border-cyan-500/20 bg-cyan-500/10',
     };
-    return colors[currency] || 'bg-gray-500';
+    return colors[currency] || 'text-gray-500 border-gray-500/20 bg-gray-500/10';
   };
 
   const getCurrencyIcon = (currency: string) => {
-    const icons = {
-      BTC: '₿',
-      ETH: 'Ξ',
-      MATIC: '◆',
-      USDT: '₮',
-      SOL: '◎'
-    };
-    return icons[currency] || '●';
+    return currency.charAt(0);
   };
 
-  const handleSend = async (recipient: string, amount: string, memo?: string) => {
-    // Implementação futura - por enquanto apenas mostra toast
-    toast.info(`Funcionalidade de envio será implementada em breve`);
-    throw new Error('Funcionalidade em desenvolvimento');
+  const formatAddress = (address: string, show: boolean) => {
+    if (show || address.length <= 16) return address;
+    return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      // Implementação futura - refresh do saldo
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
-      toast.success('Saldo atualizado!');
-    } catch (error) {
-      toast.error('Erro ao atualizar saldo');
-    } finally {
-      setIsRefreshing(false);
-    }
+  const copyAddress = () => {
+    navigator.clipboard.writeText(wallet.address);
+    toast.success('Endereço copiado!');
   };
 
-  const isPending = wallet.address === 'pending_generation';
+  const formatBalance = (balance: string) => {
+    const num = parseFloat(balance || '0');
+    if (num === 0) return '0.00000000';
+    return num.toFixed(8);
+  };
 
   return (
-    <>
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full ${getCurrencyColor(wallet.currency)} flex items-center justify-center text-white font-bold`}>
-                {getCurrencyIcon(wallet.currency)}
-              </div>
-              <div>
-                <CardTitle className="text-lg">{wallet.name}</CardTitle>
-                <Badge variant="secondary" className="text-xs">
-                  {wallet.currency}
-                </Badge>
-              </div>
+    <Card className="bg-dashboard-dark border-satotrack-neon/20 hover:border-satotrack-neon/40 transition-colors">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold ${getCurrencyColor(wallet.currency)}`}>
+              {getCurrencyIcon(wallet.currency)}
             </div>
+            <div>
+              <CardTitle className="text-lg text-satotrack-text">{wallet.name}</CardTitle>
+              <Badge variant="outline" className={`text-xs ${getCurrencyColor(wallet.currency)}`}>
+                {wallet.currency}
+              </Badge>
+            </div>
+          </div>
+          {onRefresh && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing || isPending}
+              onClick={onRefresh}
+              disabled={isLoading}
               className="h-8 w-8 p-0"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {isPending ? (
-            <div className="text-center py-4">
-              <Clock className="h-8 w-8 mx-auto mb-2 text-muted-foreground animate-pulse" />
-              <p className="text-sm text-muted-foreground">Gerando endereço...</p>
-              <p className="text-xs text-muted-foreground/70">Via Tatum API</p>
-            </div>
-          ) : (
-            <>
-              {/* Balance */}
-              <div className="text-center">
-                <p className="text-2xl font-bold">
-                  {wallet.balance || '0'} {wallet.currency}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ≈ $0.00 USD
-                </p>
-              </div>
-
-              {/* Address */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Endereço:</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowFullAddress(!showFullAddress)}
-                    className="h-6 w-6 p-0"
-                  >
-                    {showFullAddress ? (
-                      <EyeOff className="h-3 w-3" />
-                    ) : (
-                      <Eye className="h-3 w-3" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs font-mono bg-muted/30 p-2 rounded break-all">
-                  {formatAddress(wallet.address)}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setShowSendModal(true)}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setShowReceiveModal(true)}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Receber
-                </Button>
-              </div>
-            </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </CardHeader>
 
-      {/* Modals */}
-      <SendCryptoModal
-        isOpen={showSendModal}
-        onClose={() => setShowSendModal(false)}
-        wallet={wallet}
-        onSend={handleSend}
-      />
+      <CardContent className="space-y-4">
+        {/* Saldo */}
+        <div className="text-center p-4 bg-dashboard-medium/30 rounded-lg">
+          <p className="text-sm text-muted-foreground">Saldo</p>
+          <p className="text-2xl font-bold text-satotrack-neon">
+            {formatBalance(wallet.balance)} {wallet.currency}
+          </p>
+        </div>
 
-      <ReceiveCryptoModal
-        isOpen={showReceiveModal}
-        onClose={() => setShowReceiveModal(false)}
-        wallet={wallet}
-      />
-    </>
+        {/* Endereço */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Endereço</p>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFullAddress(!showFullAddress)}
+                className="h-6 w-6 p-0"
+              >
+                {showFullAddress ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={copyAddress}
+                className="h-6 w-6 p-0"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+          <div className="p-2 bg-dashboard-medium/20 rounded text-xs font-mono break-all">
+            {formatAddress(wallet.address, showFullAddress)}
+          </div>
+        </div>
+
+        {/* Ações */}
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            onClick={onReceive}
+            variant="outline"
+            className="gap-2 border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+          >
+            <Download className="h-4 w-4" />
+            Receber
+          </Button>
+          <Button
+            onClick={onSend}
+            className="gap-2 bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
+          >
+            <Send className="h-4 w-4" />
+            Enviar
+          </Button>
+        </div>
+
+        {/* QR Code Button */}
+        <Button
+          variant="ghost"
+          onClick={() => toast.info('QR Code será implementado em breve')}
+          className="w-full gap-2 text-muted-foreground hover:text-satotrack-neon"
+        >
+          <QrCode className="h-4 w-4" />
+          Mostrar QR Code
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

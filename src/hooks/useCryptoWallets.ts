@@ -1,10 +1,10 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/auth';
 
-export interface CryptoWallet {
+interface CryptoWallet {
   id: string;
   name: string;
   address: string;
@@ -16,32 +16,23 @@ export interface CryptoWallet {
   private_key_encrypted?: string;
 }
 
-interface GenerateWalletsResult {
-  success: boolean;
+interface GenerationResult {
   walletsGenerated: number;
-  totalRequested: number;
-  wallets: Array<{
-    currency: string;
-    name: string;
-    address: string;
-  }>;
-  errors?: string[];
+  errors: string[];
 }
 
 export const useCryptoWallets = () => {
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { user, session } = useAuth();
+  const { user } = useAuth();
 
   const loadWallets = useCallback(async () => {
     if (!user) return;
-
+    
     setIsLoading(true);
     try {
-      console.log('Carregando carteiras do usuário:', user.id);
-      
-      const { data: walletsData, error } = await supabase
+      const { data, error } = await supabase
         .from('crypto_wallets')
         .select('*')
         .eq('user_id', user.id)
@@ -49,25 +40,12 @@ export const useCryptoWallets = () => {
 
       if (error) {
         console.error('Erro ao carregar carteiras:', error);
-        throw error;
+        toast.error('Erro ao carregar carteiras');
+        return;
       }
 
-      console.log('Carteiras carregadas:', walletsData);
-      
-      // Fix: Map the database fields correctly to include currency
-      const formattedWallets: CryptoWallet[] = (walletsData || []).map(wallet => ({
-        id: wallet.id,
-        name: wallet.name,
-        address: wallet.address,
-        currency: wallet.name?.split(' ')[0] || 'UNKNOWN', // Extract currency from name
-        balance: wallet.balance?.toString() || '0',
-        created_at: wallet.created_at,
-        user_id: wallet.user_id,
-        xpub: wallet.xpub,
-        private_key_encrypted: wallet.private_key_encrypted
-      }));
-
-      setWallets(formattedWallets);
+      console.log('Carteiras carregadas:', data);
+      setWallets(data || []);
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
       toast.error('Erro ao carregar carteiras');
@@ -76,58 +54,65 @@ export const useCryptoWallets = () => {
     }
   }, [user]);
 
-  const generateWallets = useCallback(async (): Promise<GenerateWalletsResult | null> => {
-    if (!user || !session) {
-      throw new Error('Usuário não autenticado');
+  const generateWallets = useCallback(async (): Promise<GenerationResult | null> => {
+    if (!user) {
+      toast.error('Usuário não autenticado');
+      return null;
     }
 
     setIsGenerating(true);
     try {
-      console.log('Gerando carteiras para usuário:', user.id);
+      console.log('Iniciando geração de carteiras para usuário:', user.id);
       
       const { data, error } = await supabase.functions.invoke('generate-crypto-wallets', {
         body: { userId: user.id },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
       });
 
       if (error) {
-        console.error('Erro na função de geração:', error);
-        throw new Error(error.message || 'Erro ao gerar carteiras');
+        console.error('Erro na geração de carteiras:', error);
+        toast.error(`Erro na geração: ${error.message}`);
+        return { walletsGenerated: 0, errors: [error.message] };
       }
 
-      console.log('Resposta da geração:', data);
-      return data as GenerateWalletsResult;
+      console.log('Resultado da geração:', data);
+      
+      // Recarregar carteiras após geração
+      setTimeout(() => loadWallets(), 2000);
+      
+      return data || { walletsGenerated: 0, errors: [] };
     } catch (error) {
-      console.error('Erro ao gerar carteiras:', error);
-      throw error;
+      console.error('Erro na geração de carteiras:', error);
+      const errorMessage = error.message || 'Erro desconhecido na geração';
+      toast.error(`Falha na geração: ${errorMessage}`);
+      return { walletsGenerated: 0, errors: [errorMessage] };
     } finally {
       setIsGenerating(false);
     }
-  }, [user, session]);
+  }, [user, loadWallets]);
 
   const refreshAllBalances = useCallback(async () => {
-    if (wallets.length === 0) return;
-
+    if (!user || wallets.length === 0) return;
+    
     setIsLoading(true);
     try {
-      // Implementação futura - atualizar saldos via Tatum
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
-      toast.success('Saldos atualizados!');
-      
-      // Recarregar carteiras
+      // Implementar atualização de saldos aqui
+      toast.info('Atualizando saldos...');
       await loadWallets();
-    } catch (error) {
-      console.error('Erro ao atualizar saldos:', error);
-      toast.error('Erro ao atualizar saldos');
     } finally {
       setIsLoading(false);
     }
-  }, [wallets, loadWallets]);
+  }, [user, wallets.length, loadWallets]);
 
+  // Computed values
   const hasGeneratedWallets = wallets.some(w => w.address !== 'pending_generation');
   const hasPendingWallets = wallets.some(w => w.address === 'pending_generation');
+
+  // Auto-load wallets when user changes
+  useEffect(() => {
+    if (user) {
+      loadWallets();
+    }
+  }, [user, loadWallets]);
 
   return {
     wallets,
@@ -135,8 +120,8 @@ export const useCryptoWallets = () => {
     isGenerating,
     hasGeneratedWallets,
     hasPendingWallets,
-    loadWallets,
     generateWallets,
     refreshAllBalances,
+    loadWallets
   };
 };
