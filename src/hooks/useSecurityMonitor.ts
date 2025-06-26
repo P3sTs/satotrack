@@ -76,13 +76,16 @@ export const useSecurityMonitor = () => {
 
       if (error) throw error;
       
-      // Map notification_logs to SecurityEvent format
-      const mappedEvents: SecurityEvent[] = (data || []).map(log => ({
-        id: log.id,
-        event_type: log.details?.event_type || log.notification_type,
-        details: log.details,
-        created_at: log.created_at || new Date().toISOString()
-      }));
+      // Map notification_logs to SecurityEvent format with proper type checking
+      const mappedEvents: SecurityEvent[] = (data || []).map(log => {
+        const details = log.details as any; // Type assertion for Json type
+        return {
+          id: log.id,
+          event_type: details?.event_type || log.notification_type,
+          details: details,
+          created_at: log.created_at || new Date().toISOString()
+        };
+      });
       
       setSecurityEvents(mappedEvents);
     } catch (error) {
