@@ -202,6 +202,7 @@ export type Database = {
           address_type: string | null
           balance: number | null
           created_at: string | null
+          currency: string | null
           id: string
           last_updated: string | null
           name: string
@@ -220,6 +221,7 @@ export type Database = {
           address_type?: string | null
           balance?: number | null
           created_at?: string | null
+          currency?: string | null
           id?: string
           last_updated?: string | null
           name: string
@@ -238,6 +240,7 @@ export type Database = {
           address_type?: string | null
           balance?: number | null
           created_at?: string | null
+          currency?: string | null
           id?: string
           last_updated?: string | null
           name?: string
