@@ -46,12 +46,12 @@ export const useCryptoWallets = () => {
 
       console.log('Carteiras carregadas:', data);
       
-      // Map database response to CryptoWallet interface, ensuring currency is set
+      // Map database response to CryptoWallet interface
       const mappedWallets: CryptoWallet[] = (data || []).map(wallet => ({
         id: wallet.id,
         name: wallet.name,
         address: wallet.address,
-        currency: wallet.name?.split(' ')[0] || 'UNKNOWN', // Extract currency from name or default
+        currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN',
         balance: wallet.balance?.toString() || '0',
         created_at: wallet.created_at,
         user_id: wallet.user_id,
@@ -90,10 +90,17 @@ export const useCryptoWallets = () => {
 
       console.log('Resultado da geração:', data);
       
+      if (data?.wallets && data.wallets.length > 0) {
+        toast.success(`${data.wallets.length} carteiras geradas com sucesso!`);
+      }
+      
       // Recarregar carteiras após geração
       setTimeout(() => loadWallets(), 2000);
       
-      return data || { walletsGenerated: 0, errors: [] };
+      return {
+        walletsGenerated: data?.wallets?.length || 0,
+        errors: data?.error ? [data.error] : []
+      };
     } catch (error) {
       console.error('Erro na geração de carteiras:', error);
       const errorMessage = error.message || 'Erro desconhecido na geração';
@@ -109,7 +116,6 @@ export const useCryptoWallets = () => {
     
     setIsLoading(true);
     try {
-      // Implementar atualização de saldos aqui
       toast.info('Atualizando saldos...');
       await loadWallets();
     } finally {

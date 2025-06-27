@@ -77,34 +77,89 @@ serve(async (req) => {
       // Generate wallets for each currency
       for (const mapping of cryptoMappings) {
         try {
-          const mockAddress = `mock_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          
+          let walletAddress = '';
+          let xpubKey = '';
+          let privateKeyEncrypted = '';
+
+          if (tatumApiKey) {
+            // Use Tatum API to generate real addresses
+            const baseUrl = 'https://api.tatum.io/v3';
+            const headers = {
+              'x-api-key': tatumApiKey,
+              'Content-Type': 'application/json'
+            };
+
+            let walletResponse;
+            let addressResponse;
+
+            // Generate wallet based on currency
+            if (mapping.currency === 'BTC') {
+              walletResponse = await fetch(`${baseUrl}/bitcoin/wallet`, { method: 'GET', headers });
+              const walletData = await walletResponse.json();
+              addressResponse = await fetch(`${baseUrl}/bitcoin/address/${walletData.xpub}/0`, { method: 'GET', headers });
+              const addressData = await addressResponse.json();
+              
+              walletAddress = addressData.address;
+              xpubKey = walletData.xpub;
+              privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            } else if (mapping.currency === 'ETH' || mapping.currency === 'USDT') {
+              walletResponse = await fetch(`${baseUrl}/ethereum/wallet`, { method: 'GET', headers });
+              const walletData = await walletResponse.json();
+              addressResponse = await fetch(`${baseUrl}/ethereum/address/${walletData.xpub}/0`, { method: 'GET', headers });
+              const addressData = await addressResponse.json();
+              
+              walletAddress = addressData.address;
+              xpubKey = walletData.xpub;
+              privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            } else if (mapping.currency === 'MATIC') {
+              walletResponse = await fetch(`${baseUrl}/polygon/wallet`, { method: 'GET', headers });
+              const walletData = await walletResponse.json();
+              addressResponse = await fetch(`${baseUrl}/polygon/address/${walletData.xpub}/0`, { method: 'GET', headers });
+              const addressData = await addressResponse.json();
+              
+              walletAddress = addressData.address;
+              xpubKey = walletData.xpub;
+              privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            } else if (mapping.currency === 'SOL') {
+              walletResponse = await fetch(`${baseUrl}/solana/wallet`, { method: 'GET', headers });
+              const walletData = await walletResponse.json();
+              
+              walletAddress = walletData.address;
+              privateKeyEncrypted = btoa(walletData.privateKey || '');
+            }
+          } else {
+            // Use mock addresses when Tatum API is not available
+            walletAddress = `mock_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          }
+
           const walletData = {
             user_id: userId,
             name: mapping.name,
-            address: mockAddress,
+            address: walletAddress,
+            currency: mapping.currency,
             balance: 0,
-            network_id: crypto.randomUUID(), // Generate a UUID for network_id
-            address_type: 'generated',
-            private_key_encrypted: null,
-            xpub: null
+            xpub: xpubKey || null,
+            private_key_encrypted: privateKeyEncrypted || null
           };
 
+          // Insert or update wallet
           const { data: wallet, error: walletError } = await supabaseClient
             .from('crypto_wallets')
-            .insert(walletData)
+            .upsert(walletData, { 
+              onConflict: 'user_id,currency',
+              ignoreDuplicates: false 
+            })
             .select()
             .single();
 
           if (walletError) {
-            console.error(`Error creating ${mapping.currency} wallet:`, walletError);
-            // Continue with other wallets instead of failing completely
+            console.error(`Error creating/updating ${mapping.currency} wallet:`, walletError);
           } else {
             generatedWallets.push(wallet);
+            console.log(`Generated ${mapping.currency} wallet with address: ${walletAddress}`);
           }
         } catch (error) {
           console.error(`Error generating ${mapping.currency} wallet:`, error);
-          // Continue with other wallets
         }
       }
 
@@ -132,17 +187,16 @@ serve(async (req) => {
     } catch (error) {
       console.error('Wallet generation error:', error);
       
-      // Even if wallet generation fails, don't block user registration
       return new Response(
         JSON.stringify({ 
-          message: 'User created but wallet generation failed',
+          message: 'Wallet generation failed',
           error: error.message,
-          wallets: [],
-          count: 0
+          wallets: generatedWallets,
+          count: generatedWallets.length
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 // Return 200 to not block registration
+          status: 200 
         }
       )
     }
@@ -150,17 +204,16 @@ serve(async (req) => {
   } catch (error) {
     console.error('Generate crypto wallets error:', error)
     
-    // Don't block user registration even if this fails
     return new Response(
       JSON.stringify({ 
-        message: 'Wallet generation failed but user registration can continue',
+        message: 'Wallet generation failed',
         error: error.message || 'Internal server error',
         wallets: [],
         count: 0
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Return 200 to not block registration
+        status: 500
       }
     )
   }
