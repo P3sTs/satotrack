@@ -1,5 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth';
@@ -26,6 +27,7 @@ export const useCryptoWallets = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const loadWallets = useCallback(async () => {
     if (!user) return;
@@ -100,6 +102,11 @@ export const useCryptoWallets = () => {
         setTimeout(() => {
           loadWallets();
         }, 1000);
+
+        // Redirecionar para a página de carteiras após 2 segundos
+        setTimeout(() => {
+          navigate('/wallets');
+        }, 2000);
       } else {
         console.warn('Nenhuma carteira foi gerada:', data);
         toast.warning('Nenhuma carteira foi gerada. Verifique os logs.');
@@ -117,7 +124,7 @@ export const useCryptoWallets = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [user, loadWallets]);
+  }, [user, loadWallets, navigate]);
 
   const refreshAllBalances = useCallback(async () => {
     if (!user || wallets.length === 0) return;

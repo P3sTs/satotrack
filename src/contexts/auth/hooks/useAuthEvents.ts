@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../../integrations/supabase/client';
 
 interface UseAuthEventsProps {
@@ -18,7 +18,7 @@ export const useAuthEvents = ({
 }: UseAuthEventsProps) => {
   const setupAuthStateListener = useCallback(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, currentSession: Session | null) => {
+      async (event, currentSession: Session | null) => {
         console.log("Auth state changed:", event, !!currentSession);
         
         if (currentSession) {

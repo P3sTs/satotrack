@@ -1,226 +1,142 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/auth";
-import { I18nProvider } from "@/contexts/i18n/I18nContext";
-import { CarteirasProvider } from "@/contexts/carteiras";
-import { ViewModeProvider } from "@/contexts/ViewModeContext";
-import { GamificationProvider } from "@/contexts/gamification/GamificationContext";
-import { ReferralProvider } from "@/contexts/referral/ReferralContext";
-import { Web3Provider } from "@/contexts/web3/Web3Context";
-import { ActionFeedbackProvider } from "@/components/feedback/ActionFeedback";
-import AppLayout from "@/components/layout/AppLayout";
+import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "./contexts/auth";
+import { I18nProvider } from "./contexts/i18n/I18nContext";
+import { CarteirasProvider } from "./contexts/carteiras/CarteirasProvider";
+import { GamificationProvider } from "./contexts/gamification/GamificationContext";
+import { ReferralProvider } from "./contexts/referral/ReferralContext";
+import { Web3Provider } from "./contexts/web3/Web3Context";
+import { ViewModeProvider } from "./contexts/ViewModeContext";
+import { GlobalErrorBoundary } from "./components/error/GlobalErrorBoundary";
+import { RouteValidator } from "./components/validation/RouteValidator";
+import { SecurityIndicator } from "./components/SecurityIndicator";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { NavigationAudit } from "./components/navigation/NavigationAudit";
+import { AppLayout } from "./components/layout/AppLayout";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Wallets from "./pages/Wallets";
+import WalletsManager from "./pages/WalletsManager";
 import NovaCarteira from "./pages/NovaCarteira";
 import CarteiraDetalhes from "./pages/CarteiraDetalhes";
-import WalletsManager from "./pages/WalletsManager";
-import Mercado from "./pages/Mercado";
 import Configuracoes from "./pages/Configuracoes";
-import Notificacoes from "./pages/Notificacoes";
-import NotificacoesPremium from "./pages/NotificacoesPremium";
+import Mercado from "./pages/Mercado";
 import Historico from "./pages/Historico";
 import HistoricoPremium from "./pages/HistoricoPremium";
+import Alerts from "./pages/Alerts";
+import Notificacoes from "./pages/Notificacoes";
+import NotificacoesPremium from "./pages/NotificacoesPremium";
 import ProjecaoLucros from "./pages/ProjecaoLucros";
 import ProjecaoLucrosPremium from "./pages/ProjecaoLucrosPremium";
 import Projections from "./pages/Projections";
-import PerformanceAnalytics from "./pages/PerformanceAnalytics";
-import WalletComparison from "./pages/WalletComparison";
-import Crypto from "./pages/Crypto";
-import CryptoVisualization3D from "./pages/CryptoVisualization3D";
-import Web3Dashboard from "./pages/Web3Dashboard";
-import OnChainDashboard from "./pages/OnChainDashboard";
-import BitcoinLookup from "./pages/BitcoinLookup";
-import Alerts from "./pages/Alerts";
 import ReferralProgram from "./pages/ReferralProgram";
 import Achievements from "./pages/Achievements";
-import GrowthDashboard from "./pages/GrowthDashboard";
-import ApiDashboard from "./pages/ApiDashboard";
-import ApiDocs from "./pages/ApiDocs";
-import PlanosPage from "./pages/PlanosPage";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
+import Auth from "./pages/Auth";
 import Sobre from "./pages/Sobre";
 import Privacidade from "./pages/Privacidade";
 import TermosUso from "./pages/TermosUso";
-import Home from "./pages/Home";
-import LandingPage from "./pages/LandingPage";
+import PlanosPage from "./pages/PlanosPage";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
-import RouteValidator from "./components/validation/RouteValidator";
-import GlobalErrorBoundary from "./components/error/GlobalErrorBoundary";
+import Crypto from "./pages/Crypto";
+import CryptoVisualization3D from "./pages/CryptoVisualization3D";
+import Web3Dashboard from "./pages/Web3Dashboard";
+import BitcoinLookup from "./pages/BitcoinLookup";
+import WalletComparison from "./pages/WalletComparison";
+import OnChainDashboard from "./pages/OnChainDashboard";
+import PerformanceAnalytics from "./pages/PerformanceAnalytics";
+import ApiDashboard from "./pages/ApiDashboard";
+import ApiDocs from "./pages/ApiDocs";
+import GrowthDashboard from "./pages/GrowthDashboard";
+import LandingPage from "./pages/LandingPage";
+import "./styles/index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <BrowserRouter>
-            <I18nProvider>
-              <AuthProvider>
-                <ActionFeedbackProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <BrowserRouter>
+              <I18nProvider>
+                <AuthProvider>
                   <CarteirasProvider>
-                    <ViewModeProvider>
-                      <GamificationProvider>
-                        <ReferralProvider>
-                          <Web3Provider>
-                            <RouteValidator />
+                    <GamificationProvider>
+                      <ReferralProvider>
+                        <Web3Provider>
+                          <ViewModeProvider>
+                            <NavigationAudit />
+                            <SecurityIndicator />
                             <Routes>
-                              {/* Rota principal */}
                               <Route path="/" element={<Index />} />
-                              
-                              {/* Rotas públicas */}
                               <Route path="/home" element={<Home />} />
-                              <Route path="/landing" element={<LandingPage />} />
                               <Route path="/auth" element={<Auth />} />
-                              <Route path="/planos" element={<PlanosPage />} />
-                              <Route path="/checkout/success" element={<CheckoutSuccess />} />
                               <Route path="/sobre" element={<Sobre />} />
                               <Route path="/privacidade" element={<Privacidade />} />
                               <Route path="/termos" element={<TermosUso />} />
+                              <Route path="/planos" element={<PlanosPage />} />
+                              <Route path="/success" element={<CheckoutSuccess />} />
+                              <Route path="/landing" element={<LandingPage />} />
                               
-                              {/* Rotas do mercado e crypto (públicas) */}
-                              <Route path="/mercado" element={<Mercado />} />
-                              <Route path="/crypto" element={<Crypto />} />
-                              <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
-                              <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
-                              <Route path="/api-docs" element={<ApiDocs />} />
-                              
-                              {/* Rotas protegidas com layout */}
-                              <Route path="/" element={<AppLayout />}>
-                                <Route path="dashboard" element={
-                                  <ProtectedRoute>
-                                    <Dashboard />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="carteiras" element={
-                                  <ProtectedRoute>
-                                    <WalletsManager />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="nova-carteira" element={
-                                  <ProtectedRoute>
-                                    <NovaCarteira />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="carteira/:id" element={
-                                  <ProtectedRoute>
-                                    <CarteiraDetalhes />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="projections" element={
-                                  <ProtectedRoute>
-                                    <Projections />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="performance" element={
-                                  <ProtectedRoute>
-                                    <PerformanceAnalytics />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="wallet-comparison" element={
-                                  <ProtectedRoute>
-                                    <WalletComparison />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="projecao-lucros" element={
-                                  <ProtectedRoute>
-                                    <ProjecaoLucros />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="projecao-lucros-premium" element={
-                                  <ProtectedRoute>
-                                    <ProjecaoLucrosPremium />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="historico" element={
-                                  <ProtectedRoute>
-                                    <Historico />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="historico-premium" element={
-                                  <ProtectedRoute>
-                                    <HistoricoPremium />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="notificacoes" element={
-                                  <ProtectedRoute>
-                                    <Notificacoes />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="notificacoes-premium" element={
-                                  <ProtectedRoute>
-                                    <NotificacoesPremium />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="alerts" element={
-                                  <ProtectedRoute>
-                                    <Alerts />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="web3" element={
-                                  <ProtectedRoute>
-                                    <Web3Dashboard />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="onchain" element={
-                                  <ProtectedRoute>
-                                    <OnChainDashboard />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="referral" element={
-                                  <ProtectedRoute>
-                                    <ReferralProgram />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="achievements" element={
-                                  <ProtectedRoute>
-                                    <Achievements />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="growth" element={
-                                  <ProtectedRoute>
-                                    <GrowthDashboard />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="api" element={
-                                  <ProtectedRoute>
-                                    <ApiDashboard />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="configuracoes" element={
-                                  <ProtectedRoute>
-                                    <Configuracoes />
-                                  </ProtectedRoute>
-                                } />
+                              <Route element={<ProtectedRoute />}>
+                                <Route element={<AppLayout />}>
+                                  <Route path="/dashboard" element={<Dashboard />} />
+                                  <Route path="/wallets" element={<Wallets />} />
+                                  <Route path="/carteiras" element={<WalletsManager />} />
+                                  <Route path="/nova-carteira" element={<NovaCarteira />} />
+                                  <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
+                                  <Route path="/configuracoes" element={<Configuracoes />} />
+                                  <Route path="/mercado" element={<Mercado />} />
+                                  <Route path="/historico" element={<Historico />} />
+                                  <Route path="/historico-premium" element={<HistoricoPremium />} />
+                                  <Route path="/alerts" element={<Alerts />} />
+                                  <Route path="/notificacoes" element={<Notificacoes />} />
+                                  <Route path="/notificacoes-premium" element={<NotificacoesPremium />} />
+                                  <Route path="/projecao" element={<ProjecaoLucros />} />
+                                  <Route path="/projecao-premium" element={<ProjecaoLucrosPremium />} />
+                                  <Route path="/projections" element={<Projections />} />
+                                  <Route path="/referral" element={<ReferralProgram />} />
+                                  <Route path="/achievements" element={<Achievements />} />
+                                  <Route path="/crypto" element={<Crypto />} />
+                                  <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
+                                  <Route path="/web3" element={<Web3Dashboard />} />
+                                  <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
+                                  <Route path="/wallet-comparison" element={<WalletComparison />} />
+                                  <Route path="/onchain" element={<OnChainDashboard />} />
+                                  <Route path="/analytics" element={<PerformanceAnalytics />} />
+                                  <Route path="/api" element={<ApiDashboard />} />
+                                  <Route path="/api-docs" element={<ApiDocs />} />
+                                  <Route path="/growth" element={<GrowthDashboard />} />
+                                </Route>
                               </Route>
                               
-                              {/* Rota 404 */}
                               <Route path="*" element={<NotFound />} />
                             </Routes>
-                            <Toaster />
-                            <SonnerToaster />
-                          </Web3Provider>
-                        </ReferralProvider>
-                      </GamificationProvider>
-                    </ViewModeProvider>
+                            <RouteValidator />
+                          </ViewModeProvider>
+                        </Web3Provider>
+                      </ReferralProvider>
+                    </GamificationProvider>
                   </CarteirasProvider>
-                </ActionFeedbackProvider>
-              </AuthProvider>
-            </I18nProvider>
-          </BrowserRouter>
+                </AuthProvider>
+              </I18nProvider>
+            </BrowserRouter>
+            <Toaster />
+          </ThemeProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </GlobalErrorBoundary>
