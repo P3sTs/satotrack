@@ -32,6 +32,8 @@ export const useCryptoWallets = () => {
     
     setIsLoading(true);
     try {
+      console.log('Loading wallets for user:', user.id);
+      
       const { data, error } = await supabase
         .from('crypto_wallets')
         .select('*')
@@ -44,7 +46,7 @@ export const useCryptoWallets = () => {
         return;
       }
 
-      console.log('Carteiras carregadas:', data);
+      console.log('Carteiras carregadas do banco:', data);
       
       // Map database response to CryptoWallet interface
       const mappedWallets: CryptoWallet[] = (data || []).map(wallet => ({
@@ -59,6 +61,7 @@ export const useCryptoWallets = () => {
         private_key_encrypted: wallet.private_key_encrypted
       }));
       
+      console.log('Carteiras mapeadas:', mappedWallets);
       setWallets(mappedWallets);
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
@@ -88,14 +91,19 @@ export const useCryptoWallets = () => {
         return { walletsGenerated: 0, errors: [error.message] };
       }
 
-      console.log('Resultado da geração:', data);
+      console.log('Resultado da geração de carteiras:', data);
       
       if (data?.wallets && data.wallets.length > 0) {
         toast.success(`${data.wallets.length} carteiras geradas com sucesso!`);
+        
+        // Recarregar carteiras imediatamente após geração
+        setTimeout(() => {
+          loadWallets();
+        }, 1000);
+      } else {
+        console.warn('Nenhuma carteira foi gerada:', data);
+        toast.warning('Nenhuma carteira foi gerada. Verifique os logs.');
       }
-      
-      // Recarregar carteiras após geração
-      setTimeout(() => loadWallets(), 2000);
       
       return {
         walletsGenerated: data?.wallets?.length || 0,
@@ -130,6 +138,7 @@ export const useCryptoWallets = () => {
   // Auto-load wallets when user changes
   useEffect(() => {
     if (user) {
+      console.log('User changed, loading wallets...');
       loadWallets();
     }
   }, [user, loadWallets]);

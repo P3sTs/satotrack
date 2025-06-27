@@ -35,6 +35,11 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
   const pendingWallets = wallets.filter(w => w.address === 'pending_generation');
 
+  console.log('CryptoWalletsGrid - Total wallets:', wallets.length);
+  console.log('CryptoWalletsGrid - Active wallets:', activeWallets.length);
+  console.log('CryptoWalletsGrid - Pending wallets:', pendingWallets.length);
+  console.log('CryptoWalletsGrid - Generation status:', generationStatus);
+
   // Se não há carteiras ou todas estão pending e não está gerando, mostra tela de criação
   if ((wallets.length === 0 || activeWallets.length === 0) && generationStatus !== 'generating') {
     return (
