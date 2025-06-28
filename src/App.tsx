@@ -92,36 +92,34 @@ function App() {
                               <Route path="/success" element={<CheckoutSuccess />} />
                               <Route path="/landing" element={<LandingPage />} />
                               
-                              <Route element={<ProtectedRoute />}>
-                                <Route element={<AppLayout />}>
-                                  <Route path="/dashboard" element={<Dashboard />} />
-                                  <Route path="/wallets" element={<Wallets />} />
-                                  <Route path="/carteiras" element={<WalletsManager />} />
-                                  <Route path="/nova-carteira" element={<NovaCarteira />} />
-                                  <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
-                                  <Route path="/configuracoes" element={<Configuracoes />} />
-                                  <Route path="/mercado" element={<Mercado />} />
-                                  <Route path="/historico" element={<Historico />} />
-                                  <Route path="/historico-premium" element={<HistoricoPremium />} />
-                                  <Route path="/alerts" element={<Alerts />} />
-                                  <Route path="/notificacoes" element={<Notificacoes />} />
-                                  <Route path="/notificacoes-premium" element={<NotificacoesPremium />} />
-                                  <Route path="/projecao" element={<ProjecaoLucros />} />
-                                  <Route path="/projecao-premium" element={<ProjecaoLucrosPremium />} />
-                                  <Route path="/projections" element={<Projections />} />
-                                  <Route path="/referral" element={<ReferralProgram />} />
-                                  <Route path="/achievements" element={<Achievements />} />
-                                  <Route path="/crypto" element={<Crypto />} />
-                                  <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
-                                  <Route path="/web3" element={<Web3Dashboard />} />
-                                  <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
-                                  <Route path="/wallet-comparison" element={<WalletComparison />} />
-                                  <Route path="/onchain" element={<OnChainDashboard />} />
-                                  <Route path="/analytics" element={<PerformanceAnalytics />} />
-                                  <Route path="/api" element={<ApiDashboard />} />
-                                  <Route path="/api-docs" element={<ApiDocs />} />
-                                  <Route path="/growth" element={<GrowthDashboard />} />
-                                </Route>
+                              <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                                <Route path="/dashboard" element={<Dashboard />} />
+                                <Route path="/wallets" element={<Wallets />} />
+                                <Route path="/carteiras" element={<WalletsManager />} />
+                                <Route path="/nova-carteira" element={<NovaCarteira />} />
+                                <Route path="/carteira/:id" element={<CarteiraDetalhes />} />
+                                <Route path="/configuracoes" element={<Configuracoes />} />
+                                <Route path="/mercado" element={<Mercado />} />
+                                <Route path="/historico" element={<Historico />} />
+                                <Route path="/historico-premium" element={<HistoricoPremium />} />
+                                <Route path="/alerts" element={<Alerts />} />
+                                <Route path="/notificacoes" element={<Notificacoes />} />
+                                <Route path="/notificacoes-premium" element={<NotificacoesPremium />} />
+                                <Route path="/projecao" element={<ProjecaoLucros />} />
+                                <Route path="/projecao-premium" element={<ProjecaoLucrosPremium />} />
+                                <Route path="/projections" element={<Projections />} />
+                                <Route path="/referral" element={<ReferralProgram />} />
+                                <Route path="/achievements" element={<Achievements />} />
+                                <Route path="/crypto" element={<Crypto />} />
+                                <Route path="/crypto-3d" element={<CryptoVisualization3D />} />
+                                <Route path="/web3" element={<Web3Dashboard />} />
+                                <Route path="/bitcoin-lookup" element={<BitcoinLookup />} />
+                                <Route path="/wallet-comparison" element={<WalletComparison />} />
+                                <Route path="/onchain" element={<OnChainDashboard />} />
+                                <Route path="/analytics" element={<PerformanceAnalytics />} />
+                                <Route path="/api" element={<ApiDashboard />} />
+                                <Route path="/api-docs" element={<ApiDocs />} />
+                                <Route path="/growth" element={<GrowthDashboard />} />
                               </Route>
                               
                               <Route path="*" element={<NotFound />} />
