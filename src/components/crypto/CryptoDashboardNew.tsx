@@ -22,7 +22,8 @@ const CryptoDashboardNew: React.FC = () => {
   const { 
     wallets, 
     isLoading, 
-    isGenerating,
+    generationStatus,
+    generationErrors,
     hasGeneratedWallets,
     hasPendingWallets,
     generateWallets, 
@@ -30,8 +31,7 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets 
   } = useCryptoWallets();
   
-  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
-  const [generationErrors, setGenerationErrors] = useState<string[]>([]);
+  const [localGenerationErrors, setLocalGenerationErrors] = useState<string[]>([]);
   
   const isPremium = userPlan === 'premium';
   const supportedCurrencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL'];
@@ -46,8 +46,7 @@ const CryptoDashboardNew: React.FC = () => {
       return;
     }
 
-    setGenerationStatus('generating');
-    setGenerationErrors([]);
+    setLocalGenerationErrors([]);
 
     try {
       console.log('Iniciando geração de carteiras...');
@@ -55,11 +54,9 @@ const CryptoDashboardNew: React.FC = () => {
       console.log('Resultado da geração:', result);
       
       if (result?.errors && result.errors.length > 0) {
-        setGenerationErrors(result.errors);
-        setGenerationStatus('error');
+        setLocalGenerationErrors(result.errors);
         toast.error(`Algumas carteiras não puderam ser geradas: ${result.errors.join(', ')}`);
       } else {
-        setGenerationStatus('success');
         toast.success(`${result?.walletsGenerated || 0} carteiras geradas com sucesso!`);
       }
       
@@ -70,15 +67,13 @@ const CryptoDashboardNew: React.FC = () => {
       
     } catch (error) {
       console.error('Erro na geração de carteiras:', error);
-      setGenerationStatus('error');
-      setGenerationErrors([error.message || 'Erro desconhecido']);
+      setLocalGenerationErrors([error.message || 'Erro desconhecido']);
       toast.error(`Falha na geração de carteiras: ${error.message}`);
     }
   };
 
   const handleRetryGeneration = () => {
-    setGenerationStatus('idle');
-    setGenerationErrors([]);
+    setLocalGenerationErrors([]);
     handleGenerateWallets();
   };
 
@@ -97,6 +92,9 @@ const CryptoDashboardNew: React.FC = () => {
   const shouldShowGenerateButton = wallets.length === 0 || 
     (wallets.length > 0 && wallets.every(w => w.address === 'pending_generation'));
 
+  // Use generationErrors from hook or local errors
+  const displayErrors = generationErrors.length > 0 ? generationErrors : localGenerationErrors;
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <CryptoDashboardHeader
@@ -111,7 +109,7 @@ const CryptoDashboardNew: React.FC = () => {
 
       <CryptoDashboardAlerts
         generationStatus={generationStatus}
-        generationErrors={generationErrors}
+        generationErrors={displayErrors}
         onRetryGeneration={handleRetryGeneration}
         pendingWalletsCount={pendingWallets.length}
       />
