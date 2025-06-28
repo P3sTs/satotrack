@@ -22,10 +22,13 @@ interface GenerationResult {
   errors: string[];
 }
 
+type GenerationStatus = 'idle' | 'generating' | 'success' | 'error';
+
 export const useCryptoWallets = () => {
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
+  const [generationErrors, setGenerationErrors] = useState<string[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -65,9 +68,15 @@ export const useCryptoWallets = () => {
       
       console.log('Carteiras mapeadas:', mappedWallets);
       setWallets(mappedWallets);
+
+      // Update status based on wallets state
+      if (mappedWallets.length > 0) {
+        setGenerationStatus('success');
+      }
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
       toast.error('Erro ao carregar carteiras');
+      setGenerationStatus('error');
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +88,9 @@ export const useCryptoWallets = () => {
       return null;
     }
 
-    setIsGenerating(true);
+    setGenerationStatus('generating');
+    setGenerationErrors([]);
+    
     try {
       console.log('Iniciando geração de carteiras para usuário:', user.id);
       
@@ -89,7 +100,10 @@ export const useCryptoWallets = () => {
 
       if (error) {
         console.error('Erro na geração de carteiras:', error);
-        toast.error(`Erro na geração: ${error.message}`);
+        const errorMsg = `Erro na geração: ${error.message}`;
+        toast.error(errorMsg);
+        setGenerationStatus('error');
+        setGenerationErrors([error.message]);
         return { walletsGenerated: 0, errors: [error.message] };
       }
 
@@ -97,6 +111,7 @@ export const useCryptoWallets = () => {
       
       if (data?.wallets && data.wallets.length > 0) {
         toast.success(`${data.wallets.length} carteiras geradas com sucesso!`);
+        setGenerationStatus('success');
         
         // Recarregar carteiras imediatamente após geração
         setTimeout(() => {
@@ -107,22 +122,26 @@ export const useCryptoWallets = () => {
         setTimeout(() => {
           navigate('/wallets');
         }, 2000);
+        
+        return {
+          walletsGenerated: data.wallets.length,
+          errors: []
+        };
       } else {
         console.warn('Nenhuma carteira foi gerada:', data);
-        toast.warning('Nenhuma carteira foi gerada. Verifique os logs.');
+        const warningMsg = 'Nenhuma carteira foi gerada. Verifique os logs.';
+        toast.warning(warningMsg);
+        setGenerationStatus('error');
+        setGenerationErrors([warningMsg]);
+        return { walletsGenerated: 0, errors: [warningMsg] };
       }
-      
-      return {
-        walletsGenerated: data?.wallets?.length || 0,
-        errors: data?.error ? [data.error] : []
-      };
     } catch (error) {
       console.error('Erro na geração de carteiras:', error);
       const errorMessage = error.message || 'Erro desconhecido na geração';
       toast.error(`Falha na geração: ${errorMessage}`);
+      setGenerationStatus('error');
+      setGenerationErrors([errorMessage]);
       return { walletsGenerated: 0, errors: [errorMessage] };
-    } finally {
-      setIsGenerating(false);
     }
   }, [user, loadWallets, navigate]);
 
@@ -153,7 +172,8 @@ export const useCryptoWallets = () => {
   return {
     wallets,
     isLoading,
-    isGenerating,
+    generationStatus,
+    generationErrors,
     hasGeneratedWallets,
     hasPendingWallets,
     generateWallets,
