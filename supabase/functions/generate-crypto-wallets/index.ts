@@ -65,7 +65,7 @@ serve(async (req) => {
       )
     }
 
-    // Generate wallets with proper structure
+    // Generate wallets with SECURE approach - NO PRIVATE KEYS STORED
     const generatedWallets = [];
     const tatumApiKey = Deno.env.get('TATUM_API_KEY');
     
@@ -76,19 +76,19 @@ serve(async (req) => {
       try {
         let walletAddress = '';
         let xpubKey = '';
-        let privateKeyEncrypted = '';
+        // ❌ REMOVED: privateKeyEncrypted - NEVER STORE PRIVATE KEYS
 
         if (tatumApiKey) {
-          // Use Tatum API to generate real addresses
+          // Use Tatum API to generate real addresses - ONLY PUBLIC DATA
           const baseUrl = 'https://api.tatum.io/v3';
           const headers = {
             'x-api-key': tatumApiKey,
             'Content-Type': 'application/json'
           };
 
-          console.log(`Generating ${mapping.currency} wallet via Tatum...`);
+          console.log(`Generating ${mapping.currency} wallet via Tatum - PUBLIC DATA ONLY...`);
 
-          // Generate wallet based on currency
+          // Generate wallet based on currency - EXTRACT ONLY PUBLIC INFO
           if (mapping.currency === 'BTC') {
             const walletResponse = await fetch(`${baseUrl}/bitcoin/wallet`, { method: 'GET', headers });
             if (!walletResponse.ok) throw new Error(`Bitcoin wallet generation failed: ${walletResponse.status}`);
@@ -100,7 +100,7 @@ serve(async (req) => {
             
             walletAddress = addressData.address;
             xpubKey = walletData.xpub;
-            privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
           } else if (mapping.currency === 'ETH' || mapping.currency === 'USDT') {
             const walletResponse = await fetch(`${baseUrl}/ethereum/wallet`, { method: 'GET', headers });
             if (!walletResponse.ok) throw new Error(`Ethereum wallet generation failed: ${walletResponse.status}`);
@@ -112,7 +112,7 @@ serve(async (req) => {
             
             walletAddress = addressData.address;
             xpubKey = walletData.xpub;
-            privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
           } else if (mapping.currency === 'MATIC') {
             const walletResponse = await fetch(`${baseUrl}/polygon/wallet`, { method: 'GET', headers });
             if (!walletResponse.ok) throw new Error(`Polygon wallet generation failed: ${walletResponse.status}`);
@@ -124,14 +124,15 @@ serve(async (req) => {
             
             walletAddress = addressData.address;
             xpubKey = walletData.xpub;
-            privateKeyEncrypted = btoa(walletData.mnemonic || '');
+            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
           } else if (mapping.currency === 'SOL') {
+            // For Solana, we'll generate but store ONLY the public address
             const walletResponse = await fetch(`${baseUrl}/solana/wallet`, { method: 'GET', headers });
             if (!walletResponse.ok) throw new Error(`Solana wallet generation failed: ${walletResponse.status}`);
             const walletData = await walletResponse.json();
             
             walletAddress = walletData.address;
-            privateKeyEncrypted = btoa(walletData.privateKey || '');
+            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.privateKey || '');
           }
         } else {
           // Use mock addresses when Tatum API is not available
@@ -139,8 +140,9 @@ serve(async (req) => {
           walletAddress = `mock_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         }
 
-        console.log(`Generated ${mapping.currency} address: ${walletAddress}`);
+        console.log(`Generated ${mapping.currency} address: ${walletAddress} - SECURE (NO PRIVATE KEYS STORED)`);
 
+        // 🔒 SECURE WALLET DATA - ONLY PUBLIC INFORMATION
         const walletData = {
           user_id: userId,
           name: mapping.name,
@@ -148,7 +150,7 @@ serve(async (req) => {
           currency: mapping.currency,
           balance: 0,
           xpub: xpubKey || null,
-          private_key_encrypted: privateKeyEncrypted || null
+          // ❌ COMPLETELY REMOVED: private_key_encrypted field
         };
 
         // Insert wallet directly without upsert to avoid conflict issues
@@ -167,7 +169,7 @@ serve(async (req) => {
             .update({
               address: walletAddress,
               xpub: xpubKey || null,
-              private_key_encrypted: privateKeyEncrypted || null
+              // ❌ REMOVED: private_key_encrypted update
             })
             .eq('user_id', userId)
             .eq('currency', mapping.currency)
@@ -178,11 +180,11 @@ serve(async (req) => {
             console.error(`Error updating ${mapping.currency} wallet:`, updateError);
           } else {
             generatedWallets.push(updateWallet);
-            console.log(`Updated ${mapping.currency} wallet successfully`);
+            console.log(`Updated ${mapping.currency} wallet successfully - SECURE`);
           }
         } else {
           generatedWallets.push(wallet);
-          console.log(`Created ${mapping.currency} wallet successfully`);
+          console.log(`Created ${mapping.currency} wallet successfully - SECURE`);
         }
       } catch (error) {
         console.error(`Error generating ${mapping.currency} wallet:`, error);
@@ -190,11 +192,11 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Generated ${generatedWallets.length} wallets for user ${userId}`);
+    console.log(`Generated ${generatedWallets.length} SECURE wallets for user ${userId}`);
 
     return new Response(
       JSON.stringify({
-        message: 'Wallets generated successfully',
+        message: 'Secure wallets generated successfully - NO PRIVATE KEYS STORED',
         wallets: generatedWallets,
         count: generatedWallets.length
       }),
@@ -209,7 +211,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        message: 'Wallet generation failed',
+        message: 'Secure wallet generation failed',
         error: error.message || 'Internal server error',
         wallets: [],
         count: 0
