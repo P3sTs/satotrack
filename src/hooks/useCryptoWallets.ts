@@ -71,7 +71,10 @@ export const useCryptoWallets = () => {
 
       // Update status based on wallets state
       if (mappedWallets.length > 0) {
-        setGenerationStatus('success');
+        const hasActiveWallets = mappedWallets.some(w => w.address !== 'pending_generation');
+        if (hasActiveWallets) {
+          setGenerationStatus('success');
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
@@ -109,7 +112,8 @@ export const useCryptoWallets = () => {
 
       console.log('Resultado da geração de carteiras:', data);
       
-      if (data?.wallets && data.wallets.length > 0) {
+      // Check if we got wallets or if it's the RLS policy error case
+      if (data?.wallets && Array.isArray(data.wallets) && data.wallets.length > 0) {
         toast.success(`${data.wallets.length} carteiras geradas com sucesso!`);
         setGenerationStatus('success');
         
@@ -127,10 +131,23 @@ export const useCryptoWallets = () => {
           walletsGenerated: data.wallets.length,
           errors: []
         };
+      } else if (data?.message === 'Wallets already exist') {
+        // User already has wallets, just load them
+        console.log('Usuário já possui carteiras, carregando...');
+        setGenerationStatus('success');
+        setTimeout(() => {
+          loadWallets();
+        }, 500);
+        
+        return {
+          walletsGenerated: data.count || 0,
+          errors: []
+        };
       } else {
-        console.warn('Nenhuma carteira foi gerada:', data);
-        const warningMsg = 'Nenhuma carteira foi gerada. Verifique os logs.';
-        toast.warning(warningMsg);
+        // No wallets generated - likely RLS policy issue based on logs
+        console.warn('Nenhuma carteira foi gerada - possível problema de RLS policy:', data);
+        const warningMsg = 'Erro de permissão na criação de carteiras. Verifique as políticas de segurança.';
+        toast.error(warningMsg);
         setGenerationStatus('error');
         setGenerationErrors([warningMsg]);
         return { walletsGenerated: 0, errors: [warningMsg] };
