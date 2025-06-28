@@ -213,7 +213,7 @@ export type Database = {
           total_received: number | null
           total_sent: number | null
           transaction_count: number | null
-          user_id: string | null
+          user_id: string
           xpub: string | null
         }
         Insert: {
@@ -232,7 +232,7 @@ export type Database = {
           total_received?: number | null
           total_sent?: number | null
           transaction_count?: number | null
-          user_id?: string | null
+          user_id?: string
           xpub?: string | null
         }
         Update: {
@@ -251,7 +251,7 @@ export type Database = {
           total_received?: number | null
           total_sent?: number | null
           transaction_count?: number | null
-          user_id?: string | null
+          user_id?: string
           xpub?: string | null
         }
         Relationships: [
