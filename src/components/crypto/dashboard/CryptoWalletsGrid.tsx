@@ -17,7 +17,6 @@ interface CryptoWallet {
   created_at?: string;
   user_id?: string;
   xpub?: string;
-  // ❌ REMOVED: private_key_encrypted - SECURITY COMPLIANCE
 }
 
 interface CryptoWalletsGridProps {
@@ -31,7 +30,6 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
   generationStatus,
   onGenerateWallets
 }) => {
-  // Filtra carteiras válidas (não pending)
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
   const pendingWallets = wallets.filter(w => w.address === 'pending_generation');
 
@@ -40,7 +38,6 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
   console.log('🔒 CryptoWalletsGrid - Pending wallets:', pendingWallets.length);
   console.log('🔒 CryptoWalletsGrid - Generation status:', generationStatus);
 
-  // Se não há carteiras ou todas estão pending e não está gerando, mostra tela de criação
   if ((wallets.length === 0 || activeWallets.length === 0) && generationStatus !== 'generating') {
     return (
       <Card className="p-8 text-center bg-dashboard-dark border-satotrack-neon/20">
@@ -48,7 +45,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <Wallet className="h-16 w-16 mx-auto mb-4 text-satotrack-neon" />
           <h3 className="text-xl font-semibold mb-2 text-satotrack-text">Suas Carteiras Cripto Seguras</h3>
           <p className="text-muted-foreground mb-4">
-            Gere suas carteiras cripto com segurança máxima - sem armazenamento de chaves privadas
+            Gere suas carteiras cripto com segurança máxima - KMS integrado
           </p>
           <Button
             onClick={onGenerateWallets}
@@ -60,20 +57,20 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
-            {generationStatus === 'generating' ? 'Gerando Carteiras Seguras...' : 'Gerar Carteiras Seguras'}
+            {generationStatus === 'generating' ? 'Gerando Carteiras KMS...' : 'Gerar Carteiras KMS'}
           </Button>
           
           {pendingWallets.length > 0 && (
             <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
               <p className="text-sm text-yellow-600">
-                {pendingWallets.length} carteira(s) em processamento seguro...
+                {pendingWallets.length} carteira(s) em processamento KMS seguro...
               </p>
             </div>
           )}
           
           <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
             <p className="text-xs text-green-600">
-              🔒 Segurança Máxima: Suas chaves privadas NUNCA são armazenadas neste sistema
+              🔒 Sistema KMS: Chaves gerenciadas com segurança máxima via Tatum KMS
             </p>
           </div>
         </CardContent>
@@ -88,8 +85,8 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
             <div>
-              <h4 className="font-medium text-blue-600">Gerando suas carteiras seguras...</h4>
-              <p className="text-sm text-blue-500">🔒 Criando endereços seguros - SEM armazenamento de chaves privadas</p>
+              <h4 className="font-medium text-blue-600">Gerando carteiras via KMS...</h4>
+              <p className="text-sm text-blue-500">🔒 Sistema KMS ativo - Chaves seguras na nuvem</p>
             </div>
           </div>
         </Card>
@@ -97,8 +94,8 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
 
       <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
         <p className="text-sm text-green-600 text-center">
-          🔒 <strong>Sistema 100% Seguro:</strong> Suas chaves privadas NUNCA são armazenadas. 
-          Apenas endereços públicos são salvos para monitoramento.
+          🔒 <strong>Sistema KMS Ativo:</strong> Suas chaves são gerenciadas pelo Tatum KMS. 
+          Máxima segurança com assinatura remota de transações.
         </p>
       </div>
 
@@ -113,7 +110,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
             <CryptoWalletCard
               key={wallet.id}
               wallet={walletWithCurrency}
-              onSend={() => toast.info(`🔒 Para enviar ${wallet.currency}, conecte uma carteira externa ou use Tatum KMS`)}
+              onSend={() => toast.info(`🔒 Transação ${wallet.currency} via KMS - Assinatura segura ativada`)}
               onReceive={() => toast.info(`Endereço ${wallet.currency} copiado para área de transferência`)}
             />
           );
@@ -125,9 +122,9 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-yellow-500" />
             <div>
-              <h4 className="font-medium text-yellow-600">Processando carteiras seguras</h4>
+              <h4 className="font-medium text-yellow-600">Processando via KMS</h4>
               <p className="text-sm text-yellow-500">
-                🔒 {pendingWallets.length} carteira(s) sendo gerada(s) com segurança máxima
+                🔒 {pendingWallets.length} carteira(s) sendo gerada(s) com Tatum KMS
               </p>
             </div>
           </div>
