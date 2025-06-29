@@ -44,12 +44,12 @@ export const useAuthSession = () => {
   // User initialization
   const { initializeNewUser } = useUserInitialization();
 
-  // Auth events handling
+  // Auth events handling - fix the function signature
   const { setupAuthStateListener } = useAuthEvents({
     setSession,
     setUser,
     setLoading,
-    initializeNewUser
+    initializeNewUser: (user: User) => initializeNewUser(user.id) // Pass user.id to the function
   });
 
   const isAuthenticated = Boolean(session && user);
