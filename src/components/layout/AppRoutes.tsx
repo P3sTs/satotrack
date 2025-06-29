@@ -24,7 +24,7 @@ import Achievements from '@/pages/Achievements';
 import Auth from '@/pages/Auth';
 import Sobre from '@/pages/Sobre';
 import Privacidade from '@/pages/Privacidade';
-import Termos from '@/pages/Termos';
+import TermosUso from '@/pages/TermosUso';
 import Web3Dashboard from '@/components/web3/Web3Dashboard';
 import CryptoDashboardNew from '@/components/crypto/CryptoDashboardNew';
 import CryptoSecurityDashboard from '@/components/crypto/dashboard/CryptoSecurityDashboard';
@@ -39,7 +39,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/privacidade" element={<Privacidade />} />
-      <Route path="/termos" element={<Termos />} />
+      <Route path="/termos" element={<TermosUso />} />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={
