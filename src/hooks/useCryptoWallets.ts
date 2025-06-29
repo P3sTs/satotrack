@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth';
+import { logSecurityCompliance } from '@/utils/security/cryptoSecurity';
 
 interface CryptoWallet {
   id: string;
@@ -14,7 +15,7 @@ interface CryptoWallet {
   created_at?: string;
   user_id?: string;
   xpub?: string;
-  private_key_encrypted?: string;
+  // ❌ REMOVED: private_key_encrypted - SECURITY COMPLIANCE
 }
 
 interface GenerationResult {
@@ -38,6 +39,7 @@ export const useCryptoWallets = () => {
     setIsLoading(true);
     try {
       console.log('Loading wallets for user:', user.id);
+      logSecurityCompliance('WALLET_LOAD_ATTEMPT');
       
       const { data, error } = await supabase
         .from('crypto_wallets')
@@ -53,7 +55,7 @@ export const useCryptoWallets = () => {
 
       console.log('Carteiras carregadas do banco:', data);
       
-      // Map database response to CryptoWallet interface
+      // Map database response to CryptoWallet interface - SECURE MAPPING
       const mappedWallets: CryptoWallet[] = (data || []).map(wallet => ({
         id: wallet.id,
         name: wallet.name,
@@ -63,11 +65,12 @@ export const useCryptoWallets = () => {
         created_at: wallet.created_at,
         user_id: wallet.user_id,
         xpub: wallet.xpub,
-        private_key_encrypted: wallet.private_key_encrypted
+        // ❌ SECURITY: Never include private_key_encrypted in client mapping
       }));
       
       console.log('Carteiras mapeadas:', mappedWallets);
       setWallets(mappedWallets);
+      logSecurityCompliance('WALLET_LOAD_SUCCESS');
 
       // Update status based on wallets state
       if (mappedWallets.length > 0) {
@@ -93,6 +96,7 @@ export const useCryptoWallets = () => {
 
     setGenerationStatus('generating');
     setGenerationErrors([]);
+    logSecurityCompliance('WALLET_GENERATION_START');
     
     try {
       console.log('Iniciando geração de carteiras para usuário:', user.id);
@@ -111,11 +115,13 @@ export const useCryptoWallets = () => {
       }
 
       console.log('Resultado da geração de carteiras:', data);
+      logSecurityCompliance('WALLET_GENERATION_API_SUCCESS');
       
       // Check if we got wallets or if it's the RLS policy error case
       if (data?.wallets && Array.isArray(data.wallets) && data.wallets.length > 0) {
         toast.success(`${data.wallets.length} carteiras geradas com sucesso!`);
         setGenerationStatus('success');
+        logSecurityCompliance('WALLET_GENERATION_COMPLETE');
         
         // Recarregar carteiras imediatamente após geração
         setTimeout(() => {
@@ -135,6 +141,7 @@ export const useCryptoWallets = () => {
         // User already has wallets, just load them
         console.log('Usuário já possui carteiras, carregando...');
         setGenerationStatus('success');
+        logSecurityCompliance('WALLET_ALREADY_EXISTS');
         setTimeout(() => {
           loadWallets();
         }, 500);
@@ -166,6 +173,7 @@ export const useCryptoWallets = () => {
     if (!user || wallets.length === 0) return;
     
     setIsLoading(true);
+    logSecurityCompliance('WALLET_BALANCE_REFRESH');
     try {
       toast.info('Atualizando saldos...');
       await loadWallets();
