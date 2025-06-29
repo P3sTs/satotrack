@@ -45,7 +45,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <Wallet className="h-16 w-16 mx-auto mb-4 text-satotrack-neon" />
           <h3 className="text-xl font-semibold mb-2 text-satotrack-text">Suas Carteiras Cripto Seguras</h3>
           <p className="text-muted-foreground mb-4">
-            Gere suas carteiras cripto com segurança máxima - KMS integrado
+            Gere suas carteiras cripto com segurança máxima - Tatum KMS integrado
           </p>
           <Button
             onClick={onGenerateWallets}
@@ -57,20 +57,20 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
-            {generationStatus === 'generating' ? 'Gerando Carteiras KMS...' : 'Gerar Carteiras KMS'}
+            {generationStatus === 'generating' ? 'Gerando Carteiras via Tatum KMS...' : 'Gerar Carteiras via Tatum KMS'}
           </Button>
           
           {pendingWallets.length > 0 && (
             <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
               <p className="text-sm text-yellow-600">
-                {pendingWallets.length} carteira(s) em processamento KMS seguro...
+                {pendingWallets.length} carteira(s) em processamento via Tatum KMS...
               </p>
             </div>
           )}
           
           <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
             <p className="text-xs text-green-600">
-              🔒 Sistema KMS: Chaves gerenciadas com segurança máxima via Tatum KMS
+              🔒 Sistema Tatum KMS: Chaves gerenciadas com segurança máxima
             </p>
           </div>
         </CardContent>
@@ -85,8 +85,8 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
             <div>
-              <h4 className="font-medium text-blue-600">Gerando carteiras via KMS...</h4>
-              <p className="text-sm text-blue-500">🔒 Sistema KMS ativo - Chaves seguras na nuvem</p>
+              <h4 className="font-medium text-blue-600">Gerando carteiras via Tatum KMS...</h4>
+              <p className="text-sm text-blue-500">🔒 Conectando com Tatum API - Chaves seguras na nuvem</p>
             </div>
           </div>
         </Card>
@@ -94,7 +94,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
 
       <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
         <p className="text-sm text-green-600 text-center">
-          🔒 <strong>Sistema KMS Ativo:</strong> Suas chaves são gerenciadas pelo Tatum KMS. 
+          🔒 <strong>Sistema Tatum KMS Ativo:</strong> Suas chaves são gerenciadas pelo Tatum KMS. 
           Máxima segurança com assinatura remota de transações.
         </p>
       </div>
@@ -110,7 +110,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
             <CryptoWalletCard
               key={wallet.id}
               wallet={walletWithCurrency}
-              onSend={() => toast.info(`🔒 Transação ${wallet.currency} via KMS - Assinatura segura ativada`)}
+              onSend={() => toast.info(`🔒 Transação ${wallet.currency} via Tatum KMS - Assinatura segura ativada`)}
               onReceive={() => toast.info(`Endereço ${wallet.currency} copiado para área de transferência`)}
             />
           );
@@ -122,7 +122,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-yellow-500" />
             <div>
-              <h4 className="font-medium text-yellow-600">Processando via KMS</h4>
+              <h4 className="font-medium text-yellow-600">Processando via Tatum KMS</h4>
               <p className="text-sm text-yellow-500">
                 🔒 {pendingWallets.length} carteira(s) sendo gerada(s) com Tatum KMS
               </p>

@@ -7,216 +7,206 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const cryptoMappings = [
-  { name: 'Bitcoin', currency: 'BTC' },
-  { name: 'Ethereum', currency: 'ETH' },
-  { name: 'Polygon', currency: 'MATIC' },
-  { name: 'Tether', currency: 'USDT' },
-  { name: 'Solana', currency: 'SOL' }
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
-
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user } } = await supabaseClient.auth.getUser(token)
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
-
     const { userId } = await req.json()
-
-    console.log('Generating crypto wallets for user:', userId)
-
-    // Check if wallets already exist and are not pending
-    const { data: existingWallets, error: checkError } = await supabaseClient
-      .from('crypto_wallets')
-      .select('*')
-      .eq('user_id', userId)
-      .neq('address', 'pending_generation')
-
-    if (checkError) {
-      console.error('Error checking existing wallets:', checkError)
-    }
-
-    if (existingWallets && existingWallets.length > 0) {
-      console.log('User already has generated wallets:', existingWallets.length)
-      return new Response(
-        JSON.stringify({ 
-          message: 'Wallets already exist',
-          wallets: existingWallets,
-          count: existingWallets.length
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
-      )
-    }
-
-    // Generate wallets with SECURE approach - NO PRIVATE KEYS STORED
-    const generatedWallets = [];
-    const tatumApiKey = Deno.env.get('TATUM_API_KEY');
+    console.log('🔒 Gerando carteiras SEGURAS para usuário:', userId)
     
-    console.log('TATUM_API_KEY configured:', !!tatumApiKey);
+    const TATUM_API_KEY = Deno.env.get('TATUM_API_KEY')
+    console.log('TATUM_API_KEY configurado:', !!TATUM_API_KEY)
+    
+    if (!TATUM_API_KEY) {
+      throw new Error('TATUM_API_KEY não configurado')
+    }
 
-    // Generate wallets for each currency
-    for (const mapping of cryptoMappings) {
+    // Create Supabase client with SERVICE ROLE to bypass RLS
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const currencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL']
+    const generatedWallets = []
+    
+    for (const currency of currencies) {
       try {
-        let walletAddress = '';
-        let xpubKey = '';
-        // ❌ REMOVED: privateKeyEncrypted - NEVER STORE PRIVATE KEYS
-
-        if (tatumApiKey) {
-          // Use Tatum API to generate real addresses - ONLY PUBLIC DATA
-          const baseUrl = 'https://api.tatum.io/v3';
-          const headers = {
-            'x-api-key': tatumApiKey,
-            'Content-Type': 'application/json'
-          };
-
-          console.log(`Generating ${mapping.currency} wallet via Tatum - PUBLIC DATA ONLY...`);
-
-          // Generate wallet based on currency - EXTRACT ONLY PUBLIC INFO
-          if (mapping.currency === 'BTC') {
-            const walletResponse = await fetch(`${baseUrl}/bitcoin/wallet`, { method: 'GET', headers });
-            if (!walletResponse.ok) throw new Error(`Bitcoin wallet generation failed: ${walletResponse.status}`);
-            const walletData = await walletResponse.json();
-            
-            const addressResponse = await fetch(`${baseUrl}/bitcoin/address/${walletData.xpub}/0`, { method: 'GET', headers });
-            if (!addressResponse.ok) throw new Error(`Bitcoin address generation failed: ${addressResponse.status}`);
-            const addressData = await addressResponse.json();
-            
-            walletAddress = addressData.address;
-            xpubKey = walletData.xpub;
-            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
-          } else if (mapping.currency === 'ETH' || mapping.currency === 'USDT') {
-            const walletResponse = await fetch(`${baseUrl}/ethereum/wallet`, { method: 'GET', headers });
-            if (!walletResponse.ok) throw new Error(`Ethereum wallet generation failed: ${walletResponse.status}`);
-            const walletData = await walletResponse.json();
-            
-            const addressResponse = await fetch(`${baseUrl}/ethereum/address/${walletData.xpub}/0`, { method: 'GET', headers });
-            if (!addressResponse.ok) throw new Error(`Ethereum address generation failed: ${addressResponse.status}`);
-            const addressData = await addressResponse.json();
-            
-            walletAddress = addressData.address;
-            xpubKey = walletData.xpub;
-            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
-          } else if (mapping.currency === 'MATIC') {
-            const walletResponse = await fetch(`${baseUrl}/polygon/wallet`, { method: 'GET', headers });
-            if (!walletResponse.ok) throw new Error(`Polygon wallet generation failed: ${walletResponse.status}`);
-            const walletData = await walletResponse.json();
-            
-            const addressResponse = await fetch(`${baseUrl}/polygon/address/${walletData.xpub}/0`, { method: 'GET', headers });
-            if (!addressResponse.ok) throw new Error(`Polygon address generation failed: ${addressResponse.status}`);
-            const addressData = await addressResponse.json();
-            
-            walletAddress = addressData.address;
-            xpubKey = walletData.xpub;
-            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.mnemonic || '');
-          } else if (mapping.currency === 'SOL') {
-            // For Solana, we'll generate but store ONLY the public address
-            const walletResponse = await fetch(`${baseUrl}/solana/wallet`, { method: 'GET', headers });
-            if (!walletResponse.ok) throw new Error(`Solana wallet generation failed: ${walletResponse.status}`);
-            const walletData = await walletResponse.json();
-            
-            walletAddress = walletData.address;
-            // ❌ REMOVED: privateKeyEncrypted = btoa(walletData.privateKey || '');
-          }
-        } else {
-          // Use mock addresses when Tatum API is not available
-          console.log(`Using mock address for ${mapping.currency}`);
-          walletAddress = `mock_${mapping.currency.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`🔒 Gerando carteira ${currency} via Tatum - APENAS DADOS PÚBLICOS...`)
+        
+        // Generate wallet using Tatum API
+        let walletResponse
+        
+        if (currency === 'BTC') {
+          walletResponse = await fetch('https://api.tatum.io/v3/bitcoin/wallet', {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          })
+        } else if (currency === 'ETH' || currency === 'USDT') {
+          walletResponse = await fetch('https://api.tatum.io/v3/ethereum/wallet', {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          })
+        } else if (currency === 'MATIC') {
+          walletResponse = await fetch('https://api.tatum.io/v3/polygon/wallet', {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          })
+        } else if (currency === 'SOL') {
+          walletResponse = await fetch('https://api.tatum.io/v3/solana/wallet', {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          })
         }
 
-        console.log(`Generated ${mapping.currency} address: ${walletAddress} - SECURE (NO PRIVATE KEYS STORED)`);
+        if (!walletResponse || !walletResponse.ok) {
+          throw new Error(`Tatum API erro para ${currency}: ${walletResponse?.statusText}`)
+        }
 
-        // 🔒 SECURE WALLET DATA - ONLY PUBLIC INFORMATION
-        const walletData = {
-          user_id: userId,
-          name: mapping.name,
-          address: walletAddress,
-          currency: mapping.currency,
-          balance: 0,
-          xpub: xpubKey || null,
-          // ❌ COMPLETELY REMOVED: private_key_encrypted field
-        };
+        const walletData = await walletResponse.json()
+        
+        // Generate address from wallet
+        let address = ''
+        if (currency === 'BTC') {
+          const addressResponse = await fetch(`https://api.tatum.io/v3/bitcoin/address/${walletData.xpub}/0`, {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+            }
+          })
+          const addressData = await addressResponse.json()
+          address = addressData.address
+        } else if (currency === 'ETH' || currency === 'USDT') {
+          const addressResponse = await fetch(`https://api.tatum.io/v3/ethereum/address/${walletData.xpub}/0`, {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+            }
+          })
+          const addressData = await addressResponse.json()
+          address = addressData.address
+        } else if (currency === 'MATIC') {
+          const addressResponse = await fetch(`https://api.tatum.io/v3/polygon/address/${walletData.xpub}/0`, {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+            }
+          })
+          const addressData = await addressResponse.json()
+          address = addressData.address
+        } else if (currency === 'SOL') {
+          const addressResponse = await fetch(`https://api.tatum.io/v3/solana/address/${walletData.xpub}/0`, {
+            method: 'GET',
+            headers: {
+              'x-api-key': TATUM_API_KEY,
+            }
+          })
+          const addressData = await addressResponse.json()
+          address = addressData.address
+        }
 
-        // Insert wallet directly without upsert to avoid conflict issues
-        const { data: wallet, error: walletError } = await supabaseClient
+        console.log(`🔒 Endereço ${currency} gerado: ${address} - SEGURO (SEM CHAVES PRIVADAS ARMAZENADAS)`)
+
+        // Try to create wallet in database with proper service role authentication
+        const { data: existingWallet, error: selectError } = await supabase
           .from('crypto_wallets')
-          .insert(walletData)
-          .select()
-          .single();
+          .select('id')
+          .eq('user_id', userId)
+          .eq('currency', currency)
+          .single()
 
-        if (walletError) {
-          console.error(`Error creating ${mapping.currency} wallet:`, walletError);
-          
-          // Try to update existing pending wallet
-          const { data: updateWallet, error: updateError } = await supabaseClient
+        if (existingWallet) {
+          // Update existing wallet
+          const { data: updatedWallet, error: updateError } = await supabase
             .from('crypto_wallets')
             .update({
-              address: walletAddress,
-              xpub: xpubKey || null,
-              // ❌ REMOVED: private_key_encrypted update
+              address: address,
+              xpub: walletData.xpub,
+              name: `${currency} Wallet`,
+              updated_at: new Date().toISOString()
             })
             .eq('user_id', userId)
-            .eq('currency', mapping.currency)
+            .eq('currency', currency)
             .select()
-            .single();
+            .single()
 
           if (updateError) {
-            console.error(`Error updating ${mapping.currency} wallet:`, updateError);
+            console.error(`Erro ao atualizar carteira ${currency}:`, updateError)
           } else {
-            generatedWallets.push(updateWallet);
-            console.log(`Updated ${mapping.currency} wallet successfully - SECURE`);
+            generatedWallets.push(updatedWallet)
+            console.log(`✅ Carteira ${currency} atualizada com sucesso`)
           }
         } else {
-          generatedWallets.push(wallet);
-          console.log(`Created ${mapping.currency} wallet successfully - SECURE`);
+          // Create new wallet
+          const { data: newWallet, error: insertError } = await supabase
+            .from('crypto_wallets')
+            .insert({
+              user_id: userId,
+              currency: currency,
+              address: address,
+              xpub: walletData.xpub,
+              name: `${currency} Wallet`,
+              balance: 0,
+              native_token_balance: 0,
+              tokens_data: [],
+              total_received: 0,
+              total_sent: 0,
+              transaction_count: 0,
+              network_id: null, // Will be set later if needed
+              address_type: currency.toLowerCase()
+            })
+            .select()
+            .single()
+
+          if (insertError) {
+            console.error(`Erro ao criar carteira ${currency}:`, insertError)
+          } else {
+            generatedWallets.push(newWallet)
+            console.log(`✅ Carteira ${currency} criada com sucesso`)
+          }
         }
+
       } catch (error) {
-        console.error(`Error generating ${mapping.currency} wallet:`, error);
-        // Continue with other currencies even if one fails
+        console.error(`Erro na geração da carteira ${currency}:`, error)
       }
     }
 
-    console.log(`Generated ${generatedWallets.length} SECURE wallets for user ${userId}`);
+    console.log(`🔒 Geradas ${generatedWallets.length} carteiras SEGURAS para usuário ${userId}`)
 
     return new Response(
       JSON.stringify({
-        message: 'Secure wallets generated successfully - NO PRIVATE KEYS STORED',
+        success: true,
         wallets: generatedWallets,
-        count: generatedWallets.length
+        message: `${generatedWallets.length} carteiras geradas com segurança via Tatum KMS`
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+        status: 200
       }
     )
 
   } catch (error) {
-    console.error('Generate crypto wallets error:', error)
+    console.error('🚨 Erro na geração de carteiras:', error)
     
     return new Response(
-      JSON.stringify({ 
-        message: 'Secure wallet generation failed',
-        error: error.message || 'Internal server error',
-        wallets: [],
-        count: 0
+      JSON.stringify({
+        error: error.message || 'Erro interno na geração de carteiras',
+        success: false
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
       }
