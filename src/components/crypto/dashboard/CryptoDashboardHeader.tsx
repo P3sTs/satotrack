@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Plus, Loader2, CheckCircle2, XCircle, Zap } from 'lucide-react';
-
-type GenerationStatus = 'idle' | 'generating' | 'success' | 'error';
+import { ArrowLeft, RefreshCw, Plus, Loader2 } from 'lucide-react';
 
 interface CryptoDashboardHeaderProps {
-  generationStatus: GenerationStatus;
+  isGenerating: boolean;
   onGoBack: () => void;
   onRefreshAll: () => void;
   onGenerateWallets: () => void;
@@ -15,21 +13,8 @@ interface CryptoDashboardHeaderProps {
   shouldShowGenerateButton: boolean;
 }
 
-const getGenerationStatusIcon = (status: GenerationStatus) => {
-  switch (status) {
-    case 'generating':
-      return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
-    case 'success':
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-    case 'error':
-      return <XCircle className="h-5 w-5 text-red-500" />;
-    default:
-      return <Zap className="h-5 w-5 text-satotrack-neon" />;
-  }
-};
-
 export const CryptoDashboardHeader: React.FC<CryptoDashboardHeaderProps> = ({
-  generationStatus,
+  isGenerating,
   onGoBack,
   onRefreshAll,
   onGenerateWallets,
@@ -38,52 +23,57 @@ export const CryptoDashboardHeader: React.FC<CryptoDashboardHeaderProps> = ({
   shouldShowGenerateButton
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-dashboard-medium">
       <div className="flex items-center gap-4">
         <Button
-          onClick={onGoBack}
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="gap-2"
+          onClick={onGoBack}
+          className="text-satotrack-text hover:text-white hover:bg-dashboard-medium"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
-        
         <div>
-          <h1 className="text-3xl font-bold text-satotrack-text mb-2 flex items-center gap-2">
-            {getGenerationStatusIcon(generationStatus)}
+          <h1 className="text-2xl md:text-3xl font-bold text-satotrack-text">
             Carteiras Cripto
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie suas carteiras de criptomoedas com segurança total
+          <p className="text-sm text-muted-foreground mt-1">
+            🔒 Sistema Tatum KMS - Segurança Máxima
           </p>
         </div>
       </div>
-      
-      <div className="flex gap-2">
-        <Button
-          onClick={onRefreshAll}
-          variant="outline"
-          disabled={isLoading || activeWalletsCount === 0}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Atualizar Tudo
-        </Button>
-        
+
+      <div className="flex items-center gap-2 w-full sm:w-auto">
+        {activeWalletsCount > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefreshAll}
+            disabled={isLoading}
+            className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10 flex-1 sm:flex-none"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Atualizar
+          </Button>
+        )}
+
         {shouldShowGenerateButton && (
           <Button
             onClick={onGenerateWallets}
-            disabled={generationStatus === 'generating'}
-            className="gap-2 bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
+            disabled={isGenerating}
+            className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90 flex-1 sm:flex-none"
           >
-            {generationStatus === 'generating' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-2" />
             )}
-            {generationStatus === 'generating' ? 'Gerando...' : 'Gerar Carteiras'}
+            {isGenerating ? 'Gerando...' : 'Gerar Carteiras'}
           </Button>
         )}
       </div>

@@ -16,9 +16,9 @@ const MainNav: React.FC = () => {
   
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/carteiras', label: 'Carteiras', icon: Wallet }, // Corrigido para usar /carteiras
+    { path: '/carteiras', label: 'Carteiras', icon: Wallet },
+    { path: '/web3', label: 'Web3', icon: Zap },
     { path: '/nova-carteira', label: 'Nova Carteira', icon: Plus },
-    { path: '/web3', label: 'Web3', icon: Zap, premium: false },
     { path: '/mercado', label: 'Mercado', icon: BarChart3 },
     { path: '/historico', label: 'Histórico', icon: Clock },
     { path: '/notificacoes', label: 'Notificações', icon: Bell, premium: true },
@@ -36,12 +36,12 @@ const MainNav: React.FC = () => {
             isActive(path)
               ? 'text-white bg-satotrack-neon/20 border border-satotrack-neon/30 shadow-sm'
               : 'text-satotrack-text hover:text-white hover:bg-dashboard-medium/50 border border-transparent',
-            premium && 'border border-bitcoin/30'
+            premium && !isPremium && 'opacity-60'
           )}
           aria-current={isActive(path) ? 'page' : undefined}
         >
           {label}
-          {premium && (
+          {premium && !isPremium && (
             <span className="absolute -top-1 -right-1 text-xs bg-bitcoin text-white px-1 rounded-full text-[10px]">
               PRO
             </span>

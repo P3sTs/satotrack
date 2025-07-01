@@ -14,16 +14,12 @@ import { CryptoDashboardAlerts } from './dashboard/CryptoDashboardAlerts';
 import { CryptoWalletsGrid } from './dashboard/CryptoWalletsGrid';
 import { CryptoSecurityNotice } from './dashboard/CryptoSecurityNotice';
 
-type GenerationStatus = 'idle' | 'generating' | 'success' | 'error';
-
 const CryptoDashboardNew: React.FC = () => {
   const navigate = useNavigate();
   const { userPlan } = useAuth();
   const { 
     wallets, 
     isLoading, 
-    generationStatus,
-    generationErrors,
     hasGeneratedWallets,
     hasPendingWallets,
     generateWallets, 
@@ -31,7 +27,8 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets 
   } = useCryptoWallets();
   
-  const [localGenerationErrors, setLocalGenerationErrors] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationErrors, setGenerationErrors] = useState<string[]>([]);
   
   const isPremium = userPlan === 'premium';
   const supportedCurrencies = ['BTC', 'ETH', 'MATIC', 'USDT', 'SOL'];
@@ -42,13 +39,12 @@ const CryptoDashboardNew: React.FC = () => {
 
   // Redirecionar automaticamente para carteiras após gerar com sucesso
   useEffect(() => {
-    if (generationStatus === 'success' && hasGeneratedWallets) {
-      toast.success('🎉 Carteiras geradas com sucesso! Redirecionando...');
+    if (hasGeneratedWallets && !isGenerating) {
       setTimeout(() => {
         navigate('/carteiras');
       }, 2000);
     }
-  }, [generationStatus, hasGeneratedWallets, navigate]);
+  }, [hasGeneratedWallets, isGenerating, navigate]);
 
   const handleGenerateWallets = async () => {
     if (hasGeneratedWallets) {
@@ -56,7 +52,8 @@ const CryptoDashboardNew: React.FC = () => {
       return;
     }
 
-    setLocalGenerationErrors([]);
+    setGenerationErrors([]);
+    setIsGenerating(true);
 
     try {
       console.log('Iniciando geração de carteiras...');
@@ -64,7 +61,7 @@ const CryptoDashboardNew: React.FC = () => {
       console.log('Resultado da geração:', result);
       
       if (result?.errors && result.errors.length > 0) {
-        setLocalGenerationErrors(result.errors);
+        setGenerationErrors(result.errors);
         toast.error(`Algumas carteiras não puderam ser geradas: ${result.errors.join(', ')}`);
       } else {
         toast.success(`${result?.walletsGenerated || 0} carteiras geradas com sucesso!`);
@@ -77,13 +74,15 @@ const CryptoDashboardNew: React.FC = () => {
       
     } catch (error) {
       console.error('Erro na geração de carteiras:', error);
-      setLocalGenerationErrors([error.message || 'Erro desconhecido']);
+      setGenerationErrors([error.message || 'Erro desconhecido']);
       toast.error(`Falha na geração de carteiras: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const handleRetryGeneration = () => {
-    setLocalGenerationErrors([]);
+    setGenerationErrors([]);
     handleGenerateWallets();
   };
 
@@ -102,13 +101,10 @@ const CryptoDashboardNew: React.FC = () => {
   const shouldShowGenerateButton = wallets.length === 0 || 
     (wallets.length > 0 && wallets.every(w => w.address === 'pending_generation'));
 
-  // Use generationErrors from hook or local errors
-  const displayErrors = generationErrors.length > 0 ? generationErrors : localGenerationErrors;
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <CryptoDashboardHeader
-        generationStatus={generationStatus}
+        isGenerating={isGenerating}
         onGoBack={handleGoBack}
         onRefreshAll={refreshAllBalances}
         onGenerateWallets={handleGenerateWallets}
@@ -118,8 +114,8 @@ const CryptoDashboardNew: React.FC = () => {
       />
 
       <CryptoDashboardAlerts
-        generationStatus={generationStatus}
-        generationErrors={displayErrors}
+        isGenerating={isGenerating}
+        generationErrors={generationErrors}
         onRetryGeneration={handleRetryGeneration}
         pendingWalletsCount={pendingWallets.length}
       />
@@ -128,7 +124,7 @@ const CryptoDashboardNew: React.FC = () => {
         activeWalletsCount={activeWallets.length}
         totalBalance={totalBalance}
         supportedCurrenciesCount={supportedCurrencies.length}
-        generationStatus={generationStatus}
+        isGenerating={isGenerating}
         pendingWalletsCount={pendingWallets.length}
       />
 
@@ -142,7 +138,7 @@ const CryptoDashboardNew: React.FC = () => {
 
       <CryptoWalletsGrid
         wallets={wallets}
-        generationStatus={generationStatus}
+        isGenerating={isGenerating}
         onGenerateWallets={handleGenerateWallets}
       />
 

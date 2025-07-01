@@ -6,8 +6,6 @@ import { Wallet, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import CryptoWalletCard from '../CryptoWalletCard';
 
-type GenerationStatus = 'idle' | 'generating' | 'success' | 'error';
-
 interface CryptoWallet {
   id: string;
   name: string;
@@ -21,13 +19,13 @@ interface CryptoWallet {
 
 interface CryptoWalletsGridProps {
   wallets: CryptoWallet[];
-  generationStatus: GenerationStatus;
+  isGenerating: boolean;
   onGenerateWallets: () => void;
 }
 
 export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
   wallets,
-  generationStatus,
+  isGenerating,
   onGenerateWallets
 }) => {
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
@@ -36,9 +34,8 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
   console.log('🔒 CryptoWalletsGrid - SECURE MODE - Total wallets:', wallets.length);
   console.log('🔒 CryptoWalletsGrid - Active wallets:', activeWallets.length);
   console.log('🔒 CryptoWalletsGrid - Pending wallets:', pendingWallets.length);
-  console.log('🔒 CryptoWalletsGrid - Generation status:', generationStatus);
 
-  if ((wallets.length === 0 || activeWallets.length === 0) && generationStatus !== 'generating') {
+  if ((wallets.length === 0 || activeWallets.length === 0) && !isGenerating) {
     return (
       <Card className="p-8 text-center bg-dashboard-dark border-satotrack-neon/20">
         <CardContent>
@@ -49,15 +46,15 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
           </p>
           <Button
             onClick={onGenerateWallets}
-            disabled={generationStatus === 'generating'}
+            disabled={isGenerating}
             className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
           >
-            {generationStatus === 'generating' ? (
+            {isGenerating ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Plus className="h-4 w-4 mr-2" />
             )}
-            {generationStatus === 'generating' ? 'Gerando Carteiras via Tatum KMS...' : 'Gerar Carteiras via Tatum KMS'}
+            {isGenerating ? 'Gerando Carteiras via Tatum KMS...' : 'Gerar Carteiras via Tatum KMS'}
           </Button>
           
           {pendingWallets.length > 0 && (
@@ -80,7 +77,7 @@ export const CryptoWalletsGrid: React.FC<CryptoWalletsGridProps> = ({
 
   return (
     <div className="space-y-4">
-      {generationStatus === 'generating' && (
+      {isGenerating && (
         <Card className="p-4 bg-blue-500/10 border-blue-500/20">
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
