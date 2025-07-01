@@ -87,8 +87,10 @@ serve(async (req) => {
               'x-api-key': TATUM_API_KEY,
             }
           })
-          const addressData = await addressResponse.json()
-          address = addressData.address
+          if (addressResponse.ok) {
+            const addressData = await addressResponse.json()
+            address = addressData.address
+          }
         } else if (currency === 'ETH' || currency === 'USDT') {
           const addressResponse = await fetch(`https://api.tatum.io/v3/ethereum/address/${walletData.xpub}/0`, {
             method: 'GET',
@@ -96,8 +98,10 @@ serve(async (req) => {
               'x-api-key': TATUM_API_KEY,
             }
           })
-          const addressData = await addressResponse.json()
-          address = addressData.address
+          if (addressResponse.ok) {
+            const addressData = await addressResponse.json()
+            address = addressData.address
+          }
         } else if (currency === 'MATIC') {
           const addressResponse = await fetch(`https://api.tatum.io/v3/polygon/address/${walletData.xpub}/0`, {
             method: 'GET',
@@ -105,8 +109,10 @@ serve(async (req) => {
               'x-api-key': TATUM_API_KEY,
             }
           })
-          const addressData = await addressResponse.json()
-          address = addressData.address
+          if (addressResponse.ok) {
+            const addressData = await addressResponse.json()
+            address = addressData.address
+          }
         } else if (currency === 'SOL') {
           const addressResponse = await fetch(`https://api.tatum.io/v3/solana/address/${walletData.xpub}/0`, {
             method: 'GET',
@@ -114,8 +120,16 @@ serve(async (req) => {
               'x-api-key': TATUM_API_KEY,
             }
           })
-          const addressData = await addressResponse.json()
-          address = addressData.address
+          if (addressResponse.ok) {
+            const addressData = await addressResponse.json()
+            address = addressData.address
+          }
+        }
+
+        // Se não conseguiu gerar endereço, pular esta moeda
+        if (!address) {
+          console.log(`⚠️ Não foi possível gerar endereço para ${currency}, pulando...`)
+          continue
         }
 
         console.log(`🔒 Endereço ${currency} gerado: ${address} - SEGURO (SEM CHAVES PRIVADAS ARMAZENADAS)`)
@@ -136,7 +150,7 @@ serve(async (req) => {
               address: address,
               xpub: walletData.xpub,
               name: `${currency} Wallet`,
-              updated_at: new Date().toISOString()
+              last_updated: new Date().toISOString()
             })
             .eq('user_id', userId)
             .eq('currency', currency)
@@ -150,7 +164,7 @@ serve(async (req) => {
             console.log(`✅ Carteira ${currency} atualizada com sucesso`)
           }
         } else {
-          // Create new wallet
+          // Create new wallet - removendo network_id que está causando erro
           const { data: newWallet, error: insertError } = await supabase
             .from('crypto_wallets')
             .insert({
@@ -165,7 +179,6 @@ serve(async (req) => {
               total_received: 0,
               total_sent: 0,
               transaction_count: 0,
-              network_id: null, // Will be set later if needed
               address_type: currency.toLowerCase()
             })
             .select()
