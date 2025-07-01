@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../ProtectedRoute';
@@ -48,13 +47,39 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/wallets" element={
+      {/* Crypto Wallet Routes - Unificadas */}
+      <Route path="/carteiras" element={
         <ProtectedRoute>
           <Wallets />
         </ProtectedRoute>
       } />
       
-      <Route path="/carteiras" element={
+      <Route path="/web3" element={
+        <ProtectedRoute>
+          <Web3Dashboard />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/crypto" element={
+        <ProtectedRoute>
+          <CryptoDashboardNew />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/crypto-security" element={
+        <ProtectedRoute>
+          <CryptoSecurityDashboard />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/kms" element={
+        <ProtectedRoute>
+          <KMSDashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* Legacy Wallet Routes */}
+      <Route path="/wallets" element={
         <ProtectedRoute>
           <WalletsManager />
         </ProtectedRoute>
@@ -72,6 +97,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      {/* Other Protected Routes */}
       <Route path="/configuracoes" element={
         <ProtectedRoute>
           <Configuracoes />
@@ -141,31 +167,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/achievements" element={
         <ProtectedRoute>
           <Achievements />
-        </ProtectedRoute>
-      } />
-      
-      {/* Web3 & Crypto Routes */}
-      <Route path="/web3" element={
-        <ProtectedRoute>
-          <Web3Dashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/crypto" element={
-        <ProtectedRoute>
-          <CryptoDashboardNew />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/crypto-security" element={
-        <ProtectedRoute>
-          <CryptoSecurityDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/kms" element={
-        <ProtectedRoute>
-          <KMSDashboard />
         </ProtectedRoute>
       } />
     </Routes>

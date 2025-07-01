@@ -78,6 +78,8 @@ export const useCryptoWallets = () => {
         if (hasActiveWallets) {
           setGenerationStatus('success');
         }
+      } else {
+        setGenerationStatus('idle');
       }
     } catch (error) {
       console.error('Erro ao carregar carteiras:', error);
@@ -92,6 +94,14 @@ export const useCryptoWallets = () => {
     if (!user) {
       toast.error('Usuário não autenticado');
       return null;
+    }
+
+    // Verificar se já tem carteiras ativas
+    const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
+    if (activeWallets.length > 0) {
+      toast.info('Você já possui carteiras geradas. Redirecionando...');
+      setTimeout(() => navigate('/carteiras'), 1000);
+      return { walletsGenerated: activeWallets.length, errors: [] };
     }
 
     setGenerationStatus('generating');
@@ -130,7 +140,7 @@ export const useCryptoWallets = () => {
 
         // Redirecionar para a página de carteiras após 2 segundos
         setTimeout(() => {
-          navigate('/wallets');
+          navigate('/carteiras');
         }, 2000);
         
         return {
@@ -144,6 +154,7 @@ export const useCryptoWallets = () => {
         logSecurityCompliance('WALLET_ALREADY_EXISTS');
         setTimeout(() => {
           loadWallets();
+          navigate('/carteiras');
         }, 500);
         
         return {
@@ -167,7 +178,7 @@ export const useCryptoWallets = () => {
       setGenerationErrors([errorMessage]);
       return { walletsGenerated: 0, errors: [errorMessage] };
     }
-  }, [user, loadWallets, navigate]);
+  }, [user, wallets, loadWallets, navigate]);
 
   const refreshAllBalances = useCallback(async () => {
     if (!user || wallets.length === 0) return;
