@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -15,9 +16,9 @@ const MainNav: React.FC = () => {
   
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/carteiras', label: 'Carteiras', icon: Wallet },
+    { path: '/carteiras', label: 'Carteiras', icon: Wallet }, // Corrigido para usar /carteiras
     { path: '/nova-carteira', label: 'Nova Carteira', icon: Plus },
-    { path: '/web3', label: 'Web3', icon: Zap, premium: false }, // Nova rota Web3
+    { path: '/web3', label: 'Web3', icon: Zap, premium: false },
     { path: '/mercado', label: 'Mercado', icon: BarChart3 },
     { path: '/historico', label: 'Histórico', icon: Clock },
     { path: '/notificacoes', label: 'Notificações', icon: Bell, premium: true },

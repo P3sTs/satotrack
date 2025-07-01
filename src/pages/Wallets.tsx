@@ -5,19 +5,15 @@ import { useAuth } from '../contexts/auth';
 import { useCryptoWallets } from '../hooks/useCryptoWallets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Copy, Send, Download, QrCode, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
-import { QRCodeSVG } from 'qrcode.react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import CryptoWalletCard from '../components/crypto/CryptoWalletCard';
 
 const Wallets: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { wallets, isLoading, refreshAllBalances } = useCryptoWallets();
+  const { wallets, isLoading, refreshAllBalances, loadWallets } = useCryptoWallets();
   const [refreshing, setRefreshing] = useState(false);
 
   // Redirect if not authenticated
@@ -27,35 +23,12 @@ const Wallets: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    loadWallets();
+  }, []);
+
   // Filter only active wallets (not pending)
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
-
-  const getCryptoColor = (currency: string) => {
-    const colors = {
-      BTC: 'bg-gradient-to-r from-orange-500 to-yellow-500',
-      ETH: 'bg-gradient-to-r from-blue-500 to-purple-500',
-      MATIC: 'bg-gradient-to-r from-purple-500 to-pink-500',
-      USDT: 'bg-gradient-to-r from-green-500 to-teal-500',
-      SOL: 'bg-gradient-to-r from-purple-600 to-blue-600',
-    };
-    return colors[currency as keyof typeof colors] || 'bg-gradient-to-r from-gray-500 to-gray-600';
-  };
-
-  const getCryptoIcon = (currency: string) => {
-    const icons = {
-      BTC: '₿',
-      ETH: 'Ξ',
-      MATIC: '⬟',
-      USDT: '₮',
-      SOL: '◎'
-    };
-    return icons[currency as keyof typeof icons] || '●';
-  };
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copiado!`);
-  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -69,11 +42,12 @@ const Wallets: React.FC = () => {
     }
   };
 
-  const formatBalance = (balance: string) => {
-    const num = parseFloat(balance);
-    if (num === 0) return '0.00';
-    if (num < 0.01) return '<0.01';
-    return num.toFixed(4);
+  const handleGoToDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  const handleGenerateWallets = () => {
+    navigate('/dashboard'); // Vai para o dashboard onde pode gerar carteiras
   };
 
   if (!isAuthenticated) {
@@ -81,37 +55,42 @@ const Wallets: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-700">
+      <div className="sticky top-0 z-50 bg-dashboard-dark/80 backdrop-blur-lg border-b border-dashboard-medium">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="text-white hover:bg-slate-700"
+                onClick={handleGoToDashboard}
+                className="text-satotrack-text hover:text-white hover:bg-dashboard-medium"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
+                Dashboard
               </Button>
-              <h1 className="text-2xl font-bold text-white">Minhas Carteiras</h1>
+              <h1 className="text-2xl font-bold text-satotrack-text">
+                Minhas Carteiras Cripto
+              </h1>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="border-slate-600 text-white hover:bg-slate-700"
-            >
-              {refreshing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Atualizar
-            </Button>
+            
+            {activeWallets.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+              >
+                {refreshing ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Atualizar Saldos
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -121,157 +100,136 @@ const Wallets: React.FC = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5].map((i) => (
-              <Card key={i} className="bg-slate-800 border-slate-700">
+              <Card key={i} className="bg-dashboard-dark border-dashboard-medium">
                 <CardHeader>
-                  <Skeleton className="h-8 w-32 bg-slate-700" />
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full bg-dashboard-medium" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24 bg-dashboard-medium" />
+                      <Skeleton className="h-3 w-16 bg-dashboard-medium" />
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <Skeleton className="h-16 w-full bg-slate-700 mb-4" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-10 flex-1 bg-slate-700" />
-                    <Skeleton className="h-10 flex-1 bg-slate-700" />
+                  <Skeleton className="h-20 w-full bg-dashboard-medium mb-4" />
+                  <Skeleton className="h-8 w-full bg-dashboard-medium mb-2" />
+                  <div className="grid grid-cols-3 gap-2">
+                    <Skeleton className="h-8 bg-dashboard-medium" />
+                    <Skeleton className="h-8 bg-dashboard-medium" />
+                    <Skeleton className="h-8 bg-dashboard-medium" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : activeWallets.length === 0 ? (
-          <Card className="max-w-md mx-auto bg-slate-800 border-slate-700 text-center p-8">
-            <div className="text-6xl mb-4">👛</div>
-            <h3 className="text-xl font-semibold text-white mb-2">Nenhuma carteira encontrada</h3>
-            <p className="text-slate-400 mb-4">
-              Você ainda não possui carteiras cripto. Vá para o dashboard para gerar suas carteiras.
-            </p>
-            <Button
-              onClick={() => navigate('/dashboard')}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Ir para Dashboard
-            </Button>
+          <Card className="max-w-md mx-auto bg-dashboard-dark border-dashboard-medium text-center p-8">
+            <CardContent className="space-y-6">
+              <div className="w-20 h-20 mx-auto rounded-full bg-satotrack-neon/10 flex items-center justify-center">
+                <Wallet className="h-10 w-10 text-satotrack-neon" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-satotrack-text">
+                  Nenhuma carteira encontrada
+                </h3>
+                <p className="text-muted-foreground">
+                  Você ainda não possui carteiras cripto. Generate suas carteiras seguras via Tatum KMS.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={handleGenerateWallets}
+                  className="w-full bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
+                >
+                  🔒 Gerar Carteiras via Tatum KMS
+                </Button>
+                
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <p className="text-xs text-green-400">
+                    🔒 Sistema Tatum KMS: Máxima segurança com chaves gerenciadas na nuvem
+                  </p>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeWallets.map((wallet) => (
-              <Card
-                key={wallet.id}
-                className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-all duration-300 hover:scale-105"
-              >
-                <CardHeader className="pb-3">
+          <div className="space-y-6">
+            {/* Stats Header */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-dashboard-dark border-dashboard-medium">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-full ${getCryptoColor(wallet.currency)} flex items-center justify-center text-white text-xl font-bold`}>
-                        {getCryptoIcon(wallet.currency)}
-                      </div>
-                      <div>
-                        <CardTitle className="text-white text-lg">{wallet.name}</CardTitle>
-                        <Badge variant="outline" className="text-xs border-slate-600 text-slate-400">
-                          {wallet.currency}
-                        </Badge>
-                      </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total de Carteiras</p>
+                      <p className="text-2xl font-bold text-satotrack-neon">
+                        {activeWallets.length}
+                      </p>
                     </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* Balance */}
-                  <div className="text-center py-4 bg-slate-900/50 rounded-lg">
-                    <p className="text-sm text-slate-400">Saldo</p>
-                    <p className="text-2xl font-bold text-white">
-                      {formatBalance(wallet.balance)} {wallet.currency}
-                    </p>
-                  </div>
-
-                  {/* Address */}
-                  <div className="space-y-2">
-                    <Label className="text-sm text-slate-400">Endereço</Label>
-                    <div className="flex items-center gap-2 p-2 bg-slate-900/50 rounded-lg">
-                      <code className="text-xs text-slate-300 flex-1 break-all">
-                        {wallet.address}
-                      </code>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(wallet.address, 'Endereço')}
-                        className="text-slate-400 hover:text-white hover:bg-slate-700 shrink-0"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="border-slate-600 text-white hover:bg-slate-700">
-                          <Download className="h-4 w-4 mr-1" />
-                          Receber
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-slate-800 border-slate-700 text-white">
-                        <DialogHeader>
-                          <DialogTitle>Receber {wallet.currency}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="flex justify-center">
-                            <div className="bg-white p-4 rounded-lg">
-                              <QRCodeSVG value={wallet.address} size={200} />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Endereço da carteira</Label>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                value={wallet.address}
-                                readOnly
-                                className="bg-slate-900 border-slate-600 text-white"
-                              />
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyToClipboard(wallet.address, 'Endereço')}
-                                className="border-slate-600 text-white hover:bg-slate-700"
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-slate-600 text-white hover:bg-slate-700"
-                      onClick={() => toast.info('Funcionalidade de envio em desenvolvimento')}
-                    >
-                      <Send className="h-4 w-4 mr-1" />
-                      Enviar
-                    </Button>
-
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="border-slate-600 text-white hover:bg-slate-700">
-                          <QrCode className="h-4 w-4 mr-1" />
-                          QR
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-slate-800 border-slate-700 text-white">
-                        <DialogHeader>
-                          <DialogTitle>QR Code - {wallet.currency}</DialogTitle>
-                        </DialogHeader>
-                        <div className="flex justify-center py-4">
-                          <div className="bg-white p-4 rounded-lg">
-                            <QRCodeSVG value={wallet.address} size={250} />
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Wallet className="h-8 w-8 text-satotrack-neon" />
                   </div>
                 </CardContent>
               </Card>
-            ))}
+
+              <Card className="bg-dashboard-dark border-dashboard-medium">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Moedas Suportadas</p>
+                      <p className="text-2xl font-bold text-satotrack-neon">
+                        {new Set(activeWallets.map(w => w.currency)).size}
+                      </p>
+                    </div>
+                    <div className="text-2xl">🔒</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-dashboard-dark border-dashboard-medium">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Status KMS</p>
+                      <p className="text-sm font-bold text-green-400">Ativo</p>
+                    </div>
+                    <div className="text-2xl">✅</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Wallets Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeWallets.map((wallet) => (
+                <CryptoWalletCard
+                  key={wallet.id}
+                  wallet={wallet}
+                  onRefresh={() => {
+                    // Implementar refresh individual se necessário
+                    handleRefresh();
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Security Notice */}
+            <Card className="bg-green-500/10 border-green-500/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🔒</div>
+                  <div>
+                    <h4 className="font-medium text-green-400">
+                      Sistema Tatum KMS Ativo
+                    </h4>
+                    <p className="text-sm text-green-300">
+                      Suas chaves privadas são gerenciadas com segurança máxima pelo Tatum KMS. 
+                      Transações assinadas remotamente com criptografia de ponta.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>

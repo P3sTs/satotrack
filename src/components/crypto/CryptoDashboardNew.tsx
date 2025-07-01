@@ -40,6 +40,16 @@ const CryptoDashboardNew: React.FC = () => {
     loadWallets();
   }, []);
 
+  // Redirecionar automaticamente para carteiras após gerar com sucesso
+  useEffect(() => {
+    if (generationStatus === 'success' && hasGeneratedWallets) {
+      toast.success('🎉 Carteiras geradas com sucesso! Redirecionando...');
+      setTimeout(() => {
+        navigate('/carteiras');
+      }, 2000);
+    }
+  }, [generationStatus, hasGeneratedWallets, navigate]);
+
   const handleGenerateWallets = async () => {
     if (hasGeneratedWallets) {
       toast.error('Você já possui carteiras geradas. Cada usuário pode ter apenas 1 endereço por moeda.');
