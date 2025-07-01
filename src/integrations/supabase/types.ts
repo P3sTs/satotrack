@@ -207,7 +207,7 @@ export type Database = {
           last_updated: string | null
           name: string
           native_token_balance: number | null
-          network_id: string
+          network_id: string | null
           private_key_encrypted: string | null
           tokens_data: Json | null
           total_received: number | null
@@ -226,7 +226,7 @@ export type Database = {
           last_updated?: string | null
           name: string
           native_token_balance?: number | null
-          network_id: string
+          network_id?: string | null
           private_key_encrypted?: string | null
           tokens_data?: Json | null
           total_received?: number | null
@@ -245,7 +245,7 @@ export type Database = {
           last_updated?: string | null
           name?: string
           native_token_balance?: number | null
-          network_id?: string
+          network_id?: string | null
           private_key_encrypted?: string | null
           tokens_data?: Json | null
           total_received?: number | null
@@ -775,6 +775,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      security_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       sync_logs: {
         Row: {
