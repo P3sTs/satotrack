@@ -224,6 +224,12 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      <Route path="/crypto-security" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      
       <Route path="/crypto-3d" element={
         <ProtectedRoute>
           <CryptoVisualization3D />

@@ -29,7 +29,12 @@ const RouteValidator: React.FC = () => {
       '/alerts',
       '/referral',
       '/achievements',
-      '/growth'
+      '/growth',
+      '/crypto-security',
+      '/crypto',
+      '/crypto-3d',
+      '/mercado',
+      '/bitcoin-lookup'
     ];
 
     // Verificar se a rota atual requer autenticação
@@ -55,17 +60,7 @@ const RouteValidator: React.FC = () => {
         return;
       }
     }
-
-    // Log de navegação em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🧭 Navegação validada:', {
-        path: currentPath,
-        authenticated: isAuthenticated,
-        userId: user?.id?.substring(0, 8) + '...',
-        loading
-      });
-    }
-  }, [location.pathname, isAuthenticated, user, navigate, loading]);
+  }, [location.pathname, isAuthenticated, loading]);
 
   return null;
 };
