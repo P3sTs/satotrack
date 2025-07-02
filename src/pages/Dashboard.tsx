@@ -30,7 +30,8 @@ const Dashboard: React.FC = () => {
   const supportedCurrenciesCount = 5; // BTC, ETH, MATIC, USDT, SOL
   const pendingWalletsCount = wallets.filter(w => w.address === 'pending_generation').length;
 
-  const shouldShowGenerateButton = !hasGeneratedWallets && generationStatus !== 'generating';
+  const isGenerating = generationStatus === 'generating';
+  const shouldShowGenerateButton = !hasGeneratedWallets && !isGenerating;
 
   const handleGoBack = () => {
     navigate('/');
@@ -44,7 +45,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <CryptoDashboardHeader
-          generationStatus={generationStatus}
+          isGenerating={isGenerating}
           onGoBack={handleGoBack}
           onRefreshAll={refreshAllBalances}
           onGenerateWallets={generateWallets}
@@ -54,7 +55,7 @@ const Dashboard: React.FC = () => {
         />
 
         <CryptoDashboardAlerts
-          generationStatus={generationStatus}
+          isGenerating={isGenerating}
           generationErrors={generationErrors}
           onRetryGeneration={handleRetryGeneration}
           pendingWalletsCount={pendingWalletsCount}
@@ -64,13 +65,13 @@ const Dashboard: React.FC = () => {
           activeWalletsCount={activeWalletsCount}
           totalBalance={totalBalance}
           supportedCurrenciesCount={supportedCurrenciesCount}
-          generationStatus={generationStatus}
+          isGenerating={isGenerating}
           pendingWalletsCount={pendingWalletsCount}
         />
 
         <CryptoWalletsGrid
           wallets={wallets}
-          generationStatus={generationStatus}
+          isGenerating={isGenerating}
           onGenerateWallets={generateWallets}
         />
 
