@@ -1,56 +1,94 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../ProtectedRoute';
+import NotFound from '@/pages/NotFound';
+
+// 🔗 Landing & Apresentação
 import Index from '@/pages/Index';
+import LandingPage from '@/pages/LandingPage';
 import Home from '@/pages/Home';
+import Sobre from '@/pages/Sobre';
+
+// 🔒 Autenticação & Segurança
+import Auth from '@/pages/Auth';
+import Privacidade from '@/pages/Privacidade';
+import TermosUso from '@/pages/TermosUso';
+
+// 📊 Painéis & Dashboards
 import Dashboard from '@/pages/Dashboard';
+import GrowthDashboard from '@/pages/GrowthDashboard';
+import OnChainDashboard from '@/pages/OnChainDashboard';
+import Web3Dashboard from '@/pages/Web3Dashboard';
+
+// 💼 Carteiras & Gestão
 import Wallets from '@/pages/Wallets';
 import WalletsManager from '@/pages/WalletsManager';
 import NovaCarteira from '@/pages/NovaCarteira';
 import CarteiraDetalhes from '@/pages/CarteiraDetalhes';
-import Configuracoes from '@/pages/Configuracoes';
-import Mercado from '@/pages/Mercado';
-import Historico from '@/pages/Historico';
-import HistoricoPremium from '@/pages/HistoricoPremium';
-import Alerts from '@/pages/Alerts';
-import Notificacoes from '@/pages/Notificacoes';
-import NotificacoesPremium from '@/pages/NotificacoesPremium';
+import WalletComparison from '@/pages/WalletComparison';
+
+// 📈 Financeiro & Projeções
 import ProjecaoLucros from '@/pages/ProjecaoLucros';
 import ProjecaoLucrosPremium from '@/pages/ProjecaoLucrosPremium';
 import Projections from '@/pages/Projections';
-import ReferralProgram from '@/pages/ReferralProgram';
+import PerformanceAnalytics from '@/pages/PerformanceAnalytics';
+import Historico from '@/pages/Historico';
+import HistoricoPremium from '@/pages/HistoricoPremium';
+
+// 💳 Pagamento & Checkout
+import PlanosPage from '@/pages/PlanosPage';
+import CheckoutSuccess from '@/pages/CheckoutSuccess';
+
+// 🔔 Alertas & Notificações
+import Alerts from '@/pages/Alerts';
+import Notificacoes from '@/pages/Notificacoes';
+import NotificacoesPremium from '@/pages/NotificacoesPremium';
+
+// 💬 API e Integrações
+import ApiDashboard from '@/pages/ApiDashboard';
+import ApiDocs from '@/pages/ApiDocs';
+
+// 💡 Ferramentas Avançadas
+import BitcoinLookup from '@/pages/BitcoinLookup';
+import Crypto from '@/pages/Crypto';
+import CryptoVisualization3D from '@/pages/CryptoVisualization3D';
+import Mercado from '@/pages/Mercado';
+
+// 🎯 Extra & Gamificação
 import Achievements from '@/pages/Achievements';
-import Auth from '@/pages/Auth';
-import Sobre from '@/pages/Sobre';
-import Privacidade from '@/pages/Privacidade';
-import TermosUso from '@/pages/TermosUso';
-import Web3Dashboard from '@/components/web3/Web3Dashboard';
-import CryptoDashboardNew from '@/components/crypto/CryptoDashboardNew';
-import CryptoSecurityDashboard from '@/components/crypto/dashboard/CryptoSecurityDashboard';
-import KMSDashboard from '@/components/crypto/dashboard/KMSDashboard';
+import ReferralProgram from '@/pages/ReferralProgram';
+import Configuracoes from '@/pages/Configuracoes';
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* 🔗 Landing & Apresentação - Rotas Públicas */}
       <Route path="/" element={<Index />} />
+      <Route path="/landing" element={<LandingPage />} />
       <Route path="/home" element={<Home />} />
-      <Route path="/auth" element={<Auth />} />
       <Route path="/sobre" element={<Sobre />} />
+      
+      {/* 🔒 Autenticação & Segurança - Rotas Públicas */}
+      <Route path="/auth" element={<Auth />} />
       <Route path="/privacidade" element={<Privacidade />} />
       <Route path="/termos" element={<TermosUso />} />
       
-      {/* Protected Routes */}
+      {/* 📊 Painéis & Dashboards - Rotas Protegidas */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       } />
       
-      {/* Crypto Wallet Routes - Unificadas */}
-      <Route path="/carteiras" element={
+      <Route path="/growth" element={
         <ProtectedRoute>
-          <Wallets />
+          <GrowthDashboard />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/onchain" element={
+        <ProtectedRoute>
+          <OnChainDashboard />
         </ProtectedRoute>
       } />
       
@@ -60,25 +98,13 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/crypto" element={
+      {/* 💼 Carteiras & Gestão - Rotas Protegidas */}
+      <Route path="/carteiras" element={
         <ProtectedRoute>
-          <CryptoDashboardNew />
+          <Wallets />
         </ProtectedRoute>
       } />
       
-      <Route path="/crypto-security" element={
-        <ProtectedRoute>
-          <CryptoSecurityDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/kms" element={
-        <ProtectedRoute>
-          <KMSDashboard />
-        </ProtectedRoute>
-      } />
-      
-      {/* Legacy Wallet Routes */}
       <Route path="/wallets" element={
         <ProtectedRoute>
           <WalletsManager />
@@ -97,31 +123,13 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
-      {/* Other Protected Routes */}
-      <Route path="/configuracoes" element={
+      <Route path="/wallet-comparison" element={
         <ProtectedRoute>
-          <Configuracoes />
+          <WalletComparison />
         </ProtectedRoute>
       } />
       
-      <Route path="/mercado" element={
-        <ProtectedRoute>
-          <Mercado />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/historico" element={
-        <ProtectedRoute>
-          <Historico />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/historico-premium" element={
-        <ProtectedRoute>
-          <HistoricoPremium />
-        </ProtectedRoute>
-      } />
-      
+      {/* 📈 Financeiro & Projeções - Rotas Protegidas */}
       <Route path="/projecao" element={
         <ProtectedRoute>
           <ProjecaoLucros />
@@ -140,6 +148,38 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      <Route path="/performance" element={
+        <ProtectedRoute>
+          <PerformanceAnalytics />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/historico" element={
+        <ProtectedRoute>
+          <Historico />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/historico-premium" element={
+        <ProtectedRoute>
+          <HistoricoPremium />
+        </ProtectedRoute>
+      } />
+      
+      {/* 💳 Pagamento & Checkout - Rotas Protegidas */}
+      <Route path="/planos" element={
+        <ProtectedRoute>
+          <PlanosPage />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/checkout-success" element={
+        <ProtectedRoute>
+          <CheckoutSuccess />
+        </ProtectedRoute>
+      } />
+      
+      {/* 🔔 Alertas & Notificações - Rotas Protegidas */}
       <Route path="/alerts" element={
         <ProtectedRoute>
           <Alerts />
@@ -158,17 +198,65 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      {/* 💬 API e Integrações - Rotas Protegidas */}
+      <Route path="/api" element={
+        <ProtectedRoute>
+          <ApiDashboard />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/api-docs" element={
+        <ProtectedRoute>
+          <ApiDocs />
+        </ProtectedRoute>
+      } />
+      
+      {/* 💡 Ferramentas Avançadas - Rotas Protegidas */}
+      <Route path="/bitcoin-lookup" element={
+        <ProtectedRoute>
+          <BitcoinLookup />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/crypto" element={
+        <ProtectedRoute>
+          <Crypto />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/crypto-3d" element={
+        <ProtectedRoute>
+          <CryptoVisualization3D />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/mercado" element={
+        <ProtectedRoute>
+          <Mercado />
+        </ProtectedRoute>
+      } />
+      
+      {/* 🎯 Extra & Gamificação - Rotas Protegidas */}
+      <Route path="/achievements" element={
+        <ProtectedRoute>
+          <Achievements />
+        </ProtectedRoute>
+      } />
+      
       <Route path="/referral" element={
         <ProtectedRoute>
           <ReferralProgram />
         </ProtectedRoute>
       } />
       
-      <Route path="/achievements" element={
+      <Route path="/configuracoes" element={
         <ProtectedRoute>
-          <Achievements />
+          <Configuracoes />
         </ProtectedRoute>
       } />
+      
+      {/* ⚠️ Fallback - 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
