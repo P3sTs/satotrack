@@ -23,7 +23,7 @@ export const CryptoDashboardHeader: React.FC<CryptoDashboardHeaderProps> = ({
   shouldShowGenerateButton
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-dashboard-medium">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-border">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -35,10 +35,10 @@ export const CryptoDashboardHeader: React.FC<CryptoDashboardHeaderProps> = ({
           Voltar
         </Button>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-satotrack-text">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
             Carteiras Cripto
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             🔒 Sistema Tatum KMS - Segurança Máxima
           </p>
         </div>

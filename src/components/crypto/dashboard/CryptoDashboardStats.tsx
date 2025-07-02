@@ -19,55 +19,55 @@ export const CryptoDashboardStats: React.FC<CryptoDashboardStatsProps> = ({
   pendingWalletsCount
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card className="bg-dashboard-dark border-dashboard-medium">
-        <CardContent className="p-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <Card className="bg-card border-border">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Carteiras Ativas</p>
-              <p className="text-2xl font-bold text-satotrack-neon">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Carteiras Ativas</p>
+              <p className="text-xl sm:text-2xl font-bold text-satotrack-neon">
                 {activeWalletsCount}
               </p>
             </div>
-            <Wallet className="h-8 w-8 text-satotrack-neon" />
+            <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-satotrack-neon" />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-dashboard-dark border-dashboard-medium">
-        <CardContent className="p-4">
+      <Card className="bg-card border-border">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Moedas Suportadas</p>
-              <p className="text-2xl font-bold text-satotrack-neon">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Moedas Suportadas</p>
+              <p className="text-xl sm:text-2xl font-bold text-satotrack-neon">
                 {supportedCurrenciesCount}
               </p>
             </div>
-            <Shield className="h-8 w-8 text-satotrack-neon" />
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-satotrack-neon" />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-dashboard-dark border-dashboard-medium">
-        <CardContent className="p-4">
+      <Card className="bg-card border-border">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Saldo Total (USD)</p>
-              <p className="text-2xl font-bold text-satotrack-neon">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Saldo Total (USD)</p>
+              <p className="text-xl sm:text-2xl font-bold text-satotrack-neon">
                 ${totalBalance.toFixed(2)}
               </p>
             </div>
-            <TrendingUp className="h-8 w-8 text-satotrack-neon" />
+            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-satotrack-neon" />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-dashboard-dark border-dashboard-medium">
-        <CardContent className="p-4">
+      <Card className="bg-card border-border">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Status KMS</p>
-              <p className="text-sm font-bold text-green-400">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Status KMS</p>
+              <p className="text-sm sm:text-base font-bold text-green-400">
                 {isGenerating ? 'Processando...' : 'Ativo'}
               </p>
               {pendingWalletsCount > 0 && (
@@ -77,9 +77,9 @@ export const CryptoDashboardStats: React.FC<CryptoDashboardStatsProps> = ({
               )}
             </div>
             {isGenerating ? (
-              <Loader2 className="h-8 w-8 text-yellow-500 animate-spin" />
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 animate-spin" />
             ) : (
-              <div className="text-2xl">✅</div>
+              <div className="text-xl sm:text-2xl">✅</div>
             )}
           </div>
         </CardContent>
