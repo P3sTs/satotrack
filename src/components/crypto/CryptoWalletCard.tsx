@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrustWalletCard, CryptoCardContent } from '@/components/ui/trust-wallet-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -128,94 +128,71 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
 
   return (
     <>
-      <Card className="bg-dashboard-dark border-dashboard-medium hover:border-satotrack-neon/30 transition-all duration-300 overflow-hidden">
-        {/* Header com gradiente */}
-        <CardHeader className={`bg-gradient-to-r ${getCryptoColor(wallet.currency)} p-0`}>
-          <div className="p-4 bg-black/20">
-            <CardTitle className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-bold">
-                  {getCryptoIcon(wallet.currency)}
-                </div>
-                <div>
-                  <h3 className="font-semibold">{wallet.name}</h3>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
-                    {wallet.currency}
-                  </Badge>
-                </div>
-              </div>
+      <TrustWalletCard variant="crypto" className="cursor-pointer">
+        <CryptoCardContent
+          icon={
+            <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${getCryptoColor(wallet.currency)} flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
+              {getCryptoIcon(wallet.currency)}
+            </div>
+          }
+          name={wallet.name}
+          symbol={wallet.currency}
+          balance={`${formatBalance(wallet.balance)} ${wallet.currency}`}
+          balanceUSD="≈ $0.00 USD"
+          change={0}
+          onClick={() => {}}
+        />
+        
+        {/* Address Section */}
+        <div className="px-4 pb-2">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-muted-foreground">Endereço:</p>
+            <div className="flex gap-1">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="text-white hover:bg-white/20"
+                onClick={() => setShowAddress(!showAddress)}
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
               >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {showAddress ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               </Button>
-            </CardTitle>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-4 space-y-4">
-          {/* Balance */}
-          <div className="text-center py-4 bg-dashboard-medium/30 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-1">Saldo Disponível</p>
-            <p className="text-2xl font-bold text-satotrack-neon">
-              {formatBalance(wallet.balance)}
-            </p>
-            <p className="text-sm text-muted-foreground">{wallet.currency}</p>
-          </div>
-
-          {/* Address */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Endereço:</p>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAddress(!showAddress)}
-                  className="h-6 w-6 p-0 text-satotrack-text hover:text-white"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(wallet.address, 'Endereço')}
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+              >
+                <a 
+                  href={getExplorerUrl(wallet.currency, wallet.address)} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
                 >
-                  {showAddress ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(wallet.address, 'Endereço')}
-                  className="h-6 w-6 p-0 text-satotrack-text hover:text-white"
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="h-6 w-6 p-0 text-satotrack-text hover:text-white"
-                >
-                  <a 
-                    href={getExplorerUrl(wallet.currency, wallet.address)} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </Button>
-              </div>
-            </div>
-            <div className="p-2 bg-dashboard-medium/50 rounded text-xs font-mono text-satotrack-text break-all">
-              {formatAddress(wallet.address)}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </Button>
             </div>
           </div>
+          <div className="p-2 bg-muted/30 rounded-lg text-xs font-mono text-muted-foreground break-all">
+            {formatAddress(wallet.address)}
+          </div>
+        </div>
 
-          {/* Action Buttons */}
+        {/* Action Buttons */}
+        <div className="px-4 pb-4">
           <div className="grid grid-cols-3 gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowReceiveModal(true)}
-              className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+              className="border-primary/30 text-primary hover:bg-primary/10"
             >
               <Download className="h-4 w-4 mr-1" />
               Receber
@@ -225,7 +202,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowSendModal(true)}
-              className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+              className="border-primary/30 text-primary hover:bg-primary/10"
             >
               <Send className="h-4 w-4 mr-1" />
               Enviar
@@ -234,22 +211,25 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowReceiveModal(true)}
-              className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="border-primary/30 text-primary hover:bg-primary/10"
             >
-              <QrCode className="h-4 w-4 mr-1" />
-              QR
+              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? '' : 'Sync'}
             </Button>
           </div>
+        </div>
 
-          {/* Security Notice */}
-          <div className="p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <p className="text-xs text-green-400 text-center">
-              🔒 Protegido pelo Tatum KMS - Máxima Segurança
+        {/* Security Notice */}
+        <div className="px-4 pb-4">
+          <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+            <p className="text-xs text-emerald-400 text-center font-medium">
+              🔒 Secured by Tatum KMS
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </TrustWalletCard>
 
       {/* Modals */}
       <SendCryptoModalNew

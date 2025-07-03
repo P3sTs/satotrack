@@ -21,7 +21,26 @@ import {
   TrendingUp,
   Trophy,
   GitCompare,
-  Zap
+  Zap,
+  Shield,
+  Key,
+  Search,
+  Globe,
+  Users,
+  CreditCard,
+  Eye,
+  FileText,
+  UserCircle,
+  Compass,
+  TrendingDown,
+  CheckCircle,
+  Gift,
+  Database,
+  DollarSign,
+  Activity,
+  Calculator,
+  Link2,
+  Book
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 
@@ -41,14 +60,38 @@ const SidebarNavigation = () => {
       href: '/carteiras' 
     },
     { 
+      label: 'Nova Carteira', 
+      icon: PlusCircle, 
+      href: '/nova-carteira' 
+    },
+    { 
+      label: 'Web3 Dashboard', 
+      icon: Zap, 
+      href: '/web3',
+      premium: true
+    },
+    { 
+      label: 'Crypto Seguro', 
+      icon: Shield, 
+      href: '/crypto' 
+    }
+  ];
+
+  const marketsItems = [
+    { 
       label: 'Mercado', 
       icon: BarChart3, 
       href: '/mercado' 
     },
     { 
-      label: 'Web3 Connect', 
-      icon: Zap, 
-      href: '/web3',
+      label: 'Bitcoin Lookup', 
+      icon: Search, 
+      href: '/bitcoin-lookup' 
+    },
+    { 
+      label: 'Crypto 3D', 
+      icon: Eye, 
+      href: '/crypto-3d',
       premium: true
     }
   ];
@@ -60,14 +103,49 @@ const SidebarNavigation = () => {
       href: '/historico' 
     },
     { 
+      label: 'Histórico Premium', 
+      icon: History, 
+      href: '/historico-premium',
+      premium: true
+    },
+    { 
       label: 'Projeções', 
       icon: TrendingUp, 
       href: '/projecao' 
     },
     { 
+      label: 'Projeções Premium', 
+      icon: TrendingUp, 
+      href: '/projecao-premium',
+      premium: true
+    },
+    { 
+      label: 'Performance', 
+      icon: Activity, 
+      href: '/performance' 
+    },
+    { 
       label: 'Comparação', 
       icon: GitCompare, 
-      href: '/comparison' 
+      href: '/wallet-comparison' 
+    }
+  ];
+
+  const growthItems = [
+    { 
+      label: 'Growth Dashboard', 
+      icon: TrendingUp, 
+      href: '/growth' 
+    },
+    { 
+      label: 'OnChain Dashboard', 
+      icon: Database, 
+      href: '/onchain' 
+    },
+    { 
+      label: 'Projections', 
+      icon: Calculator, 
+      href: '/projections' 
     }
   ];
 
@@ -78,14 +156,51 @@ const SidebarNavigation = () => {
       href: '/alerts' 
     },
     { 
-      label: 'Conquistas', 
-      icon: Trophy, 
-      href: '/achievements' 
+      label: 'Notificações', 
+      icon: Bell, 
+      href: '/notificacoes' 
+    },
+    { 
+      label: 'Notificações Premium', 
+      icon: Bell, 
+      href: '/notificacoes-premium',
+      premium: true
     },
     { 
       label: 'Configurações', 
       icon: Settings, 
       href: '/configuracoes' 
+    }
+  ];
+
+  const businessItems = [
+    { 
+      label: 'API Dashboard', 
+      icon: Link2, 
+      href: '/api' 
+    },
+    { 
+      label: 'API Docs', 
+      icon: Book, 
+      href: '/api-docs' 
+    },
+    { 
+      label: 'Planos', 
+      icon: CreditCard, 
+      href: '/planos' 
+    },
+    { 
+      label: 'Programa Referral', 
+      icon: Users, 
+      href: '/referral' 
+    }
+  ];
+
+  const achievementsItems = [
+    { 
+      label: 'Conquistas', 
+      icon: Trophy, 
+      href: '/achievements' 
     }
   ];
 
@@ -128,6 +243,15 @@ const SidebarNavigation = () => {
       </SidebarGroup>
 
       <SidebarGroup>
+        <SidebarGroupLabel>Mercado</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {marketsItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
         <SidebarGroupLabel>Analytics</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -137,10 +261,37 @@ const SidebarNavigation = () => {
       </SidebarGroup>
 
       <SidebarGroup>
+        <SidebarGroupLabel>Crescimento</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {growthItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
         <SidebarGroupLabel>Sistema</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             {systemItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel>Business</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {businessItems.map(renderNavItem)}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel>Gamificação</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {achievementsItems.map(renderNavItem)}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
