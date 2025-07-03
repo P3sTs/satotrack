@@ -197,13 +197,13 @@ export const useCryptoWallets = () => {
   const hasGeneratedWallets = wallets.some(w => w.address !== 'pending_generation');
   const hasPendingWallets = wallets.some(w => w.address === 'pending_generation');
 
-  // Auto-load wallets when user changes
+  // Auto-load wallets when user changes - FIX: remove loadWallets from dependencies
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       console.log('User changed, loading wallets...');
       loadWallets();
     }
-  }, [user, loadWallets]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops
 
   return {
     wallets,

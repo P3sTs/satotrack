@@ -17,6 +17,7 @@ import { SecurityIndicator } from "./components/SecurityIndicator";
 import NavigationAudit from "./components/navigation/NavigationAudit";
 import AppLayout from "./components/layout/AppLayout";
 import AppRoutes from "./components/layout/AppRoutes";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient();
 
@@ -34,22 +35,24 @@ function App() {
                       <ReferralProvider>
                         <Web3Provider>
                           <ViewModeProvider>
-                            <div className="min-h-screen bg-dashboard-dark text-satotrack-text">
-                              <RouteValidator />
-                              <NavigationAudit />
-                              <SecurityIndicator />
-                              
-                              <AppLayout>
-                                <AppRoutes />
-                              </AppLayout>
-                              
-                              <Toaster 
-                                position="top-right"
-                                theme="dark"
-                                richColors
-                                closeButton
-                              />
-                            </div>
+                            <SidebarProvider>
+                              <div className="min-h-screen bg-dashboard-dark text-satotrack-text w-full">
+                                <RouteValidator />
+                                <NavigationAudit />
+                                <SecurityIndicator />
+                                
+                                <AppLayout>
+                                  <AppRoutes />
+                                </AppLayout>
+                                
+                                <Toaster 
+                                  position="top-right"
+                                  theme="dark"
+                                  richColors
+                                  closeButton
+                                />
+                              </div>
+                            </SidebarProvider>
                           </ViewModeProvider>
                         </Web3Provider>
                       </ReferralProvider>
