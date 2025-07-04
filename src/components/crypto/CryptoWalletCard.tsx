@@ -116,14 +116,21 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   };
 
   const handleSendTransaction = async (recipient: string, amount: string) => {
-    // Aqui você implementaria a lógica de envio via Tatum KMS
-    console.log('Enviando transação:', { wallet: wallet.id, recipient, amount });
+    console.log('🔒 Iniciando transação KMS:', { wallet: wallet.id, recipient, amount });
     
-    // Simular API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Em produção, você chamaria o serviço KMS aqui
-    throw new Error('Funcionalidade em desenvolvimento - Tatum KMS');
+    try {
+      // Simular envio via Tatum KMS
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Notificar sucesso temporário
+      toast.success(`🚧 Transação ${wallet.currency} simulada com sucesso! KMS em desenvolvimento.`);
+      
+      // TODO: Implementar integração real com Tatum KMS
+      throw new Error('🚧 Envio real em desenvolvimento - Aguarde integração KMS completa');
+    } catch (error) {
+      console.error('Erro na transação KMS:', error);
+      throw error;
+    }
   };
 
   return (
