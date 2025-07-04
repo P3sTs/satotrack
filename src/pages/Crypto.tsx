@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useMultiChainWallets } from '../hooks/useMultiChainWallets';
-import { CryptoDashboardStats } from '@/components/crypto/dashboard/CryptoDashboardStats';
-import { CryptoWalletsGrid } from '@/components/crypto/dashboard/CryptoWalletsGrid';
-import { MultiChainWalletGenerator } from '@/components/crypto/MultiChainWalletGenerator';
+import { SatoTrackerWalletHeader } from '@/components/crypto/redesign/SatoTrackerWalletHeader';
+import { SatoTrackerWalletList } from '@/components/crypto/redesign/SatoTrackerWalletList';
+import { AddWalletModal } from '@/components/crypto/redesign/AddWalletModal';
+import { WalletStatusSection } from '@/components/crypto/redesign/WalletStatusSection';
 
 const Crypto = () => {
   const {
@@ -11,62 +12,78 @@ const Crypto = () => {
     isLoading,
     generationStatus,
     hasGeneratedWallets,
-    hasPendingWallets,
     generateWallets,
     refreshAllBalances
   } = useMultiChainWallets();
 
+  const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'BRL' | 'BTC'>('BRL');
+  const [showAddWalletModal, setShowAddWalletModal] = useState(false);
+
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
-  const pendingWallets = wallets.filter(w => w.address === 'pending_generation');
   const isGenerating = generationStatus === 'generating';
 
-  const handleGenerateWallets = async (networks?: string[], generateAll = false) => {
-    await generateWallets(networks, generateAll);
+  // Show only main wallets by default: BTC, ETH, MATIC, USDT
+  const mainWallets = activeWallets.filter(w => 
+    ['BTC', 'ETH', 'MATIC', 'USDT'].includes(w.currency)
+  );
+  const otherWallets = activeWallets.filter(w => 
+    !['BTC', 'ETH', 'MATIC', 'USDT'].includes(w.currency)
+  );
+
+  const displayWallets = hasGeneratedWallets ? [...mainWallets, ...otherWallets] : [];
+
+  const handleGenerateMainWallets = async () => {
+    await generateWallets(['BTC', 'ETH', 'MATIC', 'USDT'], false);
   };
 
-  // Calcular estatísticas
-  const totalBalance = activeWallets.reduce((sum, wallet) => 
+  const handleAddWallet = async (networks: string[]) => {
+    await generateWallets(networks, false);
+    setShowAddWalletModal(false);
+  };
+
+  // Calculate total balance in selected currency
+  const totalBalance = displayWallets.reduce((sum, wallet) => 
     sum + parseFloat(wallet.balance || '0'), 0
   );
 
-  const supportedCurrencies = new Set(activeWallets.map(w => w.currency)).size;
-
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-satotrack-text mb-2">
-          🔒 Crypto Seguro Multi-Chain
-        </h1>
-        <p className="text-muted-foreground">
-          Sistema de carteiras seguras com Tatum KMS - Suporte a 50+ blockchains
-        </p>
-      </div>
-
-      {/* Stats */}
-      <CryptoDashboardStats
-        activeWalletsCount={activeWallets.length}
-        totalBalance={totalBalance}
-        supportedCurrenciesCount={supportedCurrencies}
-        isGenerating={isGenerating}
-        pendingWalletsCount={pendingWallets.length}
-      />
-
-      {/* Wallet Generator */}
-      {!hasGeneratedWallets && (
-        <MultiChainWalletGenerator
-          onGenerate={handleGenerateWallets}
-          isGenerating={isGenerating}
-          hasWallets={hasGeneratedWallets}
+    <div className="min-h-screen bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Header with Currency Selector and Total Balance */}
+        <SatoTrackerWalletHeader
+          selectedCurrency={selectedCurrency}
+          onCurrencyChange={setSelectedCurrency}
+          totalBalance={totalBalance}
+          walletsCount={displayWallets.length}
         />
-      )}
 
-      {/* Wallets Grid */}
-      <CryptoWalletsGrid
-        wallets={wallets}
-        isGenerating={isGenerating}
-        onGenerateWallets={() => handleGenerateWallets()}
-      />
+        {/* Wallet List */}
+        <SatoTrackerWalletList
+          wallets={displayWallets}
+          selectedCurrency={selectedCurrency}
+          isLoading={isLoading}
+          hasGeneratedWallets={hasGeneratedWallets}
+          isGenerating={isGenerating}
+          onGenerateMainWallets={handleGenerateMainWallets}
+          onAddWallet={() => setShowAddWalletModal(true)}
+          onRefreshWallet={refreshAllBalances}
+        />
+
+        {/* Status Section */}
+        <WalletStatusSection
+          walletsCount={displayWallets.length}
+          isGenerating={isGenerating}
+        />
+
+        {/* Add Wallet Modal */}
+        <AddWalletModal
+          isOpen={showAddWalletModal}
+          onClose={() => setShowAddWalletModal(false)}
+          onAddWallet={handleAddWallet}
+          existingWallets={wallets.map(w => w.currency)}
+          isGenerating={isGenerating}
+        />
+      </div>
     </div>
   );
 };
