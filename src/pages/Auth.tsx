@@ -35,7 +35,7 @@ const Auth = () => {
               </div>
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full"></div>
             </div>
-            <h1 className="text-lg md:text-2xl font-bold text-satotrack-text">Monitoramento Bitcoin</h1>
+            <h1 className="text-lg md:text-2xl font-bold text-satotrack-text">Entre ou crie sua conta para acompanhar e movimentar seus criptoativos com segurança.</h1>
           </div>
         </div>
         
@@ -48,7 +48,7 @@ const Auth = () => {
         
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="login">Entrar</TabsTrigger>
             <TabsTrigger value="register">Cadastro</TabsTrigger>
           </TabsList>
           
