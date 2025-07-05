@@ -6,7 +6,7 @@ SatoTracker é uma plataforma inteligente de rastreamento de carteiras e transa�
 
 ## 🌐 Acesse o projeto:
 
-👉 [https://satotrack.lovable.app](https://satotrack.lovable.app)
+👉 [https://satotrack.lovable.app](https://satotracker.lovable.app)
 
 ---
 
