@@ -1,48 +1,42 @@
-
-import React, { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
-import Footer from '../Footer';
-import { Advertisement } from '../monetization/Advertisement';
+import React from 'react';
+import { useAuth } from '@/contexts/auth';
+import AppLayout from './AppLayout';
+import PublicLayout from './PublicLayout';
 
 interface AppContentProps {
-  showAds?: boolean;
+  children: React.ReactNode;
 }
 
-/**
- * Loading state placeholder for main content
- */
-const ContentLoadingState = () => (
-  <div className="p-4">
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-full max-w-md" />
-      <Skeleton className="h-32 w-full" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-    </div>
-  </div>
-);
+const AppContent: React.FC<AppContentProps> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-/**
- * Main content area component 
- * Contains outlet for route content and footer
- */
-const AppContent: React.FC<AppContentProps> = ({ showAds = false }) => {
-  return (
-    <>
-      <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-dashboard-medium p-2 sm:p-4">
-        <Suspense fallback={<ContentLoadingState />}>
-          <Outlet />
-        </Suspense>
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dashboard-dark flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="relative h-16 w-16 mx-auto">
+            <div className="absolute inset-0 rounded-full border-2 border-t-satotrack-neon border-x-transparent border-b-transparent animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img 
+                src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
+                alt="SatoTrack" 
+                className="h-8 w-8 opacity-70"
+              />
+            </div>
+          </div>
+          <p className="text-satotrack-text">Carregando SatoTracker...</p>
+        </div>
       </div>
-      
-      <Footer />
-      {showAds && <Advertisement position="footer" />}
-    </>
-  );
+    );
+  }
+
+  // Use different layouts based on authentication status
+  if (isAuthenticated) {
+    return <AppLayout>{children}</AppLayout>;
+  }
+
+  return <PublicLayout>{children}</PublicLayout>;
 };
 
 export default AppContent;

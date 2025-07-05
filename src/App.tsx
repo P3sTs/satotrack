@@ -15,7 +15,7 @@ import GlobalErrorBoundary from "./components/error/GlobalErrorBoundary";
 import RouteValidator from "./components/validation/RouteValidator";
 import { SecurityIndicator } from "./components/SecurityIndicator";
 import NavigationAudit from "./components/navigation/NavigationAudit";
-import AppLayout from "./components/layout/AppLayout";
+import AppContent from "./components/layout/AppContent";
 import AppRoutes from "./components/layout/AppRoutes";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -41,9 +41,9 @@ function App() {
                                 <NavigationAudit />
                                 <SecurityIndicator />
                                 
-                                <AppLayout>
-                                  <AppRoutes />
-                                </AppLayout>
+                <AppContent>
+                  <AppRoutes />
+                </AppContent>
                                 
                                 <Toaster 
                                   position="top-right"

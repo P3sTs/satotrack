@@ -40,7 +40,9 @@ import {
   Activity,
   Calculator,
   Link2,
-  Book
+  Book,
+  Send,
+  Download
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 
@@ -55,25 +57,25 @@ const SidebarNavigation = () => {
       href: '/dashboard' 
     },
     { 
-      label: 'Carteiras', 
+      label: 'Minhas Carteiras', 
       icon: Wallet, 
-      href: '/carteiras' 
+      href: '/crypto' 
     },
     { 
-      label: 'Nova Carteira', 
-      icon: PlusCircle, 
-      href: '/nova-carteira' 
+      label: 'Enviar Cripto', 
+      icon: Send, 
+      href: '/crypto?action=send' 
+    },
+    { 
+      label: 'Receber Cripto', 
+      icon: Download, 
+      href: '/crypto?action=receive' 
     },
     { 
       label: 'Web3 Dashboard', 
       icon: Zap, 
       href: '/web3',
       premium: true
-    },
-    { 
-      label: 'Crypto Seguro', 
-      icon: Shield, 
-      href: '/crypto' 
     }
   ];
 

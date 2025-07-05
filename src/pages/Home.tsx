@@ -33,11 +33,10 @@ const Home = () => {
               <div className="grid-pattern absolute inset-0 opacity-25"></div>
               <div className="relative z-10 max-w-3xl mx-auto text-center">
                 <h2 className="text-xl md:text-3xl font-orbitron mb-3 md:mb-4 satotrack-gradient-text">
-                  Monitore suas carteiras Bitcoin com precisão
+                  Acompanhe, envie e receba criptoativos com segurança
                 </h2>
                 <p className="text-satotrack-text mb-6 md:mb-8 text-sm md:text-lg">
-                  Acompanhe suas carteiras Bitcoin, analise transações e tenha insights avançados sobre seu portfólio. 
-                  Tudo isso com a segurança e anonimato que você precisa.
+                  A SatoTracker agora é uma plataforma completa de gestão e movimentação de criptoativos em múltiplas redes — tudo em um só lugar, com privacidade e controle total.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button 
@@ -46,16 +45,24 @@ const Home = () => {
                     onClick={() => navigate('/auth')}
                     className="group w-full sm:w-auto"
                   >
-                    Começar a Monitorar
+                    🚀 Criar Carteira
                     <ArrowRight className="ml-1 transition-transform group-hover:translate-x-1" />
                   </Button>
                   <Button 
                     variant="outline" 
                     size="lg"
-                    onClick={() => navigate('/sobre')}
+                    onClick={() => navigate('/auth')}
                     className="w-full sm:w-auto"
                   >
-                    Saiba Mais
+                    📤 Enviar Cripto
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => navigate('/auth')}
+                    className="w-full sm:w-auto"
+                  >
+                    📥 Receber Cripto
                   </Button>
                 </div>
               </div>
@@ -72,8 +79,8 @@ const Home = () => {
               <div className="p-2 md:p-3 bg-satotrack-neon/10 rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center mb-3 md:mb-4 border border-satotrack-neon/30">
                 <TrendingUp className="h-6 w-6 md:h-7 md:w-7 text-satotrack-neon" />
               </div>
-              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Monitoramento em Tempo Real</h3>
-              <p className="text-satotrack-text text-sm md:text-base">Acompanhe suas carteiras Bitcoin com atualizações em tempo real. Visualize transações assim que ocorrem na blockchain.</p>
+              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Envio Seguro Multi-Rede</h3>
+              <p className="text-satotrack-text text-sm md:text-base">Envie criptoativos em múltiplas redes (Bitcoin, Ethereum, Polygon, Solana) com assinatura KMS segura e taxas otimizadas.</p>
               <div className="mt-3 md:mt-4">
                 <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
                   Saber mais <ArrowRight className="ml-1 w-3 h-3" />
@@ -87,8 +94,8 @@ const Home = () => {
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
               </div>
-              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Acompanhamento de Saldo</h3>
-              <p className="text-satotrack-text text-sm md:text-base">Visualize o valor total de suas carteiras em BTC, USD e BRL. Acompanhe a variação histórica do seu portfolio.</p>
+              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Recebimento Simplificado</h3>
+              <p className="text-satotrack-text text-sm md:text-base">Gere endereços únicos para receber criptoativos com QR codes personalizados e notificações em tempo real.</p>
               <div className="mt-3 md:mt-4">
                 <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
                   Saber mais <ArrowRight className="ml-1 w-3 h-3" />
@@ -104,8 +111,8 @@ const Home = () => {
                   <path d="m8.5 14 7-4"></path>
                 </svg>
               </div>
-              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Análise Detalhada</h3>
-              <p className="text-satotrack-text text-sm md:text-base">Acesse métricas avançadas sobre suas transações. Identifique padrões e otimize sua estratégia no mercado de criptomoedas.</p>
+              <h3 className="text-lg md:text-xl font-orbitron mb-2 md:mb-3">Controle Total e Privacidade</h3>
+              <p className="text-satotrack-text text-sm md:text-base">Mantenha o controle total de seus ativos com chaves privadas seguras e transações totalmente privadas.</p>
               <div className="mt-3 md:mt-4">
                 <Link to="/sobre" className="text-satotrack-neon hover:underline text-sm flex items-center">
                   Saber mais <ArrowRight className="ml-1 w-3 h-3" />
