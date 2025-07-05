@@ -66,7 +66,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<Index />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/home" element={<Home />} />
-      <Route path="/sobre" element={<Sobre />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/privacidade" element={<Privacidade />} />
       
       {/* 🔒 Autenticação & Segurança - Rotas Públicas */}
       <Route path="/auth" element={<Auth />} />
