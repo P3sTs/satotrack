@@ -10,12 +10,15 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
-  Shield
+  Shield,
+  Info
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { MultiChainWallet } from '@/hooks/useMultiChainWallets';
 import SendCryptoModalNew from '../SendCryptoModalNew';
 import ReceiveCryptoModalNew from '../ReceiveCryptoModalNew';
+import { WalletDetailModal } from '../WalletDetailModal';
+import { EnhancedSendModal } from '../EnhancedSendModal';
 
 interface PremiumWalletCardProps {
   wallet: MultiChainWallet;
@@ -32,6 +35,8 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEnhancedSendModal, setShowEnhancedSendModal] = useState(false);
 
   const getCryptoIcon = (currency: string) => {
     const icons = {
@@ -119,11 +124,21 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
     }
   };
 
-  const handleSendTransaction = async (recipient: string, amount: string) => {
+  const handleSendTransaction = async (
+    wallet: MultiChainWallet, 
+    recipient: string, 
+    amount: string, 
+    memo?: string,
+    feeLevel?: string
+  ) => {
     // Simulated KMS transaction
     await new Promise(resolve => setTimeout(resolve, 2000));
     toast.success(`🚧 Transação ${wallet.currency} simulada via SatoTracker KMS!`);
     throw new Error('🚧 Envio real em desenvolvimento - Aguarde integração completa');
+  };
+
+  const handleLegacySend = async (recipient: string, amount: string) => {
+    return handleSendTransaction(wallet, recipient, amount);
   };
 
   return (
@@ -207,7 +222,7 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="grid grid-cols-2 gap-2 mb-4">
             <Button
               variant="outline"
               size="sm"
@@ -221,11 +236,24 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowSendModal(true)}
+              onClick={() => setShowEnhancedSendModal(true)}
               className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 rounded-xl"
             >
               <Send className="h-4 w-4 mr-1" />
               Enviar
+            </Button>
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDetailModal(true)}
+              className="border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10 rounded-xl"
+            >
+              <Info className="h-4 w-4 mr-1" />
+              Detalhes
             </Button>
             
             <Button
@@ -255,13 +283,28 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
         isOpen={showSendModal}
         onClose={() => setShowSendModal(false)}
         wallet={wallet}
-        onSend={handleSendTransaction}
+        onSend={handleLegacySend}
+      />
+
+      <EnhancedSendModal
+        isOpen={showEnhancedSendModal}
+        onClose={() => setShowEnhancedSendModal(false)}
+        wallet={wallet}
+        onSendTransaction={handleSendTransaction}
+        isLoading={false}
       />
 
       <ReceiveCryptoModalNew
         isOpen={showReceiveModal}
         onClose={() => setShowReceiveModal(false)}
         wallet={wallet}
+      />
+
+      <WalletDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        wallet={wallet}
+        selectedCurrency={selectedCurrency}
       />
     </>
   );
