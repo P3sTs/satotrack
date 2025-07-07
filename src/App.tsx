@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "./contexts/theme/ThemeContext";
 import { AuthProvider } from "./contexts/auth";
 import { I18nProvider } from "./contexts/i18n/I18nContext";
 import { CarteirasProvider } from "./contexts/carteiras/CarteirasProvider";
@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark">
+      <ThemeProvider>
         <TooltipProvider>
           <BrowserRouter>
             <GlobalErrorBoundary>
@@ -36,7 +36,7 @@ function App() {
                         <Web3Provider>
                           <ViewModeProvider>
                             <SidebarProvider>
-                              <div className="min-h-screen bg-dashboard-dark text-satotrack-text w-full">
+                              <div className="min-h-screen bg-background text-foreground w-full">
                                 <RouteValidator />
                                 <NavigationAudit />
                                 <SecurityIndicator />
@@ -45,12 +45,11 @@ function App() {
                   <AppRoutes />
                 </AppContent>
                                 
-                                <Toaster 
-                                  position="top-right"
-                                  theme="dark"
-                                  richColors
-                                  closeButton
-                                />
+                                 <Toaster 
+                                   position="top-right"
+                                   richColors
+                                   closeButton
+                                 />
                               </div>
                             </SidebarProvider>
                           </ViewModeProvider>

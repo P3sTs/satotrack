@@ -9,7 +9,7 @@ const HeroSection = () => {
   const { user } = useAuth();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-card to-background overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-satotrack-neon/20 rounded-full blur-3xl animate-pulse"></div>
@@ -23,7 +23,7 @@ const HeroSection = () => {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 satotrack-gradient-text">
               Sua carteira multichain,
               <br />
-              <span className="text-white">segura e sem complicações</span>
+              <span className="text-foreground">segura e sem complicações</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -66,19 +66,19 @@ const HeroSection = () => {
 
             {/* Trust Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-              <div className="flex items-center justify-center gap-2 p-4 bg-dashboard-medium/50 rounded-xl border border-dashboard-light/20">
+              <div className="flex items-center justify-center gap-2 p-4 bg-card/50 rounded-xl border border-border/20">
                 <Shield className="h-5 w-5 text-satotrack-neon" />
-                <span className="text-sm text-white font-medium">KMS Seguro</span>
+                <span className="text-sm text-foreground font-medium">KMS Seguro</span>
               </div>
               
-              <div className="flex items-center justify-center gap-2 p-4 bg-dashboard-medium/50 rounded-xl border border-dashboard-light/20">
+              <div className="flex items-center justify-center gap-2 p-4 bg-card/50 rounded-xl border border-border/20">
                 <Zap className="h-5 w-5 text-blue-400" />
-                <span className="text-sm text-white font-medium">50+ Networks</span>
+                <span className="text-sm text-foreground font-medium">50+ Networks</span>
               </div>
               
-              <div className="flex items-center justify-center gap-2 p-4 bg-dashboard-medium/50 rounded-xl border border-dashboard-light/20">
+              <div className="flex items-center justify-center gap-2 p-4 bg-card/50 rounded-xl border border-border/20">
                 <Globe className="h-5 w-5 text-purple-400" />
-                <span className="text-sm text-white font-medium">Global Access</span>
+                <span className="text-sm text-foreground font-medium">Global Access</span>
               </div>
             </div>
           </div>
