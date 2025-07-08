@@ -19,6 +19,8 @@
 :root {
   /* Smooth transitions for theme changes */
   transition: background-color 0.3s ease, color 0.3s ease;
+  
+  /* Base theme colors */
   --background: 220 13% 9%;
   --foreground: 0 0% 98%;
   --card: 220 13% 12%;
@@ -40,6 +42,16 @@
   --ring: 212 100% 50%;
   --radius: 1rem;
   
+  /* Sidebar colors */
+  --sidebar-background: 220 13% 12%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 212 100% 50%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 258 100% 70%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 220 13% 25%;
+  --sidebar-ring: 212 100% 50%;
+  
   /* Dashboard colors */
   --dashboard-dark: 220 13% 9%;
   --dashboard-medium: 220 13% 12%;
@@ -50,11 +62,11 @@
   --loss-red: 0 84% 60%;
   --warning-yellow: 51 100% 60%;
   --data-cyan: 186 100% 50%;
-  --tech-purple: 258 100% 75%;
+  --tech-purple: 258 100% 70%;
 
   /* Bitcoin colors */
-  --bitcoin: 37 95% 58%;
-  --bitcoin-dark: 36 85% 48%;
+  --bitcoin-orange: 29 100% 54%;
+  --bitcoin-dark: 31 89% 46%;
 
   /* SatoTrack colors */
   --satotrack-primary: 212 100% 50%;
@@ -87,6 +99,16 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 212 100% 50%;
+  
+  /* Sidebar colors - Light */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 240 10% 3.9%;
+  --sidebar-primary: 212 100% 50%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 258 100% 70%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 5.9% 90%;
+  --sidebar-ring: 212 100% 50%;
   
   /* Dashboard colors - Light */
   --dashboard-dark: 0 0% 100%;
@@ -130,39 +152,39 @@ html, body, #root {
 
 /* CORES ESPECÍFICAS IMPORTANTES */
 .text-bitcoin, .bitcoin {
-  color: hsl(37 95% 58%) !important;
+  color: hsl(var(--bitcoin-orange)) !important;
 }
 
 .text-profit, .profit {
-  color: hsl(142 76% 50%) !important;
+  color: hsl(var(--profit-green)) !important;
 }
 
 .text-loss, .loss {
-  color: hsl(0 84% 60%) !important;
+  color: hsl(var(--loss-red)) !important;
 }
 
 .text-warning, .warning {
-  color: hsl(51 100% 60%) !important;
+  color: hsl(var(--warning-yellow)) !important;
 }
 
 .text-primary, .primary {
-  color: hsl(212 100% 50%) !important;
+  color: hsl(var(--primary)) !important;
 }
 
 .text-secondary, .secondary {
-  color: hsl(0 0% 80%) !important;
+  color: hsl(var(--satotrack-secondary)) !important;
 }
 
 .text-muted-foreground {
-  color: hsl(0 0% 85%) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 .text-satotrack-neon {
-  color: hsl(142 76% 50%) !important;
+  color: hsl(var(--satotrack-neon)) !important;
 }
 
 .text-satotrack-text {
-  color: #fafafa !important;
+  color: hsl(var(--satotrack-text)) !important;
 }
 
 /* Remove duplicate background classes */

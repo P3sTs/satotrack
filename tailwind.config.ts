@@ -25,85 +25,85 @@ export default {
 				mono: ['Courier New', 'monospace'],
 			},
 			colors: {
-				border: '#404040',
-				input: '#262626',
-				ring: '#3b82f6',
-				background: '#17171a',
-				foreground: '#fafafa',
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#3b82f6',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: '#404040',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				destructive: {
-					DEFAULT: '#ef4444',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))'
 				},
 				muted: {
-					DEFAULT: '#262626',
-					foreground: '#d9d9d9'
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
-					DEFAULT: '#a855f7',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
-					DEFAULT: '#1f1f23',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))'
 				},
 				card: {
-					DEFAULT: '#1f1f23',
-					foreground: '#fafafa'
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))'
 				},
 				sidebar: {
-					DEFAULT: '#1f1f23',
-					foreground: '#fafafa',
-					primary: '#3b82f6',
-					'primary-foreground': '#fafafa',
-					accent: '#a855f7',
-					'accent-foreground': '#fafafa',
-					border: '#404040',
-					ring: '#3b82f6'
+					DEFAULT: 'hsl(var(--sidebar-background))',
+					foreground: 'hsl(var(--sidebar-foreground))',
+					primary: 'hsl(var(--sidebar-primary))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+					accent: 'hsl(var(--sidebar-accent))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+					border: 'hsl(var(--sidebar-border))',
+					ring: 'hsl(var(--sidebar-ring))'
 				},
 				// Financial colors
 				profit: {
-					DEFAULT: '#22c55e',
+					DEFAULT: 'hsl(var(--profit-green))',
 				},
 				loss: {
-					DEFAULT: '#ef4444',
+					DEFAULT: 'hsl(var(--loss-red))',
 				},
 				warning: {
-					DEFAULT: '#eab308',
+					DEFAULT: 'hsl(var(--warning-yellow))',
 				},
 				'data-cyan': {
-					DEFAULT: '#06b6d4',
+					DEFAULT: 'hsl(var(--data-cyan))',
 				},
 				'tech-purple': {
-					DEFAULT: '#a855f7',
+					DEFAULT: 'hsl(var(--tech-purple))',
 				},
 				// Bitcoin colors
 				bitcoin: {
-					DEFAULT: '#F7931A',
-					dark: '#D97C0B'
+					DEFAULT: 'hsl(var(--bitcoin-orange))',
+					dark: 'hsl(var(--bitcoin-dark))'
 				},
 				// Dashboard colors
 				dashboard: {
-					dark: '#17171a',
-					medium: '#1f1f23',
-					light: '#404040'
+					dark: 'hsl(var(--dashboard-dark))',
+					medium: 'hsl(var(--dashboard-medium))',
+					light: 'hsl(var(--dashboard-light))'
 				},
 				// SatoTrack specific colors
 				satotrack: {
-					primary: '#3b82f6',
-					text: '#fafafa',
-					secondary: '#cccccc',
-					success: '#22c55e',
-					alert: '#ef4444',
-					warning: '#eab308',
-					neon: '#22c55e'
+					primary: 'hsl(var(--satotrack-primary))',
+					text: 'hsl(var(--satotrack-text))',
+					secondary: 'hsl(var(--satotrack-secondary))',
+					success: 'hsl(var(--satotrack-success))',
+					alert: 'hsl(var(--satotrack-alert))',
+					warning: 'hsl(var(--satotrack-warning))',
+					neon: 'hsl(var(--satotrack-neon))'
 				}
 			},
 			borderRadius: {
