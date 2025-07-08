@@ -184,17 +184,49 @@ export const useCryptoWallets = () => {
   }, [user, wallets, navigate, loadWallets]);
 
   const refreshAllBalances = useCallback(async () => {
-    if (!user || wallets.length === 0) return;
+    if (!user?.id) {
+      console.log('No user ID available for refresh');
+      return;
+    }
     
     setIsLoading(true);
     logSecurityCompliance('WALLET_BALANCE_REFRESH');
     try {
       toast.info('Atualizando saldos...');
-      await loadWallets();
+      
+      // Call loadWallets to refresh data from database
+      const { data, error } = await supabase
+        .from('crypto_wallets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao atualizar saldos:', error);
+        throw error;
+      }
+
+      const mappedWallets = (data || []).map(wallet => ({
+        id: wallet.id,
+        name: wallet.name,
+        address: wallet.address,
+        currency: wallet.currency || wallet.name?.split(' ')[0] || 'UNKNOWN',
+        balance: wallet.balance?.toString() || '0',
+        created_at: wallet.created_at,
+        user_id: wallet.user_id,
+        xpub: wallet.xpub,
+      }));
+      
+      setWallets(mappedWallets);
+      toast.success('Saldos atualizados com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar saldos:', error);
+      toast.error('Erro ao atualizar saldos');
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [user, wallets.length, loadWallets]);
+  }, [user?.id]);
 
   // Computed values
   const hasGeneratedWallets = wallets.some(w => w.address !== 'pending_generation');
@@ -210,7 +242,7 @@ export const useCryptoWallets = () => {
       setWallets([]);
       setGenerationStatus('idle');
     }
-  }, [user?.id, loadWallets]);
+  }, [user?.id]); // Remove loadWallets from dependencies to avoid infinite loop
 
   return {
     wallets,

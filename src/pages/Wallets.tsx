@@ -6,15 +6,29 @@ import { useCryptoWallets } from '../hooks/useCryptoWallets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, RefreshCw, Loader2, Wallet } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2, Wallet, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import CryptoWalletCard from '../components/crypto/CryptoWalletCard';
 
 const Wallets: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { wallets, isLoading, refreshAllBalances, loadWallets } = useCryptoWallets();
+  const { wallets, isLoading, refreshAllBalances, loadWallets, generationErrors } = useCryptoWallets();
   const [refreshing, setRefreshing] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+
+  // Debug effect
+  useEffect(() => {
+    setDebugInfo({
+      userExists: !!user,
+      userId: user?.id,
+      isAuthenticated,
+      walletsCount: wallets.length,
+      isLoading,
+      timestamp: new Date().toISOString()
+    });
+  }, [user, isAuthenticated, wallets.length, isLoading]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -23,9 +37,12 @@ const Wallets: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  // Load wallets only once on component mount
   useEffect(() => {
-    loadWallets();
-  }, []);
+    if (isAuthenticated && user?.id) {
+      loadWallets();
+    }
+  }, [isAuthenticated, user?.id]); // Remove loadWallets dependency
 
   // Filter only active wallets (not pending)
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
@@ -94,6 +111,44 @@ const Wallets: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Debug Info (removido em produção) */}
+      {process.env.NODE_ENV === 'development' && debugInfo && (
+        <Alert className="mb-4 bg-blue-500/10 border-blue-500/20">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <details className="text-xs">
+              <summary className="cursor-pointer font-medium text-blue-400">Debug Info (Dev Only)</summary>
+              <pre className="mt-2 text-blue-300 whitespace-pre-wrap">
+                {JSON.stringify(debugInfo, null, 2)}
+              </pre>
+            </details>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Generation Errors */}
+      {generationErrors && generationErrors.length > 0 && (
+        <Alert className="mb-4" variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Erro na geração de carteiras:</strong>
+            <ul className="mt-2 list-disc list-inside">
+              {generationErrors.map((error, index) => (
+                <li key={index} className="text-sm">{error}</li>
+              ))}
+            </ul>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2" 
+              onClick={() => loadWallets()}
+            >
+              Tentar novamente
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
