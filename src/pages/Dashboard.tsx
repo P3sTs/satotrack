@@ -34,6 +34,7 @@ import { EnhancedSendModal } from '@/components/crypto/EnhancedSendModal';
 import { CryptoDepositModal } from '@/components/crypto/enhanced/CryptoDepositModal';
 import { WalletDetailModal } from '@/components/crypto/WalletDetailModal';
 import { AddWalletModal } from '@/components/crypto/redesign/AddWalletModal';
+import TokenSwapModal from '@/components/crypto/TokenSwapModal';
 import { toast } from 'sonner';
 
 const Dashboard: React.FC = () => {
@@ -43,6 +44,7 @@ const Dashboard: React.FC = () => {
   const [showBalance, setShowBalance] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAddWalletModal, setShowAddWalletModal] = useState(false);
+  const [showSwapModal, setShowSwapModal] = useState(false);
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
   
   const {
@@ -387,10 +389,11 @@ const Dashboard: React.FC = () => {
                 <Button
                   variant="outline"
                   className="h-16 flex-col gap-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
-                  onClick={() => navigate('/configuracoes')}
+                  onClick={() => setShowSwapModal(true)}
+                  disabled={!hasGeneratedWallets}
                 >
-                  <Shield className="h-5 w-5" />
-                  <span className="text-xs">Configurações</span>
+                  <Send className="h-5 w-5" />
+                  <span className="text-xs">Token Swap</span>
                 </Button>
               </div>
             </CardContent>
@@ -685,6 +688,13 @@ const Dashboard: React.FC = () => {
           onAddWallet={handleAddWallet}
           existingWallets={wallets.map(w => w.currency)}
           isGenerating={isGenerating}
+        />
+
+        {/* Token Swap Modal */}
+        <TokenSwapModal
+          isOpen={showSwapModal}
+          onClose={() => setShowSwapModal(false)}
+          wallets={activeWallets}
         />
       </div>
     </div>
