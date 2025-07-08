@@ -22,6 +22,18 @@ export const useI18n = () => {
 const STORAGE_KEY = 'satotrack_language';
 const DEFAULT_LANGUAGE = 'pt-BR';
 
+// Detect browser language
+const detectBrowserLanguage = (): string => {
+  try {
+    const browserLang = navigator.language || (navigator as any).userLanguage;
+    if (browserLang.startsWith('pt')) return 'pt-BR';
+    if (browserLang.startsWith('en')) return 'en-US';
+    return DEFAULT_LANGUAGE;
+  } catch {
+    return DEFAULT_LANGUAGE;
+  }
+};
+
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize language state with a safe default
   const [language, setLanguageState] = useState<string>(DEFAULT_LANGUAGE);
@@ -32,9 +44,15 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const savedLanguage = localStorage.getItem(STORAGE_KEY);
       if (savedLanguage && savedLanguage in translations) {
         setLanguageState(savedLanguage);
+      } else {
+        // First time visit - detect browser language
+        const browserLanguage = detectBrowserLanguage();
+        setLanguageState(browserLanguage);
+        localStorage.setItem(STORAGE_KEY, browserLanguage);
       }
     } catch (error) {
       console.warn('Error accessing localStorage:', error);
+      setLanguageState(detectBrowserLanguage());
     }
   }, []);
 

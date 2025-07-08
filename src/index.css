@@ -17,6 +17,8 @@
 
 /* Theme Variables - Dark Mode */
 :root {
+  /* Smooth transitions for theme changes */
+  transition: background-color 0.3s ease, color 0.3s ease;
   --background: 220 13% 9%;
   --foreground: 0 0% 98%;
   --card: 220 13% 12%;

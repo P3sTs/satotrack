@@ -62,6 +62,7 @@ export interface Translations {
     autoSync: string;
     saveSuccess: string;
     loginRequired: string;
+    themeChanged: string;
   };
 }
 
@@ -128,7 +129,8 @@ export const translations: Record<string, Translations> = {
       enableNotifications: 'Ativar notificações',
       autoSync: 'Sincronização automática',
       saveSuccess: 'Configurações salvas com sucesso!',
-      loginRequired: 'Você precisa estar logado para acessar as configurações.'
+      loginRequired: 'Você precisa estar logado para acessar as configurações.',
+      themeChanged: 'Tema alterado com sucesso!'
     }
   },
   'en-US': {
@@ -193,7 +195,8 @@ export const translations: Record<string, Translations> = {
       enableNotifications: 'Enable notifications',
       autoSync: 'Auto synchronization',
       saveSuccess: 'Settings saved successfully!',
-      loginRequired: 'You need to be logged in to access settings.'
+      loginRequired: 'You need to be logged in to access settings.',
+      themeChanged: 'Theme changed successfully!'
     }
   }
 };

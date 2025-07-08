@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { useCarteiras } from '@/contexts/carteiras';
 import { useI18n } from '@/contexts/i18n/I18nContext';
-import { useTheme } from '@/components/theme-provider';
+import { useTheme } from '@/contexts/theme/ThemeContext';
 import {
   Card,
   CardContent,
@@ -75,8 +75,8 @@ const Configuracoes = () => {
                   <SelectValue placeholder={t.settings.selectTheme || 'Selecione o tema'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dark">{t.settings.darkTheme || 'Escuro'}</SelectItem>
                   <SelectItem value="light">{t.settings.lightTheme || 'Claro'}</SelectItem>
+                  <SelectItem value="dark">{t.settings.darkTheme || 'Escuro'}</SelectItem>
                   <SelectItem value="system">{t.settings.systemTheme || 'Sistema'}</SelectItem>
                 </SelectContent>
               </Select>

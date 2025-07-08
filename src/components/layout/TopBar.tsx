@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import UserMenu from '../navigation/UserMenu';
 import { useAuth } from '@/contexts/auth';
 import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
+import LanguageSelector from '@/components/common/LanguageSelector';
 
 const timeRanges = [
   { label: '1D', value: '1d' },
@@ -108,6 +109,7 @@ const TopBar = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          <LanguageSelector variant="header" />
           <ThemeSwitcher />
           <UserMenu 
             user={user} 
