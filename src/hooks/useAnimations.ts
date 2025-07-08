@@ -1,70 +1,119 @@
 
 import { useEffect, useRef } from 'react';
 
-// Use require for animejs to avoid TypeScript import issues
-const anime = require('animejs');
-
+// Simple animation utilities without external dependencies
 export const useAnimations = () => {
   const elementsRef = useRef<(HTMLElement | null)[]>([]);
 
-  const animateIn = (selector: string, options?: object) => {
-    anime({
-      targets: selector,
-      opacity: [0, 1],
-      translateY: [20, 0],
-      duration: 800,
-      easing: 'easeOutExpo',
-      delay: anime.stagger(100),
-      ...options,
-    });
+  const animateIn = (selector: string, options?: { delay?: number; duration?: number }) => {
+    try {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        console.warn(`🎬 No elements found for selector: ${selector}`);
+        return;
+      }
+      
+      elements.forEach((element, index) => {
+        const htmlElement = element as HTMLElement;
+        const delay = options?.delay || 0;
+        const duration = options?.duration || 800;
+        
+        // Set initial state
+        htmlElement.style.opacity = '0';
+        htmlElement.style.transform = 'translateY(20px)';
+        htmlElement.style.transition = `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+        
+        // Animate in with stagger
+        setTimeout(() => {
+          htmlElement.style.opacity = '1';
+          htmlElement.style.transform = 'translateY(0px)';
+        }, delay + (index * 100));
+      });
+    } catch (error) {
+      console.error('🎬 Error in animateIn:', error);
+    }
   };
 
   const animateCounter = (element: HTMLElement, endValue: number, duration = 2000) => {
-    anime({
-      targets: { value: 0 },
-      value: endValue,
-      duration,
-      easing: 'easeOutExpo',
-      update: function(anim: any) {
-        element.innerHTML = Math.round(anim.animatables[0].target.value).toLocaleString();
+    if (!element) return;
+    
+    const startValue = 0;
+    const startTime = performance.now();
+    
+    const updateCounter = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function (easeOutExpo)
+      const easedProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentValue = Math.round(startValue + (endValue - startValue) * easedProgress);
+      
+      element.innerHTML = currentValue.toLocaleString();
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
       }
-    });
+    };
+    
+    requestAnimationFrame(updateCounter);
   };
 
   const animateFloat = (selector: string) => {
-    anime({
-      targets: selector,
-      translateY: [-10, 10],
-      duration: 2000,
-      easing: 'easeInOutSine',
-      direction: 'alternate',
-      loop: true,
-    });
+    try {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        console.warn(`🎈 No elements found for float animation: ${selector}`);
+        return;
+      }
+      elements.forEach((element) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.style.animation = 'float 4s ease-in-out infinite';
+      });
+    } catch (error) {
+      console.error('🎈 Error in animateFloat:', error);
+    }
   };
 
   const animateGlow = (selector: string) => {
-    anime({
-      targets: selector,
-      boxShadow: [
-        '0 0 10px rgba(34, 197, 94, 0.3)',
-        '0 0 30px rgba(34, 197, 94, 0.8)',
-        '0 0 10px rgba(34, 197, 94, 0.3)'
-      ],
-      duration: 2000,
-      easing: 'easeInOutSine',
-      loop: true,
-    });
+    try {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        console.warn(`✨ No elements found for glow animation: ${selector}`);
+        return;
+      }
+      elements.forEach((element) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.style.animation = 'glowPulse 2s ease-in-out infinite alternate';
+      });
+    } catch (error) {
+      console.error('✨ Error in animateGlow:', error);
+    }
   };
 
   const animateSlideUp = (selector: string, delay = 0) => {
-    anime({
-      targets: selector,
-      opacity: [0, 1],
-      translateY: [50, 0],
-      duration: 1000,
-      easing: 'easeOutCubic',
-      delay,
-    });
+    try {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        console.warn(`⬆️ No elements found for slide up animation: ${selector}`);
+        return;
+      }
+      elements.forEach((element, index) => {
+        const htmlElement = element as HTMLElement;
+        
+        // Set initial state
+        htmlElement.style.opacity = '0';
+        htmlElement.style.transform = 'translateY(50px)';
+        htmlElement.style.transition = 'all 1s cubic-bezier(0.4, 0, 0.2, 1)';
+        
+        // Animate in
+        setTimeout(() => {
+          htmlElement.style.opacity = '1';
+          htmlElement.style.transform = 'translateY(0px)';
+        }, delay + (index * 100));
+      });
+    } catch (error) {
+      console.error('⬆️ Error in animateSlideUp:', error);
+    }
   };
 
   return {

@@ -262,6 +262,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
+      
       {/* ⚠️ Fallback - 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
