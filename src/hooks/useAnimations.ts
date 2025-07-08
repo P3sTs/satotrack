@@ -1,6 +1,8 @@
 
 import { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+
+// Use require for animejs to avoid TypeScript import issues
+const anime = require('animejs');
 
 export const useAnimations = () => {
   const elementsRef = useRef<(HTMLElement | null)[]>([]);
@@ -23,7 +25,7 @@ export const useAnimations = () => {
       value: endValue,
       duration,
       easing: 'easeOutExpo',
-      update: function(anim) {
+      update: function(anim: any) {
         element.innerHTML = Math.round(anim.animatables[0].target.value).toLocaleString();
       }
     });
