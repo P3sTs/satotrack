@@ -22,8 +22,19 @@ import {
   RefreshCw,
   PlusCircle,
   BarChart3,
-  Sparkles
+  Sparkles,
+  Send,
+  Download,
+  Copy,
+  ExternalLink,
+  Info
 } from 'lucide-react';
+import { PremiumWalletCard } from '@/components/crypto/redesign/PremiumWalletCard';
+import { EnhancedSendModal } from '@/components/crypto/EnhancedSendModal';
+import { CryptoDepositModal } from '@/components/crypto/enhanced/CryptoDepositModal';
+import { WalletDetailModal } from '@/components/crypto/WalletDetailModal';
+import { AddWalletModal } from '@/components/crypto/redesign/AddWalletModal';
+import { toast } from 'sonner';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -31,6 +42,8 @@ const Dashboard: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'BRL' | 'BTC'>('BRL');
   const [showBalance, setShowBalance] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAddWalletModal, setShowAddWalletModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
   
   const {
     wallets,
@@ -81,8 +94,40 @@ const Dashboard: React.FC = () => {
     setIsRefreshing(true);
     try {
       await refreshAllBalances();
+      toast.success('Saldos atualizados!');
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleGenerateMainWallets = async () => {
+    await generateWallets(['BTC', 'ETH', 'MATIC', 'USDT'], false);
+  };
+
+  const handleAddWallet = async (networks: string[]) => {
+    await generateWallets(networks, false);
+    setShowAddWalletModal(false);
+  };
+
+  const formatCurrencyDisplay = (balance: number, currency: string, displayCurrency: string) => {
+    const num = balance;
+    
+    switch (displayCurrency) {
+      case 'USD':
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(num * 50000);
+      case 'BRL':
+        return new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(num * 280000);
+      case 'BTC':
+        if (currency === 'BTC') return `${num.toFixed(8)} BTC`;
+        return `${(num * 0.000001).toFixed(8)} BTC`;
+      default:
+        return `${num.toFixed(6)} ${currency}`;
     }
   };
 
@@ -104,7 +149,19 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2 bg-dashboard-dark/50 p-2 rounded-lg">
+              <label className="text-xs text-muted-foreground">Moeda:</label>
+              <select
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value as 'USD' | 'BRL' | 'BTC')}
+                className="bg-transparent text-white text-xs border-none focus:outline-none"
+              >
+                <option value="BRL" className="bg-dashboard-dark">BRL</option>
+                <option value="USD" className="bg-dashboard-dark">USD</option>
+                <option value="BTC" className="bg-dashboard-dark">BTC</option>
+              </select>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -125,12 +182,13 @@ const Dashboard: React.FC = () => {
               Atualizar
             </Button>
             <Button
+              variant="outline"
               size="sm"
-              onClick={() => navigate('/crypto')}
-              className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold"
+              onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
+              className="border-satotrack-neon/30 text-satotrack-neon"
             >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Gerenciar Carteiras
+              <BarChart3 className="h-4 w-4 mr-2" />
+              {viewMode === 'overview' ? 'Visão Detalhada' : 'Visão Geral'}
             </Button>
           </div>
         </div>
@@ -234,68 +292,235 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Quick Wallet Overview */}
-        <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-              <Bitcoin className="h-5 w-5 text-bitcoin" />
-              Carteiras Principais
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {hasGeneratedWallets ? (
-              <>
-                {activeWallets.slice(0, 4).map((wallet) => (
-                  <div key={wallet.id} className="flex items-center justify-between p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-bitcoin to-orange-500 flex items-center justify-center text-white font-bold">
-                        {wallet.currency.slice(0, 2)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-white">{wallet.name}</p>
-                        <p className="text-xs text-muted-foreground">{wallet.currency}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-white">
-                        {formatBalance(parseFloat(wallet.balance || '0'), selectedCurrency)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {wallet.balance} {wallet.currency}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/crypto')}
-                  className="w-full border-dashboard-light text-white"
-                >
-                  Ver Todas as Carteiras
-                </Button>
-              </>
-            ) : (
-              <div className="text-center py-8 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center mx-auto">
-                  <Sparkles className="h-8 w-8 text-black" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Bem-vindo ao SatoTracker!</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Comece gerando suas primeiras carteiras seguras
-                  </p>
+        {/* Crypto Wallet Management Section */}
+        {viewMode === 'detailed' && (
+          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-satotrack-neon" />
+                  Gestão de Carteiras Cripto
+                </CardTitle>
+                <div className="flex gap-2">
+                  {hasGeneratedWallets && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAddWalletModal(true)}
+                      disabled={isGenerating}
+                      className="border-satotrack-neon/30 text-satotrack-neon"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Adicionar Rede
+                    </Button>
+                  )}
                   <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => navigate('/crypto')}
-                    className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold"
+                    className="border-dashboard-light text-white"
                   >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Começar Agora
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Ver Página Completa
                   </Button>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {hasGeneratedWallets ? (
+                <div className="space-y-6">
+                  {/* Wallet Summary Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-satotrack-neon/20 flex items-center justify-center">
+                          <Wallet className="h-5 w-5 text-satotrack-neon" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total de Carteiras</p>
+                          <p className="text-lg font-bold text-white">{activeWallets.length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                          <DollarSign className="h-5 w-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Valor Total</p>
+                          <p className="text-lg font-bold text-white">
+                            {formatBalance(totalBalance, selectedCurrency)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                          <Shield className="h-5 w-5 text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Segurança KMS</p>
+                          <p className="text-lg font-bold text-white">100%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Wallets Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {activeWallets.map((wallet) => (
+                      <PremiumWalletCard
+                        key={wallet.id}
+                        wallet={wallet}
+                        selectedCurrency={selectedCurrency}
+                        onRefresh={handleRefresh}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 space-y-6">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center mx-auto">
+                    <Sparkles className="h-10 w-10 text-black" />
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-2xl font-bold text-white">Comece sua jornada cripto!</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Gere suas primeiras carteiras seguras com tecnologia KMS e comece a administrar seus criptoativos com total segurança.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={handleGenerateMainWallets}
+                      disabled={isGenerating}
+                      className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold px-8 py-3"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Gerando carteiras...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-5 w-5 mr-2" />
+                          Gerar Carteiras Principais
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/crypto')}
+                      className="border-dashboard-light text-white px-8 py-3"
+                    >
+                      <Info className="h-4 w-4 mr-2" />
+                      Saiba Mais
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Carteiras geradas: BTC, ETH, MATIC, USDT
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Wallet Overview */}
+        {viewMode === 'overview' && (
+          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
+                <Bitcoin className="h-5 w-5 text-bitcoin" />
+                Carteiras Principais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {hasGeneratedWallets ? (
+                <>
+                  {activeWallets.slice(0, 4).map((wallet) => (
+                    <div key={wallet.id} className="flex items-center justify-between p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-bitcoin to-orange-500 flex items-center justify-center text-white font-bold">
+                          {wallet.currency.slice(0, 2)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-white">{wallet.name}</p>
+                          <p className="text-xs text-muted-foreground">{wallet.currency}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-white">
+                          {formatBalance(parseFloat(wallet.balance || '0'), selectedCurrency)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {wallet.balance} {wallet.currency}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setViewMode('detailed')}
+                      className="border-satotrack-neon/30 text-satotrack-neon"
+                    >
+                      <Wallet className="h-4 w-4 mr-2" />
+                      Gerenciar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/crypto')}
+                      className="border-dashboard-light text-white"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Ver Todas
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center mx-auto">
+                    <Sparkles className="h-8 w-8 text-black" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Bem-vindo ao SatoTracker!</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Comece gerando suas primeiras carteiras seguras
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={handleGenerateMainWallets}
+                        disabled={isGenerating}
+                        className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Gerando...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Gerar Carteiras
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setViewMode('detailed')}
+                        className="border-dashboard-light text-white text-xs"
+                      >
+                        Ver Opções Avançadas
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* User Account Status */}
         {user && (
@@ -347,6 +572,15 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Add Wallet Modal */}
+        <AddWalletModal
+          isOpen={showAddWalletModal}
+          onClose={() => setShowAddWalletModal(false)}
+          onAddWallet={handleAddWallet}
+          existingWallets={wallets.map(w => w.currency)}
+          isGenerating={isGenerating}
+        />
       </div>
     </div>
   );
