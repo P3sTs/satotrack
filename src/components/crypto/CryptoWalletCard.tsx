@@ -46,6 +46,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const getCryptoColor = (currency: string) => {
     const colors = {
@@ -133,22 +134,38 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
     }
   };
 
+  if (isExpanded) {
+    const CryptoWalletCardExpanded = React.lazy(() => import('./CryptoWalletCardExpanded'));
+    return (
+      <React.Suspense fallback={<div>Carregando...</div>}>
+        <CryptoWalletCardExpanded 
+          wallet={wallet}
+          onSend={onSend}
+          onReceive={onReceive}
+          onRefresh={onRefresh}
+          onCollapse={() => setIsExpanded(false)}
+        />
+      </React.Suspense>
+    );
+  }
+
   return (
     <>
-      <TrustWalletCard variant="crypto" className="cursor-pointer">
-        <CryptoCardContent
-          icon={
-            <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${getCryptoColor(wallet.currency)} flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
-              {getCryptoIcon(wallet.currency)}
-            </div>
-          }
-          name={wallet.name}
-          symbol={wallet.currency}
-          balance={`${formatBalance(wallet.balance)} ${wallet.currency}`}
-          balanceUSD="≈ $0.00 USD"
-          change={0}
-          onClick={() => {}}
-        />
+      <div className="cursor-pointer" onClick={() => setIsExpanded(true)}>
+        <TrustWalletCard variant="crypto">
+          <CryptoCardContent
+            icon={
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${getCryptoColor(wallet.currency)} flex items-center justify-center text-white text-xl font-bold shadow-lg`}>
+                {getCryptoIcon(wallet.currency)}
+              </div>
+            }
+            name={wallet.name}
+            symbol={wallet.currency}
+            balance={`${formatBalance(wallet.balance)} ${wallet.currency}`}
+            balanceUSD="≈ $0.00 USD"
+            change={0}
+            onClick={() => {}}
+          />
         
         {/* Address Section */}
         <div className="px-4 pb-2">
@@ -236,7 +253,8 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             </p>
           </div>
         </div>
-      </TrustWalletCard>
+        </TrustWalletCard>
+      </div>
 
       {/* Modals */}
       <SendCryptoModalNew

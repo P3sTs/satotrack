@@ -37,6 +37,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
   onDelete 
 }) => {
   const [showFullAddress, setShowFullAddress] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { definirCarteiraPrincipal, atualizarCarteira, isUpdating } = useCarteiras();
   const { data: bitcoinData } = useBitcoinPrice();
   const addressRef = useRef<HTMLSpanElement>(null);
@@ -101,8 +102,24 @@ const WalletCard: React.FC<WalletCardProps> = ({
   
   const walletStatus = getWalletStatus();
 
+  if (isExpanded) {
+    const WalletCardExpanded = React.lazy(() => import('./WalletCardExpanded'));
+    return (
+      <React.Suspense fallback={<div>Carregando...</div>}>
+        <WalletCardExpanded 
+          carteira={carteira}
+          isPrimary={isPrimary}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onCollapse={() => setIsExpanded(false)}
+        />
+      </React.Suspense>
+    );
+  }
+
   return (
-    <Card className="group hover:shadow-lg transition-all duration-200 border-l-4 border-l-bitcoin animate-fade-in">
+    <Card className="group hover:shadow-lg transition-all duration-200 border-l-4 border-l-bitcoin animate-fade-in cursor-pointer"
+          onClick={() => setIsExpanded(true)}>
       <CardContent className="p-4 md:p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">

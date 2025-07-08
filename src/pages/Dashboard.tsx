@@ -292,6 +292,84 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
+        {/* Enhanced Dashboard Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Portfolio Performance Chart */}
+          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-satotrack-neon" />
+                Performance do Portfólio
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Rendimento 24h</span>
+                  <span className="text-emerald-400 font-medium">+{mockStats.dailyChange}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Rendimento 7d</span>
+                  <span className="text-red-400 font-medium">{mockStats.weeklyChange}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Rendimento 30d</span>
+                  <span className="text-emerald-400 font-medium">+{mockStats.monthlyChange}%</span>
+                </div>
+                <div className="h-32 bg-dashboard-dark/50 rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground text-sm">Gráfico de Performance</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                <Zap className="h-5 w-5 text-satotrack-neon" />
+                Ações Rápidas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-16 flex-col gap-2 border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
+                  onClick={() => navigate('/nova-carteira')}
+                >
+                  <PlusCircle className="h-5 w-5" />
+                  <span className="text-xs">Nova Carteira</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-16 flex-col gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                  onClick={() => navigate('/mercado')}
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="text-xs">Mercado</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-16 flex-col gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                  onClick={() => navigate('/historico')}
+                >
+                  <Activity className="h-5 w-5" />
+                  <span className="text-xs">Histórico</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-16 flex-col gap-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                  onClick={() => navigate('/configuracoes')}
+                >
+                  <Shield className="h-5 w-5" />
+                  <span className="text-xs">Configurações</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Crypto Wallet Management Section */}
         {viewMode === 'detailed' && (
           <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
