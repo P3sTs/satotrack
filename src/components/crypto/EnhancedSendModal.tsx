@@ -99,7 +99,6 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
 
   const validateAddress = async (address: string) => {
     if (!address || address.length < 10) {
-      setAddressValidation(null);
       return;
     }
 
@@ -147,7 +146,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
       const balanceNum = parseFloat(wallet.balance || '0');
       const feeNum = parseFloat(selectedFee?.fee || '0');
 
-      if (amountNum <= 0) {
+      if (isNaN(amountNum) || amountNum <= 0) {
         newErrors.push('Valor deve ser maior que zero');
       }
 
@@ -231,10 +230,16 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
   };
 
   useEffect(() => {
-    if (recipient) {
-      validateAddress(recipient);
+    if (recipient && recipient.length > 10) {
+      const timer = setTimeout(() => {
+        validateAddress(recipient);
+      }, 500); // Debounce para evitar muitas validações
+      
+      return () => clearTimeout(timer);
+    } else {
+      setAddressValidation(null);
     }
-  }, [recipient]);
+  }, [recipient, wallet.currency]);
 
   const renderFormStep = () => (
     <div className="space-y-6">
