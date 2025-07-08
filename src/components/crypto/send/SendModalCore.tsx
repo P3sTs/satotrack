@@ -99,7 +99,7 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
 
     setErrors(newErrors);
     return newErrors.length === 0;
-  }, [formData.recipient, formData.amount, wallet.balance, selectedFee?.fee]);
+  }, [formData.recipient, formData.amount, wallet.balance, selectedFee]);
 
   const handleNext = useCallback(() => {
     if (step === 'form' && validateForm()) {
@@ -229,7 +229,7 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
             {step !== 'confirmation' ? (
               <Button
                 onClick={handleNext}
-                disabled={!validateForm() || isLoading}
+                disabled={step === 'form' ? !validateForm() : false}
                 className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
               >
                 Continuar
