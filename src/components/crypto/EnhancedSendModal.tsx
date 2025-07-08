@@ -230,16 +230,22 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
   };
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     if (recipient && recipient.length > 10) {
-      const timer = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         validateAddress(recipient);
-      }, 500); // Debounce para evitar muitas validações
-      
-      return () => clearTimeout(timer);
+      }, 500);
     } else {
       setAddressValidation(null);
     }
-  }, [recipient, wallet.currency]);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [recipient, validateAddress]);
 
   const renderFormStep = () => (
     <div className="space-y-6">
