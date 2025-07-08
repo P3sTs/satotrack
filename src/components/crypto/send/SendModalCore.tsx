@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -48,6 +48,7 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
   });
 
   const [errors, setErrors] = useState<string[]>([]);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const feeOptions = useMemo(() => ({
     BTC: [
@@ -74,7 +75,8 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
     setFormData(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const validateForm = useCallback(() => {
+  // Validate form when data changes
+  useEffect(() => {
     const newErrors: string[] = [];
 
     if (!formData.recipient) {
@@ -98,16 +100,16 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
     }
 
     setErrors(newErrors);
-    return newErrors.length === 0;
-  }, [formData.recipient, formData.amount, wallet.balance, selectedFee]);
+    setIsFormValid(newErrors.length === 0);
+  }, [formData.recipient, formData.amount, wallet.balance, selectedFee?.fee]);
 
   const handleNext = useCallback(() => {
-    if (step === 'form' && validateForm()) {
+    if (step === 'form' && isFormValid) {
       setStep('fees');
     } else if (step === 'fees') {
       setStep('confirmation');
     }
-  }, [step, validateForm]);
+  }, [step, isFormValid]);
 
   const handleBack = useCallback(() => {
     if (step === 'fees') {
@@ -229,7 +231,7 @@ export const SendModalCore: React.FC<SendModalCoreProps> = ({
             {step !== 'confirmation' ? (
               <Button
                 onClick={handleNext}
-                disabled={step === 'form' ? !validateForm() : false}
+                disabled={step === 'form' ? !isFormValid : false}
                 className="bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
               >
                 Continuar
