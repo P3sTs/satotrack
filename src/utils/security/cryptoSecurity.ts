@@ -161,12 +161,12 @@ export const logSecurityCompliance = (event: SecurityEvent, details?: any) => {
     timestamp,
     event,
     details,
-    userAgent: navigator.userAgent,
-    url: window.location.href,
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+    url: typeof window !== 'undefined' ? window.location.href : 'server',
   };
 
   // Log to console in development
-  if (process.env.NODE_ENV === 'development') {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
     console.log(`🔒 [Security Log] ${event}:`, logEntry);
   }
 

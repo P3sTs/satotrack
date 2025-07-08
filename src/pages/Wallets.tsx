@@ -39,13 +39,23 @@ const Wallets: React.FC = () => {
 
   // Load wallets only once on component mount
   useEffect(() => {
+    console.log('🔍 Wallets.tsx useEffect - Auth status:', { isAuthenticated, userId: user?.id });
     if (isAuthenticated && user?.id) {
+      console.log('🔍 Calling loadWallets from Wallets.tsx');
       loadWallets();
     }
   }, [isAuthenticated, user?.id]); // Remove loadWallets dependency
 
   // Filter only active wallets (not pending)
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
+
+  console.log('🔍 Wallets page render state:', {
+    walletsLength: wallets.length,
+    activeWalletsLength: activeWallets.length,
+    isLoading,
+    isAuthenticated,
+    userId: user?.id
+  });
 
   const handleRefresh = async () => {
     setRefreshing(true);

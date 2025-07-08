@@ -1265,6 +1265,31 @@ export type Database = {
         Args: { p_user_id: string; p_xp_change?: number }
         Returns: undefined
       }
+      upsert_user_settings: {
+        Args: {
+          p_user_id: string
+          p_telegram_notifications_enabled?: boolean
+          p_email_daily_summary?: boolean
+          p_email_weekly_summary?: boolean
+          p_push_notifications_enabled?: boolean
+          p_price_alert_threshold?: number
+          p_balance_alert_threshold?: number
+          p_telegram_chat_id?: string
+        }
+        Returns: {
+          balance_alert_threshold: number | null
+          created_at: string | null
+          email_daily_summary: boolean | null
+          email_weekly_summary: boolean | null
+          id: string
+          price_alert_threshold: number | null
+          push_notifications_enabled: boolean | null
+          telegram_chat_id: string | null
+          telegram_notifications_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+      }
     }
     Enums: {
       message_type: "text" | "audio" | "image" | "video"
