@@ -14,6 +14,7 @@ export const ThemeSwitcher: React.FC = () => {
   const { theme, effectiveTheme, setTheme } = useTheme();
 
   const handleThemeChange = (newTheme: typeof theme) => {
+    console.log('🎨 ThemeSwitcher: Changing theme from', theme, 'to', newTheme);
     setTheme(newTheme);
     const messages = {
       light: '🌞 Tema claro ativado',

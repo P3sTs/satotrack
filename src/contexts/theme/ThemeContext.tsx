@@ -35,14 +35,26 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const newEffectiveTheme = calculateEffectiveTheme();
+    console.log('🎨 Theme Debug:', { theme, newEffectiveTheme, previousEffectiveTheme: effectiveTheme });
+    
     setEffectiveTheme(newEffectiveTheme);
 
     // Apply theme to document with smooth transition
     const root = document.documentElement;
-    root.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    const body = document.body;
     
+    // Remove existing theme classes from both html and body
     root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark');
+    
+    // Force reflow to ensure class removal is processed
+    root.offsetHeight;
+    
+    // Add new theme class to both html and body
     root.classList.add(newEffectiveTheme);
+    body.classList.add(newEffectiveTheme);
+    
+    console.log('🎨 Applied theme class:', newEffectiveTheme, 'HTML classes:', root.className, 'Body classes:', body.className);
     
     // Save to localStorage
     localStorage.setItem('satotrack-theme', theme);
@@ -56,9 +68,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemThemeChange = () => {
         const systemTheme = mediaQuery.matches ? 'dark' : 'light';
+        console.log('🎨 System theme changed to:', systemTheme);
         setEffectiveTheme(systemTheme);
         root.classList.remove('light', 'dark');
+        document.body.classList.remove('light', 'dark');
         root.classList.add(systemTheme);
+        document.body.classList.add(systemTheme);
       };
 
       mediaQuery.addEventListener('change', handleSystemThemeChange);

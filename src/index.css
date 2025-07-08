@@ -128,26 +128,55 @@ html, body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Remove forced colors and let CSS variables control theming */
-* {
+/* Garantir que transições sejam aplicadas corretamente */
+*,
+*::before,
+*::after {
   border-color: hsl(var(--border));
+}
+
+/* Aplicar transições apenas a elementos relevantes para evitar conflitos */
+.theme-transition,
+[class*="bg-"],
+[class*="text-"],
+[class*="border-"],
+.card,
+.button,
+div,
+span,
+p,
+h1, h2, h3, h4, h5, h6 {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 /* Apply semantic color classes properly */
 .bg-background {
-  background-color: hsl(var(--background));
+  background-color: hsl(var(--background)) !important;
 }
 
 .bg-card {
-  background-color: hsl(var(--card));
+  background-color: hsl(var(--card)) !important;
 }
 
 .text-foreground {
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
 }
 
-.text-muted-foreground {
-  color: hsl(var(--muted-foreground));
+.text-card-foreground {
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Cards específicos */
+.bg-dashboard-dark {
+  background-color: hsl(var(--dashboard-dark)) !important;
+}
+
+.bg-dashboard-medium, .bg-dashboard-medium\/50 {
+  background-color: hsl(var(--dashboard-medium)) !important;
+}
+
+.bg-dashboard-light {
+  background-color: hsl(var(--dashboard-light)) !important;
 }
 
 /* CORES ESPECÍFICAS IMPORTANTES */
@@ -187,17 +216,46 @@ html, body, #root {
   color: hsl(var(--satotrack-text)) !important;
 }
 
-/* Remove duplicate background classes */
-.bg-dashboard-dark {
-  background-color: hsl(var(--dashboard-dark));
+/* Estilos específicos para modo claro com maior especificidade */
+html.light body,
+html.light #root,
+.light {
+  color-scheme: light;
 }
 
-.bg-dashboard-medium {
-  background-color: hsl(var(--dashboard-medium));
+html.dark body,
+html.dark #root,
+.dark {
+  color-scheme: dark;
 }
 
-.bg-dashboard-light {
-  background-color: hsl(var(--dashboard-light));
+/* Forçar cores corretas no modo claro */
+.light [class*="text-white"],
+.light .text-white {
+  color: hsl(var(--foreground)) !important;
+}
+
+.light [class*="text-muted"],
+.light .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.light [class*="bg-dashboard-medium"],
+.light .bg-dashboard-medium\/50 {
+  background-color: hsl(var(--card)) !important;
+}
+
+.light [class*="bg-dashboard-dark"],
+.light .bg-dashboard-dark {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Garantir visibilidade de textos em cards no modo claro */
+.light .card,
+.light [class*="Card"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* Gradients for text effects */
