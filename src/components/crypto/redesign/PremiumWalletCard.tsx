@@ -18,7 +18,7 @@ import { MultiChainWallet } from '@/hooks/useMultiChainWallets';
 import SendCryptoModalNew from '../SendCryptoModalNew';
 import ReceiveCryptoModalNew from '../ReceiveCryptoModalNew';
 import { WalletDetailModal } from '../WalletDetailModal';
-import { EnhancedSendModal } from '../EnhancedSendModal';
+import { SendModalCore } from '../send/SendModalCore';
 import { CryptoDepositModal } from '../enhanced/CryptoDepositModal';
 
 interface PremiumWalletCardProps {
@@ -37,7 +37,7 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showEnhancedSendModal, setShowEnhancedSendModal] = useState(false);
+  const [isTransacting, setIsTransacting] = useState(false);
 
   const getCryptoIcon = (currency: string) => {
     const icons = {
@@ -132,6 +132,7 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
     memo?: string,
     feeLevel?: string
   ) => {
+    setIsTransacting(true);
     try {
       console.log('🔒 Enviando transação KMS:', { wallet: wallet.currency, recipient, amount, memo, feeLevel });
       
@@ -158,12 +159,17 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
       toast.success(`✅ ${amount} ${wallet.currency} enviado com sucesso!`);
       
       // Refresh wallet balance
-      setTimeout(onRefresh, 1000);
+      setTimeout(() => {
+        onRefresh();
+        setShowSendModal(false);
+      }, 1000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro na transação:', error);
       toast.error(`❌ Erro: ${error.message}`);
       throw error;
+    } finally {
+      setIsTransacting(false);
     }
   };
 
@@ -266,7 +272,7 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowEnhancedSendModal(true)}
+              onClick={() => setShowSendModal(true)}
               disabled={parseFloat(wallet.balance) === 0}
               className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -310,19 +316,12 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
       </Card>
 
       {/* Modals */}
-      <SendCryptoModalNew
+      <SendModalCore
         isOpen={showSendModal}
         onClose={() => setShowSendModal(false)}
         wallet={wallet}
-        onSend={handleLegacySend}
-      />
-
-      <EnhancedSendModal
-        isOpen={showEnhancedSendModal}
-        onClose={() => setShowEnhancedSendModal(false)}
-        wallet={wallet}
         onSendTransaction={handleSendTransaction}
-        isLoading={false}
+        isLoading={isTransacting}
       />
 
       <CryptoDepositModal
