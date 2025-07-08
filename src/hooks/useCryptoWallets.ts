@@ -34,7 +34,10 @@ export const useCryptoWallets = () => {
   const navigate = useNavigate();
 
   const loadWallets = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) {
+      console.log('No user ID available for loading wallets');
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -88,7 +91,7 @@ export const useCryptoWallets = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.id]);
 
   const generateWallets = useCallback(async (): Promise<GenerationResult | null> => {
     if (!user) {
@@ -178,7 +181,7 @@ export const useCryptoWallets = () => {
       setGenerationErrors([errorMessage]);
       return { walletsGenerated: 0, errors: [errorMessage] };
     }
-  }, [user, wallets, loadWallets, navigate]);
+  }, [user, wallets, navigate, loadWallets]);
 
   const refreshAllBalances = useCallback(async () => {
     if (!user || wallets.length === 0) return;
@@ -202,8 +205,12 @@ export const useCryptoWallets = () => {
     if (user?.id) {
       console.log('User changed, loading wallets...');
       loadWallets();
+    } else {
+      console.log('No user, clearing wallets');
+      setWallets([]);
+      setGenerationStatus('idle');
     }
-  }, [user?.id, loadWallets]); // Added loadWallets back to deps but it's memoized
+  }, [user?.id, loadWallets]);
 
   return {
     wallets,

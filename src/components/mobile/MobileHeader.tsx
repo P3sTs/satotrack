@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 
 interface MobileHeaderProps {
   isMenuOpen: boolean;
@@ -30,15 +31,19 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ isMenuOpen, setIsMenuOpen }
           </span>
         </Link>
 
-        {/* Menu Button */}
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="text-satotrack-text hover:text-satotrack-neon relative z-[60] hover:bg-dashboard-medium/50"
-        >
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
+          
+          {/* Menu Button */}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-satotrack-text hover:text-satotrack-neon relative z-[60] hover:bg-dashboard-medium/50"
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
       </div>
     </header>
   );

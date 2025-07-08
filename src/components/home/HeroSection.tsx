@@ -1,37 +1,52 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Shield, Zap, Globe } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
+import { useAnimations } from '@/hooks/useAnimations';
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { animateIn, animateFloat, animateGlow } = useAnimations();
+
+  useEffect(() => {
+    // Animate hero content on mount
+    animateIn('.hero-title', { delay: 200 });
+    animateIn('.hero-subtitle', { delay: 400 });
+    animateIn('.hero-buttons', { delay: 600 });
+    animateIn('.trust-indicators', { delay: 800 });
+    
+    // Floating animation for background elements
+    animateFloat('.floating-element');
+    animateGlow('.glow-element');
+  }, [animateIn, animateFloat, animateGlow]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-card to-background overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-satotrack-neon/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="floating-element glow-element absolute top-1/4 left-1/4 w-32 h-32 bg-satotrack-neon/20 rounded-full blur-3xl"></div>
+        <div className="floating-element absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Content */}
-          <div className="animate-fade-in">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 satotrack-gradient-text">
+          <div>
+            <h1 className="hero-title opacity-0 text-4xl md:text-6xl lg:text-7xl font-bold mb-6 satotrack-gradient-text">
               Sua carteira multichain,
               <br />
               <span className="text-foreground">segura e sem complicações</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="hero-subtitle opacity-0 text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Com a SatoTrack você <span className="text-satotrack-neon">envia</span>, <span className="text-blue-400">recebe</span> e <span className="text-purple-400">acompanha</span> seus ativos em tempo real
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <div className="hero-buttons opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               {!user ? (
                 <>
                   <Button 
@@ -65,7 +80,7 @@ const HeroSection = () => {
             </div>
 
             {/* Trust Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="trust-indicators opacity-0 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-2 p-4 bg-card/50 rounded-xl border border-border/20">
                 <Shield className="h-5 w-5 text-satotrack-neon" />
                 <span className="text-sm text-foreground font-medium">KMS Seguro</span>

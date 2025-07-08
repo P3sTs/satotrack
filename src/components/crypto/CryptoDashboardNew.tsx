@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/auth';
 import { Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useAnimations } from '@/hooks/useAnimations';
 
 // Import dashboard components
 import { CryptoDashboardHeader } from './dashboard/CryptoDashboardHeader';
@@ -18,6 +19,7 @@ import { WalletDebugInfo } from '@/components/debug/WalletDebugInfo';
 const CryptoDashboardNew: React.FC = () => {
   const navigate = useNavigate();
   const { userPlan } = useAuth();
+  const { animateIn, animateSlideUp } = useAnimations();
   const { 
     wallets, 
     isLoading, 
@@ -36,7 +38,15 @@ const CryptoDashboardNew: React.FC = () => {
 
   useEffect(() => {
     loadWallets();
-  }, []);
+  }, [loadWallets]);
+
+  useEffect(() => {
+    // Animate dashboard elements on mount
+    setTimeout(() => {
+      animateSlideUp('.dashboard-section', 0);
+      animateIn('.wallet-card', { delay: 200 });
+    }, 100);
+  }, [animateIn, animateSlideUp]);
 
   // Redirecionar automaticamente para carteiras após gerar com sucesso
   useEffect(() => {
@@ -104,49 +114,63 @@ const CryptoDashboardNew: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <CryptoDashboardHeader
-        isGenerating={isGenerating}
-        onGoBack={handleGoBack}
-        onRefreshAll={refreshAllBalances}
-        onGenerateWallets={handleGenerateWallets}
-        isLoading={isLoading}
-        activeWalletsCount={activeWallets.length}
-        shouldShowGenerateButton={shouldShowGenerateButton}
-      />
+      <div className="dashboard-section opacity-0">
+        <CryptoDashboardHeader
+          isGenerating={isGenerating}
+          onGoBack={handleGoBack}
+          onRefreshAll={refreshAllBalances}
+          onGenerateWallets={handleGenerateWallets}
+          isLoading={isLoading}
+          activeWalletsCount={activeWallets.length}
+          shouldShowGenerateButton={shouldShowGenerateButton}
+        />
+      </div>
 
-      <CryptoDashboardAlerts
-        isGenerating={isGenerating}
-        generationErrors={generationErrors}
-        onRetryGeneration={handleRetryGeneration}
-        pendingWalletsCount={pendingWallets.length}
-      />
+      <div className="dashboard-section opacity-0">
+        <CryptoDashboardAlerts
+          isGenerating={isGenerating}
+          generationErrors={generationErrors}
+          onRetryGeneration={handleRetryGeneration}
+          pendingWalletsCount={pendingWallets.length}
+        />
+      </div>
 
-      <CryptoDashboardStats
-        activeWalletsCount={activeWallets.length}
-        totalBalance={totalBalance}
-        supportedCurrenciesCount={supportedCurrencies.length}
-        isGenerating={isGenerating}
-        pendingWalletsCount={pendingWallets.length}
-      />
+      <div className="dashboard-section opacity-0">
+        <CryptoDashboardStats
+          activeWalletsCount={activeWallets.length}
+          totalBalance={totalBalance}
+          supportedCurrenciesCount={supportedCurrencies.length}
+          isGenerating={isGenerating}
+          pendingWalletsCount={pendingWallets.length}
+        />
+      </div>
 
-      <Alert className="border-satotrack-neon/30 bg-satotrack-neon/10">
-        <Shield className="h-4 w-4 text-satotrack-neon" />
-        <AlertDescription className="text-satotrack-text">
-          <strong>Sistema de Segurança Avançado:</strong> Cada usuário possui apenas 1 endereço por criptomoeda.
-          Suas chaves privadas são criptografadas e armazenadas com segurança máxima.
-        </AlertDescription>
-      </Alert>
+      <div className="dashboard-section opacity-0">
+        <Alert className="border-satotrack-neon/30 bg-satotrack-neon/10">
+          <Shield className="h-4 w-4 text-satotrack-neon" />
+          <AlertDescription className="text-satotrack-text">
+            <strong>Sistema de Segurança Avançado:</strong> Cada usuário possui apenas 1 endereço por criptomoeda.
+            Suas chaves privadas são criptografadas e armazenadas com segurança máxima.
+          </AlertDescription>
+        </Alert>
+      </div>
 
-      <CryptoWalletsGrid
-        wallets={wallets}
-        isGenerating={isGenerating}
-        onGenerateWallets={handleGenerateWallets}
-      />
+      <div className="dashboard-section opacity-0">
+        <CryptoWalletsGrid
+          wallets={wallets}
+          isGenerating={isGenerating}
+          onGenerateWallets={handleGenerateWallets}
+        />
+      </div>
 
-      <CryptoSecurityNotice />
+      <div className="dashboard-section opacity-0">
+        <CryptoSecurityNotice />
+      </div>
       
       {/* Debug Info - Remove in production */}
-      <WalletDebugInfo />
+      <div className="dashboard-section opacity-0">
+        <WalletDebugInfo />
+      </div>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 /**
  * 🔒 SECURE Crypto Utilities - NO PRIVATE KEY STORAGE
  * This module ensures NO private keys are ever stored in the application
@@ -139,21 +138,35 @@ export const isWalletDataSecure = (walletData: any): boolean => {
 };
 
 // Enhanced security logging with categories
-export const logSecurityCompliance = (action: string, details?: any) => {
+export const logSecurityCompliance = (event: SecurityEvent, details?: any) => {
   const timestamp = new Date().toISOString();
   const logEntry = {
     timestamp,
-    action,
+    event,
     details,
-    securityLevel: 'COMPLIANT',
-    privateKeysInvolved: false
+    userAgent: navigator.userAgent,
+    url: window.location.href,
   };
-  
-  console.log(`🔒 SECURITY COMPLIANT: ${action} - No private keys involved`, logEntry);
-  
-  // Store security log for audit (optional)
-  if (details?.userId) {
-    localStorage.setItem(`security_log_${timestamp}`, JSON.stringify(logEntry));
+
+  // Log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🔒 [Security Log] ${event}:`, logEntry);
+  }
+
+  // In production, this could send to a security monitoring service
+  // For now, we'll store in sessionStorage for debugging
+  try {
+    const existingLogs = JSON.parse(sessionStorage.getItem('securityLogs') || '[]');
+    existingLogs.push(logEntry);
+    
+    // Keep only last 100 entries
+    if (existingLogs.length > 100) {
+      existingLogs.splice(0, existingLogs.length - 100);
+    }
+    
+    sessionStorage.setItem('securityLogs', JSON.stringify(existingLogs));
+  } catch (error) {
+    console.error('Failed to store security log:', error);
   }
 };
 
@@ -230,4 +243,12 @@ export const getSecurityStatus = () => {
       'Ative notificações de segurança'
     ]
   };
+};
+
+export const getSecurityLogs = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('securityLogs') || '[]');
+  } catch {
+    return [];
+  }
 };
