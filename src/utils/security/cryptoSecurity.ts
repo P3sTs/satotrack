@@ -1,7 +1,24 @@
+
 /**
  * 🔒 SECURE Crypto Utilities - NO PRIVATE KEY STORAGE
  * This module ensures NO private keys are ever stored in the application
  */
+
+// Define SecurityEvent type
+export type SecurityEvent = 
+  | 'WALLET_LOAD_ATTEMPT'
+  | 'WALLET_LOAD_SUCCESS'
+  | 'WALLET_GENERATION_START'
+  | 'WALLET_GENERATION_API_SUCCESS'
+  | 'WALLET_GENERATION_COMPLETE'
+  | 'WALLET_ALREADY_EXISTS'
+  | 'WALLET_BALANCE_REFRESH'
+  | 'ADDRESS_VALIDATION'
+  | 'SUSPICIOUS_ACTIVITY'
+  | 'PRIVATE_KEY_ACCESS_ATTEMPT'
+  | 'TRANSACTION_SIGNING_REQUEST'
+  | 'SECURITY_AUDIT'
+  | 'KMS_OPERATION';
 
 // 🔒 SECURITY NOTICE: We NEVER store private keys in this application
 export const SECURITY_NOTICE = {
