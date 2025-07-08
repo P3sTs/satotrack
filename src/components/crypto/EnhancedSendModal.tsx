@@ -97,7 +97,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
   const currentFeeOptions = feeOptions[wallet.currency] || feeOptions.BTC;
   const selectedFee = currentFeeOptions.find(f => f.type === selectedFeeType);
 
-  const validateAddress = useCallback(async (address: string) => {
+  const validateAddress = useCallback(async (address: string, currency: string) => {
     if (!address || address.length < 10) {
       return;
     }
@@ -115,20 +115,20 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
         USDT: /^0x[a-fA-F0-9]{40}$/,
       };
 
-      const pattern = validationPatterns[wallet.currency as keyof typeof validationPatterns];
+      const pattern = validationPatterns[currency as keyof typeof validationPatterns];
       const isValid = pattern ? pattern.test(address) : address.length > 20;
 
       setAddressValidation({
         isValid,
-        type: isValid ? wallet.currency : 'invalid',
-        network: wallet.currency
+        type: isValid ? currency : 'invalid',
+        network: currency
       });
     } catch (error) {
       setAddressValidation({ isValid: false });
     } finally {
       setIsValidatingAddress(false);
     }
-  }, [wallet.currency]);
+  }, []);
 
   const validateForm = () => {
     const newErrors: string[] = [];
@@ -234,7 +234,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
     
     if (recipient && recipient.length > 10) {
       timeoutId = setTimeout(() => {
-        validateAddress(recipient);
+        validateAddress(recipient, wallet.currency);
       }, 500);
     } else {
       setAddressValidation(null);
@@ -245,7 +245,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
         clearTimeout(timeoutId);
       }
     };
-  }, [recipient, validateAddress]);
+  }, [recipient, wallet.currency, validateAddress]);
 
   const renderFormStep = () => (
     <div className="space-y-6">
