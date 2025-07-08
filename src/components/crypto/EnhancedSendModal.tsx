@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -97,7 +97,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
   const currentFeeOptions = feeOptions[wallet.currency] || feeOptions.BTC;
   const selectedFee = currentFeeOptions.find(f => f.type === selectedFeeType);
 
-  const validateAddress = async (address: string) => {
+  const validateAddress = useCallback(async (address: string) => {
     if (!address || address.length < 10) {
       return;
     }
@@ -105,7 +105,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
     setIsValidatingAddress(true);
     try {
       // Simulate address validation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Basic validation patterns
       const validationPatterns = {
@@ -128,7 +128,7 @@ export const EnhancedSendModal: React.FC<EnhancedSendModalProps> = ({
     } finally {
       setIsValidatingAddress(false);
     }
-  };
+  }, [wallet.currency]);
 
   const validateForm = () => {
     const newErrors: string[] = [];
