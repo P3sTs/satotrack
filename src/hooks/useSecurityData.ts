@@ -191,22 +191,23 @@ export const useSecurityData = () => {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      loadSecurityLogs();
-      loadSecurityMetrics();
+    if (!user) return;
+
+    // Initial load
+    const initializeData = async () => {
+      await loadSecurityLogs();
+      await loadSecurityMetrics();
       
-      // Registrar evento de acesso automaticamente
+      // Register page access event after initial load
       recordSecurityEvent('page_access', {
         page: 'security_dashboard',
         success: true
       });
-    }
-  }, [user, loadSecurityLogs, loadSecurityMetrics, recordSecurityEvent]);
+    };
 
-  // Real-time updates for security logs
-  useEffect(() => {
-    if (!user) return;
+    initializeData();
 
+    // Set up real-time updates
     const channel = supabase
       .channel('security-logs-changes')
       .on(
@@ -235,21 +236,16 @@ export const useSecurityData = () => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, loadSecurityLogs, loadSecurityMetrics]);
-
-  // Auto refresh every 30 seconds
-  useEffect(() => {
-    if (!user) return;
-
+    // Auto refresh interval
     const interval = setInterval(() => {
       loadSecurityLogs();
       loadSecurityMetrics();
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [user, loadSecurityLogs, loadSecurityMetrics]);
 
   return {

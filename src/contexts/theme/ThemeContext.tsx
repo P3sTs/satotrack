@@ -50,9 +50,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Force reflow to ensure class removal is processed
     root.offsetHeight;
     
-    // Add new theme class to both html and body
-    root.classList.add(newEffectiveTheme);
-    body.classList.add(newEffectiveTheme);
+    // Add new theme class to both html and body (ensure it's a string)
+    const themeClass = String(newEffectiveTheme);
+    root.classList.add(themeClass);
+    body.classList.add(themeClass);
     
     console.log('🎨 Applied theme class:', newEffectiveTheme, 'HTML classes:', root.className, 'Body classes:', body.className);
     
@@ -72,8 +73,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setEffectiveTheme(systemTheme);
         root.classList.remove('light', 'dark');
         document.body.classList.remove('light', 'dark');
-        root.classList.add(systemTheme);
-        document.body.classList.add(systemTheme);
+        const systemThemeClass = String(systemTheme);
+        root.classList.add(systemThemeClass);
+        document.body.classList.add(systemThemeClass);
       };
 
       mediaQuery.addEventListener('change', handleSystemThemeChange);
