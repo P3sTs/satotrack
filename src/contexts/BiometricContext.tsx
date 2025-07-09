@@ -1,16 +1,23 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useBiometricAuth } from '@/hooks/useBiometricAuth';
+import { usePinAuth } from '@/hooks/usePinAuth';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
 
 interface BiometricContextType {
   isBiometricAvailable: boolean;
   isBiometricEnabled: boolean;
+  isPinEnabled: boolean;
   isAuthenticated: boolean;
   enableBiometric: () => Promise<boolean>;
   disableBiometric: () => Promise<void>;
+  setupPin: (pin: string) => Promise<boolean>;
+  removePin: () => Promise<void>;
   authenticateWithBiometric: () => Promise<boolean>;
-  requireBiometricAuth: () => Promise<boolean>;
+  authenticateWithPin: (pin: string) => Promise<boolean>;
+  requireAuth: () => Promise<boolean>;
+  hasAnySecurityMethod: () => boolean;
+  requireBiometricAuth: () => Promise<boolean>; // Compatibilidade
 }
 
 const BiometricContext = createContext<BiometricContextType | null>(null);
@@ -22,7 +29,9 @@ interface BiometricProviderProps {
 export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const biometric = useBiometricAuth();
+  const pinAuth = usePinAuth();
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const [isPinEnabled, setIsPinEnabled] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -34,22 +43,27 @@ export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }
       console.log('👤 Usuário não logado - resetando estados');
       setIsAuthenticated(false);
       setIsBiometricEnabled(false);
+      setIsPinEnabled(false);
       return;
     }
 
-    console.log('🔍 Verificando status da biometria...');
-    const enabled = await biometric.isBiometricEnabled();
-    console.log('🔐 Biometria habilitada:', enabled);
+    console.log('🔍 Verificando status da segurança...');
+    const biometricEnabled = await biometric.isBiometricEnabled();
+    const pinEnabled = await pinAuth.checkPinStatus();
     
-    setIsBiometricEnabled(enabled);
+    console.log('🔐 Biometria habilitada:', biometricEnabled);
+    console.log('🔢 PIN habilitado:', pinEnabled);
     
-    // Se biometria está habilitada, exigir autenticação
-    if (enabled) {
-      console.log('🔒 Biometria ativa - requer autenticação');
+    setIsBiometricEnabled(biometricEnabled);
+    setIsPinEnabled(pinEnabled);
+    
+    // Se algum método está habilitado, exigir autenticação
+    if (biometricEnabled || pinEnabled) {
+      console.log('🔒 Segurança ativa - requer autenticação');
       setIsAuthenticated(false);
     } else {
-      console.log('🔓 Biometria inativa - acesso livre');
-      setIsAuthenticated(true); // Se não tem biometria, acesso direto
+      console.log('🔓 Nenhuma segurança ativa - acesso livre');
+      setIsAuthenticated(true);
     }
   };
 
@@ -125,25 +139,94 @@ export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }
     }
   };
 
-  const requireBiometricAuth = async (): Promise<boolean> => {
-    if (!isBiometricEnabled) {
-      return true; // Se biometria não está ativa, permite acesso
+  const setupPin = async (pin: string): Promise<boolean> => {
+    try {
+      const success = await pinAuth.setupPin(pin);
+      if (success) {
+        setIsPinEnabled(true);
+        setIsAuthenticated(true); // Já autenticado após configuração
+        toast.success('🔢 PIN configurado com sucesso!');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Setup pin error:', error);
+      toast.error('❌ Erro ao configurar PIN');
+      return false;
+    }
+  };
+
+  const removePin = async (): Promise<void> => {
+    try {
+      await pinAuth.removePin();
+      setIsPinEnabled(false);
+      // Se não há biometria, liberar acesso
+      if (!isBiometricEnabled) {
+        setIsAuthenticated(true);
+      }
+      toast.success('🗑️ PIN removido');
+    } catch (error) {
+      console.error('Remove pin error:', error);
+      toast.error('❌ Erro ao remover PIN');
+    }
+  };
+
+  const authenticateWithPin = async (pin: string): Promise<boolean> => {
+    try {
+      const success = await pinAuth.verifyPin(pin);
+      if (success) {
+        setIsAuthenticated(true);
+        toast.success('🔓 Acesso liberado!');
+        return true;
+      } else {
+        toast.error('❌ PIN incorreto');
+        return false;
+      }
+    } catch (error) {
+      console.error('Pin authentication error:', error);
+      toast.error('❌ Erro na autenticação por PIN');
+      return false;
+    }
+  };
+
+  const requireAuth = async (): Promise<boolean> => {
+    // Se não há métodos de segurança ativados, permitir acesso
+    if (!isBiometricEnabled && !isPinEnabled) {
+      return true;
     }
 
+    // Se já autenticado, permitir acesso
     if (isAuthenticated) {
-      return true; // Já autenticado
+      return true;
     }
 
-    return await authenticateWithBiometric();
+    // Caso contrário, precisa autenticar
+    return false;
+  };
+
+  const hasAnySecurityMethod = (): boolean => {
+    return isBiometricEnabled || isPinEnabled;
+  };
+
+  // Manter compatibilidade com código existente
+  const requireBiometricAuth = async (): Promise<boolean> => {
+    return await requireAuth();
   };
 
   const value: BiometricContextType = {
     isBiometricAvailable: biometric.isAvailable,
     isBiometricEnabled,
+    isPinEnabled,
     isAuthenticated,
     enableBiometric,
     disableBiometric,
+    setupPin,
+    removePin,
     authenticateWithBiometric,
+    authenticateWithPin,
+    requireAuth,
+    hasAnySecurityMethod,
+    // Compatibilidade
     requireBiometricAuth
   };
 

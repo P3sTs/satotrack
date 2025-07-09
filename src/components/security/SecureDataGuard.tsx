@@ -2,6 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { useBiometricPrompt } from '@/hooks/useBiometricPrompt';
 import { useBiometric } from '@/contexts/BiometricContext';
 import BiometricPromptModal from './BiometricPromptModal';
+import PinVerificationModal from './PinVerificationModal';
 
 interface SecureDataGuardProps {
   children: ReactNode;
@@ -16,18 +17,28 @@ const SecureDataGuard: React.FC<SecureDataGuardProps> = ({
   fallbackComponent,
   onAccessGranted
 }) => {
-  const { isBiometricEnabled } = useBiometric();
+  const { hasAnySecurityMethod, requireAuth } = useBiometric();
   const { shouldShowPrompt, checkAndPrompt, hidePrompt } = useBiometricPrompt();
   const [hasAccess, setHasAccess] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
   const handleCheckAccess = async () => {
     setIsChecking(true);
-    const canAccess = await checkAndPrompt(dataType);
     
-    if (canAccess) {
-      setHasAccess(true);
-      onAccessGranted?.();
+    if (!hasAnySecurityMethod()) {
+      // Se não há métodos de segurança, mostrar prompt para configurar
+      const canAccess = await checkAndPrompt(dataType);
+      if (canAccess) {
+        setHasAccess(true);
+        onAccessGranted?.();
+      }
+    } else {
+      // Se há métodos configurados, verificar autenticação
+      const canAccess = await requireAuth();
+      if (canAccess) {
+        setHasAccess(true);
+        onAccessGranted?.();
+      }
     }
     
     setIsChecking(false);
@@ -38,8 +49,8 @@ const SecureDataGuard: React.FC<SecureDataGuardProps> = ({
     onAccessGranted?.();
   };
 
-  // Se já tem acesso ou biometria está ativada, mostrar conteúdo
-  if (hasAccess || isBiometricEnabled) {
+  // Se já tem acesso, mostrar conteúdo
+  if (hasAccess) {
     return <>{children}</>;
   }
 

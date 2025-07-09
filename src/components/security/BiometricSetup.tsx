@@ -10,22 +10,32 @@ import {
   Unlock,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
+  Hash
 } from 'lucide-react';
 import { useBiometric } from '@/contexts/BiometricContext';
+import PinSetupModal from './PinSetupModal';
+import PinVerificationModal from './PinVerificationModal';
 import { toast } from 'sonner';
 
 const BiometricSetup: React.FC = () => {
   const {
     isBiometricAvailable,
     isBiometricEnabled,
+    isPinEnabled,
     isAuthenticated,
     enableBiometric,
     disableBiometric,
-    authenticateWithBiometric
+    setupPin,
+    removePin,
+    authenticateWithBiometric,
+    authenticateWithPin,
+    hasAnySecurityMethod
   } = useBiometric();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [showPinVerification, setShowPinVerification] = useState(false);
 
   const handleToggleBiometric = async () => {
     setIsLoading(true);
@@ -49,14 +59,34 @@ const BiometricSetup: React.FC = () => {
     }
   };
 
+  const handleTogglePin = async () => {
+    if (isPinEnabled) {
+      await removePin();
+    } else {
+      setShowPinSetup(true);
+    }
+  };
+
+  const handlePinSetup = () => {
+    setShowPinSetup(false);
+  };
+
+  const handleTestPin = () => {
+    setShowPinVerification(true);
+  };
+
+  const handlePinVerificationSuccess = () => {
+    setShowPinVerification(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Status Card */}
       <Card className="bg-dashboard-medium/30 border-dashboard-light/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
-            <Fingerprint className="h-5 w-5 text-satotrack-neon" />
-            Segurança Biométrica
+            <Shield className="h-5 w-5 text-satotrack-neon" />
+            Configurações de Segurança
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -136,6 +166,42 @@ const BiometricSetup: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* PIN Security Section */}
+          <div className="flex items-center justify-between p-3 bg-dashboard-dark/50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-lg ${isPinEnabled ? 'bg-purple-500/20' : 'bg-gray-500/20'} flex items-center justify-center`}>
+                {isPinEnabled ? (
+                  <Hash className="h-5 w-5 text-purple-400" />
+                ) : (
+                  <Hash className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+              <div>
+                <p className="font-medium text-white">PIN de Segurança</p>
+                <p className="text-xs text-muted-foreground">
+                  {isPinEnabled ? 'PIN de 6 dígitos configurado' : 'Configurar PIN como alternativa'}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {isPinEnabled && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestPin}
+                  className="border-purple-500/30 text-purple-400"
+                >
+                  Testar
+                </Button>
+              )}
+              <Switch
+                checked={isPinEnabled}
+                onCheckedChange={handleTogglePin}
+                disabled={isLoading}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -174,7 +240,29 @@ const BiometricSetup: React.FC = () => {
             <p className="text-xs text-blue-200">Acesso protegido por biometria</p>
           </CardContent>
         </Card>
+
+        <Card className="bg-purple-500/10 border-purple-500/20">
+          <CardContent className="p-4 text-center">
+            <Hash className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+            <p className="font-medium text-purple-300 mb-1">PIN Security</p>
+            <p className="text-xs text-purple-200">Proteção por PIN de 6 dígitos</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Modals */}
+      <PinSetupModal
+        isOpen={showPinSetup}
+        onClose={() => setShowPinSetup(false)}
+        onPinSetup={handlePinSetup}
+      />
+
+      <PinVerificationModal
+        isOpen={showPinVerification}
+        onClose={() => setShowPinVerification(false)}
+        onSuccess={handlePinVerificationSuccess}
+        showBiometricOption={isBiometricAvailable && isBiometricEnabled}
+      />
     </div>
   );
 };

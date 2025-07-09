@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
 
+// Definir interface para biometria nativa
+interface NativeBiometric {
+  isAvailable(): Promise<{ isAvailable: boolean }>;
+  verifyIdentity(options: {
+    reason: string;
+    title: string;
+    subtitle?: string;
+    description?: string;
+  }): Promise<{ isSuccessful: boolean }>;
+}
+
+// Declarar plugin global
+declare global {
+  interface Window {
+    NativeBiometric?: NativeBiometric;
+  }
+}
+
 interface BiometricAuthOptions {
   reason?: string;
   title?: string;
@@ -38,10 +56,18 @@ export const useBiometricAuth = (): BiometricResult => {
     }
 
     try {
-      // Para native platforms, implementaremos a verificação real
-      // Por agora, simular disponibilidade
-      setIsAvailable(true);
-      setIsEnrolled(true);
+      // Verificar se o plugin de biometria está disponível
+      if (window.NativeBiometric) {
+        const result = await window.NativeBiometric.isAvailable();
+        setIsAvailable(result.isAvailable);
+        setIsEnrolled(result.isAvailable);
+        console.log('📱 Biometria nativa disponível:', result.isAvailable);
+      } else {
+        // Fallback para quando plugin não está disponível
+        setIsAvailable(true);
+        setIsEnrolled(true);
+        console.log('📱 Plugin biométrico não encontrado, usando fallback');
+      }
     } catch (error) {
       console.error('Biometric check failed:', error);
       setIsAvailable(false);
@@ -65,12 +91,25 @@ export const useBiometricAuth = (): BiometricResult => {
     }
 
     try {
-      console.log('📱 Modo nativo: simulando autenticação biométrica');
-      // Para mobile, implementar biometria real
-      // Por agora, simular sucesso com feedback visual
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('✅ Autenticação biométrica simulada com sucesso');
-      return true;
+      // Usar biometria nativa real se disponível
+      if (window.NativeBiometric) {
+        console.log('📱 Usando biometria nativa real...');
+        const result = await window.NativeBiometric.verifyIdentity({
+          reason: options?.reason || 'Autentique-se para acessar suas carteiras',
+          title: options?.title || 'SatoTracker - Acesso Seguro',
+          subtitle: options?.subtitle || 'Use sua biometria para continuar',
+          description: options?.description || 'Suas chaves privadas estão protegidas'
+        });
+        
+        console.log('📱 Resultado biometria nativa:', result.isSuccessful);
+        return result.isSuccessful;
+      } else {
+        // Fallback para simulação
+        console.log('📱 Modo nativo: simulando autenticação biométrica');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        console.log('✅ Autenticação biométrica simulada com sucesso');
+        return true;
+      }
     } catch (error) {
       console.error('❌ Biometric authentication failed:', error);
       return false;
