@@ -50,21 +50,29 @@ export const useBiometricAuth = (): BiometricResult => {
   };
 
   const authenticate = async (options?: BiometricAuthOptions): Promise<boolean> => {
+    console.log('🔐 Iniciando autenticação biométrica...', options);
+    
     if (!Capacitor.isNativePlatform()) {
-      // Web fallback - usar prompt simples por agora
+      // Web fallback - usar prompt simples
+      console.log('🌐 Modo web: usando prompt de confirmação');
       return new Promise((resolve) => {
-        const result = confirm(options?.reason || 'Autenticar com biometria?');
+        const result = confirm(
+          `${options?.title || 'SatoTracker'}\n\n${options?.reason || 'Autenticar com biometria?'}\n\n${options?.description || 'Confirme para continuar'}`
+        );
+        console.log('🌐 Resultado da autenticação web:', result);
         resolve(result);
       });
     }
 
     try {
+      console.log('📱 Modo nativo: simulando autenticação biométrica');
       // Para mobile, implementar biometria real
-      // Por agora, simular sucesso
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Por agora, simular sucesso com feedback visual
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('✅ Autenticação biométrica simulada com sucesso');
       return true;
     } catch (error) {
-      console.error('Biometric authentication failed:', error);
+      console.error('❌ Biometric authentication failed:', error);
       return false;
     }
   };
@@ -111,12 +119,17 @@ export const useBiometricAuth = (): BiometricResult => {
 
   const enableBiometric = async (): Promise<boolean> => {
     try {
+      console.log('🔐 Gerando chave de sessão segura...');
       const sessionKey = await generateSecureKey();
+      
+      console.log('💾 Armazenando dados seguros...');
       await storeSecureData('session_key', sessionKey);
       await Preferences.set({ key: 'biometric_enabled', value: 'true' });
+      
+      console.log('✅ Biometria habilitada com sucesso');
       return true;
     } catch (error) {
-      console.error('Failed to enable biometric:', error);
+      console.error('❌ Failed to enable biometric:', error);
       return false;
     }
   };

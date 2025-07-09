@@ -31,29 +31,55 @@ export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }
 
   const checkBiometricStatus = async () => {
     if (!user) {
+      console.log('👤 Usuário não logado - resetando estados');
       setIsAuthenticated(false);
+      setIsBiometricEnabled(false);
       return;
     }
 
+    console.log('🔍 Verificando status da biometria...');
     const enabled = await biometric.isBiometricEnabled();
+    console.log('🔐 Biometria habilitada:', enabled);
+    
     setIsBiometricEnabled(enabled);
     
     // Se biometria está habilitada, exigir autenticação
     if (enabled) {
+      console.log('🔒 Biometria ativa - requer autenticação');
       setIsAuthenticated(false);
     } else {
+      console.log('🔓 Biometria inativa - acesso livre');
       setIsAuthenticated(true); // Se não tem biometria, acesso direto
     }
   };
 
   const enableBiometric = async (): Promise<boolean> => {
     try {
+      console.log('🔐 Tentando ativar biometria...');
+      
+      // Primeiro autentica para ativar
+      const authSuccess = await biometric.authenticate({
+        reason: 'Confirme sua identidade para ativar a proteção biométrica',
+        title: 'SatoTracker - Ativar Biometria',
+        subtitle: 'Use sua biometria para confirmar',
+        description: 'Isso protegerá seus dados sensíveis'
+      });
+
+      if (!authSuccess) {
+        console.log('❌ Autenticação para ativação falhou');
+        toast.error('❌ Autenticação necessária para ativar biometria');
+        return false;
+      }
+
       const success = await biometric.enableBiometric();
       if (success) {
+        console.log('✅ Biometria ativada com sucesso');
         setIsBiometricEnabled(true);
+        setIsAuthenticated(true); // Já autenticado após ativação
         toast.success('🔐 Biometria ativada com sucesso!');
         return true;
       }
+      console.log('❌ Falha ao ativar biometria');
       toast.error('❌ Falha ao ativar biometria');
       return false;
     } catch (error) {
