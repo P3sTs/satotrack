@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCurrencyConverter } from '@/hooks/useCurrencyConverter';
-import anime from 'animejs/lib/anime.es.js';
+const anime = require('animejs');
 
 const CurrencyConverter: React.FC = () => {
   const {

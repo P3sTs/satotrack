@@ -14,7 +14,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { toast } from 'sonner';
-import anime from 'animejs/lib/anime.es.js';
+const anime = require('animejs');
 
 interface TokenPair {
   symbol: string;
