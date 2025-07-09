@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./contexts/theme/ThemeContext";
 import { AuthProvider } from "./contexts/auth";
+import { BiometricProvider } from "./contexts/BiometricContext";
 import { I18nProvider } from "./contexts/i18n/I18nContext";
 import { CarteirasProvider } from "./contexts/carteiras/CarteirasProvider";
 import { GamificationProvider } from "./contexts/gamification/GamificationContext";
@@ -29,12 +30,13 @@ function App() {
           <BrowserRouter>
             <GlobalErrorBoundary>
               <AuthProvider>
-                <I18nProvider>
-                  <CarteirasProvider>
-                    <GamificationProvider>
-                      <ReferralProvider>
-                        <Web3Provider>
-                          <ViewModeProvider>
+                <BiometricProvider>
+                  <I18nProvider>
+                    <CarteirasProvider>
+                      <GamificationProvider>
+                        <ReferralProvider>
+                          <Web3Provider>
+                            <ViewModeProvider>
                             <SidebarProvider>
                               <div className="min-h-screen bg-background text-foreground w-full">
                                 <RouteValidator />
@@ -52,12 +54,13 @@ function App() {
                                  />
                               </div>
                             </SidebarProvider>
-                          </ViewModeProvider>
-                        </Web3Provider>
-                      </ReferralProvider>
-                    </GamificationProvider>
-                  </CarteirasProvider>
-                </I18nProvider>
+                            </ViewModeProvider>
+                          </Web3Provider>
+                        </ReferralProvider>
+                      </GamificationProvider>
+                    </CarteirasProvider>
+                  </I18nProvider>
+                </BiometricProvider>
               </AuthProvider>
             </GlobalErrorBoundary>
           </BrowserRouter>

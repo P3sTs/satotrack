@@ -11,6 +11,7 @@ import Sobre from '@/pages/Sobre';
 
 // 🔒 Autenticação & Segurança
 import Auth from '@/pages/Auth';
+import SecuritySettings from '@/pages/SecuritySettings';
 import Privacidade from '@/pages/Privacidade';
 import TermosUso from '@/pages/TermosUso';
 
@@ -259,6 +260,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/configuracoes" element={
         <ProtectedRoute>
           <Configuracoes />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/security-settings" element={
+        <ProtectedRoute>
+          <SecuritySettings />
         </ProtectedRoute>
       } />
       

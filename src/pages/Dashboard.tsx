@@ -35,10 +35,13 @@ import { CryptoDepositModal } from '@/components/crypto/enhanced/CryptoDepositMo
 import { WalletDetailModal } from '@/components/crypto/WalletDetailModal';
 import { AddWalletModal } from '@/components/crypto/redesign/AddWalletModal';
 import TokenSwapModal from '@/components/crypto/TokenSwapModal';
+import SecureWalletAccess from '@/components/security/SecureWalletAccess';
+import { useBiometric } from '@/contexts/BiometricContext';
 import { toast } from 'sonner';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { requireBiometricAuth } = useBiometric();
   const navigate = useNavigate();
   const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'BRL' | 'BTC'>('BRL');
   const [showBalance, setShowBalance] = useState(true);
@@ -130,10 +133,16 @@ const Dashboard: React.FC = () => {
   };
 
   const handleGenerateMainWallets = async () => {
+    const hasAccess = await requireBiometricAuth();
+    if (!hasAccess) return;
+    
     await generateWallets(['BTC', 'ETH', 'MATIC', 'USDT'], false);
   };
 
   const handleAddWallet = async (networks: string[]) => {
+    const hasAccess = await requireBiometricAuth();
+    if (!hasAccess) return;
+    
     await generateWallets(networks, false);
     setShowAddWalletModal(false);
   };
@@ -402,13 +411,14 @@ const Dashboard: React.FC = () => {
 
         {/* Crypto Wallet Management Section */}
         {viewMode === 'detailed' && (
-          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-satotrack-neon" />
-                  Gestão de Carteiras Cripto
-                </CardTitle>
+          <SecureWalletAccess>
+            <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-satotrack-neon" />
+                    Gestão de Carteiras Cripto
+                  </CardTitle>
                 <div className="flex gap-2">
                   {hasGeneratedWallets && (
                     <Button
@@ -533,6 +543,7 @@ const Dashboard: React.FC = () => {
               )}
             </CardContent>
           </Card>
+          </SecureWalletAccess>
         )}
 
         {/* Quick Wallet Overview */}
