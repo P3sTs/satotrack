@@ -296,6 +296,7 @@ const SecuritySetupWizard: React.FC = () => {
       <PinSetupModal
         isOpen={showPinSetup}
         onClose={() => setShowPinSetup(false)}
+        onPinSetup={handlePinSetupSuccess}
       />
     </div>
   );
