@@ -10,7 +10,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const QRCodeGenerator: React.FC = () => {
+interface QRCodeGeneratorProps {
+  userWallets?: any[];
+}
+
+const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({ userWallets = [] }) => {
   const [address, setAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [qrGenerated, setQrGenerated] = useState(false);

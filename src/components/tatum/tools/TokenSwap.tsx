@@ -9,7 +9,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const TokenSwap: React.FC = () => {
+interface TokenSwapProps {
+  userWallets?: any[];
+}
+
+const TokenSwap: React.FC<TokenSwapProps> = ({ userWallets = [] }) => {
   const [isSwapping, setIsSwapping] = useState(false);
 
   const handleSwap = async () => {

@@ -8,7 +8,11 @@ import {
   Clock
 } from 'lucide-react';
 
-const NetworkStatus: React.FC = () => {
+interface NetworkStatusProps {
+  userWallets?: any[];
+}
+
+const NetworkStatus: React.FC<NetworkStatusProps> = ({ userWallets = [] }) => {
   const [networkData, setNetworkData] = useState({
     ethereum: { status: 'active', gasPrice: '25', latency: '120ms' },
     polygon: { status: 'active', gasPrice: '2', latency: '80ms' },
