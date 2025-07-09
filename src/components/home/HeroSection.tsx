@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Shield, Zap, Globe } from 'lucide-react';
@@ -10,18 +10,34 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { animateIn, animateFloat, animateGlow } = useAnimations();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Animate hero content on mount
-    animateIn('.hero-title', { delay: 200 });
-    animateIn('.hero-subtitle', { delay: 400 });
-    animateIn('.hero-buttons', { delay: 600 });
-    animateIn('.trust-indicators', { delay: 800 });
-    
-    // Floating animation for background elements
-    animateFloat('.floating-element');
-    animateGlow('.glow-element');
-  }, [animateIn, animateFloat, animateGlow]);
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Delay para garantir que os elementos estejam montados
+    const timer = setTimeout(() => {
+      try {
+        // Animate hero content on mount
+        animateIn('.hero-title', { delay: 200 });
+        animateIn('.hero-subtitle', { delay: 400 });
+        animateIn('.hero-buttons', { delay: 600 });
+        animateIn('.trust-indicators', { delay: 800 });
+        
+        // Floating animation for background elements
+        animateFloat('.floating-element');
+        animateGlow('.glow-element');
+      } catch (error) {
+        console.error('🎬 Animation error in HeroSection:', error);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [animateIn, animateFloat, animateGlow, isClient]);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-card to-background overflow-hidden">
@@ -35,8 +51,10 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Content */}
           <div>
-            <h1 className="hero-title opacity-0 text-4xl md:text-6xl lg:text-7xl font-bold mb-6 satotrack-gradient-text">
-              Sua carteira multichain,
+            <h1 className="hero-title opacity-0 text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+              <span className="satotrack-gradient-text">
+                Sua carteira multichain,
+              </span>
               <br />
               <span className="text-foreground">segura e sem complicações</span>
             </h1>

@@ -13,6 +13,14 @@ export const useAuthSession = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log('🔐 useAuthSession state:', { 
+    hasSession: !!session, 
+    hasUser: !!user, 
+    loading,
+    userId: user?.id,
+    isAuthenticated: !!(session && user)
+  });
+
   // Activity monitoring
   const {
     lastActivity,
