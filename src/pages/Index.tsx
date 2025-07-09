@@ -9,29 +9,31 @@ const Index = () => {
   const navigate = useNavigate();
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Redirecionamento mais inteligente - executar apenas uma vez
+  // Redirecionamento corrigido
   useEffect(() => {
     console.log('🔄 Index mounted:', { loading, isAuthenticated, user: !!user, hasRedirected });
     
-    if (loading || hasRedirected) {
-      return; // Evita redirecionamentos enquanto carrega ou já redirecionou
+    if (loading) {
+      console.log('⏳ Still loading, waiting...');
+      return; 
     }
 
-    // Delay pequeno para evitar loops
-    const timer = setTimeout(() => {
-      if (user && isAuthenticated) {
-        console.log('🚀 Redirecting to dashboard - user authenticated');
-        updateLastActivity();
-        setHasRedirected(true);
-        navigate('/dashboard', { replace: true });
-      } else {
-        console.log('🏠 Redirecting to home - user not authenticated');
-        setHasRedirected(true);
-        navigate('/home', { replace: true });
-      }
-    }, 100);
+    if (hasRedirected) {
+      console.log('✅ Already redirected, skipping...');
+      return;
+    }
 
-    return () => clearTimeout(timer);
+    // Redirecionamento sem delay
+    if (isAuthenticated && user) {
+      console.log('🚀 User authenticated, redirecting to dashboard');
+      updateLastActivity();
+      setHasRedirected(true);
+      navigate('/dashboard', { replace: true });
+    } else {
+      console.log('🏠 User not authenticated, redirecting to home');
+      setHasRedirected(true);
+      navigate('/home', { replace: true });
+    }
   }, [loading, isAuthenticated, user, navigate, updateLastActivity, hasRedirected]);
 
   // Tela de carregamento durante a verificação de autenticação
