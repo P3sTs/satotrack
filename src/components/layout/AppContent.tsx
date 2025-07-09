@@ -10,11 +10,8 @@ interface AppContentProps {
 const AppContent: React.FC<AppContentProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  console.log('🎯 AppContent render:', { isAuthenticated, loading });
-
   // Show loading state while checking authentication
   if (loading) {
-    console.log('⏳ AppContent showing loading state');
     return (
       <div className="min-h-screen bg-dashboard-dark flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -36,11 +33,9 @@ const AppContent: React.FC<AppContentProps> = ({ children }) => {
 
   // Use different layouts based on authentication status
   if (isAuthenticated) {
-    console.log('🔒 Using AppLayout (authenticated)');
     return <AppLayout>{children}</AppLayout>;
   }
 
-  console.log('🌐 Using PublicLayout (not authenticated)');
   return <PublicLayout>{children}</PublicLayout>;
 };
 

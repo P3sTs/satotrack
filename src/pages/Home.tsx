@@ -10,26 +10,24 @@ import FooterSection from '@/components/home/FooterSection';
 const Home = () => {
   const { user } = useAuth();
   
-  console.log('🏠 Home component rendering:', { hasUser: !!user });
-  
   return (
-    <div className="min-h-screen bg-dashboard-dark overflow-x-hidden">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-dashboard-dark">
+      {/* Hero Section - sempre visível */}
       <HeroSection />
       
       {/* Ticket Section - apenas para não logados */}
       {!user && <TicketAccessSection />}
       
-      {/* How It Works */}
+      {/* How It Works - sempre visível */}
       <HowItWorks />
       
-      {/* Security Section */}
+      {/* Security Section - sempre visível */}
       <SecuritySection />
       
-      {/* Testimonials */}
+      {/* Testimonials - sempre visível */}
       <TestimonialsSection />
       
-      {/* Footer */}
+      {/* Footer - sempre visível */}
       <FooterSection />
     </div>
   );

@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCurrencyConverter } from '@/hooks/useCurrencyConverter';
-const anime = require('animejs');
 
 const CurrencyConverter: React.FC = () => {
   const {
@@ -95,28 +94,11 @@ const CurrencyConverter: React.FC = () => {
   };
 
   const handleSwap = () => {
-    // Animação de rotação
-    anime({
-      targets: '.swap-button',
-      rotate: '180deg',
-      duration: 300,
-      easing: 'easeInOutQuad',
-      complete: () => {
-        swapCurrencies();
-        toast.success('Moedas trocadas!');
-      }
-    });
+    swapCurrencies();
+    toast.success('Moedas trocadas!');
   };
 
   const handleRefresh = () => {
-    // Animação de loading
-    anime({
-      targets: '.refresh-button',
-      rotate: '360deg',
-      duration: 500,
-      easing: 'easeOutQuart'
-    });
-    
     updateExchangeRate();
     toast.success('Taxa de câmbio atualizada!');
   };
@@ -165,7 +147,7 @@ const CurrencyConverter: React.FC = () => {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isLoading}
-                className="refresh-button border-primary/30 text-primary hover:bg-primary/10"
+                className="border-primary/30 text-primary hover:bg-primary/10"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
@@ -223,7 +205,7 @@ const CurrencyConverter: React.FC = () => {
               onClick={handleSwap}
               variant="outline"
               size="sm"
-              className="swap-button rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black border-0 hover:opacity-90"
+              className="rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black border-0 hover:opacity-90"
             >
               <ArrowLeftRight className="h-4 w-4" />
             </Button>

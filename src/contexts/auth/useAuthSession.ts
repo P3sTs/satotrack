@@ -13,14 +13,6 @@ export const useAuthSession = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  console.log('🔐 useAuthSession state:', { 
-    hasSession: !!session, 
-    hasUser: !!user, 
-    loading,
-    userId: user?.id,
-    isAuthenticated: !!(session && user)
-  });
-
   // Activity monitoring
   const {
     lastActivity,
@@ -92,28 +84,26 @@ export const useAuthSession = () => {
 
   // Session initialization
   useEffect(() => {
-    console.log("🔐 Inicializando useAuthSession...");
-    setLoading(true);
+    console.log("Inicializando useAuthSession...");
     
     const subscription = setupAuthStateListener();
 
     // Check for existing session
     const checkSession = async () => {
       try {
-        console.log("🔍 Verificando sessão existente...");
+        console.log("Verificando sessão existente...");
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("❌ Erro ao verificar sessão:", error);
+          console.error("Erro ao verificar sessão:", error);
         }
         
-        console.log("✅ Sessão inicial:", !!initialSession ? 'encontrada' : 'não encontrada');
+        console.log("Sessão inicial encontrada:", !!initialSession);
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
+        setLoading(false);
       } catch (error) {
-        console.error("❌ Erro ao verificar sessão:", error);
-      } finally {
-        console.log("🏁 Finalizando verificação de sessão");
+        console.error("Erro ao verificar sessão:", error);
         setLoading(false);
       }
     };
@@ -121,7 +111,7 @@ export const useAuthSession = () => {
     checkSession();
 
     return () => {
-      console.log("🧹 Limpando subscription do useAuthSession");
+      console.log("Limpando subscription do useAuthSession");
       subscription.unsubscribe();
     };
   }, [setupAuthStateListener]);

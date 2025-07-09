@@ -13,7 +13,6 @@ import { ReferralProvider } from "./contexts/referral/ReferralContext";
 import { Web3Provider } from "./contexts/web3/Web3Context";
 import { ViewModeProvider } from "./contexts/ViewModeContext";
 import GlobalErrorBoundary from "./components/error/GlobalErrorBoundary";
-import ErrorBoundary from "./components/error/ErrorBoundary";
 import RouteValidator from "./components/validation/RouteValidator";
 import { SecurityIndicator } from "./components/SecurityIndicator";
 import NavigationAudit from "./components/navigation/NavigationAudit";
@@ -30,43 +29,39 @@ function App() {
         <TooltipProvider>
           <BrowserRouter>
             <GlobalErrorBoundary>
-              <ErrorBoundary>
-                <AuthProvider>
-                  <BiometricProvider>
-                    <I18nProvider>
-                      <CarteirasProvider>
-                        <GamificationProvider>
-                          <ReferralProvider>
-                            <Web3Provider>
-                              <ViewModeProvider>
-                                <SidebarProvider>
-                                  <div className="min-h-screen bg-background text-foreground w-full">
-                                    <RouteValidator />
-                                    <NavigationAudit />
-                                    <SecurityIndicator />
-                                    
-                                    <AppContent>
-                                      <ErrorBoundary>
-                                        <AppRoutes />
-                                      </ErrorBoundary>
-                                    </AppContent>
-                                    
-                                    <Toaster 
-                                      position="top-right"
-                                      richColors
-                                      closeButton
-                                    />
-                                  </div>
-                                </SidebarProvider>
-                              </ViewModeProvider>
-                            </Web3Provider>
-                          </ReferralProvider>
-                        </GamificationProvider>
-                      </CarteirasProvider>
-                    </I18nProvider>
-                  </BiometricProvider>
-                </AuthProvider>
-              </ErrorBoundary>
+              <AuthProvider>
+                <BiometricProvider>
+                  <I18nProvider>
+                    <CarteirasProvider>
+                      <GamificationProvider>
+                        <ReferralProvider>
+                          <Web3Provider>
+                            <ViewModeProvider>
+                            <SidebarProvider>
+                              <div className="min-h-screen bg-background text-foreground w-full">
+                                <RouteValidator />
+                                <NavigationAudit />
+                                <SecurityIndicator />
+                                
+                <AppContent>
+                  <AppRoutes />
+                </AppContent>
+                                
+                                 <Toaster 
+                                   position="top-right"
+                                   richColors
+                                   closeButton
+                                 />
+                              </div>
+                            </SidebarProvider>
+                            </ViewModeProvider>
+                          </Web3Provider>
+                        </ReferralProvider>
+                      </GamificationProvider>
+                    </CarteirasProvider>
+                  </I18nProvider>
+                </BiometricProvider>
+              </AuthProvider>
             </GlobalErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
