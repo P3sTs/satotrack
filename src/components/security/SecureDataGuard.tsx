@@ -17,6 +17,7 @@ const SecureDataGuard: React.FC<SecureDataGuardProps> = ({
   fallbackComponent,
   onAccessGranted
 }) => {
+  // All hooks must be called at the top level
   const { hasAnySecurityMethod, requireAuth } = useBiometric();
   const { shouldShowPrompt, checkAndPrompt, hidePrompt } = useBiometricPrompt();
   const [hasAccess, setHasAccess] = useState(false);
@@ -49,6 +50,11 @@ const SecureDataGuard: React.FC<SecureDataGuardProps> = ({
     onAccessGranted?.();
   };
 
+  // useEffect must be called before any early returns
+  React.useEffect(() => {
+    handleCheckAccess();
+  }, []);
+
   // Se já tem acesso, mostrar conteúdo
   if (hasAccess) {
     return <>{children}</>;
@@ -62,11 +68,6 @@ const SecureDataGuard: React.FC<SecureDataGuardProps> = ({
       </div>
     );
   }
-
-  // Primeira renderização - verificar automaticamente
-  React.useEffect(() => {
-    handleCheckAccess();
-  }, []);
 
   return (
     <>
