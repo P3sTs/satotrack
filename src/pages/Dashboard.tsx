@@ -7,28 +7,26 @@ import { useAuth } from '@/contexts/auth';
 import { useMultiChainWallets } from '@/hooks/useMultiChainWallets';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Wallet, 
-  TrendingUp, 
-  Shield, 
-  Zap, 
-  Users, 
-  Activity, 
-  ArrowUpRight, 
-  ArrowDownRight,
   DollarSign,
-  Bitcoin,
   Eye,
   EyeOff,
-  RefreshCw,
-  PlusCircle,
   BarChart3,
-  Sparkles,
-  Send,
-  Download,
-  Copy,
+  ArrowUpRight,
+  ArrowDownRight,
+  Wallet,
+  PlusCircle,
   ExternalLink,
-  Info
+  Shield,
+  Sparkles,
+  RefreshCw,
+  Info,
+  Bitcoin,
+  Users,
+  Activity
 } from 'lucide-react';
+import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { RealTimeUpdater } from '@/components/dashboard/RealTimeUpdater';
+import { QuickActions } from '@/components/dashboard/QuickActions';
 import { PremiumWalletCard } from '@/components/crypto/redesign/PremiumWalletCard';
 import { EnhancedSendModal } from '@/components/crypto/EnhancedSendModal';
 import { CryptoDepositModal } from '@/components/crypto/enhanced/CryptoDepositModal';
@@ -209,16 +207,14 @@ const Dashboard: React.FC = () => {
               {showBalance ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
               {showBalance ? 'Ocultar' : 'Mostrar'}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="border-dashboard-light text-white"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
+            
+            {/* Real-time updater with auto refresh */}
+            <RealTimeUpdater 
+              onUpdate={handleRefresh}
+              interval={30000}
+              autoUpdate={true}
+            />
+            
             <Button
               variant="outline"
               size="sm"
@@ -267,68 +263,12 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Active Wallets */}
-          <Card className="bg-dashboard-medium/50 border-dashboard-light/30 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Carteiras Ativas</p>
-                  <p className="text-3xl font-bold text-white">{activeWallets.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-blue-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Total Transactions */}
-          <Card className="bg-dashboard-medium/50 border-dashboard-light/30 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Transações</p>
-                  <p className="text-3xl font-bold text-white">{realStats.totalTransactions}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-purple-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Active Networks */}
-          <Card className="bg-dashboard-medium/50 border-dashboard-light/30 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Redes Ativas</p>
-                  <p className="text-3xl font-bold text-white">{realStats.activeNetworks}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-emerald-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security Score */}
-          <Card className="bg-dashboard-medium/50 border-dashboard-light/30 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Segurança</p>
-                  <p className="text-3xl font-bold text-white">{realStats.securityScore}%</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-satotrack-neon/20 flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-satotrack-neon" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Interactive Stats Grid */}
+        <DashboardStats 
+          wallets={wallets}
+          totalBalance={totalBalance}
+          selectedCurrency={selectedCurrency}
+        />
 
         {/* Enhanced Dashboard Features */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -361,52 +301,11 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
-          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                <Zap className="h-5 w-5 text-satotrack-neon" />
-                Ações Rápidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  className="h-16 flex-col gap-2 border-satotrack-neon/30 text-satotrack-neon hover:bg-satotrack-neon/10"
-                  onClick={() => navigate('/nova-carteira')}
-                >
-                  <PlusCircle className="h-5 w-5" />
-                  <span className="text-xs">Nova Carteira</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-16 flex-col gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-                  onClick={() => navigate('/mercado')}
-                >
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="text-xs">Mercado</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-16 flex-col gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
-                  onClick={() => navigate('/historico')}
-                >
-                  <Activity className="h-5 w-5" />
-                  <span className="text-xs">Histórico</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-16 flex-col gap-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
-                  onClick={() => setShowSwapModal(true)}
-                  disabled={!hasGeneratedWallets}
-                >
-                  <Send className="h-5 w-5" />
-                  <span className="text-xs">Token Swap</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Enhanced Quick Actions */}
+          <QuickActions 
+            hasGeneratedWallets={hasGeneratedWallets}
+            onShowSwapModal={() => setShowSwapModal(true)}
+          />
         </div>
 
         {/* Crypto Wallet Management Section */}
