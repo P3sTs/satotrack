@@ -27,7 +27,7 @@ const Security: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isBiometricEnabled: biometricEnabled } = useBiometric();
-  const { securityLogs, securityMetrics, isLoading, loadSecurityLogs } = useSecurityData();
+  const { securityLogs, securityMetrics } = useSecurityData();
 
   const securityScore = Math.min(
     80 + 
@@ -87,16 +87,10 @@ const Security: React.FC = () => {
               </div>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-satotrack-neon/30 text-satotrack-neon"
-            onClick={loadSecurityLogs}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            {isLoading ? 'Carregando...' : 'Atualizar'}
-          </Button>
+          <div className="flex items-center gap-2 text-emerald-400">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span className="text-sm">Atualização automática ativa</span>
+          </div>
         </div>
 
         {/* Security Overview Cards */}

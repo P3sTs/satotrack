@@ -140,12 +140,58 @@ export const useSecurityData = () => {
     }
   }, [user, loadSecurityLogs, loadSecurityMetrics]);
 
+  // Real-time updates for security logs
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('security-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'security_logs',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          loadSecurityLogs();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_security_settings',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          loadSecurityMetrics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, loadSecurityLogs, loadSecurityMetrics]);
+
+  // Auto refresh every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      loadSecurityLogs();
+      loadSecurityMetrics();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, loadSecurityLogs, loadSecurityMetrics]);
+
   return {
     securityLogs,
     securityMetrics,
-    isLoading,
-    loadSecurityLogs,
-    loadSecurityMetrics,
     recordSecurityEvent
   };
 };
