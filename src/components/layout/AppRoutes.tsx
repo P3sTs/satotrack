@@ -33,8 +33,10 @@ import ProjecaoLucros from '@/pages/ProjecaoLucros';
 import ProjecaoLucrosPremium from '@/pages/ProjecaoLucrosPremium';
 import Projections from '@/pages/Projections';
 import PerformanceAnalytics from '@/pages/PerformanceAnalytics';
+import PerformanceAnalyticsDetailed from '@/pages/PerformanceAnalyticsDetailed';
 import Historico from '@/pages/Historico';
 import HistoricoPremium from '@/pages/HistoricoPremium';
+import Security from '@/pages/Security';
 
 // 💳 Pagamento & Checkout
 import PlanosPage from '@/pages/PlanosPage';
@@ -154,6 +156,18 @@ const AppRoutes: React.FC = () => {
       <Route path="/performance" element={
         <ProtectedRoute>
           <PerformanceAnalytics />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/performance-analytics" element={
+        <ProtectedRoute>
+          <PerformanceAnalyticsDetailed />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/security" element={
+        <ProtectedRoute>
+          <Security />
         </ProtectedRoute>
       } />
       
