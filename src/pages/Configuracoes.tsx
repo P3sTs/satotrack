@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from 'sonner';
+import BiometricSetup from '@/components/security/BiometricSetup';
+import { Fingerprint, Settings, Shield, User } from 'lucide-react';
 
 const Configuracoes = () => {
   const { user } = useAuth();

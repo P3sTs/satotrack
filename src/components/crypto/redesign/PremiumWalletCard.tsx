@@ -18,7 +18,7 @@ import { MultiChainWallet } from '@/hooks/useMultiChainWallets';
 import SendCryptoModalNew from '../SendCryptoModalNew';
 import ReceiveCryptoModalNew from '../ReceiveCryptoModalNew';
 import { WalletDetailModal } from '../WalletDetailModal';
-import { SendModalCore } from '../send/SendModalCore';
+import SecureDataGuard from '@/components/security/SecureDataGuard';
 import { CryptoDepositModal } from '../enhanced/CryptoDepositModal';
 
 interface PremiumWalletCardProps {
@@ -252,9 +252,18 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
                 </Button>
               </div>
             </div>
-            <div className="p-3 bg-dashboard-dark/50 rounded-lg text-xs font-mono text-muted-foreground break-all border border-dashboard-light/20">
-              {formatAddress(wallet.address)}
-            </div>
+            <SecureDataGuard 
+              dataType="endereço da carteira"
+              fallbackComponent={
+                <div className="p-3 bg-dashboard-dark/50 rounded-lg text-xs font-mono text-muted-foreground border border-dashboard-light/20">
+                  ••••••••••••••••••••••••••••••••
+                </div>
+              }
+            >
+              <div className="p-3 bg-dashboard-dark/50 rounded-lg text-xs font-mono text-muted-foreground break-all border border-dashboard-light/20">
+                {formatAddress(wallet.address)}
+              </div>
+            </SecureDataGuard>
           </div>
 
           {/* Action Buttons */}
@@ -316,15 +325,14 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
       </Card>
 
       {/* Modals */}
-      <SendModalCore
+      <SendCryptoModalNew
         isOpen={showSendModal}
         onClose={() => setShowSendModal(false)}
         wallet={wallet}
-        onSendTransaction={handleSendTransaction}
-        isLoading={isTransacting}
+        onSend={handleLegacySend}
       />
 
-      <CryptoDepositModal
+      <ReceiveCryptoModalNew
         isOpen={showReceiveModal}
         onClose={() => setShowReceiveModal(false)}
         wallet={wallet}

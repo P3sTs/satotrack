@@ -1,0 +1,82 @@
+import React, { useState, ReactNode } from 'react';
+import { useBiometricPrompt } from '@/hooks/useBiometricPrompt';
+import { useBiometric } from '@/contexts/BiometricContext';
+import BiometricPromptModal from './BiometricPromptModal';
+
+interface SecureDataGuardProps {
+  children: ReactNode;
+  dataType?: string;
+  fallbackComponent?: ReactNode;
+  onAccessGranted?: () => void;
+}
+
+const SecureDataGuard: React.FC<SecureDataGuardProps> = ({ 
+  children, 
+  dataType = 'dados sensíveis',
+  fallbackComponent,
+  onAccessGranted
+}) => {
+  const { isBiometricEnabled } = useBiometric();
+  const { shouldShowPrompt, checkAndPrompt, hidePrompt } = useBiometricPrompt();
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const handleCheckAccess = async () => {
+    setIsChecking(true);
+    const canAccess = await checkAndPrompt(dataType);
+    
+    if (canAccess) {
+      setHasAccess(true);
+      onAccessGranted?.();
+    }
+    
+    setIsChecking(false);
+  };
+
+  const handleBiometricActivated = () => {
+    setHasAccess(true);
+    onAccessGranted?.();
+  };
+
+  // Se já tem acesso ou biometria está ativada, mostrar conteúdo
+  if (hasAccess || isBiometricEnabled) {
+    return <>{children}</>;
+  }
+
+  // Se está verificando, mostrar loading ou fallback
+  if (isChecking) {
+    return fallbackComponent || (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-satotrack-neon"></div>
+      </div>
+    );
+  }
+
+  // Primeira renderização - verificar automaticamente
+  React.useEffect(() => {
+    handleCheckAccess();
+  }, []);
+
+  return (
+    <>
+      {/* Mostrar fallback enquanto não tem acesso */}
+      {fallbackComponent || (
+        <div className="flex items-center justify-center p-4 text-muted-foreground">
+          <span className="text-sm">Verificando permissões...</span>
+        </div>
+      )}
+
+      {/* Modal de prompt biométrico */}
+      <BiometricPromptModal
+        isOpen={shouldShowPrompt}
+        onClose={hidePrompt}
+        onActivate={handleBiometricActivated}
+        dataType={dataType}
+        title={`Proteger ${dataType}`}
+        description={`Para visualizar ${dataType}, recomendamos ativar a proteção biométrica.`}
+      />
+    </>
+  );
+};
+
+export default SecureDataGuard;
