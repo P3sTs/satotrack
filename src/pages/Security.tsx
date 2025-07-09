@@ -21,47 +21,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 import { useBiometric } from '@/contexts/BiometricContext';
+import { useSecurityData } from '@/hooks/useSecurityData';
 
 const Security: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isBiometricEnabled: biometricEnabled } = useBiometric();
-  
-  const [securityLogs, setSecurityLogs] = useState([
-    {
-      id: 1,
-      type: 'login',
-      timestamp: new Date().toISOString(),
-      ip: '192.168.1.100',
-      device: 'Chrome/Windows',
-      status: 'success'
-    },
-    {
-      id: 2,
-      type: 'biometric_auth',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      ip: '192.168.1.100',
-      device: 'Chrome/Windows',
-      status: 'success'
-    },
-    {
-      id: 3,
-      type: 'wallet_access',
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
-      ip: '192.168.1.100',
-      device: 'Chrome/Windows',
-      status: 'success'
-    }
-  ]);
-
-  const [securityMetrics, setSecurityMetrics] = useState({
-    totalLogins: 127,
-    successfulLogins: 125,
-    failedAttempts: 2,
-    biometricUse: 89,
-    lastPasswordChange: '2024-12-15',
-    accountAge: 45
-  });
+  const { securityLogs, securityMetrics, isLoading, loadSecurityLogs } = useSecurityData();
 
   const securityScore = Math.min(
     80 + 
@@ -125,9 +91,11 @@ const Security: React.FC = () => {
             variant="outline"
             size="sm"
             className="border-satotrack-neon/30 text-satotrack-neon"
+            onClick={loadSecurityLogs}
+            disabled={isLoading}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Carregando...' : 'Atualizar'}
           </Button>
         </div>
 

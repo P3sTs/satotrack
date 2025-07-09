@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useMultiChainWallets } from '@/hooks/useMultiChainWallets';
+import { useMarketData } from '@/hooks/useMarketData';
 
 interface RealTimeUpdaterProps {
   onUpdate: () => Promise<void>;
@@ -19,13 +21,21 @@ export const RealTimeUpdater: React.FC<RealTimeUpdaterProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [nextUpdate, setNextUpdate] = useState<Date>(new Date(Date.now() + interval));
+  const { refreshAllBalances } = useMultiChainWallets();
+  const { refreshMarketData } = useMarketData();
 
   const handleManualUpdate = async () => {
     if (isUpdating) return;
     
     setIsUpdating(true);
     try {
-      await onUpdate();
+      // Atualizar dados de carteiras e mercado
+      await Promise.all([
+        onUpdate(),
+        refreshAllBalances(),
+        refreshMarketData()
+      ]);
+      
       setLastUpdate(new Date());
       setNextUpdate(new Date(Date.now() + interval));
       toast.success('Dados atualizados com sucesso!');
@@ -44,7 +54,13 @@ export const RealTimeUpdater: React.FC<RealTimeUpdaterProps> = ({
       if (!isUpdating) {
         setIsUpdating(true);
         try {
-          await onUpdate();
+          // Atualizar dados em background
+          await Promise.all([
+            onUpdate(),
+            refreshAllBalances(),
+            refreshMarketData()
+          ]);
+          
           setLastUpdate(new Date());
           setNextUpdate(new Date(Date.now() + interval));
         } catch (error) {

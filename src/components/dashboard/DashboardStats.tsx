@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { InteractiveCard } from './InteractiveCard';
 import { useMultiChainWallets } from '@/hooks/useMultiChainWallets';
+import { useMarketData } from '@/hooks/useMarketData';
 
 interface DashboardStatsProps {
   wallets: any[];
@@ -25,6 +26,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
   selectedCurrency
 }) => {
   const navigate = useNavigate();
+  const { globalStats } = useMarketData();
   
   // Calculate real stats from wallet data
   const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
@@ -135,13 +137,13 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       {/* Market Data */}
       <InteractiveCard
         title="Mercado Cripto"
-        value="$1.8T"
+        value={`$${(globalStats.totalMarketCap / 1e12).toFixed(1)}T`}
         icon={BarChart3}
         color="orange"
         onClick={handleMarketsClick}
         tooltip="Clique para análise completa do mercado"
-        trend="up"
-        trendValue="+5.2% (24h)"
+        trend={globalStats.marketCapChange24h > 0 ? "up" : "down"}
+        trendValue={`${globalStats.marketCapChange24h > 0 ? '+' : ''}${globalStats.marketCapChange24h.toFixed(1)}% (24h)`}
         subtitle="Market Cap Global"
       />
 
