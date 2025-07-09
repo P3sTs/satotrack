@@ -1047,6 +1047,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_security_settings: {
+        Row: {
+          biometric_enabled: boolean
+          created_at: string
+          failed_attempts: number
+          id: string
+          last_successful_auth: string | null
+          locked_until: string | null
+          pin_enabled: boolean
+          pin_hash: string | null
+          pin_salt: string | null
+          security_setup_completed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          biometric_enabled?: boolean
+          created_at?: string
+          failed_attempts?: number
+          id?: string
+          last_successful_auth?: string | null
+          locked_until?: string | null
+          pin_enabled?: boolean
+          pin_hash?: string | null
+          pin_salt?: string | null
+          security_setup_completed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          biometric_enabled?: boolean
+          created_at?: string
+          failed_attempts?: number
+          id?: string
+          last_successful_auth?: string | null
+          locked_until?: string | null
+          pin_enabled?: boolean
+          pin_hash?: string | null
+          pin_salt?: string | null
+          security_setup_completed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           balance_alert_threshold: number | null

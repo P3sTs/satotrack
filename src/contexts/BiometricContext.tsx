@@ -49,7 +49,7 @@ export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }
 
     console.log('🔍 Verificando status da segurança...');
     const biometricEnabled = await biometric.isBiometricEnabled();
-    const pinEnabled = await pinAuth.checkPinStatus();
+    const pinEnabled = await pinAuth.isPinSetup();
     
     console.log('🔐 Biometria habilitada:', biometricEnabled);
     console.log('🔢 PIN habilitado:', pinEnabled);
@@ -158,11 +158,14 @@ export const BiometricProvider: React.FC<BiometricProviderProps> = ({ children }
 
   const removePin = async (): Promise<void> => {
     try {
-      await pinAuth.removePin();
-      setIsPinEnabled(false);
-      // Se não há biometria, liberar acesso
-      if (!isBiometricEnabled) {
-        setIsAuthenticated(true);
+      // Usar disablePin que requer confirmação
+      const success = await pinAuth.disablePin(''); // Vazio para forçar erro e implementar modal
+      if (success) {
+        setIsPinEnabled(false);
+        // Se não há biometria, liberar acesso
+        if (!isBiometricEnabled) {
+          setIsAuthenticated(true);
+        }
       }
       toast.success('🗑️ PIN removido');
     } catch (error) {

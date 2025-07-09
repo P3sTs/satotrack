@@ -18,7 +18,7 @@ import { MultiChainWallet } from '@/hooks/useMultiChainWallets';
 import SendCryptoModalNew from '../SendCryptoModalNew';
 import ReceiveCryptoModalNew from '../ReceiveCryptoModalNew';
 import { WalletDetailModal } from '../WalletDetailModal';
-import SecureDataGuard from '@/components/security/SecureDataGuard';
+import SecureAddressGuard from '@/components/security/SecureAddressGuard';
 import { CryptoDepositModal } from '../enhanced/CryptoDepositModal';
 
 interface PremiumWalletCardProps {
@@ -252,18 +252,15 @@ export const PremiumWalletCard: React.FC<PremiumWalletCardProps> = ({
                 </Button>
               </div>
             </div>
-            <SecureDataGuard 
+            <SecureAddressGuard 
+              walletAddress={wallet.address}
               dataType="endereço da carteira"
-              fallbackComponent={
-                <div className="p-3 bg-dashboard-dark/50 rounded-lg text-xs font-mono text-muted-foreground border border-dashboard-light/20">
-                  ••••••••••••••••••••••••••••••••
-                </div>
-              }
+              showMasked={true}
             >
               <div className="p-3 bg-dashboard-dark/50 rounded-lg text-xs font-mono text-muted-foreground break-all border border-dashboard-light/20">
                 {formatAddress(wallet.address)}
               </div>
-            </SecureDataGuard>
+            </SecureAddressGuard>
           </div>
 
           {/* Action Buttons */}

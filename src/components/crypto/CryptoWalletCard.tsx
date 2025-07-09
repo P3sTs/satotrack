@@ -17,7 +17,7 @@ import {
 import { toast } from 'sonner';
 import SendCryptoModalNew from './SendCryptoModalNew';
 import ReceiveCryptoModalNew from './ReceiveCryptoModalNew';
-import SecureDataGuard from '@/components/security/SecureDataGuard';
+import SecureAddressGuard from '@/components/security/SecureAddressGuard';
 
 interface CryptoWallet {
   id: string;
@@ -206,18 +206,15 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             </div>
           </div>
           
-          <SecureDataGuard 
+          <SecureAddressGuard 
+            walletAddress={wallet.address}
             dataType="endereço da carteira"
-            fallbackComponent={
-              <div className="p-2 bg-muted/30 rounded-lg text-xs font-mono text-muted-foreground">
-                ••••••••••••••••••••••••••••••••
-              </div>
-            }
+            showMasked={true}
           >
             <div className="p-2 bg-muted/30 rounded-lg text-xs font-mono text-muted-foreground break-all">
               {formatAddress(wallet.address)}
             </div>
-          </SecureDataGuard>
+          </SecureAddressGuard>
         </div>
 
         {/* Action Buttons */}
