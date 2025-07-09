@@ -9,6 +9,8 @@ export interface SecurityLog {
   ip: string;
   device: string;
   status: 'success' | 'failed' | 'warning';
+  location?: string;
+  userAgent?: string;
 }
 
 export interface SecurityMetrics {
@@ -54,8 +56,10 @@ export const useSecurityData = () => {
           type: log.event_type,
           timestamp: log.created_at,
           ip: details.ip || '192.168.1.100',
-          device: details.device || 'Chrome/Windows',
-          status: details.success ? 'success' : 'failed'
+          device: details.device || `${details.browser || 'Chrome'}/${details.os || 'Windows'}`,
+          status: details.success ? 'success' : 'failed',
+          location: details.location ? `${details.location.city}, ${details.location.country}` : 'Desconhecida',
+          userAgent: details.user_agent || 'Desconhecido'
         };
       });
 
@@ -109,6 +113,35 @@ export const useSecurityData = () => {
     }
   }, [user]);
 
+  const getLocationFromIP = useCallback(async (ip: string) => {
+    try {
+      const response = await fetch(`https://ipapi.co/${ip}/json/`);
+      const data = await response.json();
+      return {
+        city: data.city || 'Desconhecida',
+        region: data.region || 'Desconhecida',
+        country: data.country_name || 'Desconhecido',
+        timezone: data.timezone || 'UTC'
+      };
+    } catch (error) {
+      return {
+        city: 'Desconhecida',
+        region: 'Desconhecida', 
+        country: 'Desconhecido',
+        timezone: 'UTC'
+      };
+    }
+  }, []);
+
+  const getCurrentIP = useCallback(async () => {
+    try {
+      const response = await fetch('https://ipapi.co/ip/');
+      return await response.text();
+    } catch (error) {
+      return '192.168.1.100'; // Fallback IP
+    }
+  }, []);
+
   const recordSecurityEvent = useCallback(async (
     eventType: string, 
     details: any = {}
@@ -116,6 +149,11 @@ export const useSecurityData = () => {
     if (!user) return;
 
     try {
+      const currentIP = await getCurrentIP();
+      const location = await getLocationFromIP(currentIP);
+      const userAgent = navigator.userAgent;
+      const browserInfo = getBrowserInfo(userAgent);
+
       await supabase
         .from('security_logs')
         .insert({
@@ -124,21 +162,46 @@ export const useSecurityData = () => {
           details: {
             ...details,
             timestamp: new Date().toISOString(),
-            user_agent: navigator.userAgent,
-            ip: '192.168.1.100' // Placeholder - em produção usar IP real
+            ip: currentIP,
+            location: location,
+            device: `${browserInfo.browser}/${browserInfo.os}`,
+            user_agent: userAgent,
+            success: details.success !== false,
+            session_id: crypto.randomUUID()
           }
         });
     } catch (error) {
       console.error('Erro ao registrar evento de segurança:', error);
     }
-  }, [user]);
+  }, [user, getCurrentIP, getLocationFromIP]);
+
+  const getBrowserInfo = useCallback((userAgent: string) => {
+    const browser = userAgent.includes('Chrome') ? 'Chrome' :
+                   userAgent.includes('Firefox') ? 'Firefox' :
+                   userAgent.includes('Safari') ? 'Safari' :
+                   userAgent.includes('Edge') ? 'Edge' : 'Desconhecido';
+    
+    const os = userAgent.includes('Windows') ? 'Windows' :
+               userAgent.includes('Mac') ? 'macOS' :
+               userAgent.includes('Linux') ? 'Linux' :
+               userAgent.includes('Android') ? 'Android' :
+               userAgent.includes('iOS') ? 'iOS' : 'Desconhecido';
+    
+    return { browser, os };
+  }, []);
 
   useEffect(() => {
     if (user) {
       loadSecurityLogs();
       loadSecurityMetrics();
+      
+      // Registrar evento de acesso automaticamente
+      recordSecurityEvent('page_access', {
+        page: 'security_dashboard',
+        success: true
+      });
     }
-  }, [user, loadSecurityLogs, loadSecurityMetrics]);
+  }, [user, loadSecurityLogs, loadSecurityMetrics, recordSecurityEvent]);
 
   // Real-time updates for security logs
   useEffect(() => {

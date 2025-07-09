@@ -52,10 +52,14 @@ const Security: React.FC = () => {
   const getTypeLabel = (type: string) => {
     const labels = {
       'login': 'Login',
+      'logout': 'Logout',
       'biometric_auth': 'Auth Biométrica',
       'wallet_access': 'Acesso Carteira',
       'password_change': 'Mudança Senha',
-      'suspicious_activity': 'Atividade Suspeita'
+      'suspicious_activity': 'Atividade Suspeita',
+      'page_access': 'Acesso à Página',
+      'transaction': 'Transação',
+      'settings_change': 'Alteração Config.'
     };
     return labels[type] || type;
   };
@@ -267,36 +271,57 @@ const Security: React.FC = () => {
                   {securityLogs.map((log) => (
                     <div 
                       key={log.id} 
-                      className="flex items-center justify-between p-4 bg-dashboard-dark/50 rounded-lg border border-dashboard-light/20"
+                      className="flex items-start justify-between p-4 bg-dashboard-dark/50 rounded-lg border border-dashboard-light/20"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-3 flex-1">
                         {getStatusIcon(log.status)}
-                        <div>
-                          <p className="text-white font-medium">
-                            {getTypeLabel(log.type)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {log.device} • {log.ip}
-                          </p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-white font-medium">
+                              {getTypeLabel(log.type)}
+                            </p>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                log.status === 'success' 
+                                  ? 'border-emerald-500/30 text-emerald-400'
+                                  : 'border-red-500/30 text-red-400'
+                              }`}
+                            >
+                              {log.status === 'success' ? 'Sucesso' : 'Falha'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Globe className="h-3 w-3" />
+                              <span>IP: {log.ip}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{new Date(log.timestamp).toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Smartphone className="h-3 w-3" />
+                              <span>{log.device}</span>
+                            </div>
+                            {log.location && (
+                              <div className="flex items-center gap-1">
+                                <Globe className="h-3 w-3" />
+                                <span>{log.location}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(log.timestamp).toLocaleString('pt-BR')}
-                        </p>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            log.status === 'success' 
-                              ? 'border-emerald-500/30 text-emerald-400'
-                              : 'border-red-500/30 text-red-400'
-                          }`}
-                        >
-                          {log.status === 'success' ? 'Sucesso' : 'Falha'}
-                        </Badge>
                       </div>
                     </div>
                   ))}
+                  
+                  {securityLogs.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>Nenhum log de segurança encontrado</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
