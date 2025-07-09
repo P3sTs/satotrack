@@ -61,7 +61,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('satotrack-theme', theme);
     
     // Broadcast theme change to other tabs
-    const event = new CustomEvent('theme-change', { detail: { theme, effectiveTheme: newEffectiveTheme } });
+    const event = new CustomEvent('theme-change', { detail: theme });
     window.dispatchEvent(event);
 
     // Listen for system theme changes when using system theme
@@ -86,7 +86,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     // Listen for theme changes from other tabs
     const handleThemeChange = (event: CustomEvent) => {
-      setTheme(event.detail);
+      const themeData = event.detail;
+      if (typeof themeData === 'string' && ['dark', 'light', 'system'].includes(themeData)) {
+        setTheme(themeData as Theme);
+      } else if (themeData && typeof themeData.theme === 'string' && ['dark', 'light', 'system'].includes(themeData.theme)) {
+        setTheme(themeData.theme as Theme);
+      }
     };
 
     window.addEventListener('theme-change', handleThemeChange as EventListener);
