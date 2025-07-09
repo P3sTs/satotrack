@@ -189,11 +189,11 @@ export const useCurrencyConverter = () => {
       setLastUpdate(new Date());
       
       // Calcular conversão baseada no modo
-      if (reverseMode && toAmount) {
-        const newFromAmount = (parseFloat(toAmount) / rate).toString();
+      if (reverseMode && toAmount && !isNaN(parseFloat(toAmount))) {
+        const newFromAmount = (parseFloat(toAmount) / rate).toFixed(8);
         setFromAmount(newFromAmount);
-      } else if (!reverseMode && fromAmount) {
-        const newToAmount = (parseFloat(fromAmount) * rate).toString();
+      } else if (!reverseMode && fromAmount && !isNaN(parseFloat(fromAmount))) {
+        const newToAmount = (parseFloat(fromAmount) * rate).toFixed(8);
         setToAmount(newToAmount);
       }
     }
@@ -203,8 +203,10 @@ export const useCurrencyConverter = () => {
   useEffect(() => {
     if (!reverseMode && fromAmount && exchangeRate && !isLoading) {
       const amount = parseFloat(fromAmount);
-      if (!isNaN(amount)) {
-        setToAmount((amount * exchangeRate).toString());
+      if (!isNaN(amount) && amount >= 0) {
+        setToAmount((amount * exchangeRate).toFixed(8));
+      } else {
+        setToAmount('');
       }
     }
   }, [fromAmount, exchangeRate, reverseMode, isLoading]);
@@ -213,8 +215,10 @@ export const useCurrencyConverter = () => {
   useEffect(() => {
     if (reverseMode && toAmount && exchangeRate && !isLoading) {
       const amount = parseFloat(toAmount);
-      if (!isNaN(amount)) {
-        setFromAmount((amount / exchangeRate).toString());
+      if (!isNaN(amount) && amount >= 0) {
+        setFromAmount((amount / exchangeRate).toFixed(8));
+      } else {
+        setFromAmount('');
       }
     }
   }, [toAmount, exchangeRate, reverseMode, isLoading]);

@@ -24,6 +24,7 @@ import {
   QrCode 
 } from 'lucide-react';
 import { toast } from 'sonner';
+import anime from 'animejs/lib/anime.es.js';
 
 interface SendTransactionModalProps {
   isOpen: boolean;
@@ -58,6 +59,12 @@ const SendTransactionModal: React.FC<SendTransactionModalProps> = ({
       return;
     }
 
+    // Validação de endereço básica
+    if (recipient.length < 26 || recipient.length > 62) {
+      toast.error('Endereço inválido');
+      return;
+    }
+
     const amountNum = parseFloat(amount);
     const balanceNum = parseFloat(wallet.balance || '0');
 
@@ -71,14 +78,42 @@ const SendTransactionModal: React.FC<SendTransactionModalProps> = ({
       return;
     }
 
-    setShowConfirmation(true);
+    // Animação de transição
+    anime({
+      targets: '.send-form',
+      opacity: [1, 0],
+      translateY: [0, -20],
+      duration: 300,
+      easing: 'easeInQuad',
+      complete: () => setShowConfirmation(true)
+    });
   };
 
   const confirmTransaction = async () => {
     try {
+      // Animação de loading
+      anime({
+        targets: '.confirm-button',
+        scale: [1, 0.95, 1],
+        duration: 200,
+        easing: 'easeInOutQuad'
+      });
+
       await onSendTransaction(wallet, recipient, amount, memo || undefined);
-      resetForm();
-      setShowConfirmation(false);
+      
+      // Animação de sucesso
+      anime({
+        targets: '.confirmation-modal',
+        scale: [1, 1.05, 0.95],
+        opacity: [1, 0],
+        duration: 400,
+        easing: 'easeInBack',
+        complete: () => {
+          resetForm();
+          setShowConfirmation(false);
+        }
+      });
+      
     } catch (error) {
       setShowConfirmation(false);
       console.error('Error sending transaction:', error);
@@ -121,7 +156,7 @@ const SendTransactionModal: React.FC<SendTransactionModalProps> = ({
   if (showConfirmation) {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="confirmation-modal sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-orange-500">
               <AlertTriangle className="h-5 w-5" />
@@ -189,7 +224,7 @@ const SendTransactionModal: React.FC<SendTransactionModalProps> = ({
             <Button
               onClick={confirmTransaction}
               disabled={isLoading}
-              className="bg-red-500 hover:bg-red-600"
+              className="confirm-button bg-red-500 hover:bg-red-600"
             >
               {isLoading ? (
                 <>
@@ -219,7 +254,7 @@ const SendTransactionModal: React.FC<SendTransactionModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="send-form space-y-6">
           {/* Wallet Info */}
           <Card>
             <CardContent className="p-4">
