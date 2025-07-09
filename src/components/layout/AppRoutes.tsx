@@ -53,6 +53,7 @@ import ApiDocs from '@/pages/ApiDocs';
 import BitcoinLookup from '@/pages/BitcoinLookup';
 import Crypto from '@/pages/Crypto';
 import CryptoVisualization3D from '@/pages/CryptoVisualization3D';
+import CurrencyConverter from '@/pages/CurrencyConverter';
 import Mercado from '@/pages/Mercado';
 
 // 🎯 Extra & Gamificação
@@ -235,6 +236,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/crypto-3d" element={
         <ProtectedRoute>
           <CryptoVisualization3D />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/currency-converter" element={
+        <ProtectedRoute>
+          <CurrencyConverter />
         </ProtectedRoute>
       } />
       
