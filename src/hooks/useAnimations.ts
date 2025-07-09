@@ -18,15 +18,15 @@ export const useAnimations = () => {
         const delay = options?.delay || 0;
         const duration = options?.duration || 800;
         
-        // Set initial state
-        htmlElement.style.opacity = '0';
-        htmlElement.style.transform = 'translateY(20px)';
-        htmlElement.style.transition = `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+        // Set initial state with important to override any conflicting styles
+        htmlElement.style.setProperty('opacity', '0', 'important');
+        htmlElement.style.setProperty('transform', 'translateY(20px)', 'important');
+        htmlElement.style.setProperty('transition', `all ${duration}ms cubic-bezier(0.4, 0, 0.2, 1)`, 'important');
         
         // Animate in with stagger
         setTimeout(() => {
-          htmlElement.style.opacity = '1';
-          htmlElement.style.transform = 'translateY(0px)';
+          htmlElement.style.setProperty('opacity', '1', 'important');
+          htmlElement.style.setProperty('transform', 'translateY(0px)', 'important');
         }, delay + (index * 100));
       });
     } catch (error) {
@@ -67,7 +67,7 @@ export const useAnimations = () => {
       }
       elements.forEach((element) => {
         const htmlElement = element as HTMLElement;
-        htmlElement.style.animation = 'float 4s ease-in-out infinite';
+        htmlElement.style.setProperty('animation', 'float 4s ease-in-out infinite', 'important');
       });
     } catch (error) {
       console.error('🎈 Error in animateFloat:', error);
@@ -83,7 +83,7 @@ export const useAnimations = () => {
       }
       elements.forEach((element) => {
         const htmlElement = element as HTMLElement;
-        htmlElement.style.animation = 'glowPulse 2s ease-in-out infinite alternate';
+        htmlElement.style.setProperty('animation', 'glowPulse 2s ease-in-out infinite alternate', 'important');
       });
     } catch (error) {
       console.error('✨ Error in animateGlow:', error);
