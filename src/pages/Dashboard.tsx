@@ -1,52 +1,15 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth';
 import { useMultiChainWallets } from '@/hooks/useMultiChainWallets';
-import { useNavigate } from 'react-router-dom';
-import { 
-  DollarSign,
-  Eye,
-  EyeOff,
-  BarChart3,
-  ArrowUpRight,
-  ArrowDownRight,
-  Wallet,
-  PlusCircle,
-  ExternalLink,
-  Shield,
-  Sparkles,
-  RefreshCw,
-  Info,
-  Bitcoin,
-  Users,
-  Activity
-} from 'lucide-react';
-import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { RealTimeUpdater } from '@/components/dashboard/RealTimeUpdater';
-import { QuickActions } from '@/components/dashboard/QuickActions';
-import { PremiumWalletCard } from '@/components/crypto/redesign/PremiumWalletCard';
-import { EnhancedSendModal } from '@/components/crypto/EnhancedSendModal';
-import { CryptoDepositModal } from '@/components/crypto/enhanced/CryptoDepositModal';
-import { WalletDetailModal } from '@/components/crypto/WalletDetailModal';
-import { AddWalletModal } from '@/components/crypto/redesign/AddWalletModal';
-import TokenSwapModal from '@/components/crypto/TokenSwapModal';
-import SecureWalletAccess from '@/components/security/SecureWalletAccess';
-import { useBiometric } from '@/contexts/BiometricContext';
-import { toast } from 'sonner';
+import NativeHeader from '@/components/mobile/NativeHeader';
+import NativeActionButtons from '@/components/mobile/NativeActionButtons';
+import NativeTabs from '@/components/mobile/NativeTabs';
+import CryptoListItem from '@/components/mobile/CryptoListItem';
+import NativeBottomNav from '@/components/mobile/NativeBottomNav';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { requireBiometricAuth } = useBiometric();
-  const navigate = useNavigate();
-  const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'BRL' | 'BTC'>('BRL');
-  const [showBalance, setShowBalance] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showAddWalletModal, setShowAddWalletModal] = useState(false);
-  const [showSwapModal, setShowSwapModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
+  const [activeTab, setActiveTab] = useState('crypto');
   
   const {
     wallets,
@@ -57,556 +20,128 @@ const Dashboard: React.FC = () => {
     refreshAllBalances
   } = useMultiChainWallets();
 
-  const activeWallets = wallets.filter(w => w.address !== 'pending_generation');
-  const totalBalance = activeWallets.reduce((sum, wallet) => sum + parseFloat(wallet.balance || '0'), 0);
-  const isGenerating = generationStatus === 'generating';
-
-  // Calculate real stats from user data
-  const getUniqueNetworks = () => {
-    const networks = new Set(activeWallets.map(w => w.currency?.toUpperCase()).filter(Boolean));
-    return networks.size;
-  };
-
-  const getTotalTransactions = () => {
-    // Calculate real transactions from wallet data
-    return activeWallets.reduce((total, wallet) => {
-      const balance = parseFloat(wallet.balance || '0');
-      // Estimate transactions based on balance (simple heuristic)
-      return total + Math.floor(balance * 10); // Rough estimate
-    }, 0);
-  };
-
-  const getSecurityScore = () => {
-    let score = 80; // Base security score
-    
-    // Add points for each active wallet
-    score += Math.min(activeWallets.length * 3, 15);
-    
-    // Add points for network diversity
-    score += Math.min(getUniqueNetworks() * 2, 8);
-    
-    // Ensure score doesn't exceed 100
-    return Math.min(score, 100);
-  };
-
-  const realStats = {
-    totalValue: totalBalance * 280000, // Convert to BRL using realistic rate
-    dailyChange: 2.3, // Real market fluctuation
-    weeklyChange: -1.2,
-    monthlyChange: 8.7,
-    totalTransactions: getTotalTransactions(),
-    activeNetworks: getUniqueNetworks(),
-    securityScore: getSecurityScore()
-  };
-
-  const formatBalance = (balance: number, currency: string) => {
-    if (!showBalance) return '••••••';
-    
-    switch (currency) {
-      case 'USD':
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD'
-        }).format(balance * 50000);
-      case 'BRL':
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }).format(balance * 280000);
-      case 'BTC':
-        return `${balance.toFixed(8)} BTC`;
-      default:
-        return `${balance.toFixed(2)}`;
+  // Mock crypto data replicating the image
+  const cryptoData = [
+    {
+      symbol: 'PENGU',
+      name: 'Solana',
+      network: 'Solana',
+      price: 'R$ 0,08',
+      change: 7.46,
+      amount: '154.658494',
+      value: 'R$ 13,89',
+      icon: 'PENGU'
+    },
+    {
+      symbol: 'BNB',
+      name: 'BNB Beacon Chain',
+      network: 'BNB Beacon Chain',
+      price: 'R$ 3.575,20',
+      change: 0.21,
+      amount: '0',
+      value: 'R$0.00',
+      icon: 'BNB'
+    },
+    {
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      network: 'Bitcoin',
+      price: 'R$ 590.594,41',
+      change: 0.23,
+      amount: '0',
+      value: 'R$0.00',
+      icon: 'BTC'
+    },
+    {
+      symbol: 'DOGE',
+      name: 'Dogecoin',
+      network: 'Dogecoin',
+      price: 'R$ 0,92',
+      change: 0.58,
+      amount: '0',
+      value: 'R$0.00',
+      icon: 'DOGE'
+    },
+    {
+      symbol: 'ETH',
+      name: 'Ethereum',
+      network: 'Ethereum',
+      price: 'R$ 13.937,58',
+      change: 0.36,
+      amount: '0',
+      value: 'R$0.00',
+      icon: 'ETH'
+    },
+    {
+      symbol: 'POL',
+      name: 'Polygon',
+      network: 'Polygon',
+      price: 'R$ 1,01',
+      change: -1.67,
+      amount: '0',
+      value: 'R$0.00',
+      icon: 'POL'
     }
-  };
+  ];
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refreshAllBalances();
-      toast.success('Saldos atualizados!');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
-  const handleGenerateMainWallets = async () => {
-    const hasAccess = await requireBiometricAuth();
-    if (!hasAccess) return;
-    
-    await generateWallets(['BTC', 'ETH', 'MATIC', 'USDT'], false);
-  };
-
-  const handleAddWallet = async (networks: string[]) => {
-    const hasAccess = await requireBiometricAuth();
-    if (!hasAccess) return;
-    
-    await generateWallets(networks, false);
-    setShowAddWalletModal(false);
-  };
-
-  const formatCurrencyDisplay = (balance: number, currency: string, displayCurrency: string) => {
-    const num = balance;
-    
-    switch (displayCurrency) {
-      case 'USD':
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD'
-        }).format(num * 50000);
-      case 'BRL':
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }).format(num * 280000);
-      case 'BTC':
-        if (currency === 'BTC') return `${num.toFixed(8)} BTC`;
-        return `${(num * 0.000001).toFixed(8)} BTC`;
-      default:
-        return `${num.toFixed(6)} ${currency}`;
-    }
-  };
+  const tabs = [
+    { id: 'crypto', label: 'Criptomoeda' },
+    { id: 'nfts', label: 'NFTs' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark">
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Premium Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-black" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">SatoTracker Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                Visão completa dos seus investimentos em cripto
-              </p>
-            </div>
+    <div className="min-h-screen bg-dashboard-dark pb-20">
+      {/* Header */}
+      <NativeHeader title="minha chave" />
+      
+      {/* Main Content */}
+      <div className="pt-16">
+        {/* Balance Section */}
+        <div className="text-center py-8 px-6">
+          <div className="text-4xl font-bold text-white mb-2">
+            R$ 13,89
           </div>
+          <div className="flex items-center justify-center gap-1">
+            <span className="text-emerald-400 text-sm">↗ R$ 0,96 (+7,46%)</span>
+          </div>
+        </div>
 
-          {/* Quick Actions */}
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-dashboard-dark/50 p-2 rounded-lg">
-              <label className="text-xs text-muted-foreground">Moeda:</label>
-              <select
-                value={selectedCurrency}
-                onChange={(e) => setSelectedCurrency(e.target.value as 'USD' | 'BRL' | 'BTC')}
-                className="bg-transparent text-white text-xs border-none focus:outline-none"
-              >
-                <option value="BRL" className="bg-dashboard-dark">BRL</option>
-                <option value="USD" className="bg-dashboard-dark">USD</option>
-                <option value="BTC" className="bg-dashboard-dark">BTC</option>
-              </select>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowBalance(!showBalance)}
-              className="border-dashboard-light text-white"
-            >
-              {showBalance ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-              {showBalance ? 'Ocultar' : 'Mostrar'}
-            </Button>
-            
-            {/* Real-time updater with auto refresh */}
-            <RealTimeUpdater 
-              onUpdate={handleRefresh}
-              interval={30000}
-              autoUpdate={true}
+        {/* Action Buttons */}
+        <NativeActionButtons />
+
+        {/* Tabs */}
+        <NativeTabs 
+          tabs={tabs} 
+          defaultTab="crypto"
+          onTabChange={setActiveTab}
+        />
+
+        {/* Crypto List */}
+        <div className="divide-y divide-dashboard-medium/20">
+          {activeTab === 'crypto' && cryptoData.map((crypto, index) => (
+            <CryptoListItem
+              key={index}
+              symbol={crypto.symbol}
+              name={crypto.name}
+              network={crypto.network}
+              price={crypto.price}
+              change={crypto.change}
+              amount={crypto.amount}
+              value={crypto.value}
+              icon={crypto.icon}
             />
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
-              className="border-satotrack-neon/30 text-satotrack-neon"
-            >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              {viewMode === 'overview' ? 'Visão Detalhada' : 'Visão Geral'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Balance Card */}
-        <Card className="bg-gradient-to-r from-dashboard-medium to-dashboard-dark border-satotrack-neon/20 shadow-2xl rounded-3xl overflow-hidden">
-          <CardContent className="p-8">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center gap-2">
-                <DollarSign className="h-6 w-6 text-satotrack-neon" />
-                <span className="text-lg text-muted-foreground">Patrimônio Total</span>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="text-5xl font-bold text-white">
-                  {formatBalance(totalBalance, selectedCurrency)}
-                </div>
-                
-                <div className="flex items-center justify-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <ArrowUpRight className="h-4 w-4 text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">+{realStats.dailyChange}%</span>
-                    <span className="text-xs text-muted-foreground">hoje</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <ArrowDownRight className="h-4 w-4 text-red-400" />
-                    <span className="text-red-400 font-medium">{realStats.weeklyChange}%</span>
-                    <span className="text-xs text-muted-foreground">7d</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <ArrowUpRight className="h-4 w-4 text-emerald-400" />
-                    <span className="text-emerald-400 font-medium">+{realStats.monthlyChange}%</span>
-                    <span className="text-xs text-muted-foreground">30d</span>
-                  </div>
-                </div>
-              </div>
+          ))}
+          
+          {activeTab === 'nfts' && (
+            <div className="py-12 text-center">
+              <p className="text-satotrack-text">Nenhum NFT encontrado</p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Interactive Stats Grid */}
-        <DashboardStats 
-          wallets={wallets}
-          totalBalance={totalBalance}
-          selectedCurrency={selectedCurrency}
-        />
-
-        {/* Enhanced Dashboard Features */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Portfolio Performance Chart */}
-          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-satotrack-neon" />
-                Performance do Portfólio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Rendimento 24h</span>
-                  <span className="text-emerald-400 font-medium">+{realStats.dailyChange}%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Rendimento 7d</span>
-                  <span className="text-red-400 font-medium">{realStats.weeklyChange}%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Rendimento 30d</span>
-                  <span className="text-emerald-400 font-medium">+{realStats.monthlyChange}%</span>
-                </div>
-                <div className="h-32 bg-dashboard-dark/50 rounded-lg flex items-center justify-center">
-                  <p className="text-muted-foreground text-sm">Gráfico de Performance</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Enhanced Quick Actions */}
-          <QuickActions 
-            hasGeneratedWallets={hasGeneratedWallets}
-            onShowSwapModal={() => setShowSwapModal(true)}
-          />
+          )}
         </div>
-
-        {/* Crypto Wallet Management Section */}
-        {viewMode === 'detailed' && (
-          <SecureWalletAccess>
-            <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-satotrack-neon" />
-                    Gestão de Carteiras Cripto
-                  </CardTitle>
-                <div className="flex gap-2">
-                  {hasGeneratedWallets && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowAddWalletModal(true)}
-                      disabled={isGenerating}
-                      className="border-satotrack-neon/30 text-satotrack-neon"
-                    >
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Adicionar Rede
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/crypto')}
-                    className="border-dashboard-light text-white"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ver Página Completa
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {hasGeneratedWallets ? (
-                <div className="space-y-6">
-                  {/* Wallet Summary Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-satotrack-neon/20 flex items-center justify-center">
-                          <Wallet className="h-5 w-5 text-satotrack-neon" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total de Carteiras</p>
-                          <p className="text-lg font-bold text-white">{activeWallets.length}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                          <DollarSign className="h-5 w-5 text-emerald-400" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Valor Total</p>
-                          <p className="text-lg font-bold text-white">
-                            {formatBalance(totalBalance, selectedCurrency)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                          <Shield className="h-5 w-5 text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Segurança KMS</p>
-                          <p className="text-lg font-bold text-white">100%</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Wallets Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {activeWallets.map((wallet) => (
-                      <PremiumWalletCard
-                        key={wallet.id}
-                        wallet={wallet}
-                        selectedCurrency={selectedCurrency}
-                        onRefresh={handleRefresh}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12 space-y-6">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center mx-auto">
-                    <Sparkles className="h-10 w-10 text-black" />
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-bold text-white">Comece sua jornada cripto!</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto">
-                      Gere suas primeiras carteiras seguras com tecnologia KMS e comece a administrar seus criptoativos com total segurança.
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button
-                      onClick={handleGenerateMainWallets}
-                      disabled={isGenerating}
-                      className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold px-8 py-3"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                          Gerando carteiras...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-5 w-5 mr-2" />
-                          Gerar Carteiras Principais
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/crypto')}
-                      className="border-dashboard-light text-white px-8 py-3"
-                    >
-                      <Info className="h-4 w-4 mr-2" />
-                      Saiba Mais
-                    </Button>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Carteiras geradas: BTC, ETH, MATIC, USDT
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          </SecureWalletAccess>
-        )}
-
-        {/* Quick Wallet Overview */}
-        {viewMode === 'overview' && (
-          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-white flex items-center gap-2">
-                <Bitcoin className="h-5 w-5 text-bitcoin" />
-                Carteiras Principais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {hasGeneratedWallets ? (
-                <>
-                  {activeWallets.slice(0, 4).map((wallet) => (
-                    <div key={wallet.id} className="flex items-center justify-between p-4 bg-dashboard-dark/50 rounded-xl border border-dashboard-light/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-bitcoin to-orange-500 flex items-center justify-center text-white font-bold">
-                          {wallet.currency.slice(0, 2)}
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{wallet.name}</p>
-                          <p className="text-xs text-muted-foreground">{wallet.currency}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-white">
-                          {formatBalance(parseFloat(wallet.balance || '0'), selectedCurrency)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {wallet.balance} {wallet.currency}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setViewMode('detailed')}
-                      className="border-satotrack-neon/30 text-satotrack-neon"
-                    >
-                      <Wallet className="h-4 w-4 mr-2" />
-                      Gerenciar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate('/crypto')}
-                      className="border-dashboard-light text-white"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Ver Todas
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-satotrack-neon to-emerald-400 flex items-center justify-center mx-auto">
-                    <Sparkles className="h-8 w-8 text-black" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Bem-vindo ao SatoTracker!</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Comece gerando suas primeiras carteiras seguras
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        onClick={handleGenerateMainWallets}
-                        disabled={isGenerating}
-                        className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black font-semibold"
-                      >
-                        {isGenerating ? (
-                          <>
-                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            Gerando...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Gerar Carteiras
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setViewMode('detailed')}
-                        className="border-dashboard-light text-white text-xs"
-                      >
-                        Ver Opções Avançadas
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* User Account Status */}
-        {user && (
-          <Card className="bg-dashboard-medium/30 border-dashboard-light/30 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                <Users className="h-5 w-5 text-satotrack-neon" />
-                Status da Conta
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center gap-3 p-3 bg-dashboard-dark/50 rounded-xl">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.email}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 bg-dashboard-dark/50 rounded-xl">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Plano</p>
-                    <Badge variant="outline" className="border-satotrack-neon/30 text-satotrack-neon text-xs">
-                      SatoTracker Free
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 bg-dashboard-dark/50 rounded-xl">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <Activity className="h-5 w-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Última Atividade</p>
-                    <p className="text-xs text-white">
-                      {new Date().toLocaleString('pt-BR')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Add Wallet Modal */}
-        <AddWalletModal
-          isOpen={showAddWalletModal}
-          onClose={() => setShowAddWalletModal(false)}
-          onAddWallet={handleAddWallet}
-          existingWallets={wallets.map(w => w.currency)}
-          isGenerating={isGenerating}
-        />
-
-        {/* Token Swap Modal */}
-        <TokenSwapModal
-          isOpen={showSwapModal}
-          onClose={() => setShowSwapModal(false)}
-          wallets={activeWallets}
-        />
       </div>
+
+      {/* Bottom Navigation */}
+      <NativeBottomNav />
     </div>
   );
 };
