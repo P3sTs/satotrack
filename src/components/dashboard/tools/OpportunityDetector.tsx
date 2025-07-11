@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Target, TrendingUp, Volume2, Plus, AlertCircle, Brain, Loader2 } from 'lucide-react';
 import { useGeminiAI } from '@/hooks/useGeminiAI';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
-import { useRealtimePrices } from '@/hooks/useRealtimePrices';
+import { useRealTimePrices } from '@/hooks/useRealTimePrices';
 
 interface SmartOpportunity {
   id: string;
@@ -32,7 +32,7 @@ const OpportunityDetector: React.FC = () => {
   
   const { detectOpportunities, isLoading: aiLoading } = useGeminiAI();
   const { data: bitcoinData } = useBitcoinPrice();
-  const { prices } = useRealtimePrices();
+  const { prices } = useRealTimePrices();
 
   const scanWithAI = async () => {
     if (!prices || !bitcoinData) return;

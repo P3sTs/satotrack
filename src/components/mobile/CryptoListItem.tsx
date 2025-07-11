@@ -1,4 +1,6 @@
 import React from 'react';
+import { useRealTimePrices } from '@/hooks/useRealTimePrices';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 
 interface CryptoItemProps {
   symbol: string;
@@ -71,7 +73,8 @@ const CryptoListItem: React.FC<CryptoItemProps> = ({
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-satotrack-text">{price}</span>
             <span className={`text-xs ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-              {isPositive ? '+' : ''}{change.toFixed(2)}%
+              {isPositive ? '+' : ''}
+              <AnimatedNumber value={change} decimals={2} suffix="%" />
             </span>
           </div>
         </div>

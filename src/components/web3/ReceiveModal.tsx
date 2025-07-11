@@ -20,7 +20,7 @@ import {
   Info
 } from 'lucide-react';
 import { toast } from 'sonner';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface ReceiveModalProps {
   isOpen: boolean;
@@ -123,7 +123,7 @@ const ReceiveModal: React.FC<ReceiveModalProps> = ({
           {/* QR Code */}
           <div className="flex flex-col items-center space-y-4">
             <div className="p-4 bg-white rounded-lg">
-              <QRCode
+              <QRCodeCanvas
                 value={wallet.address}
                 size={200}
                 level="M"

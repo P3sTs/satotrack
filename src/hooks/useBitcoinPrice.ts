@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRealtimePrices } from './useRealtimePrices';
+import { useRealTimePrices } from './useRealTimePrices';
 
 export interface BitcoinPriceData {
   price_usd: number;
@@ -33,7 +33,7 @@ export const useBitcoinPrice = () => {
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  const { prices, isLoading: pricesLoading, refresh: refreshPrices, lastUpdated } = useRealtimePrices(60000);
+  const { prices, isLoading: pricesLoading, fetchPrices, lastUpdated } = useRealTimePrices(['bitcoin']);
   
   // Buscar dados adicionais do CoinGecko (mercado, etc)
   const fetchAdditionalData = useCallback(async () => {
@@ -109,18 +109,18 @@ export const useBitcoinPrice = () => {
     try {
       setIsRefreshing(true);
       
-      // Se temos preços do nosso serviço
-      if (prices) {
-        // Buscar dados adicionais
-        const additionalData = await fetchAdditionalData();
-        
-        const newData: BitcoinPriceData = {
-          price_usd: prices.BTC_USD,
-          price_brl: prices.BTC_BRL,
-          last_updated: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
-          updated_at: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
-          ...additionalData
-        };
+        // Se temos preços do nosso serviço
+        if (prices && prices.bitcoin) {
+          // Buscar dados adicionais
+          const additionalData = await fetchAdditionalData();
+          
+          const newData: BitcoinPriceData = {
+            price_usd: prices.bitcoin.usd,
+            price_brl: prices.bitcoin.brl,
+            last_updated: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
+            updated_at: lastUpdated ? lastUpdated.toISOString() : new Date().toISOString(),
+            ...additionalData
+          };
         
         setData(newData);
         setError(null);
@@ -145,9 +145,9 @@ export const useBitcoinPrice = () => {
   
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refreshPrices();
+    await fetchPrices();
     setIsRefreshing(false);
-  }, [refreshPrices]);
+  }, [fetchPrices]);
   
   return { data, loading, error, previousPrice, isRefreshing, refresh };
 };
