@@ -7,6 +7,7 @@ import { useActivityMonitor } from './useActivityMonitor';
 import { useLoginAttempts } from './useLoginAttempts';
 import { useAuthEvents } from './hooks/useAuthEvents';
 import { useUserInitialization } from './hooks/useUserInitialization';
+import { useGuestAccess } from '@/hooks/useGuestAccess';
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -43,6 +44,9 @@ export const useAuthSession = () => {
 
   // User initialization
   const { initializeNewUser } = useUserInitialization();
+  
+  // Guest access
+  const guestAccess = useGuestAccess();
 
   // Auth events handling - fix the function signature
   const { setupAuthStateListener } = useAuthEvents({
@@ -55,6 +59,7 @@ export const useAuthSession = () => {
   const isAuthenticated = Boolean(session && user);
   const isLoading = loading || authLoading;
   const failedLoginAttempts = getFailedLoginAttempts();
+  const isGuestMode = guestAccess.isGuestMode;
 
   const updateProfile = async (data: any) => {
     if (!user) throw new Error('No user logged in');
@@ -134,5 +139,7 @@ export const useAuthSession = () => {
     resetFailedLoginAttempts,
     checkSubscriptionStatus,
     isLoading,
+    isGuestMode,
+    ...guestAccess,
   };
 };

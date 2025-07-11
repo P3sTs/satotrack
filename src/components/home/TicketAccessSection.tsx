@@ -132,7 +132,26 @@ const TicketAccessSection = () => {
                   className="w-full bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
                   onClick={() => window.location.href = '/auth?ticket=' + ticket.code}
                 >
-                  🚀 Ativar Conta Agora
+                  🚀 Ativar Conta Completa
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                  onClick={() => {
+                    // Criar sessão guest temporária
+                    const guestSession = {
+                      id: `guest_${Date.now()}`,
+                      type: 'guest',
+                      accessLevel: 'read_only',
+                      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hora
+                      generatedAt: new Date()
+                    };
+                    localStorage.setItem('guest_session', JSON.stringify(guestSession));
+                    window.location.href = '/dashboard?mode=guest';
+                  }}
+                >
+                  👁️ Acessar como Visitante (1h)
                 </Button>
                 
                 <Button 

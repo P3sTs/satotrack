@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, Camera, MoreHorizontal } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
 import { WalletInfoModal } from '@/components/modals/WalletInfoModal';
+import { GuestTimer } from '@/components/guest/GuestTimer';
 
 interface NativeHeaderProps {
   title: string;
@@ -9,6 +11,7 @@ interface NativeHeaderProps {
 }
 
 const NativeHeader: React.FC<NativeHeaderProps> = ({ title, subtitle, onTitleClick }) => {
+  const { isGuestMode } = useAuth();
   const [showWalletModal, setShowWalletModal] = useState(false);
 
   const handleTitleClick = () => {
@@ -21,10 +24,10 @@ const NativeHeader: React.FC<NativeHeaderProps> = ({ title, subtitle, onTitleCli
 
   // Mock wallet data - this would come from your wallet context
   const walletData = {
-    name: title,
-    address: 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
+    name: isGuestMode ? 'Carteira Demo' : title,
+    address: isGuestMode ? 'demo1234...abcd' : 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
     network: 'Bitcoin',
-    balance: '0.00135',
+    balance: isGuestMode ? '0.05847' : '0.00135',
     currency: 'BTC'
   };
 
@@ -38,12 +41,17 @@ const NativeHeader: React.FC<NativeHeaderProps> = ({ title, subtitle, onTitleCli
           </div>
 
           {/* Center - Title with dropdown */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={handleTitleClick}
-          >
-            <span className="text-white font-medium">{title}</span>
-            <ChevronDown className="h-4 w-4 text-satotrack-text" />
+          <div className="flex items-center gap-3">
+            <div 
+              className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={handleTitleClick}
+            >
+              <span className="text-white font-medium">
+                {isGuestMode ? 'carteira demo' : title}
+              </span>
+              <ChevronDown className="h-4 w-4 text-satotrack-text" />
+            </div>
+            <GuestTimer />
           </div>
 
           {/* Right side - Search */}

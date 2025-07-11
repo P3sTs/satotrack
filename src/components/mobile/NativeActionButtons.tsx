@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowUp, ArrowDown, Zap, Building2 } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
 import { SendCryptoModal } from '@/components/modals/SendCryptoModal';
 import { ReceiveCryptoModal } from '@/components/modals/ReceiveCryptoModal';
 import { BuyCryptoModal } from '@/components/modals/BuyCryptoModal';
+import { GuestActionModal } from '@/components/guest/GuestActionModal';
 import { useRealTimePrices } from '@/hooks/useRealTimePrices';
 
 interface ActionButton {
@@ -13,12 +15,23 @@ interface ActionButton {
 }
 
 const NativeActionButtons: React.FC = () => {
+  const { interceptAction } = useAuth();
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
+  const [guestModalOpen, setGuestModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState('');
   
   const { prices } = useRealTimePrices();
+
+  const handleAction = (actionName: string, callback: () => void) => {
+    const allowed = interceptAction(actionName, callback);
+    if (!allowed) {
+      setCurrentAction(actionName);
+      setGuestModalOpen(true);
+    }
+  };
 
   // Mock wallet data - this would come from your wallet context
   const mockWallets = [
@@ -60,25 +73,25 @@ const NativeActionButtons: React.FC = () => {
       icon: <ArrowUp className="h-5 w-5" />,
       label: 'Enviar',
       variant: 'default',
-      onClick: () => setShowSendModal(true)
+      onClick: () => handleAction('enviar criptomoedas', () => setShowSendModal(true))
     },
     {
       icon: <ArrowDown className="h-5 w-5" />,
       label: 'Receber',
       variant: 'default',
-      onClick: () => setShowReceiveModal(true)
+      onClick: () => handleAction('receber criptomoedas', () => setShowReceiveModal(true))
     },
     {
       icon: <Zap className="h-5 w-5" />,
       label: 'Comprar',
       variant: 'primary',
-      onClick: () => setShowBuyModal(true)
+      onClick: () => handleAction('comprar criptomoedas', () => setShowBuyModal(true))
     },
     {
       icon: <Building2 className="h-5 w-5" />,
       label: 'Vender',
       variant: 'default',
-      onClick: () => setShowSellModal(true)
+      onClick: () => handleAction('vender criptomoedas', () => setShowSellModal(true))
     }
   ];
 
@@ -120,6 +133,12 @@ const NativeActionButtons: React.FC = () => {
         isOpen={showBuyModal}
         onClose={() => setShowBuyModal(false)}
         supportedCryptos={supportedCryptos}
+      />
+
+      <GuestActionModal
+        isOpen={guestModalOpen}
+        onClose={() => setGuestModalOpen(false)}
+        actionName={currentAction}
       />
       
       {/* Sell Modal - Could be implemented similarly */}

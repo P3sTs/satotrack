@@ -21,6 +21,7 @@ export interface AuthContextType {
   session: Session | null;
   user: AuthUser | null;
   loading: boolean;
+  isGuestMode: boolean;
   
   // Password management
   apiToken: string | null;
@@ -59,6 +60,14 @@ export interface AuthContextType {
   openCustomerPortal: () => Promise<{ url: string }>;
   checkSubscriptionStatus: () => Promise<void>;
   isLoading: boolean;
+  
+  // Guest access functions
+  guestSession: any;
+  createGuestSession: (ticketCode: string) => void;
+  interceptAction: (actionName: string, callback?: () => void) => boolean;
+  endGuestSession: () => void;
+  getRemainingTime: () => number;
+  formatRemainingTime: () => string;
 }
 
 export interface SecurityStatus {
