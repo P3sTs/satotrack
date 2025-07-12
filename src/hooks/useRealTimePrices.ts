@@ -43,7 +43,23 @@ export const useRealTimePrices = (cryptoIds: string[] = ['bitcoin', 'ethereum', 
       }
 
       const data = await response.json();
-      setPrices(data);
+      
+      // Só atualiza se os dados realmente mudaram significativamente
+      setPrices(prevPrices => {
+        const hasSignificantChange = Object.keys(data).some(id => {
+          const newPrice = data[id];
+          const oldPrice = prevPrices[id];
+          
+          if (!oldPrice) return true;
+          
+          // Só atualiza se mudança for > 0.1%
+          const change = Math.abs((newPrice.brl - oldPrice.brl) / oldPrice.brl) * 100;
+          return change > 0.1;
+        });
+        
+        return hasSignificantChange ? data : prevPrices;
+      });
+      
       setLastUpdated(new Date());
       setIsLoading(false);
     } catch (err) {
@@ -88,8 +104,8 @@ export const useRealTimePrices = (cryptoIds: string[] = ['bitcoin', 'ethereum', 
     // Fetch immediately
     fetchPrices();
 
-    // Set up interval for updates every 30 seconds
-    intervalRef.current = setInterval(fetchPrices, 30000);
+    // Set up interval for updates every 60 seconds (menos frequente para evitar mudanças constantes)
+    intervalRef.current = setInterval(fetchPrices, 60000);
 
     return () => {
       if (intervalRef.current) {

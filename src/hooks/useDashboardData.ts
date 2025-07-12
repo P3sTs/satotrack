@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
+import { demoWallets, demoStats } from '@/data/demoWallets';
+import { useTatumPrices } from './useTatumPrices';
 
 export interface DashboardStats {
   totalBalance: number;
@@ -30,6 +32,7 @@ const POLLING_INTERVAL = 30000; // 30 seconds
 
 export const useDashboardData = () => {
   const { user } = useAuth();
+  const { getCryptoData } = useTatumPrices();
   const [stats, setStats] = useState<DashboardStats>({
     totalBalance: 0,
     totalBalanceChange: 0,
@@ -43,12 +46,44 @@ export const useDashboardData = () => {
   
   const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const isGuestMode = localStorage.getItem('guest_demo_mode') === 'true';
 
-  // Fetch wallet data from Supabase
+  // Fetch wallet data from Supabase or use demo data
   const fetchWalletData = useCallback(async () => {
-    if (!user) return;
-
     try {
+      if (isGuestMode || !user) {
+        // Usar dados demo para convidados
+        setStats({
+          totalBalance: demoStats.totalBalance,
+          totalBalanceChange: 2.34,
+          activeWallets: demoStats.activeWallets,
+          totalTransactions: demoStats.totalTransactions,
+          activeNetworks: demoStats.activeNetworks,
+          securityScore: demoStats.securityScore,
+          isLoading: false,
+          lastUpdated: new Date(),
+        });
+
+        // Converter dados demo para assets com preços reais
+        const demoAssets: CryptoAsset[] = demoWallets.map(wallet => {
+          const priceData = getCryptoData(wallet.symbol);
+          return {
+            symbol: wallet.symbol,
+            name: wallet.name,
+            network: wallet.network,
+            price: priceData?.priceBRL || 'R$ 0,00',
+            change: priceData?.change24h.value || wallet.change24h,
+            amount: wallet.balance.toString(),
+            value: priceData ? (wallet.balance * priceData.price * 5.2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : `R$ ${wallet.balanceUSD.toFixed(2)}`,
+            balanceUSD: wallet.balanceUSD,
+            icon: wallet.icon,
+          };
+        });
+
+        setCryptoAssets(demoAssets);
+        return;
+      }
+
       const { data: wallets, error } = await supabase
         .from('crypto_wallets')
         .select('*')
@@ -73,7 +108,7 @@ export const useDashboardData = () => {
       setStats(prev => ({
         ...prev,
         totalBalance,
-        totalBalanceChange: Math.random() * 10 - 5, // Mock change for now
+        totalBalanceChange: Math.random() * 10 - 5,
         activeWallets: activeWallets.length,
         totalTransactions: transactionCount || 0,
         activeNetworks: uniqueNetworks,
@@ -81,18 +116,23 @@ export const useDashboardData = () => {
         lastUpdated: new Date(),
       }));
 
-      // Convert to crypto assets format
-      const assets: CryptoAsset[] = activeWallets.map(wallet => ({
-        symbol: wallet.currency || 'UNKNOWN',
-        name: wallet.name,
-        network: wallet.currency || 'Unknown',
-        price: `R$ ${(Math.random() * 1000).toFixed(2)}`,
-        change: Math.random() * 20 - 10,
-        amount: wallet.balance?.toString() || '0',
-        value: `R$ ${(parseFloat(wallet.balance?.toString() || '0') * Math.random() * 100).toFixed(2)}`,
-        balanceUSD: parseFloat(wallet.balance?.toString() || '0') * Math.random() * 100,
-        icon: wallet.currency || 'UNKNOWN',
-      }));
+      // Convert to crypto assets format with real prices
+      const assets: CryptoAsset[] = activeWallets.map(wallet => {
+        const priceData = getCryptoData(wallet.currency || 'BTC');
+        const balance = parseFloat(wallet.balance?.toString() || '0');
+        
+        return {
+          symbol: wallet.currency || 'UNKNOWN',
+          name: wallet.name,
+          network: wallet.currency || 'Unknown',
+          price: priceData?.priceBRL || 'R$ 0,00',
+          change: priceData?.change24h.value || 0,
+          amount: balance.toString(),
+          value: priceData ? (balance * priceData.price * 5.2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+          balanceUSD: balance * (priceData?.price || 0),
+          icon: wallet.currency || 'UNKNOWN',
+        };
+      });
 
       setCryptoAssets(assets);
 
@@ -101,7 +141,7 @@ export const useDashboardData = () => {
       toast.error('Erro ao carregar dados do dashboard');
       setStats(prev => ({ ...prev, isLoading: false }));
     }
-  }, [user]);
+  }, [user, getCryptoData, isGuestMode]);
 
   // Manual refresh function
   const refreshData = useCallback(() => {

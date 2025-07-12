@@ -42,11 +42,12 @@ const TicketAccessSection = () => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 horas
       };
       
+      // Salvar email para cadastro posterior
+      sessionStorage.setItem('ticket_email', email || phone);
+      sessionStorage.setItem('ticket_code', newTicket.code);
+      
       setTicket(newTicket);
       toast.success('Ticket de acesso gerado com sucesso!');
-      
-      // Aqui seria a integração real com Supabase
-      // await supabase.from('access_tickets').insert({...})
       
     } catch (error) {
       toast.error('Erro ao gerar ticket. Tente novamente.');
@@ -130,7 +131,11 @@ const TicketAccessSection = () => {
               <div className="space-y-3">
                 <Button 
                   className="w-full bg-satotrack-neon text-black hover:bg-satotrack-neon/90"
-                  onClick={() => window.location.href = '/auth?ticket=' + ticket.code}
+                  onClick={() => {
+                    sessionStorage.setItem('ticket_email', email || phone);
+                    sessionStorage.setItem('ticket_code', ticket.code);
+                    window.location.href = '/auth?mode=signup&ticket=' + ticket.code;
+                  }}
                 >
                   🚀 Ativar Conta Completa
                 </Button>

@@ -41,7 +41,7 @@ export const useGuestAccess = () => {
     }
   }, []);
 
-  const createGuestSession = (ticketCode: string) => {
+  const createGuestSession = (ticketCode: string = '') => {
     const session: GuestSession = {
       id: `guest_${Date.now()}`,
       type: 'guest',
@@ -51,6 +51,7 @@ export const useGuestAccess = () => {
     };
 
     localStorage.setItem('guest_session', JSON.stringify(session));
+    localStorage.setItem('guest_demo_mode', 'true'); // Flag para dados demo
     setGuestSession(session);
     setIsGuestMode(true);
     
