@@ -16,14 +16,25 @@ export const useGuestAccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('🔍 useGuestAccess: Verificando sessão guest...');
+    
     // Verificar se existe sessão guest no localStorage
     const storedSession = localStorage.getItem('guest_session');
+    const isDemoMode = localStorage.getItem('guest_demo_mode') === 'true';
+    
+    console.log('📦 Sessão armazenada:', !!storedSession);
+    console.log('🎭 Modo demo:', isDemoMode);
+    
     if (storedSession) {
       try {
         const session = JSON.parse(storedSession);
         const expiresAt = new Date(session.expiresAt);
         
+        console.log('⏰ Sessão expira em:', expiresAt);
+        console.log('🕐 Agora:', new Date());
+        
         if (expiresAt > new Date()) {
+          console.log('✅ Sessão guest válida - ativando modo convidado');
           setGuestSession({
             ...session,
             expiresAt,
@@ -31,13 +42,18 @@ export const useGuestAccess = () => {
           });
           setIsGuestMode(true);
         } else {
-          // Sessão expirada
+          console.log('❌ Sessão guest expirada - removendo');
           localStorage.removeItem('guest_session');
+          localStorage.removeItem('guest_demo_mode');
           toast.error('Sua sessão de visitante expirou. Crie uma conta para continuar.');
         }
       } catch (error) {
+        console.error('❌ Erro ao processar sessão guest:', error);
         localStorage.removeItem('guest_session');
+        localStorage.removeItem('guest_demo_mode');
       }
+    } else {
+      console.log('ℹ️ Nenhuma sessão guest encontrada');
     }
   }, []);
 
@@ -75,7 +91,9 @@ export const useGuestAccess = () => {
   };
 
   const endGuestSession = () => {
+    console.log('🚪 Encerrando sessão guest');
     localStorage.removeItem('guest_session');
+    localStorage.removeItem('guest_demo_mode');
     setGuestSession(null);
     setIsGuestMode(false);
   };

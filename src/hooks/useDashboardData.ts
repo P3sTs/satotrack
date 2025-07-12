@@ -51,8 +51,9 @@ export const useDashboardData = () => {
   // Fetch wallet data from Supabase or use demo data
   const fetchWalletData = useCallback(async () => {
     try {
-      if (isGuestMode || !user) {
-        // Usar dados demo para convidados
+      // Se for modo convidado, sempre usar dados demo
+      if (isGuestMode) {
+        console.log('🎭 Modo convidado: usando dados demo');
         setStats({
           totalBalance: demoStats.totalBalance,
           totalBalanceChange: 2.34,
@@ -84,6 +85,17 @@ export const useDashboardData = () => {
         return;
       }
 
+      // Se não tem usuário logado e não é modo convidado, não carregar nada
+      if (!user) {
+        console.log('⚠️ Sem usuário e sem modo convidado');
+        setStats(prev => ({ ...prev, isLoading: false }));
+        setCryptoAssets([]);
+        return;
+      }
+
+      // Usuário autenticado - carregar dados reais do Supabase
+      console.log('👤 Usuário autenticado: carregando dados reais');
+      
       const { data: wallets, error } = await supabase
         .from('crypto_wallets')
         .select('*')
@@ -138,7 +150,6 @@ export const useDashboardData = () => {
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      toast.error('Erro ao carregar dados do dashboard');
       setStats(prev => ({ ...prev, isLoading: false }));
     }
   }, [user, getCryptoData, isGuestMode]);
@@ -151,14 +162,15 @@ export const useDashboardData = () => {
 
   // Setup polling for real-time updates
   useEffect(() => {
-    if (!user) return;
-
+    // Sempre carregar dados, independente do modo
     fetchWalletData();
     
-    const interval = setInterval(fetchWalletData, POLLING_INTERVAL);
-    
-    return () => clearInterval(interval);
-  }, [user, fetchWalletData]);
+    // Só fazer polling se usuário estiver logado (não convidado)
+    if (user && !isGuestMode) {
+      const interval = setInterval(fetchWalletData, POLLING_INTERVAL);
+      return () => clearInterval(interval);
+    }
+  }, [user, isGuestMode, fetchWalletData]);
 
   // Monitor online status
   useEffect(() => {

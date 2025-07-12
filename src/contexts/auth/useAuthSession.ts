@@ -59,7 +59,17 @@ export const useAuthSession = () => {
   const isAuthenticated = Boolean(session && user);
   const isLoading = loading || authLoading;
   const failedLoginAttempts = getFailedLoginAttempts();
+  
+  // Modo guest vem do hook dedicado e independe do user
   const isGuestMode = guestAccess.isGuestMode;
+  
+  console.log('🏗️ useAuthSession state:', {
+    hasUser: !!user,
+    hasSession: !!session,
+    isAuthenticated,
+    isGuestMode,
+    loading
+  });
 
   const updateProfile = async (data: any) => {
     if (!user) throw new Error('No user logged in');

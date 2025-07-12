@@ -15,7 +15,7 @@ interface ActionButton {
 }
 
 const NativeActionButtons: React.FC = () => {
-  const { interceptAction } = useAuth();
+  const { isGuestMode, user, interceptAction } = useAuth();
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -26,11 +26,22 @@ const NativeActionButtons: React.FC = () => {
   const { prices } = useRealTimePrices();
 
   const handleAction = (actionName: string, callback: () => void) => {
-    const allowed = interceptAction(actionName, callback);
-    if (!allowed) {
+    // Se for modo convidado, interceptar e mostrar modal
+    if (isGuestMode) {
       setCurrentAction(actionName);
       setGuestModalOpen(true);
+      return;
     }
+    
+    // Se usuário está autenticado, executar ação normal
+    if (user) {
+      callback();
+      return;
+    }
+    
+    // Se não tem usuário nem é convidado, mostrar erro
+    setCurrentAction('fazer login');
+    setGuestModalOpen(true);
   };
 
   // Mock wallet data - this would come from your wallet context
@@ -116,33 +127,38 @@ const NativeActionButtons: React.FC = () => {
         ))}
       </div>
 
-      {/* Modals */}
-      <SendCryptoModal
-        isOpen={showSendModal}
-        onClose={() => setShowSendModal(false)}
-        wallets={mockWallets}
-      />
-      
-      <ReceiveCryptoModal
-        isOpen={showReceiveModal}
-        onClose={() => setShowReceiveModal(false)}
-        wallets={mockWallets}
-      />
-      
-      <BuyCryptoModal
-        isOpen={showBuyModal}
-        onClose={() => setShowBuyModal(false)}
-        supportedCryptos={supportedCryptos}
-      />
+      {/* Modals - Só aparecem para usuários autenticados */}
+      {user && !isGuestMode && (
+        <>
+          <SendCryptoModal
+            isOpen={showSendModal}
+            onClose={() => setShowSendModal(false)}
+            wallets={mockWallets}
+          />
+          
+          <ReceiveCryptoModal
+            isOpen={showReceiveModal}
+            onClose={() => setShowReceiveModal(false)}
+            wallets={mockWallets}
+          />
+          
+          <BuyCryptoModal
+            isOpen={showBuyModal}
+            onClose={() => setShowBuyModal(false)}
+            supportedCryptos={supportedCryptos}
+          />
+        </>
+      )}
 
+      {/* Modal para convidados ou não autenticados */}
       <GuestActionModal
         isOpen={guestModalOpen}
         onClose={() => setGuestModalOpen(false)}
         actionName={currentAction}
       />
       
-      {/* Sell Modal - Could be implemented similarly */}
-      {showSellModal && (
+      {/* Sell Modal - Só para usuários autenticados */}
+      {user && !isGuestMode && showSellModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-background rounded-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-semibold mb-4">Vender Criptomoeda</h3>

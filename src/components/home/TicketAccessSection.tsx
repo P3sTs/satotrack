@@ -144,7 +144,7 @@ const TicketAccessSection = () => {
                   variant="outline"
                   className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
                   onClick={() => {
-                    // Criar sessão guest temporária
+                    // Criar sessão guest temporária com localStorage
                     const guestSession = {
                       id: `guest_${Date.now()}`,
                       type: 'guest',
@@ -153,7 +153,10 @@ const TicketAccessSection = () => {
                       generatedAt: new Date()
                     };
                     localStorage.setItem('guest_session', JSON.stringify(guestSession));
-                    window.location.href = '/dashboard?mode=guest';
+                    localStorage.setItem('guest_demo_mode', 'true');
+                    
+                    // Redirecionar direto para dashboard
+                    window.location.href = '/dashboard';
                   }}
                 >
                   👁️ Acessar como Visitante (1h)
