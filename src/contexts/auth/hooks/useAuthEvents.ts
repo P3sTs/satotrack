@@ -15,10 +15,20 @@ export const useAuthEvents = (props?: UseAuthEventsProps) => {
     console.log('🔒 Setting up secure auth event listeners...');
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔒 Auth event:', event, session?.user?.email);
+      (event, session) => {
+        console.log('🔒 Auth event:', event, {
+          "_type": typeof session,
+          "value": session ? "session_exists" : "undefined"
+        });
         
-        if (event === 'SIGNED_IN') {
+        if (event === 'INITIAL_SESSION') {
+          console.log('Sessão inicial encontrada:', !!session);
+          if (props) {
+            props.setSession(session);
+            props.setUser(session?.user ?? null);
+            props.setLoading(false);
+          }
+        } else if (event === 'SIGNED_IN') {
           console.log('🔒 User signed in securely:', session?.user?.email);
           console.log('🔒 SECURITY COMPLIANT: User authentication completed - No sensitive data exposed');
           
@@ -28,7 +38,9 @@ export const useAuthEvents = (props?: UseAuthEventsProps) => {
             props.setLoading(false);
             
             if (session?.user) {
-              props.initializeNewUser(session.user);
+              setTimeout(() => {
+                props.initializeNewUser(session.user);
+              }, 0);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -52,7 +64,7 @@ export const useAuthEvents = (props?: UseAuthEventsProps) => {
     );
 
     return subscription;
-  }, [props]);
+  }, []); // Remove props das dependências para evitar recriações
 
   // Setup event listeners for user activity if no props provided (standalone usage)
   useEffect(() => {

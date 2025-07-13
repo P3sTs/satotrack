@@ -55,13 +55,11 @@ export const LoginForm = () => {
       
       await signIn(email, password);
       
-      // Aguardar um pouco e verificar se foi redirecionado
-      setTimeout(() => {
-        if (!isAuthenticated) {
-          console.log("Login aparentemente bem-sucedido, mas usuário não está autenticado. Redirecionando manualmente...");
-          navigate('/dashboard', { replace: true });
-        }
-      }, 2000);
+      // Toast de sucesso
+      toast({
+        title: "Login realizado",
+        description: "Redirecionando para o dashboard...",
+      });
       
     } catch (err) {
       console.error("Erro de login:", err);

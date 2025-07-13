@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuthFunctions } from './useAuthFunctions';
@@ -48,12 +48,12 @@ export const useAuthSession = () => {
   // Guest access
   const guestAccess = useGuestAccess();
 
-  // Auth events handling - fix the function signature
+  // Auth events handling - simplificado para evitar loops
   const { setupAuthStateListener } = useAuthEvents({
     setSession,
     setUser,
     setLoading,
-    initializeNewUser: (user: User) => initializeNewUser(user.id) // Pass user.id to the function
+    initializeNewUser: (user: User) => initializeNewUser(user.id)
   });
 
   const isAuthenticated = Boolean(session && user);
@@ -97,39 +97,49 @@ export const useAuthSession = () => {
     }
   };
 
-  // Session initialization
+  // Session initialization - executar apenas uma vez
   useEffect(() => {
     console.log("Inicializando useAuthSession...");
     
-    const subscription = setupAuthStateListener();
+    let subscription: any;
+    let isInitialized = false;
 
-    // Check for existing session
-    const checkSession = async () => {
+    const initializeAuth = async () => {
       try {
-        console.log("Verificando sessão existente...");
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Erro ao verificar sessão:", error);
+        // Setup do listener de eventos
+        subscription = setupAuthStateListener();
+
+        // Verificar sessão existente apenas uma vez
+        if (!isInitialized) {
+          console.log("Verificando sessão existente...");
+          const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Erro ao verificar sessão:", error);
+          }
+          
+          console.log("Sessão inicial encontrada:", !!initialSession);
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+          setLoading(false);
+          
+          isInitialized = true;
         }
-        
-        console.log("Sessão inicial encontrada:", !!initialSession);
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-        setLoading(false);
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
         setLoading(false);
       }
     };
 
-    checkSession();
+    initializeAuth();
 
     return () => {
       console.log("Limpando subscription do useAuthSession");
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
-  }, [setupAuthStateListener]);
+  }, []); // Array vazio para executar apenas uma vez
 
   return { 
     session, 
