@@ -35,8 +35,8 @@ const Auth = () => {
       />
       
       {/* Auth Form Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center px-4 py-8 md:py-12 z-50">
-        <div className="w-full max-w-sm md:max-w-md bg-background/95 backdrop-blur-xl border border-border/30 rounded-lg p-6 shadow-2xl relative z-50">
+      <div className="relative z-10 flex items-center justify-center px-4 py-8 md:py-12 min-h-screen">
+        <div className="w-full max-w-sm md:max-w-md bg-background/98 backdrop-blur-xl border border-border/40 rounded-lg p-6 shadow-2xl">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
               <div className="relative h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-r from-satotrack-secondary/20 to-satotrack-neon/20 flex items-center justify-center">

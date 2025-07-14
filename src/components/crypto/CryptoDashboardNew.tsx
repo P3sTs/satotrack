@@ -14,7 +14,7 @@ import { CryptoDashboardStats } from './dashboard/CryptoDashboardStats';
 import { CryptoDashboardAlerts } from './dashboard/CryptoDashboardAlerts';
 import { CryptoWalletsGrid } from './dashboard/CryptoWalletsGrid';
 import { CryptoSecurityNotice } from './dashboard/CryptoSecurityNotice';
-import { WalletDebugInfo } from '@/components/debug/WalletDebugInfo';
+
 
 const CryptoDashboardNew: React.FC = () => {
   const navigate = useNavigate();
@@ -167,10 +167,6 @@ const CryptoDashboardNew: React.FC = () => {
         <CryptoSecurityNotice />
       </div>
       
-      {/* Debug Info - Remove in production */}
-      <div className="dashboard-section opacity-0">
-        <WalletDebugInfo />
-      </div>
     </div>
   );
 };

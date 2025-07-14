@@ -7,7 +7,7 @@ import { useActivityMonitor } from './useActivityMonitor';
 import { useLoginAttempts } from './useLoginAttempts';
 import { useAuthEvents } from './hooks/useAuthEvents';
 import { useUserInitialization } from './hooks/useUserInitialization';
-import { useGuestAccess } from '@/hooks/useGuestAccess';
+
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,8 +45,6 @@ export const useAuthSession = () => {
   // User initialization
   const { initializeNewUser } = useUserInitialization();
   
-  // Guest access
-  const guestAccess = useGuestAccess();
 
   // Auth events handling - simplificado para evitar loops
   const { setupAuthStateListener } = useAuthEvents({
@@ -60,8 +58,7 @@ export const useAuthSession = () => {
   const isLoading = loading || authLoading;
   const failedLoginAttempts = getFailedLoginAttempts();
   
-  // Modo guest vem do hook dedicado e independe do user
-  const isGuestMode = guestAccess.isGuestMode;
+  const isGuestMode = false;
   
   console.log('🏗️ useAuthSession state:', {
     hasUser: !!user,
@@ -160,6 +157,5 @@ export const useAuthSession = () => {
     checkSubscriptionStatus,
     isLoading,
     isGuestMode,
-    ...guestAccess,
   };
 };

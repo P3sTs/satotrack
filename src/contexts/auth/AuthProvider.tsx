@@ -36,13 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetFailedLoginAttempts,
     checkSubscriptionStatus,
     isLoading,
-    isGuestMode,
-    guestSession,
-    createGuestSession,
-    interceptAction,
-    endGuestSession,
-    getRemainingTime,
-    formatRemainingTime
+    isGuestMode
   } = useAuthSession();
 
   const {
@@ -112,13 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createCheckoutSession,
     openCustomerPortal,
     checkSubscriptionStatus,
-    isLoading,
-    guestSession,
-    createGuestSession,
-    interceptAction,
-    endGuestSession,
-    getRemainingTime,
-    formatRemainingTime
+    isLoading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

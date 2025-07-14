@@ -46,13 +46,13 @@ export const useDashboardData = () => {
   
   const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const isGuestMode = localStorage.getItem('guest_demo_mode') === 'true';
+  const isGuestMode = false;
 
   // Fetch wallet data from Supabase or use demo data
   const fetchWalletData = useCallback(async () => {
     try {
       // Se for modo convidado, sempre usar dados demo
-      if (isGuestMode) {
+      if (false) {
         console.log('🎭 Modo convidado: usando dados demo');
         setStats({
           totalBalance: demoStats.totalBalance,

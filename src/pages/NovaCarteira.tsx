@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import NewWalletModal from '../components/NewWalletModal';
 import { useErrorHandler } from '../hooks/useErrorHandler';
-import DebugLogger from '../components/debug/DebugLogger';
+
 
 const NovaCarteira: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(true);
@@ -33,11 +33,6 @@ const NovaCarteira: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
-      <DebugLogger 
-        data={{ route: '/nova-carteira', walletsCount: carteiras.length }}
-        label="Nova Carteira Page"
-      />
-      
       <div className="flex items-center mb-6">
         <Button 
           variant="ghost" 

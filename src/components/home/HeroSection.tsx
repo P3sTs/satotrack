@@ -24,9 +24,9 @@ const HeroSection = () => {
             <Button 
               size="lg" 
               className="group bg-satotrack-neon text-black hover:bg-satotrack-neon/90 text-lg px-8 py-6 rounded-2xl font-semibold w-full sm:w-auto"
-              onClick={() => navigate('/auth?action=register')}
+              onClick={() => navigate('/auth?mode=signup')}
             >
-              🎫 Criar ticket de acesso gratuito
+              🚀 Criar Conta Grátis
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
             

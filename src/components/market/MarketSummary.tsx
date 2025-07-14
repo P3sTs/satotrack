@@ -35,7 +35,7 @@ const MarketSummary: React.FC = () => {
     };
 
     fetchMarketData();
-    const interval = setInterval(fetchMarketData, 60000); // Atualizar a cada minuto
+    const interval = setInterval(fetchMarketData, 30000); // Atualizar a cada 30 segundos
 
     return () => clearInterval(interval);
   }, []);

@@ -61,13 +61,6 @@ export interface AuthContextType {
   checkSubscriptionStatus: () => Promise<void>;
   isLoading: boolean;
   
-  // Guest access functions
-  guestSession: any;
-  createGuestSession: (ticketCode: string) => void;
-  interceptAction: (actionName: string, callback?: () => void) => boolean;
-  endGuestSession: () => void;
-  getRemainingTime: () => number;
-  formatRemainingTime: () => string;
 }
 
 export interface SecurityStatus {
