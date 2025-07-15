@@ -3,6 +3,7 @@ import React from 'react';
 import { Sidebar, SidebarContent, SidebarTrigger } from "@/components/ui/sidebar";
 import SidebarNavigation from './sidebar/SidebarNavigation';
 import MainNavigation from '../navigation/MainNavigation';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -30,9 +31,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="h-12 flex items-center border-b border-border/50 px-4">
-          <SidebarTrigger className="mr-4" />
-          <MainNavigation />
+        <header className="h-12 flex items-center justify-between border-b border-border/50 px-4">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <MainNavigation />
+          </div>
+          <ThemeToggle />
         </header>
         
         <main className="flex-1 overflow-auto">

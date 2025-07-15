@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Github, Instagram, MessageCircle } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const Footer: React.FC = () => {
   return (
@@ -27,7 +28,8 @@ const Footer: React.FC = () => {
             <Link to="/privacidade" className="hover:text-satotrack-neon transition-colors">Política</Link>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="mr-2" />
             <a 
               href="https://t.me/No_dts" 
               target="_blank"
