@@ -4,16 +4,21 @@ import * as React from "react"
 import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Github, Instagram, MessageCircle, Send } from "lucide-react"
+import { Github, Instagram, MessageCircle, Moon, Send, Sun } from "lucide-react"
+import { useTheme } from "@/contexts/theme/ThemeContext"
 
 function SatoTrackFooter() {
+  const { effectiveTheme, toggleTheme } = useTheme()
+  const isDarkMode = effectiveTheme === "dark"
+
   return (
     <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
@@ -165,14 +170,22 @@ function SatoTrackFooter() {
             </div>
 
             {/* Theme Toggle */}
-            <div className="mb-4">
-              <h4 className="mb-2 text-sm font-medium text-satotrack-neon">Tema</h4>
-              <ThemeToggle />
+            <div className="flex items-center space-x-2">
+              <Sun className="h-4 w-4" />
+              <Switch
+                id="dark-mode"
+                checked={isDarkMode}
+                onCheckedChange={toggleTheme}
+              />
+              <Moon className="h-4 w-4" />
+              <Label htmlFor="dark-mode" className="sr-only">
+                Alternar modo escuro
+              </Label>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Bottom Section with "Feito com ❤️🇧🇷" */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-satotrack-neon/10 pt-8 text-center md:flex-row">
           <div className="text-sm text-satotrack-text">
             <p>© {new Date().getFullYear()} SatoTrack. Todos os direitos reservados.</p>
@@ -182,9 +195,9 @@ function SatoTrackFooter() {
             </p>
           </div>
           
-          {/* Brazilian Pride Section */}
-          <div className="text-center">
-            <p className="text-lg font-semibold text-satotrack-neon mb-1">
+          {/* Brazilian Pride Section - DESTAQUE */}
+          <div className="text-center order-first md:order-none">
+            <p className="text-xl md:text-2xl font-bold text-satotrack-neon mb-1 animate-pulse">
               Feito com ❤️🇧🇷
             </p>
             <p className="text-xs text-satotrack-text">
