@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TrustWalletCard, CryptoCardContent } from '@/components/ui/trust-wallet-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
   onReceive,
   onRefresh 
 }) => {
+  const navigate = useNavigate();
   const [showAddress, setShowAddress] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
@@ -135,6 +137,15 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Evita navegação se clicou em botões específicos
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="button"]')) {
+      return;
+    }
+    navigate(`/coin/${wallet.currency}`);
+  };
+
   if (isExpanded) {
     const CryptoWalletCardExpanded = React.lazy(() => import('./CryptoWalletCardExpanded'));
     return (
@@ -152,7 +163,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
 
   return (
     <>
-      <div className="cursor-pointer" onClick={() => window.location.href = `/coin/${wallet.currency}`}>
+      <div className="cursor-pointer" onClick={handleCardClick}>
         <TrustWalletCard variant="crypto">
           <CryptoCardContent
             icon={
@@ -176,7 +187,10 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowAddress(!showAddress)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAddress(!showAddress);
+                }}
                 className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
               >
                 {showAddress ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
@@ -184,7 +198,10 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => copyToClipboard(wallet.address, 'Endereço')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(wallet.address, 'Endereço');
+                }}
                 className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
               >
                 <Copy className="h-3 w-3" />
@@ -223,7 +240,10 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowReceiveModal(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowReceiveModal(true);
+              }}
               className="border-primary/30 text-primary hover:bg-primary/10"
             >
               <Download className="h-4 w-4 mr-1" />
@@ -233,7 +253,10 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowSendModal(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSendModal(true);
+              }}
               className="border-primary/30 text-primary hover:bg-primary/10"
             >
               <Send className="h-4 w-4 mr-1" />
@@ -243,7 +266,10 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={handleRefresh}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRefresh();
+              }}
               disabled={isRefreshing}
               className="border-primary/30 text-primary hover:bg-primary/10"
             >
