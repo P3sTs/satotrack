@@ -152,7 +152,7 @@ const CryptoWalletCard: React.FC<CryptoWalletCardProps> = ({
 
   return (
     <>
-      <div className="cursor-pointer" onClick={() => setIsExpanded(true)}>
+      <div className="cursor-pointer" onClick={() => window.location.href = `/coin/${wallet.currency}`}>
         <TrustWalletCard variant="crypto">
           <CryptoCardContent
             icon={

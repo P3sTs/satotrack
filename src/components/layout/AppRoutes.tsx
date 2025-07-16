@@ -26,6 +26,7 @@ import Wallets from '@/pages/Wallets';
 import WalletsManager from '@/pages/WalletsManager';
 import NovaCarteira from '@/pages/NovaCarteira';
 import CarteiraDetalhes from '@/pages/CarteiraDetalhes';
+import CoinDetail from '@/pages/CoinDetail';
 import WalletComparison from '@/pages/WalletComparison';
 
 // 📈 Financeiro & Projeções
@@ -125,6 +126,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/carteira/:id" element={
         <ProtectedRoute>
           <CarteiraDetalhes />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/coin/:symbol" element={
+        <ProtectedRoute>
+          <CoinDetail />
         </ProtectedRoute>
       } />
       
