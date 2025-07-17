@@ -1,194 +1,166 @@
-
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Input validation functions
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email) && email.length <= 254;
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const validateAmount = (amount: string, currency: string): { isValid: boolean; error?: string } => {
-  const numAmount = parseFloat(amount);
-  
-  if (isNaN(numAmount) || numAmount <= 0) {
-    return { isValid: false, error: 'Invalid amount' };
-  }
-  
-  const minimums: Record<string, number> = {
-    'BTC': 0.00001,
-    'ETH': 0.001,
-    'MATIC': 0.01,
-    'USDT': 1,
-    'SOL': 0.001
-  };
-  
-  const minAmount = minimums[currency.toUpperCase()] || 0.0001;
-  
-  if (numAmount < minAmount) {
-    return { isValid: false, error: `Minimum amount for ${currency} is ${minAmount}` };
-  }
-  
-  if (numAmount > 1000000) {
-    return { isValid: false, error: 'Amount too high' };
-  }
-  
-  return { isValid: true };
-};
-
-const validateAddress = (address: string): boolean => {
-  if (!address || address.length < 10 || address.length > 100) {
-    return false;
-  }
-  
-  const addressRegex = /^[a-zA-Z0-9]+$/;
-  return addressRegex.test(address);
-};
-
-// Rate limiting
-const rateLimiter = new Map<string, { count: number; resetTime: number }>();
-
-const checkRateLimit = (userId: string, maxRequests = 10, windowMs = 60000): boolean => {
-  const now = Date.now();
-  const userRequests = rateLimiter.get(userId);
-  
-  if (!userRequests || now > userRequests.resetTime) {
-    rateLimiter.set(userId, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-  
-  if (userRequests.count >= maxRequests) {
-    return false;
-  }
-  
-  userRequests.count++;
-  return true;
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[SECURE-WALLET-OPS] ${step}${detailsStr}`);
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    logStep("Function started");
 
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization')!
+    const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      throw new Error('Missing authorization header')
+      throw new Error("No authorization header provided");
     }
 
-    const token = authHeader.replace('Bearer ', '')
-    const { data: user, error: authError } = await supabaseClient.auth.getUser(token)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-    if (authError || !user.user) {
-      throw new Error('Unauthorized')
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    const user = userData.user;
+    if (!user) throw new Error("User not authenticated");
+
+    const { operation, wallet_id, amount, to_address, currency } = await req.json();
+    
+    if (!operation || !wallet_id) {
+      throw new Error("operation e wallet_id são obrigatórios");
     }
 
-    // Rate limiting
-    if (!checkRateLimit(user.user.id)) {
-      return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 429 
-        }
-      )
+    logStep("Processing secure wallet operation", { operation, wallet_id, userId: user.id });
+
+    // Verificar se a carteira pertence ao usuário
+    const { data: wallet, error: walletError } = await supabase
+      .from('crypto_wallets')
+      .select('*')
+      .eq('id', wallet_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (walletError || !wallet) {
+      throw new Error("Carteira não encontrada ou não autorizada");
     }
 
-    const { operation, ...payload } = await req.json()
-
-    // Log security event
-    await supabaseClient
-      .from('security_logs')
-      .insert({
-        user_id: user.user.id,
-        event_type: 'wallet_operation',
-        details: {
-          operation,
-          timestamp: new Date().toISOString(),
-          ip: req.headers.get('x-forwarded-for') || 'unknown'
-        }
-      });
-
-    let result = {};
+    let result;
 
     switch (operation) {
-      case 'validate_transaction':
-        const { recipient, amount, currency } = payload;
-        
-        // Input validation
-        if (!validateAddress(recipient)) {
-          throw new Error('Invalid recipient address');
+      case 'send':
+        if (!amount || !to_address || !currency) {
+          throw new Error("Para envio: amount, to_address e currency são obrigatórios");
         }
-        
-        const amountValidation = validateAmount(amount, currency);
-        if (!amountValidation.isValid) {
-          throw new Error(amountValidation.error || 'Invalid amount');
+
+        // Validar se há saldo suficiente
+        if (wallet.balance < amount) {
+          throw new Error("Saldo insuficiente para esta transação");
         }
-        
-        result = { valid: true, message: 'Transaction validated' };
+
+        // Registrar log de segurança
+        await supabase
+          .from('security_logs')
+          .insert({
+            user_id: user.id,
+            event_type: 'wallet_send_attempt',
+            details: {
+              wallet_id,
+              amount,
+              to_address,
+              currency,
+              timestamp: new Date().toISOString()
+            }
+          });
+
+        // Simular transação (em produção, integraria com APIs reais)
+        result = {
+          transaction_id: `sim_${Date.now()}`,
+          status: 'pending',
+          amount,
+          to_address,
+          currency,
+          fee: amount * 0.001, // Taxa simulada
+          estimated_confirmation: '10-15 minutes'
+        };
+
+        logStep("Send operation simulated", { transaction_id: result.transaction_id });
         break;
 
-      case 'check_wallet_security':
-        const { data: wallets, error: walletsError } = await supabaseClient
-          .from('crypto_wallets')
-          .select('id, private_key_encrypted')
-          .eq('user_id', user.user.id);
-
-        if (walletsError) throw walletsError;
-
-        const insecureWallets = wallets?.filter(wallet => {
-          if (!wallet.private_key_encrypted) return false;
-          
-          try {
-            const decoded = atob(wallet.private_key_encrypted);
-            return /^[a-fA-F0-9]{64}$/.test(decoded);
-          } catch {
-            return false;
-          }
-        }) || [];
-
+      case 'receive':
+        // Gerar novo endereço de recebimento (simulado)
         result = {
-          total_wallets: wallets?.length || 0,
-          insecure_wallets: insecureWallets.length,
-          security_status: insecureWallets.length === 0 ? 'secure' : 'needs_attention'
+          address: wallet.address,
+          qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${wallet.address}`,
+          currency: wallet.currency,
+          note: 'Use este endereço para receber pagamentos'
         };
+
+        logStep("Receive address generated", { address: result.address });
+        break;
+
+      case 'backup':
+        // Gerar informações de backup (ATENÇÃO: Em produção, isso seria muito mais complexo)
+        result = {
+          backup_phrase: 'NEVER_STORE_REAL_SEEDS_HERE',
+          backup_date: new Date().toISOString(),
+          warning: 'Este é apenas um exemplo. NUNCA armazene seeds reais em logs ou APIs.',
+          instructions: [
+            'Anote a frase de recuperação em papel',
+            'Guarde em local seguro e privado',
+            'Nunca compartilhe com terceiros',
+            'Verifique regularmente o backup'
+          ]
+        };
+
+        // Registrar log de backup
+        await supabase
+          .from('security_logs')
+          .insert({
+            user_id: user.id,
+            event_type: 'wallet_backup_generated',
+            details: {
+              wallet_id,
+              timestamp: new Date().toISOString()
+            }
+          });
+
+        logStep("Backup information generated", { wallet_id });
         break;
 
       default:
-        throw new Error('Unknown operation');
+        throw new Error(`Operação não suportada: ${operation}`);
     }
 
-    return new Response(
-      JSON.stringify(result),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    )
+    return new Response(JSON.stringify({
+      success: true,
+      data: result
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
 
   } catch (error) {
-    console.error('Secure wallet operations error:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
     
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error'
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Unauthorized' ? 401 : 
-                error.message === 'Rate limit exceeded' ? 429 : 500
-      }
-    )
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: errorMessage 
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
-})
+});

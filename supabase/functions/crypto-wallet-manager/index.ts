@@ -1,350 +1,149 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-interface WalletRequest {
-  action: 'generate_wallets' | 'get_balance' | 'send_transaction' | 'get_transactions'
-  currency?: string
-  recipient?: string
-  amount?: string
-  privateKey?: string
-}
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CRYPTO-WALLET-MANAGER] ${step}${detailsStr}`);
+};
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const TATUM_API_KEY = Deno.env.get('TATUM_API_KEY')
-    if (!TATUM_API_KEY) {
-      throw new Error('TATUM_API_KEY not configured')
+    logStep("Function started");
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("No authorization header provided");
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data: user } = await supabaseClient.auth.getUser(token)
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    const user = userData.user;
+    if (!user) throw new Error("User not authenticated");
 
-    if (!user.user) {
-      throw new Error('Unauthorized')
+    const { action, wallet_data } = await req.json();
+    
+    if (!action) {
+      throw new Error("action é obrigatório");
     }
 
-    const { action, currency, recipient, amount, privateKey }: WalletRequest = await req.json()
+    logStep("Processing wallet action", { action, userId: user.id });
 
-    const baseUrl = 'https://api.tatum.io/v3'
-    const headers = {
-      'x-api-key': TATUM_API_KEY,
-      'Content-Type': 'application/json'
-    }
-
-    let result: any = {}
+    let result;
 
     switch (action) {
-      case 'generate_wallets': {
-        console.log(`Generating wallets for user: ${user.user.id}`)
-        
-        const currencies = [
-          { name: 'Bitcoin', network_id: 'BTC' },
-          { name: 'Ethereum', network_id: 'ETH' },
-          { name: 'Polygon', network_id: 'MATIC' },
-          { name: 'Tether', network_id: 'USDT' },
-          { name: 'Solana', network_id: 'SOL' }
-        ]
-        const generatedWallets = []
-
-        for (const curr of currencies) {
-          try {
-            // Check if wallet already exists and is generated
-            const { data: existingWallet } = await supabaseClient
-              .from('crypto_wallets')
-              .select('*')
-              .eq('user_id', user.user.id)
-              .eq('name', curr.name)
-              .single()
-
-            if (existingWallet && existingWallet.address !== 'pending_generation') {
-              console.log(`Wallet for ${curr.name} already exists`)
-              generatedWallets.push(existingWallet)
-              continue
-            }
-
-            // Generate new wallet based on currency
-            let walletResponse
-            let addressResponse
-            
-            if (curr.network_id === 'BTC') {
-              walletResponse = await fetch(`${baseUrl}/bitcoin/wallet`, {
-                method: 'GET',
-                headers
-              })
-            } else if (curr.network_id === 'ETH' || curr.network_id === 'USDT') {
-              walletResponse = await fetch(`${baseUrl}/ethereum/wallet`, {
-                method: 'GET',
-                headers
-              })
-            } else if (curr.network_id === 'MATIC') {
-              walletResponse = await fetch(`${baseUrl}/polygon/wallet`, {
-                method: 'GET',
-                headers
-              })
-            } else if (curr.network_id === 'SOL') {
-              walletResponse = await fetch(`${baseUrl}/solana/wallet`, {
-                method: 'GET',
-                headers
-              })
-            }
-
-            if (!walletResponse?.ok) {
-              console.error(`Failed to generate ${curr.name} wallet`)
-              continue
-            }
-
-            const walletData = await walletResponse.json()
-            console.log(`Generated ${curr.name} wallet data:`, walletData)
-            
-            // Generate address from wallet
-            let finalAddress = walletData.address // For Solana
-            
-            if (curr.network_id === 'BTC') {
-              addressResponse = await fetch(`${baseUrl}/bitcoin/address/${walletData.xpub}/0`, {
-                method: 'GET',
-                headers
-              })
-              if (addressResponse.ok) {
-                const addressData = await addressResponse.json()
-                finalAddress = addressData.address
-              }
-            } else if (curr.network_id === 'ETH' || curr.network_id === 'USDT') {
-              addressResponse = await fetch(`${baseUrl}/ethereum/address/${walletData.xpub}/0`, {
-                method: 'GET',
-                headers
-              })
-              if (addressResponse.ok) {
-                const addressData = await addressResponse.json()
-                finalAddress = addressData.address
-              }
-            } else if (curr.network_id === 'MATIC') {
-              addressResponse = await fetch(`${baseUrl}/polygon/address/${walletData.xpub}/0`, {
-                method: 'GET',
-                headers
-              })
-              if (addressResponse.ok) {
-                const addressData = await addressResponse.json()
-                finalAddress = addressData.address
-              }
-            }
-
-            console.log(`Generated address for ${curr.name}: ${finalAddress}`)
-
-            // Update wallet in database with retry mechanism
-            let updatedWallet = null
-            let retries = 3
-            
-            while (retries > 0 && !updatedWallet) {
-              try {
-                const { data, error } = await supabaseClient
-                  .from('crypto_wallets')
-                  .update({
-                    address: finalAddress,
-                    xpub: walletData.xpub,
-                    private_key_encrypted: btoa(walletData.privateKey || walletData.address), // Simple encoding for demo
-                    balance: 0
-                  })
-                  .eq('user_id', user.user.id)
-                  .eq('name', curr.name)
-                  .select()
-                  .single()
-
-                if (error) {
-                  console.error(`Error updating ${curr.name} wallet:`, error)
-                  retries--
-                  if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, 1000))
-                    continue
-                  }
-                  break
-                }
-
-                // Verify the wallet was actually updated
-                const { data: verifyData } = await supabaseClient
-                  .from('crypto_wallets')
-                  .select('*')
-                  .eq('user_id', user.user.id)
-                  .eq('name', curr.name)
-                  .single()
-
-                if (verifyData?.address && verifyData.address !== 'pending_generation') {
-                  updatedWallet = verifyData
-                  console.log(`${curr.name} wallet updated successfully:`, updatedWallet)
-                  break
-                } else {
-                  console.log(`Retrying ${curr.name} wallet update...`)
-                  retries--
-                  if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, 1500))
-                  }
-                }
-              } catch (updateError) {
-                console.error(`Update error for ${curr.name}:`, updateError)
-                retries--
-                if (retries > 0) {
-                  await new Promise(resolve => setTimeout(resolve, 1000))
-                }
-              }
-            }
-
-            if (updatedWallet) {
-              generatedWallets.push(updatedWallet)
-            } else {
-              console.error(`Failed to update ${curr.name} wallet after retries`)
-            }
-
-          } catch (error) {
-            console.error(`Error generating ${curr.name} wallet:`, error)
-          }
+      case 'create':
+        if (!wallet_data?.currency || !wallet_data?.address || !wallet_data?.name) {
+          throw new Error("Para criar carteira: currency, address e name são obrigatórios");
         }
 
-        result = { generatedWallets, success: true }
-        break
-      }
+        const { data: newWallet, error: createError } = await supabase
+          .from('crypto_wallets')
+          .insert({
+            user_id: user.id,
+            currency: wallet_data.currency,
+            address: wallet_data.address,
+            name: wallet_data.name,
+            balance: wallet_data.balance || 0,
+            total_received: wallet_data.total_received || 0,
+            total_sent: wallet_data.total_sent || 0,
+            transaction_count: wallet_data.transaction_count || 0
+          })
+          .select()
+          .single();
 
-      case 'get_balance': {
-        if (!currency) throw new Error('Currency required')
-        
-        const { data: wallet } = await supabaseClient
+        if (createError) throw createError;
+        result = { wallet: newWallet };
+        break;
+
+      case 'update':
+        if (!wallet_data?.id) {
+          throw new Error("Para atualizar carteira: id é obrigatório");
+        }
+
+        const { data: updatedWallet, error: updateError } = await supabase
+          .from('crypto_wallets')
+          .update({
+            balance: wallet_data.balance,
+            total_received: wallet_data.total_received,
+            total_sent: wallet_data.total_sent,
+            transaction_count: wallet_data.transaction_count,
+            last_updated: new Date().toISOString()
+          })
+          .eq('id', wallet_data.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        result = { wallet: updatedWallet };
+        break;
+
+      case 'delete':
+        if (!wallet_data?.id) {
+          throw new Error("Para deletar carteira: id é obrigatório");
+        }
+
+        const { error: deleteError } = await supabase
+          .from('crypto_wallets')
+          .delete()
+          .eq('id', wallet_data.id)
+          .eq('user_id', user.id);
+
+        if (deleteError) throw deleteError;
+        result = { success: true };
+        break;
+
+      case 'list':
+        const { data: wallets, error: listError } = await supabase
           .from('crypto_wallets')
           .select('*')
-          .eq('user_id', user.user.id)
-          .eq('network_id', currency)
-          .single()
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-        if (!wallet || wallet.address === 'pending_generation') {
-          throw new Error('Wallet not found or not generated')
-        }
-
-        let balanceResponse
-        
-        if (currency === 'BTC') {
-          balanceResponse = await fetch(`${baseUrl}/bitcoin/address/balance/${wallet.address}`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'ETH') {
-          balanceResponse = await fetch(`${baseUrl}/ethereum/account/balance/${wallet.address}`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'MATIC') {
-          balanceResponse = await fetch(`${baseUrl}/polygon/account/balance/${wallet.address}`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'USDT') {
-          // USDT ERC20 token balance
-          balanceResponse = await fetch(`${baseUrl}/ethereum/account/balance/erc20/${wallet.address}`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7' // USDT contract
-            })
-          })
-        } else if (currency === 'SOL') {
-          balanceResponse = await fetch(`${baseUrl}/solana/account/balance/${wallet.address}`, {
-            method: 'GET',
-            headers
-          })
-        }
-
-        const balanceData = await balanceResponse?.json()
-        
-        result = {
-          address: wallet.address,
-          balance: balanceData?.incoming || balanceData?.balance || '0',
-          currency
-        }
-        break
-      }
-
-      case 'get_transactions': {
-        if (!currency) throw new Error('Currency required')
-        
-        const { data: wallet } = await supabaseClient
-          .from('crypto_wallets')
-          .select('*')
-          .eq('user_id', user.user.id)
-          .eq('network_id', currency)
-          .single()
-
-        if (!wallet) throw new Error('Wallet not found')
-
-        let txResponse
-        
-        if (currency === 'BTC') {
-          txResponse = await fetch(`${baseUrl}/bitcoin/transaction/address/${wallet.address}?pageSize=50`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'ETH' || currency === 'USDT') {
-          txResponse = await fetch(`${baseUrl}/ethereum/account/transaction/${wallet.address}?pageSize=50`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'MATIC') {
-          txResponse = await fetch(`${baseUrl}/polygon/account/transaction/${wallet.address}?pageSize=50`, {
-            method: 'GET',
-            headers
-          })
-        } else if (currency === 'SOL') {
-          txResponse = await fetch(`${baseUrl}/solana/account/transaction/${wallet.address}?pageSize=50`, {
-            method: 'GET',
-            headers
-          })
-        }
-
-        const txData = await txResponse?.json()
-        
-        result = {
-          address: wallet.address,
-          transactions: txData || [],
-          currency
-        }
-        break
-      }
+        if (listError) throw listError;
+        result = { wallets };
+        break;
 
       default:
-        throw new Error(`Unknown action: ${action}`)
+        throw new Error(`Ação não suportada: ${action}`);
     }
 
-    console.log(`Action ${action} completed successfully`)
+    logStep("Action completed successfully", { action, result: !!result });
 
-    return new Response(
-      JSON.stringify(result),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    )
+    return new Response(JSON.stringify({
+      success: true,
+      data: result
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
 
   } catch (error) {
-    console.error('Crypto wallet manager error:', error)
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        details: error.toString()
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
-    )
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
+    
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: errorMessage 
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
-})
+});
