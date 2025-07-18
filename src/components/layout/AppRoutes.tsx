@@ -64,6 +64,11 @@ import Achievements from '@/pages/Achievements';
 import ReferralProgram from '@/pages/ReferralProgram';
 import Configuracoes from '@/pages/Configuracoes';
 
+// 🔐 Novas páginas
+import SecurityPin from '@/pages/SecurityPin';
+import WalletDashboardPage from '@/pages/WalletDashboard';
+import Conversor from '@/pages/Conversor';
+
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -296,8 +301,26 @@ const AppRoutes: React.FC = () => {
           <SecuritySettings />
         </ProtectedRoute>
       } />
-      
-      
+
+      {/* 🔐 Novas páginas de segurança e wallet */}
+      <Route path="/security-pin" element={
+        <ProtectedRoute>
+          <SecurityPin />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/wallet-dashboard" element={
+        <ProtectedRoute>
+          <WalletDashboardPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/conversor" element={
+        <ProtectedRoute>
+          <Conversor />
+        </ProtectedRoute>
+      } />
+
       {/* ⚠️ Fallback - 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>

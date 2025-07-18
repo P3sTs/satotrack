@@ -309,11 +309,16 @@ export const WalletDashboard: React.FC = () => {
           />
         )}
 
-        {activeModal === 'receive' && (
+        {activeModal === 'receive' && selectedWallet && (
           <WalletReceiveModal
             isOpen={true}
             onClose={() => setActiveModal(null)}
-            wallets={balances}
+            wallet={{
+              id: selectedWallet.id,
+              name: selectedWallet.currency,
+              address: selectedWallet.address || 'Endereço não disponível',
+              currency: selectedWallet.currency
+            }}
           />
         )}
 
@@ -321,7 +326,12 @@ export const WalletDashboard: React.FC = () => {
           <WalletConverterModal
             isOpen={true}
             onClose={() => setActiveModal(null)}
-            wallets={balances}
+            wallets={balances.map(w => ({
+              id: w.id,
+              name: w.currency,
+              currency: w.currency,
+              balance: w.balance || 0
+            }))}
           />
         )}
 
