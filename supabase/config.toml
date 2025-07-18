@@ -1,41 +1,82 @@
 
 project_id = "cwmzzdwoagtmxdmgtfzj"
 
-[functions.fetch-wallet-data]
-verify_jwt = true
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+port = 54325
+
+[auth]
+enabled = true
+port = 54326
 
 [functions.send-telegram]
 verify_jwt = true
 
-[functions.send-email-summary]
-verify_jwt = true
-
-[functions.create-checkout]
-verify_jwt = true
-
-[functions.check-subscription]
-verify_jwt = true
-
-[functions.customer-portal]
-verify_jwt = true
-
-[functions.process-referral]
-verify_jwt = false
-
-[functions.satoai-chat]
-verify_jwt = false
-
 [functions.crypto-prices]
 verify_jwt = false
+
+[functions.crypto-wallet-manager]
+verify_jwt = true
 
 [functions.tatum-wallet-api]
 verify_jwt = true
 
-[functions.crypto-wallet-manager]
+[functions.secure-wallet-operations]
+verify_jwt = true
+
+[functions.process-referral]
+verify_jwt = true
+
+[functions.satoai-chat]
+verify_jwt = true
+
+[functions.fetch-wallet-data]
 verify_jwt = true
 
 [functions.generate-crypto-wallets]
 verify_jwt = true
 
-[functions.secure-wallet-operations]
+[functions.satoalerta-monitor]
+verify_jwt = false
+
+[functions.wallet-create]
+verify_jwt = true
+
+[functions.wallet-balance]
+verify_jwt = true
+
+[functions.wallet-send]
+verify_jwt = true
+
+[functions.wallet-receive]
+verify_jwt = true
+
+[functions.wallet-convert]
+verify_jwt = true
+
+[functions.wallet-history]
+verify_jwt = true
+
+[functions.wallet-link-external]
+verify_jwt = true
+
+[functions.user-check-auth]
 verify_jwt = true
