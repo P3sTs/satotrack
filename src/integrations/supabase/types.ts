@@ -781,6 +781,39 @@ export type Database = {
           },
         ]
       }
+      security_audit_logs: {
+        Row: {
+          event_details: Json | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          session_id: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          event_details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          event_details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_logs: {
         Row: {
           created_at: string
@@ -1049,45 +1082,90 @@ export type Database = {
       }
       user_security_settings: {
         Row: {
+          auto_lock_enabled: boolean | null
           biometric_enabled: boolean
           created_at: string
           failed_attempts: number
           id: string
+          large_amount_threshold: number | null
           last_successful_auth: string | null
           locked_until: string | null
+          max_failed_attempts: number | null
           pin_enabled: boolean
           pin_hash: string | null
           pin_salt: string | null
+          require_biometric_for_large_amounts: boolean | null
+          require_pin_for_transactions: boolean | null
           security_setup_completed: boolean
+          session_timeout_minutes: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_lock_enabled?: boolean | null
           biometric_enabled?: boolean
           created_at?: string
           failed_attempts?: number
           id?: string
+          large_amount_threshold?: number | null
           last_successful_auth?: string | null
           locked_until?: string | null
+          max_failed_attempts?: number | null
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          require_biometric_for_large_amounts?: boolean | null
+          require_pin_for_transactions?: boolean | null
           security_setup_completed?: boolean
+          session_timeout_minutes?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_lock_enabled?: boolean | null
           biometric_enabled?: boolean
           created_at?: string
           failed_attempts?: number
           id?: string
+          large_amount_threshold?: number | null
           last_successful_auth?: string | null
           locked_until?: string | null
+          max_failed_attempts?: number | null
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          require_biometric_for_large_amounts?: boolean | null
+          require_pin_for_transactions?: boolean | null
           security_setup_completed?: boolean
+          session_timeout_minutes?: number | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_session_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          token_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          token_hash?: string
           user_id?: string
         }
         Relationships: []
@@ -1298,9 +1376,24 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      cleanup_expired_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_unique_referral_code: {
         Args: { user_name: string; user_id: string }
         Returns: string
+      }
+      log_security_event: {
+        Args: {
+          p_user_id: string
+          p_event_type: string
+          p_event_details?: Json
+          p_ip_address?: string
+          p_user_agent?: string
+          p_session_id?: string
+        }
+        Returns: undefined
       }
       process_referral: {
         Args: { referrer_code: string; referred_user_id: string }
