@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../ProtectedRoute';
 import { ScreenLockOverlay } from '@/components/security/ScreenLockOverlay';
+import NativeBottomNav from '@/components/mobile/NativeBottomNav';
 import NotFound from '@/pages/NotFound';
 
 // 🔗 Landing & Apresentação
@@ -73,7 +74,8 @@ import Conversor from '@/pages/Conversor';
 const AppRoutes: React.FC = () => {
   return (
     <ScreenLockOverlay>
-      <Routes>
+      <div className="relative min-h-screen">
+        <Routes>
       {/* 🔗 Landing & Apresentação - Rotas Públicas */}
       <Route path="/" element={<Index />} />
       <Route path="/landing" element={<LandingPage />} />
@@ -323,9 +325,15 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* ⚠️ Fallback - 404 */}
-      <Route path="*" element={<NotFound />} />
-      </Routes>
+        {/* ⚠️ Fallback - 404 */}
+        <Route path="*" element={<NotFound />} />
+        </Routes>
+        
+        {/* Fixed Bottom Navigation for all protected routes */}
+        <div className="md:hidden">
+          <NativeBottomNav />
+        </div>
+      </div>
     </ScreenLockOverlay>
   );
 };

@@ -17,7 +17,7 @@ const MobileBottomNavigation: React.FC = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-dashboard-dark/95 backdrop-blur-lg border-t border-dashboard-medium/30 md:hidden z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-dashboard-dark/95 backdrop-blur-lg border-t border-dashboard-medium/30 md:hidden z-50">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map(({ to, icon: Icon, label }) => (
           <Link

@@ -297,11 +297,14 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
                   <div className="relative">
                     <textarea
                       id="seedPhrase"
-                      value={seedPhrase}
-                      onChange={(e) => setSeedPhrase(e.target.value)}
-                      placeholder="Digite ou cole sua seed phrase de 12 ou 24 palavras..."
-                      className="w-full p-3 border rounded-md bg-background min-h-[100px] resize-none"
-                      style={{ fontFamily: showSeed ? 'inherit' : 'monospace', WebkitTextSecurity: showSeed ? 'none' : 'disc' }}
+                       value={seedPhrase}
+                       onChange={(e) => setSeedPhrase(e.target.value)}
+                       placeholder="Digite ou cole sua seed phrase de 12 ou 24 palavras..."
+                       className="w-full p-3 border rounded-md bg-background min-h-[100px] resize-none"
+                       style={{ 
+                         fontFamily: showSeed ? 'inherit' : 'monospace',
+                         ...(showSeed ? {} : { fontFeatureSettings: '"zero" on', WebkitTextSecurity: 'disc' } as any)
+                       }}
                     />
                     <Button
                       type="button"

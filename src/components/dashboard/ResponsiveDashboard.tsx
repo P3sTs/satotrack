@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Wallet, 
@@ -16,17 +16,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DashboardCard } from './DashboardCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardStabilizer } from '@/hooks/useDashboardStabilizer';
 import NativeHeader from '@/components/mobile/NativeHeader';
 import NativeActionButtons from '@/components/mobile/NativeActionButtons';
 import NativeTabs from '@/components/mobile/NativeTabs';
 import CryptoListItem from '@/components/mobile/CryptoListItem';
-import NativeBottomNav from '@/components/mobile/NativeBottomNav';
+import { WalletDetailsModal } from './WalletDetailsModal';
 import { cn } from '@/lib/utils';
 
 export const ResponsiveDashboard: React.FC = () => {
   const { stats, cryptoAssets, isOnline, refreshData } = useDashboardData();
   const [activeTab, setActiveTab] = useState('crypto');
+  const [selectedWallet, setSelectedWallet] = useState<any>(null);
   const navigate = useNavigate();
+
+  // Use the stabilizer hook to prevent unnecessary re-renders
+  const stableStats = useDashboardStabilizer(stats);
 
   const tabs = [
     { id: 'crypto', label: 'Criptomoeda' },
@@ -34,14 +39,14 @@ export const ResponsiveDashboard: React.FC = () => {
   ];
 
   const getSecurityColor = () => {
-    return stats.securityScore > 80 ? 'success' : 'warning';
+    return stableStats.securityScore > 80 ? 'success' : 'warning';
   };
 
-  const dashboardCards = [
+  const dashboardCards = useMemo(() => [
     {
       title: 'Patrimônio Total',
-      value: stats.totalBalance,
-      change: stats.totalBalanceChange,
+      value: stableStats.totalBalance,
+      change: stableStats.totalBalanceChange,
       icon: Wallet,
       color: 'primary' as const,
       route: '/dashboard/detalhado',
@@ -52,7 +57,7 @@ export const ResponsiveDashboard: React.FC = () => {
     },
     {
       title: 'Carteiras Ativas',
-      value: stats.activeWallets,
+      value: stableStats.activeWallets,
       icon: Activity,
       color: 'success' as const,
       route: '/carteiras',
@@ -60,7 +65,7 @@ export const ResponsiveDashboard: React.FC = () => {
     },
     {
       title: 'Transações',
-      value: stats.totalTransactions,
+      value: stableStats.totalTransactions,
       icon: TrendingUp,
       color: 'info' as const,
       route: '/historico',
@@ -68,7 +73,7 @@ export const ResponsiveDashboard: React.FC = () => {
     },
     {
       title: 'Redes Ativas',
-      value: stats.activeNetworks,
+      value: stableStats.activeNetworks,
       icon: Globe,
       color: 'warning' as const,
       route: '/mercado',
@@ -76,14 +81,18 @@ export const ResponsiveDashboard: React.FC = () => {
     },
     {
       title: 'Segurança',
-      value: stats.securityScore,
+      value: stableStats.securityScore,
       icon: Shield,
       color: getSecurityColor() as 'success' | 'warning',
       route: '/configuracoes',
       suffix: '%',
       subtitle: 'Score de segurança',
     },
-  ];
+  ], [stableStats, isOnline]);
+
+  const handleWalletClick = (wallet: any) => {
+    setSelectedWallet(wallet);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -129,7 +138,7 @@ export const ResponsiveDashboard: React.FC = () => {
         {/* Balance Section - Mobile */}
         <div className="block md:hidden text-center py-8">
           <div className="text-4xl font-bold text-foreground mb-2">
-            R$ {stats.totalBalance.toLocaleString('pt-BR', { 
+            R$ {stableStats.totalBalance.toLocaleString('pt-BR', { 
               minimumFractionDigits: 2,
               maximumFractionDigits: 2 
             })}
@@ -137,14 +146,14 @@ export const ResponsiveDashboard: React.FC = () => {
           <div className="flex items-center justify-center gap-1">
             <span className={cn(
               "text-sm flex items-center",
-              stats.totalBalanceChange >= 0 ? "text-emerald-400" : "text-red-400"
+              stableStats.totalBalanceChange >= 0 ? "text-emerald-400" : "text-red-400"
             )}>
-              {stats.totalBalanceChange >= 0 ? 
+              {stableStats.totalBalanceChange >= 0 ? 
                 <TrendingUp className="w-3 h-3 mr-1" /> : 
                 <TrendingDown className="w-3 h-3 mr-1" />
               }
-              R$ {Math.abs(stats.totalBalanceChange).toFixed(2)} 
-              ({stats.totalBalanceChange >= 0 ? '+' : ''}{stats.totalBalanceChange.toFixed(2)}%)
+              R$ {Math.abs(stableStats.totalBalanceChange).toFixed(2)} 
+              ({stableStats.totalBalanceChange >= 0 ? '+' : ''}{stableStats.totalBalanceChange.toFixed(2)}%)
             </span>
           </div>
         </div>
@@ -155,7 +164,7 @@ export const ResponsiveDashboard: React.FC = () => {
             <DashboardCard
               key={index}
               {...card}
-              isLoading={stats.isLoading}
+              isLoading={stableStats.isLoading}
             />
           ))}
         </div>
@@ -180,20 +189,34 @@ export const ResponsiveDashboard: React.FC = () => {
           {activeTab === 'crypto' && (
             <div className="divide-y divide-border/20">
               {cryptoAssets.map((crypto, index) => (
-                <CryptoListItem
-                  key={index}
-                  symbol={crypto.symbol}
-                  name={crypto.name}
-                  network={crypto.network}
-                  price={crypto.price}
-                  change={crypto.change}
-                  amount={crypto.amount}
-                  value={crypto.value}
-                  icon={crypto.icon}
-                />
+                <div 
+                  key={index} 
+                  onClick={() => handleWalletClick({
+                    symbol: crypto.symbol,
+                    name: crypto.name,
+                    address: `${crypto.symbol.toLowerCase()}1234...abcd`,
+                    balance: crypto.amount,
+                    value: crypto.value,
+                    change: crypto.change,
+                    network: crypto.network,
+                    icon: crypto.icon
+                  })}
+                  className="cursor-pointer"
+                >
+                  <CryptoListItem
+                    symbol={crypto.symbol}
+                    name={crypto.name}
+                    network={crypto.network}
+                    price={crypto.price}
+                    change={crypto.change}
+                    amount={crypto.amount}
+                    value={crypto.value}
+                    icon={crypto.icon}
+                  />
+                </div>
               ))}
               
-              {cryptoAssets.length === 0 && !stats.isLoading && (
+              {cryptoAssets.length === 0 && !stableStats.isLoading && (
                 <div className="py-12 text-center">
                   <p className="text-muted-foreground">
                     Nenhuma criptomoeda encontrada
@@ -226,17 +249,14 @@ export const ResponsiveDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation - Mobile */}
-      <div className="block md:hidden">
-        <NativeBottomNav />
-      </div>
 
-      {/* Refresh Status */}
-      {stats.lastUpdated && (
-        <div className="fixed bottom-24 md:bottom-6 right-4 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-          Atualizado: {stats.lastUpdated.toLocaleTimeString('pt-BR')}
-        </div>
-      )}
+      {/* Wallet Details Modal */}
+      <WalletDetailsModal
+        isOpen={!!selectedWallet}
+        onClose={() => setSelectedWallet(null)}
+        wallet={selectedWallet || {}}
+      />
+
     </div>
   );
 };
