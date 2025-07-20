@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
 import { demoWallets, demoStats } from '@/data/demoWallets';
 import { useTatumPrices } from './useTatumPrices';
+import { usePortfolioCalculator } from './usePortfolioCalculator';
 
 export interface DashboardStats {
   totalBalance: number;
@@ -20,10 +21,11 @@ export interface CryptoAsset {
   symbol: string;
   name: string;
   network: string;
-  price: string;
+  price: string | number;
   change: number;
-  amount: string;
-  value: string;
+  change24h?: number;
+  amount: string | number;
+  value: string | number;
   balanceUSD: number;
   icon: string;
 }
@@ -47,6 +49,15 @@ export const useDashboardData = () => {
   const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const isGuestMode = false;
+  
+  // Calculate real portfolio changes
+  const portfolioData = usePortfolioCalculator(cryptoAssets.map(asset => ({
+    symbol: asset.symbol,
+    amount: typeof asset.amount === 'number' ? asset.amount : parseFloat(asset.amount || '0'),
+    price: typeof asset.price === 'number' ? asset.price : parseFloat(asset.price?.toString().replace(/[^\d.,]/g, '').replace(',', '.') || '0'),
+    value: typeof asset.value === 'number' ? asset.value : parseFloat(asset.value?.toString().replace(/[^\d.,]/g, '').replace(',', '.') || '0'),
+    change24h: asset.change24h || asset.change
+  })));
 
   // Fetch wallet data from Supabase or use demo data
   const fetchWalletData = useCallback(async () => {
@@ -119,8 +130,8 @@ export const useDashboardData = () => {
 
       setStats(prev => ({
         ...prev,
-        totalBalance,
-        totalBalanceChange: Math.random() * 10 - 5,
+        totalBalance: portfolioData.totalValueNow,
+        totalBalanceChange: portfolioData.percentageChange,
         activeWallets: activeWallets.length,
         totalTransactions: transactionCount || 0,
         activeNetworks: uniqueNetworks,
@@ -132,16 +143,19 @@ export const useDashboardData = () => {
       const assets: CryptoAsset[] = activeWallets.map(wallet => {
         const priceData = getCryptoData(wallet.currency || 'BTC');
         const balance = parseFloat(wallet.balance?.toString() || '0');
+        const priceValue = priceData?.price || 0;
+        const valueInBRL = balance * priceValue * 5.2;
         
         return {
           symbol: wallet.currency || 'UNKNOWN',
           name: wallet.name,
           network: wallet.currency || 'Unknown',
-          price: priceData?.priceBRL || 'R$ 0,00',
+          price: priceValue,
           change: priceData?.change24h.value || 0,
-          amount: balance.toString(),
-          value: priceData ? (balance * priceData.price * 5.2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
-          balanceUSD: balance * (priceData?.price || 0),
+          change24h: priceData?.change24h.value || 0,
+          amount: balance,
+          value: valueInBRL,
+          balanceUSD: balance * priceValue,
           icon: wallet.currency || 'UNKNOWN',
         };
       });

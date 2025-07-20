@@ -152,8 +152,7 @@ export const ResponsiveDashboard: React.FC = () => {
                 <TrendingUp className="w-3 h-3 mr-1" /> : 
                 <TrendingDown className="w-3 h-3 mr-1" />
               }
-              R$ {Math.abs(stableStats.totalBalanceChange).toFixed(2)} 
-              ({stableStats.totalBalanceChange >= 0 ? '+' : ''}{stableStats.totalBalanceChange.toFixed(2)}%)
+              {stableStats.totalBalanceChange >= 0 ? '+' : ''}{stableStats.totalBalanceChange.toFixed(2)}%
             </span>
           </div>
         </div>
@@ -195,9 +194,9 @@ export const ResponsiveDashboard: React.FC = () => {
                     symbol: crypto.symbol,
                     name: crypto.name,
                     address: `${crypto.symbol.toLowerCase()}1234...abcd`,
-                    balance: crypto.amount,
-                    value: crypto.value,
-                    change: crypto.change,
+                    balance: parseFloat(crypto.amount?.toString() || '0'),
+                    value: parseFloat(crypto.value?.toString() || '0'),
+                    change: parseFloat(crypto.change?.toString() || '0'),
                     network: crypto.network,
                     icon: crypto.icon
                   })}
@@ -207,10 +206,10 @@ export const ResponsiveDashboard: React.FC = () => {
                     symbol={crypto.symbol}
                     name={crypto.name}
                     network={crypto.network}
-                    price={crypto.price}
+                    price={crypto.price?.toString() || '0'}
                     change={crypto.change}
-                    amount={crypto.amount}
-                    value={crypto.value}
+                    amount={crypto.amount?.toString() || '0'}
+                    value={crypto.value?.toString() || '0'}
                     icon={crypto.icon}
                   />
                 </div>

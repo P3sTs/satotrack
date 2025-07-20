@@ -83,7 +83,7 @@ export const WalletDetailsModal: React.FC<WalletDetailsModalProps> = ({
           {/* Balance Section */}
           <div className="text-center space-y-2">
             <div className="text-3xl font-bold text-foreground">
-              {wallet.balance.toFixed(8)} {wallet.symbol}
+              {typeof wallet.balance === 'number' ? wallet.balance.toFixed(8) : parseFloat(wallet.balance || '0').toFixed(8)} {wallet.symbol}
             </div>
             <div className="text-lg text-muted-foreground">
               R$ {wallet.value.toLocaleString('pt-BR', { 
