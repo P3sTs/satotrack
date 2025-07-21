@@ -17,12 +17,29 @@ import { Badge } from '@/components/ui/badge';
 import { DashboardCard } from './DashboardCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardStabilizer } from '@/hooks/useDashboardStabilizer';
+import { useCryptoCardOrder } from '@/hooks/useCryptoCardOrder';
 import NativeHeader from '@/components/mobile/NativeHeader';
 import NativeActionButtons from '@/components/mobile/NativeActionButtons';
 import NativeTabs from '@/components/mobile/NativeTabs';
-import CryptoListItem from '@/components/mobile/CryptoListItem';
+import DraggableCryptoListItem from '@/components/mobile/DraggableCryptoListItem';
 import { WalletDetailsModal } from './WalletDetailsModal';
 import { cn } from '@/lib/utils';
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 export const ResponsiveDashboard: React.FC = () => {
   const { stats, cryptoAssets, isOnline, refreshData } = useDashboardData();
@@ -32,6 +49,17 @@ export const ResponsiveDashboard: React.FC = () => {
 
   // Use the stabilizer hook to prevent unnecessary re-renders
   const stableStats = useDashboardStabilizer(stats);
+  
+  // Use the card order hook for drag-and-drop functionality
+  const { orderedAssets, reorderCards } = useCryptoCardOrder(cryptoAssets);
+  
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const tabs = [
     { id: 'crypto', label: 'Criptomoeda' },
@@ -92,6 +120,23 @@ export const ResponsiveDashboard: React.FC = () => {
 
   const handleWalletClick = (wallet: any) => {
     setSelectedWallet(wallet);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = orderedAssets.findIndex(asset => asset.symbol === active.id);
+      const newIndex = orderedAssets.findIndex(asset => asset.symbol === over.id);
+      
+      const newOrder = arrayMove(
+        orderedAssets.map(asset => asset.symbol), 
+        oldIndex, 
+        newIndex
+      );
+      
+      reorderCards(newOrder);
+    }
   };
 
   return (
@@ -186,49 +231,57 @@ export const ResponsiveDashboard: React.FC = () => {
         <div className="space-y-4">
           {/* Crypto List */}
           {activeTab === 'crypto' && (
-            <div className="divide-y divide-border/20">
-              {cryptoAssets.map((crypto, index) => (
-                <div 
-                  key={index} 
-                  onClick={() => handleWalletClick({
-                    symbol: crypto.symbol,
-                    name: crypto.name,
-                    address: `${crypto.symbol.toLowerCase()}1234...abcd`,
-                    balance: parseFloat(crypto.amount?.toString() || '0'),
-                    value: parseFloat(crypto.value?.toString() || '0'),
-                    change: parseFloat(crypto.change?.toString() || '0'),
-                    network: crypto.network,
-                    icon: crypto.icon
-                  })}
-                  className="cursor-pointer"
-                >
-                  <CryptoListItem
-                    symbol={crypto.symbol}
-                    name={crypto.name}
-                    network={crypto.network}
-                    price={crypto.price?.toString() || '0'}
-                    change={crypto.change}
-                    amount={crypto.amount?.toString() || '0'}
-                    value={crypto.value?.toString() || '0'}
-                    icon={crypto.icon}
-                  />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={orderedAssets.map(asset => asset.symbol)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="divide-y divide-border/20">
+                  {orderedAssets.map((crypto) => (
+                    <DraggableCryptoListItem
+                      key={crypto.symbol}
+                      id={crypto.symbol}
+                      symbol={crypto.symbol}
+                      name={crypto.name}
+                      network={crypto.network}
+                      price={crypto.price?.toString() || '0'}
+                      change={crypto.change}
+                      amount={crypto.amount?.toString() || '0'}
+                      value={crypto.value?.toString() || '0'}
+                      icon={crypto.icon}
+                      onClick={() => handleWalletClick({
+                        symbol: crypto.symbol,
+                        name: crypto.name,
+                        address: `${crypto.symbol.toLowerCase()}1234...abcd`,
+                        balance: parseFloat(crypto.amount?.toString() || '0'),
+                        value: parseFloat(crypto.value?.toString() || '0'),
+                        change: parseFloat(crypto.change?.toString() || '0'),
+                        network: crypto.network,
+                        icon: crypto.icon
+                      })}
+                    />
+                  ))}
                 </div>
-              ))}
-              
-              {cryptoAssets.length === 0 && !stableStats.isLoading && (
-                <div className="py-12 text-center">
-                  <p className="text-muted-foreground">
-                    Nenhuma criptomoeda encontrada
-                  </p>
-                  <Button 
-                    onClick={() => navigate('/carteiras')}
-                    className="mt-4"
-                    variant="outline"
-                  >
-                    Adicionar Carteiras
-                  </Button>
-                </div>
-              )}
+              </SortableContext>
+            </DndContext>
+          )}
+          
+          {orderedAssets.length === 0 && !stableStats.isLoading && activeTab === 'crypto' && (
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground">
+                Nenhuma criptomoeda encontrada
+              </p>
+              <Button 
+                onClick={() => navigate('/carteiras')}
+                className="mt-4"
+                variant="outline"
+              >
+                Adicionar Carteiras
+              </Button>
             </div>
           )}
           

@@ -70,6 +70,9 @@ import Configuracoes from '@/pages/Configuracoes';
 import SecurityPin from '@/pages/SecurityPin';
 import WalletDashboardPage from '@/pages/WalletDashboard';
 import Conversor from '@/pages/Conversor';
+import Swap from '@/pages/Swap';
+import Earn from '@/pages/Earn';
+import Discover from '@/pages/Discover';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -322,6 +325,24 @@ const AppRoutes: React.FC = () => {
       <Route path="/conversor" element={
         <ProtectedRoute>
           <Conversor />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/swap" element={
+        <ProtectedRoute>
+          <Swap />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/earn" element={
+        <ProtectedRoute>
+          <Earn />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/discover" element={
+        <ProtectedRoute>
+          <Discover />
         </ProtectedRoute>
       } />
 
