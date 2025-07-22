@@ -134,16 +134,22 @@ serve(async (req) => {
 
         console.log(`🔒 Endereço ${currency} gerado: ${address} - SEGURO (SEM CHAVES PRIVADAS ARMAZENADAS)`)
 
-        // Try to create wallet in database with proper service role authentication
+        // Check if wallet already exists to prevent duplicates
         const { data: existingWallet, error: selectError } = await supabase
           .from('crypto_wallets')
           .select('id')
           .eq('user_id', userId)
           .eq('currency', currency)
-          .single()
+          .maybeSingle(); // Use maybeSingle to avoid error when no record found
+
+        
+        if (selectError) {
+          console.error(`Error checking existing wallet for ${currency}:`, selectError);
+          continue;
+        }
 
         if (existingWallet) {
-          // Update existing wallet
+          // Update existing wallet with better error handling
           const { data: updatedWallet, error: updateError } = await supabase
             .from('crypto_wallets')
             .update({
@@ -155,16 +161,16 @@ serve(async (req) => {
             .eq('user_id', userId)
             .eq('currency', currency)
             .select()
-            .single()
+            .maybeSingle();
 
           if (updateError) {
-            console.error(`Erro ao atualizar carteira ${currency}:`, updateError)
-          } else {
-            generatedWallets.push(updatedWallet)
-            console.log(`✅ Carteira ${currency} atualizada com sucesso`)
+            console.error(`Erro ao atualizar carteira ${currency}:`, updateError);
+          } else if (updatedWallet) {
+            generatedWallets.push(updatedWallet);
+            console.log(`✅ Carteira ${currency} atualizada com sucesso`);
           }
         } else {
-          // Create new wallet - removendo network_id que está causando erro
+          // Create new wallet with comprehensive data
           const { data: newWallet, error: insertError } = await supabase
             .from('crypto_wallets')
             .insert({
@@ -179,16 +185,32 @@ serve(async (req) => {
               total_received: 0,
               total_sent: 0,
               transaction_count: 0,
-              address_type: currency.toLowerCase()
+              address_type: currency.toLowerCase(),
+              created_at: new Date().toISOString(),
+              last_updated: new Date().toISOString()
             })
             .select()
-            .single()
+            .maybeSingle();
 
           if (insertError) {
-            console.error(`Erro ao criar carteira ${currency}:`, insertError)
-          } else {
-            generatedWallets.push(newWallet)
-            console.log(`✅ Carteira ${currency} criada com sucesso`)
+            console.error(`Erro ao criar carteira ${currency}:`, insertError);
+            // Se for erro de unique constraint, tentar buscar existente
+            if (insertError.code === '23505') {
+              const { data: existingRetry } = await supabase
+                .from('crypto_wallets')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('currency', currency)
+                .maybeSingle();
+              
+              if (existingRetry) {
+                generatedWallets.push(existingRetry);
+                console.log(`✅ Carteira ${currency} já existia - usando existente`);
+              }
+            }
+          } else if (newWallet) {
+            generatedWallets.push(newWallet);
+            console.log(`✅ Carteira ${currency} criada com sucesso`);
           }
         }
 

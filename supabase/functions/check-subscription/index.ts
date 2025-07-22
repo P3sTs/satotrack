@@ -54,12 +54,18 @@ serve(async (req) => {
         premium_expiry: null,
       }, { onConflict: 'id' });
 
-      // Update user_plans table
-      await supabaseClient.from("user_plans").upsert({
-        user_id: user.id,
-        plan_type: 'free',
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      // Update user_plans table - com melhor tratamento de erro
+      const { error: userPlanError } = await supabaseClient
+        .from("user_plans")
+        .upsert({
+          user_id: user.id,
+          plan_type: 'free',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+      
+      if (userPlanError) {
+        console.error('Error updating user_plans:', userPlanError);
+      }
       
       return new Response(JSON.stringify({ subscribed: false, plan_type: 'free' }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -94,12 +100,22 @@ serve(async (req) => {
       premium_expiry: subscriptionEnd,
     }, { onConflict: 'id' });
 
-    // Update user_plans table
-    await supabaseClient.from("user_plans").upsert({
-      user_id: user.id,
-      plan_type: hasActiveSub ? 'premium' : 'free',
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
+    // Update user_plans table - com tratamento de erro aprimorado
+    const { error: userPlanUpdateError } = await supabaseClient
+      .from("user_plans")
+      .upsert({
+        user_id: user.id,
+        plan_type: hasActiveSub ? 'premium' : 'free',
+        updated_at: new Date().toISOString(),
+      }, { 
+        onConflict: 'user_id',
+        ignoreDuplicates: false 
+      });
+    
+    if (userPlanUpdateError) {
+      console.error('Error updating user_plans in subscription check:', userPlanUpdateError);
+      // Não falhar a requisição por causa deste erro
+    }
 
     logStep("Updated database with subscription info", { subscribed: hasActiveSub, plan_type: hasActiveSub ? 'premium' : 'free' });
 

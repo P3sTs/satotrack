@@ -93,14 +93,24 @@ serve(async (req) => {
     const pinHashArray = Array.from(new Uint8Array(pinHash));
     const pinHashHex = pinHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    await supabase
+    // Update user security settings com melhor tratamento de erro
+    const { error: securityError } = await supabase
       .from('user_security_settings')
       .upsert({
         user_id: user.id,
         pin_hash: pinHashHex,
         pin_enabled: true,
-        security_setup_completed: true
+        security_setup_completed: true,
+        updated_at: new Date().toISOString()
+      }, { 
+        onConflict: 'user_id',
+        ignoreDuplicates: false 
       });
+    
+    if (securityError) {
+      console.error('Error updating user_security_settings:', securityError);
+      // Não falhar por causa deste erro específico
+    }
 
     logStep("Wallet creation completed", { walletsCreated: wallets.length });
 
