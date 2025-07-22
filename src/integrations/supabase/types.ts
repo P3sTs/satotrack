@@ -593,6 +593,30 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portfolio_snapshots: {
         Row: {
           created_at: string
@@ -835,6 +859,66 @@ export type Database = {
           event_type?: string
           id?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      swap_transactions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          from_address: string
+          from_amount: number
+          from_currency: string
+          id: string
+          network_fee: string
+          platform_fee_amount: number
+          platform_fee_currency: string
+          platform_fee_type: string
+          status: string
+          swap_rate: number
+          to_address: string
+          to_amount: number
+          to_currency: string
+          transaction_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          from_address: string
+          from_amount: number
+          from_currency: string
+          id?: string
+          network_fee: string
+          platform_fee_amount: number
+          platform_fee_currency: string
+          platform_fee_type: string
+          status?: string
+          swap_rate: number
+          to_address: string
+          to_amount: number
+          to_currency: string
+          transaction_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          from_address?: string
+          from_amount?: number
+          from_currency?: string
+          id?: string
+          network_fee?: string
+          platform_fee_amount?: number
+          platform_fee_currency?: string
+          platform_fee_type?: string
+          status?: string
+          swap_rate?: number
+          to_address?: string
+          to_amount?: number
+          to_currency?: string
+          transaction_hash?: string | null
+          user_id?: string
         }
         Relationships: []
       }
