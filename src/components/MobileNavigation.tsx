@@ -20,8 +20,8 @@ const MobileNavigation: React.FC = () => {
     navigationItems
   } = useMobileNavigation();
 
-  // Só renderiza no mobile
-  if (!isMobile) {
+  // Só renderiza no mobile E quando usuário está autenticado
+  if (!isMobile || !isAuthenticated) {
     return null;
   }
 
