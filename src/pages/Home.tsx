@@ -9,7 +9,7 @@ import { SatoTrackFooter } from '@/components/ui/footer-section';
 import EnhancedHeroSection from '@/components/sections/EnhancedHeroSection';
 import AnimatedBackground from '@/components/ui/enhanced/AnimatedBackground';
 import ParallaxSection from '@/components/ui/enhanced/ParallaxSection';
-import Interactive3DGrid from '@/components/enhanced/Interactive3DGrid';
+
 
 const Home = () => {
   return (
@@ -18,11 +18,6 @@ const Home = () => {
       
       {/* Enhanced Hero Section */}
       <EnhancedHeroSection />
-      
-      {/* Interactive 3D Section */}
-      <section className="py-20">
-        <Interactive3DGrid />
-      </section>
       
       {/* Enhanced Features Section with Parallax */}
       <ParallaxSection speed={0.3}>
