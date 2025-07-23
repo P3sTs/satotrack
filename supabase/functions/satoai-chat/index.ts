@@ -23,13 +23,13 @@ serve(async (req) => {
       throw new Error("OPENAI_API_KEY não configurado");
     }
 
-    const { message, conversation_history = [] } = await req.json();
+    const { message, conversation_history = [], context = "SatoTrack App" } = await req.json();
     
     if (!message) {
       throw new Error("message é obrigatório");
     }
 
-    logStep("Processing chat message", { messageLength: message.length, historyLength: conversation_history.length });
+    logStep("Processing chat message", { messageLength: message.length, historyLength: conversation_history.length, context });
 
     // Sistema de prompt especializado em Bitcoin e criptomoedas
     const systemPrompt = `Você é SatoAI, um assistente especializado em Bitcoin e criptomoedas brasileiro. 
@@ -71,7 +71,7 @@ Sempre seja útil, educativo e seguro nas suas respostas.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4.1-2025-04-14",
         messages: messages,
         max_tokens: 1000,
         temperature: 0.7,
@@ -97,10 +97,12 @@ Sempre seja útil, educativo e seguro nas suas respostas.`;
     return new Response(JSON.stringify({
       success: true,
       data: {
+        response: aiResponse,
         message: aiResponse,
         usage: data.usage,
         model: data.model,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        provider: "openai"
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

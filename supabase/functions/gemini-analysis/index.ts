@@ -60,8 +60,19 @@ const callGemini = async (prompt: string, data: any, type: string) => {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1000,
-      }
+        maxOutputTokens: 1500,
+        candidateCount: 1
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH", 
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
     }),
   });
 
@@ -133,8 +144,20 @@ serve(async (req) => {
     const aiResponse = await callGemini(prompt, data, type);
 
     // Estruturar resposta
+    let structuredAnalysis;
+    try {
+      // Tentar extrair JSON da resposta
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        structuredAnalysis = JSON.parse(jsonMatch[0]);
+      }
+    } catch (error) {
+      console.log('Resposta não é JSON válido, processando como texto');
+    }
+
     const structuredResponse = {
       analysis: aiResponse,
+      structured: structuredAnalysis || {},
       confidence: Math.floor(Math.random() * 30) + 70, // 70-99%
       recommendations: aiResponse.split('\n').filter(line => 
         line.includes('recomend') || line.includes('sugir') || line.includes('consider')

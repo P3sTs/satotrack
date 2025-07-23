@@ -228,12 +228,12 @@ serve(async (req) => {
         // Calculate platform fee
         const platformFee = calculatePlatformFee(parseFloat(amount), fromCurrency, feeType, feeSettings);
 
-        // For demonstration, we'll simulate the swap execution
-        // In a real implementation, you would use Tatum's DEX or exchange APIs
-        console.log('Executing swap:', { fromCurrency, toCurrency, amount, fromAddress, toAddress });
+        // Para demonstração, simulamos a execução do swap
+        // Em produção, você usaria as APIs DEX do Tatum ou outras exchanges
+        console.log('Executando swap:', { fromCurrency, toCurrency, amount, fromAddress, toAddress });
         
-        // Simulate processing time
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Simular processamento
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
         // Generate a mock transaction hash
         const txHash = `0x${Math.random().toString(16).substr(2, 64)}`;
