@@ -4,6 +4,7 @@ import ProtectedRoute from '../ProtectedRoute';
 import { ScreenLockOverlay } from '@/components/security/ScreenLockOverlay';
 import NativeBottomNav from '@/components/mobile/NativeBottomNav';
 import NotFound from '@/pages/NotFound';
+import { useAuth } from '@/contexts/auth';
 
 // 🔗 Landing & Apresentação
 import Index from '@/pages/Index';
@@ -75,6 +76,8 @@ import Earn from '@/pages/Earn';
 import Discover from '@/pages/Discover';
 
 const AppRoutes: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <ScreenLockOverlay>
       <div className="relative min-h-screen">
@@ -350,10 +353,12 @@ const AppRoutes: React.FC = () => {
         <Route path="*" element={<NotFound />} />
         </Routes>
         
-        {/* Fixed Bottom Navigation for all protected routes */}
-        <div className="md:hidden">
-          <NativeBottomNav />
-        </div>
+        {/* Fixed Bottom Navigation only for authenticated users */}
+        {isAuthenticated && (
+          <div className="md:hidden">
+            <NativeBottomNav />
+          </div>
+        )}
       </div>
     </ScreenLockOverlay>
   );
