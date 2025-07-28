@@ -8,11 +8,11 @@ const NativeBottomNav: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { to: '/dashboard', icon: Home, label: 'Página Inicial' },
-    { to: '/mercado', icon: TrendingUp, label: 'Em alta' },
+    { to: '/dashboard', icon: Home, label: 'Dashboard' },
+    { to: '/mercado', icon: TrendingUp, label: 'Mercado' },
     { to: '/swap', icon: RefreshCw, label: 'Swap' },
     { to: '/earn', icon: Diamond, label: 'Earn' },
-    { to: '/discover', icon: Compass, label: 'Descubra' },
+    { to: '/discover', icon: Compass, label: 'Descobrir' },
   ];
 
   return (

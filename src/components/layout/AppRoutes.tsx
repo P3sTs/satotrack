@@ -5,6 +5,7 @@ import { ScreenLockOverlay } from '@/components/security/ScreenLockOverlay';
 import NativeBottomNav from '@/components/mobile/NativeBottomNav';
 import NotFound from '@/pages/NotFound';
 import { useAuth } from '@/contexts/auth';
+import LegacyRedirect from '@/components/navigation/LegacyRedirect';
 
 // 🔗 Landing & Apresentação
 import Index from '@/pages/Index';
@@ -116,6 +117,27 @@ const AppRoutes: React.FC = () => {
       <Route path="/web3" element={
         <ProtectedRoute>
           <Web3Dashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* Redirecionamentos legados para dashboard unificado */}
+      <Route path="/wallets-old" element={
+        <ProtectedRoute>
+          <LegacyRedirect 
+            from="/wallets-old" 
+            to="/dashboard"
+            message="As carteiras agora estão integradas no dashboard principal!" 
+          />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/crypto-security" element={
+        <ProtectedRoute>
+          <LegacyRedirect 
+            from="/crypto-security" 
+            to="/dashboard"
+            message="Funcionalidades de segurança agora estão no dashboard unificado!" 
+          />
         </ProtectedRoute>
       } />
       
@@ -263,11 +285,6 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/crypto-security" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
       
       <Route path="/crypto-3d" element={
         <ProtectedRoute>
