@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -224,17 +225,14 @@ export const UnifiedDashboard: React.FC = () => {
             </Badge>
             
             <Button
-              onClick={() => {
-                refreshData();
-                refreshAllBalances();
-              }}
-              disabled={stats.isLoading || walletsLoading}
+              onClick={refreshAll}
+              disabled={isRefreshing}
               variant="outline"
               size="sm"
             >
               <RefreshCw className={cn(
                 "w-4 h-4 mr-2",
-                (stats.isLoading || walletsLoading) && "animate-spin"
+                isRefreshing && "animate-spin"
               )} />
               Atualizar Tudo
             </Button>
@@ -247,7 +245,7 @@ export const UnifiedDashboard: React.FC = () => {
         {/* Balance Section - Mobile */}
         <div className="block md:hidden text-center py-8">
           <div className="text-4xl font-bold text-foreground mb-2">
-            R$ {(stableStats.totalBalance + totalCryptoBalance).toLocaleString('pt-BR', { 
+            R$ {stats.totalBalance.toLocaleString('pt-BR', { 
               minimumFractionDigits: 2,
               maximumFractionDigits: 2 
             })}
@@ -255,13 +253,13 @@ export const UnifiedDashboard: React.FC = () => {
           <div className="flex items-center justify-center gap-1">
             <span className={cn(
               "text-sm flex items-center",
-              stableStats.totalBalanceChange >= 0 ? "text-emerald-400" : "text-red-400"
+              stats.totalBalanceChange >= 0 ? "text-emerald-400" : "text-red-400"
             )}>
-              {stableStats.totalBalanceChange >= 0 ? 
+              {stats.totalBalanceChange >= 0 ? 
                 <TrendingUp className="w-3 h-3 mr-1" /> : 
                 <TrendingDown className="w-3 h-3 mr-1" />
               }
-              {stableStats.totalBalanceChange >= 0 ? '+' : ''}{stableStats.totalBalanceChange.toFixed(2)}%
+              {stats.totalBalanceChange >= 0 ? '+' : ''}{stats.totalBalanceChange.toFixed(2)}%
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
@@ -275,7 +273,7 @@ export const UnifiedDashboard: React.FC = () => {
             <DashboardCard
               key={index}
               {...card}
-              isLoading={stableStats.isLoading || walletsLoading}
+              isLoading={stats.isLoading}
             />
           ))}
         </div>
@@ -318,7 +316,7 @@ export const UnifiedDashboard: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Patrimônio Tradicional</span>
                       <span className="font-semibold">
-                        R$ {stableStats.totalBalance.toLocaleString('pt-BR', { 
+                        R$ {stats.traditionalBalance.toLocaleString('pt-BR', { 
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2 
                         })}
@@ -327,7 +325,7 @@ export const UnifiedDashboard: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Patrimônio Web3</span>
                       <span className="font-semibold">
-                        R$ {totalCryptoBalance.toLocaleString('pt-BR', { 
+                        R$ {stats.cryptoBalance.toLocaleString('pt-BR', { 
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2 
                         })}
@@ -337,7 +335,7 @@ export const UnifiedDashboard: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Total Geral</span>
                         <span className="font-bold text-lg">
-                          R$ {(stableStats.totalBalance + totalCryptoBalance).toLocaleString('pt-BR', { 
+                          R$ {stats.totalBalance.toLocaleString('pt-BR', { 
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2 
                           })}
@@ -414,7 +412,7 @@ export const UnifiedDashboard: React.FC = () => {
 
             <CryptoDashboardStats
               activeWalletsCount={activeWallets.length}
-              totalBalance={totalCryptoBalance}
+              totalBalance={stats.cryptoBalance}
               supportedCurrenciesCount={supportedCurrencies.length}
               isGenerating={isGenerating}
               pendingWalletsCount={pendingWallets.length}
