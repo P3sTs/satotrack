@@ -9,7 +9,7 @@ import Earn from '@/pages/Earn';
 import Staking from '@/pages/Staking';
 import TatumTools from '@/pages/TatumTools';
 import NativeBottomNav from '@/components/mobile/NativeBottomNav';
-import { LegacyRedirect } from '@/components/navigation/LegacyRedirect';
+import LegacyRedirect from '@/components/navigation/LegacyRedirect';
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -40,7 +40,7 @@ const AppRoutes: React.FC = () => {
         />
         
         {/* Legacy redirects */}
-        <Route path="/wallets" element={<LegacyRedirect to="/dashboard" />} />
+        <Route path="/wallets" element={<LegacyRedirect from="/wallets" to="/dashboard" />} />
         
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" />} />
