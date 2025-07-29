@@ -1,39 +1,42 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, RefreshCw, Diamond, Compass } from 'lucide-react';
 
-const NativeBottomNav: React.FC = () => {
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, Wallet, TrendingUp, Lock, Wrench } from 'lucide-react';
+
+const NativeBottomNav = () => {
+  const navigate = useNavigate();
   const location = useLocation();
-  
-  const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { to: '/dashboard', icon: Home, label: 'Dashboard' },
-    { to: '/mercado', icon: TrendingUp, label: 'Mercado' },
-    { to: '/swap', icon: RefreshCw, label: 'Swap' },
-    { to: '/earn', icon: Diamond, label: 'Earn' },
-    { to: '/discover', icon: Compass, label: 'Descobrir' },
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/web3', icon: Wallet, label: 'Web3' },
+    { path: '/earn', icon: TrendingUp, label: 'Earn' },
+    { path: '/staking', icon: Lock, label: 'Staking' },
+    { path: '/tools', icon: Wrench, label: 'Tools' }
   ];
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-dashboard-dark/95 backdrop-blur-lg border-t border-dashboard-medium/30 z-50">
-      <div className="flex justify-around items-center px-2 py-2">
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <Link
-            key={to}
-            to={to}
-            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200 min-w-0 flex-1 ${
-              isActive(to) 
-                ? 'text-satotrack-neon' 
-                : 'text-satotrack-text hover:text-satotrack-neon'
-            }`}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="text-xs text-center leading-tight max-w-full truncate">
-              {label}
-            </span>
-          </Link>
-        ))}
+    <div className="fixed bottom-0 left-0 right-0 bg-dashboard-dark/95 backdrop-blur-lg border-t border-satotrack-neon/20 z-50">
+      <div className="flex justify-around items-center py-2 px-4">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center p-2 rounded-lg transition-all duration-200 ${
+                isActive(item.path)
+                  ? 'text-satotrack-neon bg-satotrack-neon/10'
+                  : 'text-muted-foreground hover:text-satotrack-text'
+              }`}
+            >
+              <Icon className={`w-5 h-5 mb-1 ${isActive(item.path) ? 'text-satotrack-neon' : ''}`} />
+              <span className="text-xs font-medium">{item.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
