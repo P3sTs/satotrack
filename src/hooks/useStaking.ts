@@ -25,7 +25,13 @@ export const useStaking = () => {
 
       if (error) throw error;
 
-      setProtocols(data || []);
+      // Type assertion to match our interface
+      const protocolsData = (data || []).map(protocol => ({
+        ...protocol,
+        abi: protocol.abi as any // Convert Json to any
+      })) as StakingProtocol[];
+
+      setProtocols(protocolsData);
     } catch (error) {
       console.error('Error loading staking protocols:', error);
       toast.error('Erro ao carregar protocolos de staking');
@@ -48,16 +54,26 @@ export const useStaking = () => {
 
       if (error) throw error;
 
-      const positionsData = data || [];
+      // Type conversion and assertion
+      const positionsData = (data || []).map(pos => ({
+        ...pos,
+        staked_amount: Number(pos.staked_amount),
+        rewards_earned: Number(pos.rewards_earned || 0),
+        protocol: pos.protocol ? {
+          ...pos.protocol,
+          abi: pos.protocol.abi as any
+        } : undefined
+      })) as StakingPosition[];
+
       setPositions(positionsData);
 
       // Calculate stats
       const totalStaked = positionsData
         .filter(pos => pos.status === 'active')
-        .reduce((sum, pos) => sum + parseFloat(pos.staked_amount), 0);
+        .reduce((sum, pos) => sum + pos.staked_amount, 0);
       
       const totalRewards = positionsData
-        .reduce((sum, pos) => sum + parseFloat(pos.rewards_earned || '0'), 0);
+        .reduce((sum, pos) => sum + pos.rewards_earned, 0);
       
       const activePositions = positionsData
         .filter(pos => pos.status === 'active').length;
@@ -107,9 +123,9 @@ export const useStaking = () => {
         .insert({
           user_id: user.id,
           hash: tatumResponse.txHash,
-          type: 'stake',
-          amount,
-          status: 'pending',
+          type: 'stake' as const,
+          amount: Number(amount),
+          status: 'pending' as const,
           gas_used: tatumResponse.gasUsed,
           gas_fee: tatumResponse.gasFee
         })
@@ -125,10 +141,10 @@ export const useStaking = () => {
           user_id: user.id,
           protocol_id: protocolId,
           wallet_address: walletAddress,
-          staked_amount: amount,
-          rewards_earned: '0',
+          staked_amount: Number(amount),
+          rewards_earned: 0,
           transaction_hash: tatumResponse.txHash,
-          status: 'pending'
+          status: 'pending' as const
         });
 
       if (positionError) throw new Error(positionError.message);
@@ -140,8 +156,11 @@ export const useStaking = () => {
         loadPositions();
       }, 2000);
       
-      return transactionData;
-    } catch (error) {
+      return {
+        ...transactionData,
+        amount: Number(transactionData.amount)
+      } as StakingTransaction;
+    } catch (error: any) {
       console.error('Error executing staking:', error);
       toast.error(`Erro no staking: ${error.message}`);
       throw error;
@@ -186,9 +205,9 @@ export const useStaking = () => {
           user_id: user.id,
           position_id: positionId,
           hash: tatumResponse.txHash,
-          type: 'unstake',
-          amount,
-          status: 'pending',
+          type: 'unstake' as const,
+          amount: Number(amount),
+          status: 'pending' as const,
           gas_used: tatumResponse.gasUsed,
           gas_fee: tatumResponse.gasFee
         })
@@ -200,7 +219,7 @@ export const useStaking = () => {
       // Update position status
       const { error: updateError } = await supabase
         .from('staking_positions')
-        .update({ status: 'unstaking' })
+        .update({ status: 'unstaking' as const })
         .eq('id', positionId);
 
       if (updateError) throw new Error(updateError.message);
@@ -212,8 +231,11 @@ export const useStaking = () => {
         loadPositions();
       }, 2000);
       
-      return transactionData;
-    } catch (error) {
+      return {
+        ...transactionData,
+        amount: Number(transactionData.amount)
+      } as StakingTransaction;
+    } catch (error: any) {
       console.error('Error executing unstaking:', error);
       toast.error(`Erro no unstaking: ${error.message}`);
       throw error;
@@ -254,9 +276,9 @@ export const useStaking = () => {
           user_id: user.id,
           position_id: positionId,
           hash: tatumResponse.txHash,
-          type: 'claim',
+          type: 'claim' as const,
           amount: position.rewards_earned,
-          status: 'pending',
+          status: 'pending' as const,
           gas_used: tatumResponse.gasUsed,
           gas_fee: tatumResponse.gasFee
         })
@@ -284,8 +306,11 @@ export const useStaking = () => {
         loadPositions();
       }, 2000);
       
-      return transactionData;
-    } catch (error) {
+      return {
+        ...transactionData,
+        amount: Number(transactionData.amount)
+      } as StakingTransaction;
+    } catch (error: any) {
       console.error('Error claiming rewards:', error);
       toast.error(`Erro no claim: ${error.message}`);
       throw error;

@@ -4,10 +4,10 @@ export interface StakingProtocol {
   name: string;
   network: string;
   contract_address: string;
-  abi: any[];
+  abi: any; // Change from any[] to any to match Supabase Json type
   token: string;
   apy: number;
-  min_amount: string;
+  min_amount: number; // Change from string to number to match database
   platform_fee_percentage: number;
   is_active: boolean;
   created_at: string;
@@ -19,8 +19,8 @@ export interface StakingPosition {
   user_id: string;
   protocol_id: string;
   wallet_address: string;
-  staked_amount: string;
-  rewards_earned: string;
+  staked_amount: number; // Change from string to number to match database
+  rewards_earned: number; // Change from string to number to match database
   transaction_hash: string;
   status: 'pending' | 'active' | 'unstaking' | 'completed';
   created_at: string;
@@ -33,7 +33,7 @@ export interface StakingPosition {
 export interface StakingReward {
   id: string;
   position_id: string;
-  amount: string;
+  amount: number; // Change from string to number to match database
   timestamp: string;
   claimed: boolean;
   transaction_hash?: string;
@@ -45,7 +45,7 @@ export interface StakingTransaction {
   position_id?: string;
   hash: string;
   type: 'stake' | 'unstake' | 'claim';
-  amount: string;
+  amount: number; // Change from string to number to match database
   status: 'pending' | 'confirmed' | 'failed';
   gas_used?: string;
   gas_fee?: string;
