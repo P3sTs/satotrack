@@ -862,6 +862,180 @@ export type Database = {
         }
         Relationships: []
       }
+      staking_positions: {
+        Row: {
+          created_at: string
+          id: string
+          protocol_id: string
+          rewards_earned: number | null
+          staked_amount: number
+          status: string
+          transaction_hash: string
+          updated_at: string
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          protocol_id: string
+          rewards_earned?: number | null
+          staked_amount: number
+          status?: string
+          transaction_hash: string
+          updated_at?: string
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          protocol_id?: string
+          rewards_earned?: number | null
+          staked_amount?: number
+          status?: string
+          transaction_hash?: string
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staking_positions_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "staking_protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staking_protocols: {
+        Row: {
+          abi: Json
+          apy: number
+          contract_address: string
+          created_at: string
+          id: string
+          is_active: boolean
+          min_amount: number
+          name: string
+          network: string
+          platform_fee_percentage: number | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          abi: Json
+          apy: number
+          contract_address: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_amount: number
+          name: string
+          network: string
+          platform_fee_percentage?: number | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          abi?: Json
+          apy?: number
+          contract_address?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_amount?: number
+          name?: string
+          network?: string
+          platform_fee_percentage?: number | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      staking_rewards: {
+        Row: {
+          amount: number
+          claimed: boolean
+          id: string
+          position_id: string
+          timestamp: string
+          transaction_hash: string | null
+        }
+        Insert: {
+          amount: number
+          claimed?: boolean
+          id?: string
+          position_id: string
+          timestamp?: string
+          transaction_hash?: string | null
+        }
+        Update: {
+          amount?: number
+          claimed?: boolean
+          id?: string
+          position_id?: string
+          timestamp?: string
+          transaction_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staking_rewards_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "staking_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staking_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          gas_fee: string | null
+          gas_used: string | null
+          hash: string
+          id: string
+          position_id: string | null
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          gas_fee?: string | null
+          gas_used?: string | null
+          hash: string
+          id?: string
+          position_id?: string | null
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          gas_fee?: string | null
+          gas_used?: string | null
+          hash?: string
+          id?: string
+          position_id?: string | null
+          status?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staking_transactions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "staking_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       swap_transactions: {
         Row: {
           completed_at: string | null

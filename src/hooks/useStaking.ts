@@ -1,44 +1,31 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { StakingProtocol, StakingPosition, StakingTransaction } from '@/types/staking';
+import { StakingProtocol, StakingPosition, StakingTransaction, StakingStats } from '@/types/staking';
 
 export const useStaking = () => {
   const [protocols, setProtocols] = useState<StakingProtocol[]>([]);
   const [positions, setPositions] = useState<StakingPosition[]>([]);
+  const [stats, setStats] = useState<StakingStats>({
+    totalStaked: 0,
+    totalRewards: 0,
+    activePositions: 0,
+    totalValue: 0
+  });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Protocolos de staking pré-configurados
-  const defaultProtocols: StakingProtocol[] = [
-    {
-      id: 'lido-eth',
-      name: 'Lido Staked ETH',
-      network: 'ethereum',
-      contractAddress: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84',
-      abi: [], // ABI do Lido seria carregada aqui
-      token: 'ETH',
-      apy: 4.2,
-      minAmount: '0.01',
-      isActive: true
-    },
-    {
-      id: 'polygon-validator',
-      name: 'Polygon Staking',
-      network: 'polygon',
-      contractAddress: '0x5e3Ef299fDDf15eAa0432E6e66473ace8c13D908',
-      abi: [], // ABI do Polygon seria carregada aqui
-      token: 'MATIC',
-      apy: 12.3,
-      minAmount: '10',
-      isActive: true
-    }
-  ];
 
   const loadProtocols = useCallback(async () => {
     try {
-      // Por enquanto, usar protocolos padrão
-      setProtocols(defaultProtocols);
+      const { data, error } = await supabase
+        .from('staking_protocols')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      setProtocols(data || []);
     } catch (error) {
       console.error('Error loading staking protocols:', error);
       toast.error('Erro ao carregar protocolos de staking');
@@ -50,23 +37,37 @@ export const useStaking = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Simular posições de staking (seria carregado do Supabase)
-      const mockPositions: StakingPosition[] = [
-        {
-          id: '1',
-          userId: user.id,
-          protocolId: 'lido-eth',
-          walletAddress: '0x123...abc',
-          stakedAmount: '1.5',
-          rewardsEarned: '0.023',
-          transactionHash: '0xabc123...',
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ];
+      const { data, error } = await supabase
+        .from('staking_positions')
+        .select(`
+          *,
+          protocol:staking_protocols(*)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      setPositions(mockPositions);
+      if (error) throw error;
+
+      const positionsData = data || [];
+      setPositions(positionsData);
+
+      // Calculate stats
+      const totalStaked = positionsData
+        .filter(pos => pos.status === 'active')
+        .reduce((sum, pos) => sum + parseFloat(pos.staked_amount), 0);
+      
+      const totalRewards = positionsData
+        .reduce((sum, pos) => sum + parseFloat(pos.rewards_earned || '0'), 0);
+      
+      const activePositions = positionsData
+        .filter(pos => pos.status === 'active').length;
+
+      setStats({
+        totalStaked,
+        totalRewards,
+        activePositions,
+        totalValue: totalStaked + totalRewards
+      });
     } catch (error) {
       console.error('Error loading staking positions:', error);
       toast.error('Erro ao carregar posições de staking');
@@ -80,14 +81,17 @@ export const useStaking = () => {
   ): Promise<StakingTransaction> => {
     setIsLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const protocol = protocols.find(p => p.id === protocolId);
       if (!protocol) throw new Error('Protocol not found');
 
-      // Chamar Tatum API para executar staking
-      const response = await supabase.functions.invoke('tatum-staking', {
+      // Call Tatum API for staking transaction
+      const { data: tatumResponse, error: tatumError } = await supabase.functions.invoke('tatum-staking', {
         body: {
           action: 'stake',
-          protocol: protocol.contractAddress,
+          protocol: protocol.contract_address,
           network: protocol.network,
           amount,
           walletAddress,
@@ -95,23 +99,48 @@ export const useStaking = () => {
         }
       });
 
-      if (response.error) throw new Error(response.error.message);
+      if (tatumError) throw new Error(tatumError.message);
 
-      const transaction: StakingTransaction = {
-        hash: response.data.txHash,
-        type: 'stake',
-        amount,
-        status: 'pending',
-        gasUsed: response.data.gasUsed,
-        gasFee: response.data.gasFee
-      };
+      // Create staking transaction record
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('staking_transactions')
+        .insert({
+          user_id: user.id,
+          hash: tatumResponse.txHash,
+          type: 'stake',
+          amount,
+          status: 'pending',
+          gas_used: tatumResponse.gasUsed,
+          gas_fee: tatumResponse.gasFee
+        })
+        .select()
+        .single();
+
+      if (transactionError) throw new Error(transactionError.message);
+
+      // Create staking position record
+      const { error: positionError } = await supabase
+        .from('staking_positions')
+        .insert({
+          user_id: user.id,
+          protocol_id: protocolId,
+          wallet_address: walletAddress,
+          staked_amount: amount,
+          rewards_earned: '0',
+          transaction_hash: tatumResponse.txHash,
+          status: 'pending'
+        });
+
+      if (positionError) throw new Error(positionError.message);
 
       toast.success(`Staking de ${amount} ${protocol.token} iniciado!`);
       
-      // Atualizar posições após staking
-      setTimeout(() => loadPositions(), 2000);
+      // Reload data
+      setTimeout(() => {
+        loadPositions();
+      }, 2000);
       
-      return transaction;
+      return transactionData;
     } catch (error) {
       console.error('Error executing staking:', error);
       toast.error(`Erro no staking: ${error.message}`);
@@ -127,41 +156,63 @@ export const useStaking = () => {
   ): Promise<StakingTransaction> => {
     setIsLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const position = positions.find(p => p.id === positionId);
       if (!position) throw new Error('Position not found');
 
-      const protocol = protocols.find(p => p.id === position.protocolId);
+      const protocol = protocols.find(p => p.id === position.protocol_id);
       if (!protocol) throw new Error('Protocol not found');
 
-      // Chamar Tatum API para unstaking
-      const response = await supabase.functions.invoke('tatum-staking', {
+      // Call Tatum API for unstaking
+      const { data: tatumResponse, error: tatumError } = await supabase.functions.invoke('tatum-staking', {
         body: {
           action: 'unstake',
-          protocol: protocol.contractAddress,
+          protocol: protocol.contract_address,
           network: protocol.network,
           amount,
-          walletAddress: position.walletAddress,
+          walletAddress: position.wallet_address,
           abi: protocol.abi
         }
       });
 
-      if (response.error) throw new Error(response.error.message);
+      if (tatumError) throw new Error(tatumError.message);
 
-      const transaction: StakingTransaction = {
-        hash: response.data.txHash,
-        type: 'unstake',
-        amount,
-        status: 'pending',
-        gasUsed: response.data.gasUsed,
-        gasFee: response.data.gasFee
-      };
+      // Create transaction record
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('staking_transactions')
+        .insert({
+          user_id: user.id,
+          position_id: positionId,
+          hash: tatumResponse.txHash,
+          type: 'unstake',
+          amount,
+          status: 'pending',
+          gas_used: tatumResponse.gasUsed,
+          gas_fee: tatumResponse.gasFee
+        })
+        .select()
+        .single();
+
+      if (transactionError) throw new Error(transactionError.message);
+
+      // Update position status
+      const { error: updateError } = await supabase
+        .from('staking_positions')
+        .update({ status: 'unstaking' })
+        .eq('id', positionId);
+
+      if (updateError) throw new Error(updateError.message);
 
       toast.success(`Unstaking de ${amount} ${protocol.token} iniciado!`);
       
-      // Atualizar posições após unstaking
-      setTimeout(() => loadPositions(), 2000);
+      // Reload data
+      setTimeout(() => {
+        loadPositions();
+      }, 2000);
       
-      return transaction;
+      return transactionData;
     } catch (error) {
       console.error('Error executing unstaking:', error);
       toast.error(`Erro no unstaking: ${error.message}`);
@@ -174,40 +225,66 @@ export const useStaking = () => {
   const claimRewards = useCallback(async (positionId: string): Promise<StakingTransaction> => {
     setIsLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const position = positions.find(p => p.id === positionId);
       if (!position) throw new Error('Position not found');
 
-      const protocol = protocols.find(p => p.id === position.protocolId);
+      const protocol = protocols.find(p => p.id === position.protocol_id);
       if (!protocol) throw new Error('Protocol not found');
 
-      // Chamar Tatum API para claim rewards
-      const response = await supabase.functions.invoke('tatum-staking', {
+      // Call Tatum API for claiming rewards
+      const { data: tatumResponse, error: tatumError } = await supabase.functions.invoke('tatum-staking', {
         body: {
           action: 'claim',
-          protocol: protocol.contractAddress,
+          protocol: protocol.contract_address,
           network: protocol.network,
-          walletAddress: position.walletAddress,
+          walletAddress: position.wallet_address,
           abi: protocol.abi
         }
       });
 
-      if (response.error) throw new Error(response.error.message);
+      if (tatumError) throw new Error(tatumError.message);
 
-      const transaction: StakingTransaction = {
-        hash: response.data.txHash,
-        type: 'claim',
-        amount: position.rewardsEarned,
-        status: 'pending',
-        gasUsed: response.data.gasUsed,
-        gasFee: response.data.gasFee
-      };
+      // Create transaction record
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('staking_transactions')
+        .insert({
+          user_id: user.id,
+          position_id: positionId,
+          hash: tatumResponse.txHash,
+          type: 'claim',
+          amount: position.rewards_earned,
+          status: 'pending',
+          gas_used: tatumResponse.gasUsed,
+          gas_fee: tatumResponse.gasFee
+        })
+        .select()
+        .single();
+
+      if (transactionError) throw new Error(transactionError.message);
+
+      // Create reward record
+      const { error: rewardError } = await supabase
+        .from('staking_rewards')
+        .insert({
+          position_id: positionId,
+          amount: position.rewards_earned,
+          claimed: false,
+          transaction_hash: tatumResponse.txHash
+        });
+
+      if (rewardError) throw new Error(rewardError.message);
 
       toast.success('Claim de recompensas iniciado!');
       
-      // Atualizar posições após claim
-      setTimeout(() => loadPositions(), 2000);
+      // Reload data
+      setTimeout(() => {
+        loadPositions();
+      }, 2000);
       
-      return transaction;
+      return transactionData;
     } catch (error) {
       console.error('Error claiming rewards:', error);
       toast.error(`Erro no claim: ${error.message}`);
@@ -217,9 +294,15 @@ export const useStaking = () => {
     }
   }, [positions, protocols, loadPositions]);
 
+  // Auto-load data on mount
+  useEffect(() => {
+    loadProtocols();
+  }, [loadProtocols]);
+
   return {
     protocols,
     positions,
+    stats,
     isLoading,
     loadProtocols,
     loadPositions,

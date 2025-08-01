@@ -2,13 +2,12 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Lock, TrendingUp, Shield, Info } from 'lucide-react';
+import { ArrowLeft, Lock, TrendingUp, Shield, Info, Coins } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStaking } from '@/hooks/useStaking';
 import { useWeb3 } from '@/contexts/web3/Web3Context';
 import { StakingProtocolCard } from '@/components/staking/StakingProtocolCard';
 import { StakingPositionCard } from '@/components/staking/StakingPositionCard';
-import { toast } from 'sonner';
 
 const Staking: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +15,7 @@ const Staking: React.FC = () => {
   const {
     protocols,
     positions,
+    stats,
     isLoading,
     loadProtocols,
     loadPositions,
@@ -55,10 +55,6 @@ const Staking: React.FC = () => {
     }
   };
 
-  const totalStaked = positions.reduce((sum, pos) => sum + parseFloat(pos.stakedAmount), 0);
-  const totalRewards = positions.reduce((sum, pos) => sum + parseFloat(pos.rewardsEarned), 0);
-  const activePositions = positions.filter(pos => pos.status === 'active').length;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-dashboard-dark via-dashboard-medium to-dashboard-dark pb-20">
       <div className="container mx-auto px-4 py-6">
@@ -72,7 +68,12 @@ const Staking: React.FC = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
-          <h1 className="text-2xl font-bold text-satotrack-text">Staking - Ganhe Rendimentos</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-satotrack-text">Staking DeFi</h1>
+            <p className="text-sm text-muted-foreground">
+              Ganhe rendimentos com seus tokens em protocolos seguros
+            </p>
+          </div>
         </div>
 
         {/* Connection Warning */}
@@ -82,9 +83,10 @@ const Staking: React.FC = () => {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-yellow-400 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-yellow-400">Conecte sua Carteira</h4>
+                  <h4 className="font-medium text-yellow-400">Conecte sua Carteira Web3</h4>
                   <p className="text-sm text-yellow-300">
                     Para fazer staking, você precisa conectar sua carteira Web3 primeiro.
+                    Vá para o Dashboard e conecte sua carteira.
                   </p>
                 </div>
               </div>
@@ -92,32 +94,43 @@ const Staking: React.FC = () => {
           </Card>
         )}
 
-        {/* Stats Cards */}
+        {/* Enhanced Stats Cards */}
         {isConnected && positions.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <Card className="bg-dashboard-dark/80 border-satotrack-neon/20">
               <CardContent className="p-4 text-center">
                 <Lock className="h-6 w-6 text-satotrack-neon mx-auto mb-2" />
-                <div className="text-xl font-bold text-satotrack-text">
-                  {totalStaked.toFixed(4)}
+                <div className="text-2xl font-bold text-satotrack-text">
+                  {stats.totalStaked.toFixed(4)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total em Staking</div>
               </CardContent>
             </Card>
             <Card className="bg-dashboard-dark/80 border-satotrack-neon/20">
               <CardContent className="p-4 text-center">
-                <TrendingUp className="h-6 w-6 text-satotrack-neon mx-auto mb-2" />
-                <div className="text-xl font-bold text-satotrack-text">
-                  {totalRewards.toFixed(6)}
+                <TrendingUp className="h-6 w-6 text-green-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-400">
+                  {stats.totalRewards.toFixed(6)}
                 </div>
-                <div className="text-xs text-muted-foreground">Recompensas Acumuladas</div>
+                <div className="text-xs text-muted-foreground">Recompensas Totais</div>
               </CardContent>
             </Card>
             <Card className="bg-dashboard-dark/80 border-satotrack-neon/20">
               <CardContent className="p-4 text-center">
-                <Shield className="h-6 w-6 text-satotrack-neon mx-auto mb-2" />
-                <div className="text-xl font-bold text-satotrack-text">{activePositions}</div>
+                <Shield className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-satotrack-text">
+                  {stats.activePositions}
+                </div>
                 <div className="text-xs text-muted-foreground">Posições Ativas</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-dashboard-dark/80 border-satotrack-neon/20">
+              <CardContent className="p-4 text-center">
+                <Coins className="h-6 w-6 text-purple-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-purple-400">
+                  {stats.totalValue.toFixed(4)}
+                </div>
+                <div className="text-xs text-muted-foreground">Valor Total</div>
               </CardContent>
             </Card>
           </div>
@@ -126,12 +139,13 @@ const Staking: React.FC = () => {
         {/* Current Positions */}
         {isConnected && positions.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-satotrack-text mb-4">
-              Minhas Posições de Staking
+            <h2 className="text-xl font-semibold text-satotrack-text mb-4 flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Minhas Posições de Staking ({positions.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {positions.map((position) => {
-                const protocol = protocols.find(p => p.id === position.protocolId);
+                const protocol = position.protocol || protocols.find(p => p.id === position.protocol_id);
                 if (!protocol) return null;
                 
                 return (
@@ -151,34 +165,51 @@ const Staking: React.FC = () => {
 
         {/* Available Protocols */}
         <div>
-          <h2 className="text-lg font-semibold text-satotrack-text mb-4">
-            Protocolos de Staking Disponíveis
+          <h2 className="text-xl font-semibold text-satotrack-text mb-4 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Protocolos de Staking Disponíveis ({protocols.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {protocols.map((protocol) => (
-              <StakingProtocolCard
-                key={protocol.id}
-                protocol={protocol}
-                onStake={handleStake}
-                isLoading={isLoading}
-                userWalletAddress={address}
-              />
-            ))}
-          </div>
+          
+          {protocols.length === 0 ? (
+            <Card className="bg-dashboard-dark/80 border-satotrack-neon/20">
+              <CardContent className="p-8 text-center">
+                <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  Carregando protocolos de staking...
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {protocols.map((protocol) => (
+                <StakingProtocolCard
+                  key={protocol.id}
+                  protocol={protocol}
+                  onStake={handleStake}
+                  isLoading={isLoading}
+                  userWalletAddress={address}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info Card */}
-        <Card className="mt-6 bg-blue-500/10 border-blue-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 text-blue-400 mt-0.5" />
+        <Card className="mt-8 bg-blue-500/10 border-blue-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <Shield className="h-6 w-6 text-blue-400 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-400">Staking Seguro e Descentralizado</h4>
-                <p className="text-sm text-blue-300">
+                <h4 className="font-semibold text-blue-400 mb-2">Staking Seguro e Descentralizado</h4>
+                <p className="text-sm text-blue-300 leading-relaxed">
                   Todas as operações de staking são executadas diretamente nos contratos 
                   oficiais dos protocolos. Seus fundos permanecem sempre sob seu controle.
-                  Utilizamos Tatum para facilitar a interação com os contratos inteligentes.
+                  Utilizamos a Tatum para facilitar a interação com os contratos inteligentes,
+                  garantindo máxima segurança e transparência.
                 </p>
+                <div className="mt-3 text-xs text-blue-200">
+                  ⚡ Transações rápidas • 🔒 Contratos auditados • 💰 Rendimentos competitivos
+                </div>
               </div>
             </div>
           </CardContent>
