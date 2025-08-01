@@ -17,10 +17,10 @@ const Index = () => {
         navigate('/dashboard', { replace: true });
       } else {
         // Se não autenticado, ir para home
-        navigate('/home', { replace: true });
+        navigate('/', { replace: true });
       }
     }
-  }, [loading, isAuthenticated]);
+  }, [loading, isAuthenticated, navigate, user, updateLastActivity]);
 
   // Tela de carregamento durante a verificação de autenticação
   if (loading) {
