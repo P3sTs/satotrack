@@ -10,10 +10,10 @@ import MarketTabs from '@/components/market/MarketTabs';
 import MarketInfo from '@/components/market/MarketInfo';
 
 const Mercado = () => {
-  const { data: bitcoinData, loading, isRefreshing, refresh } = useBitcoinPrice();
+  const { data: bitcoinData, isLoading, isRefreshing, refresh } = useBitcoinPrice();
   const [activeTab, setActiveTab] = useState<string>('overview');
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 animate-pulse">
         <div className="flex justify-between items-center mb-6">
