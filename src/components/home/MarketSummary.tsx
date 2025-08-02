@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { BitcoinPriceData } from '@/hooks/useBitcoinPrice';
 import MarketTrendAlerts from './MarketTrendAlerts';
 import BitcoinHeader from './BitcoinHeader';
-import BitcoinChartGrid from './BitcoinChartGrid';
 import MarketDataCards from './MarketDataCards';
-import { LoadingState, ErrorState } from './LoadingStates';
-import InteractiveChart from '../charts/InteractiveChart';
 
 interface MarketSummaryProps {
   isLoading: boolean;
@@ -17,6 +14,32 @@ interface MarketSummaryProps {
   previousPrice: number | null;
   onRefresh: () => void;
 }
+
+const LoadingState = ({ isLoading }: { isLoading: boolean }) => {
+  if (!isLoading) return null;
+  
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="text-center space-y-4">
+        <div className="relative h-12 w-12 mx-auto">
+          <div className="absolute inset-0 rounded-full border-2 border-t-satotrack-neon border-x-transparent border-b-transparent animate-spin"></div>
+        </div>
+        <p className="text-satotrack-text">Carregando dados do mercado...</p>
+      </div>
+    </div>
+  );
+};
+
+const ErrorState = () => (
+  <div className="text-center py-12">
+    <div className="bg-dashboard-medium/50 border border-red-500/20 rounded-lg p-6">
+      <h3 className="text-lg font-semibold text-red-400 mb-2">Erro ao carregar dados</h3>
+      <p className="text-satotrack-text">
+        Não foi possível carregar os dados do Bitcoin. Tente novamente em alguns instantes.
+      </p>
+    </div>
+  </div>
+);
 
 const MarketSummary = ({ 
   isLoading, 
@@ -40,24 +63,16 @@ const MarketSummary = ({
         </Button>
       </div>
 
+      {/* Alertas de Tendência */}
       {bitcoinData && <MarketTrendAlerts bitcoinData={bitcoinData} />}
       
+      {/* Loading State */}
       <LoadingState isLoading={isLoading} />
       
+      {/* Content */}
       {!isLoading && bitcoinData ? (
         <>
           <BitcoinHeader bitcoinData={bitcoinData} />
-          
-          <div className="my-6 md:my-8">
-            <InteractiveChart bitcoinData={bitcoinData} />
-          </div>
-          
-          <div className="overflow-x-hidden">
-            <BitcoinChartGrid 
-              bitcoinData={bitcoinData} 
-              previousPrice={previousPrice}
-            />
-          </div>
           <div className="overflow-x-hidden">
             <MarketDataCards bitcoinData={bitcoinData} />
           </div>

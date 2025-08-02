@@ -3,12 +3,21 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield, TrendingUp, Wallet } from 'lucide-react';
+import { ArrowRight, Shield, TrendingUp, Wallet, Eye } from 'lucide-react';
 import { HeroGeometric } from '@/components/ui/shape-landing-hero';
+import MarketSummary from '@/components/home/MarketSummary';
+import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 
 const Home = () => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const { 
+    data: bitcoinData, 
+    isLoading: bitcoinLoading, 
+    isRefreshing,
+    previousPrice,
+    refresh 
+  } = useBitcoinPrice();
 
   // Redirecionar usuários autenticados para o dashboard
   useEffect(() => {
@@ -40,19 +49,27 @@ const Home = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Hero Background */}
-      <HeroGeometric 
-        badge="SatoTracker"
-        title1="Sua carteira multichain"
-        title2="segura e sem complicações"
-      />
-      
-      {/* Hero Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-        <div className="text-center space-y-8 max-w-4xl mx-auto">
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
+    <div className="relative min-h-screen overflow-hidden bg-dashboard-dark">
+      {/* Hero Section */}
+      <section className="relative z-10 min-h-screen flex items-center justify-center px-4">
+        <HeroGeometric 
+          badge="SatoTracker"
+          title1="Sua carteira multichain"
+          title2="segura e sem complicações"
+        />
+        
+        <div className="text-center space-y-8 max-w-4xl mx-auto relative z-20">
+          {/* Logo e Título */}
+          <div className="flex flex-col items-center space-y-4 mb-8">
+            <div className="relative">
+              <img 
+                src="/lovable-uploads/38e6a9b2-5057-4fb3-8835-2e5e079b117f.png" 
+                alt="SatoTrack Logo" 
+                className="h-20 w-20 object-contain animate-pulse"
+              />
+              <div className="absolute inset-0 bg-satotrack-neon/20 rounded-full blur-xl animate-pulse"></div>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-orbitron font-bold text-white leading-tight">
               Gerencie seus <span className="satotrack-gradient-text">criptoativos</span><br />
               de forma inteligente
             </h1>
@@ -62,12 +79,14 @@ const Home = () => {
             </p>
           </div>
 
+          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               onClick={() => navigate('/auth')}
               size="lg"
               className="bg-gradient-to-r from-satotrack-neon to-emerald-400 text-black hover:from-satotrack-neon/90 hover:to-emerald-400/90 font-semibold px-8 py-3"
             >
+              <Eye className="mr-2 h-5 w-5" />
               Começar agora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -84,7 +103,7 @@ const Home = () => {
 
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 bg-dashboard-medium/30 p-6 rounded-xl border border-satotrack-neon/20">
               <div className="mx-auto w-12 h-12 bg-satotrack-neon/20 rounded-lg flex items-center justify-center">
                 <Wallet className="h-6 w-6 text-satotrack-neon" />
               </div>
@@ -94,7 +113,7 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 bg-dashboard-medium/30 p-6 rounded-xl border border-satotrack-neon/20">
               <div className="mx-auto w-12 h-12 bg-satotrack-neon/20 rounded-lg flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-satotrack-neon" />
               </div>
@@ -104,7 +123,7 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 bg-dashboard-medium/30 p-6 rounded-xl border border-satotrack-neon/20">
               <div className="mx-auto w-12 h-12 bg-satotrack-neon/20 rounded-lg flex items-center justify-center">
                 <Shield className="h-6 w-6 text-satotrack-neon" />
               </div>
@@ -115,7 +134,16 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Market Section */}
+      <MarketSummary
+        isLoading={bitcoinLoading}
+        isRefreshing={isRefreshing}
+        bitcoinData={bitcoinData}
+        previousPrice={previousPrice}
+        onRefresh={refresh}
+      />
     </div>
   );
 };
