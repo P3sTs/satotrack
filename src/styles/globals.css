@@ -31,7 +31,7 @@ body {
 
 /* Gradientes de texto */
 .satotrack-gradient-text {
-  background: linear-gradient(135deg, hsl(var(--satotrack-neon)), hsl(var(--primary))) !important;
+  background: linear-gradient(135deg, hsl(var(--satotrack-neon)), hsl(var(--satotrack-secondary))) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
@@ -46,18 +46,49 @@ body {
   font-weight: bold;
 }
 
+/* Gradientes de fundo */
+.bg-gradient-radial {
+  background: radial-gradient(circle at center, var(--tw-gradient-stops));
+}
+
 /* Animações customizadas */
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(var(--satotrack-neon) / 0.5);
+    box-shadow: 0 0 20px hsl(var(--satotrack-neon) / 0.4), 0 0 40px hsl(var(--satotrack-neon) / 0.2);
   }
   50% {
-    box-shadow: 0 0 30px hsl(var(--satotrack-neon) / 0.8);
+    box-shadow: 0 0 30px hsl(var(--satotrack-neon) / 0.6), 0 0 60px hsl(var(--satotrack-neon) / 0.3);
+  }
+}
+
+@keyframes pulse-neon {
+  0%, 100% {
+    text-shadow: 0 0 10px hsl(var(--satotrack-neon) / 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px hsl(var(--satotrack-neon) / 0.8), 0 0 30px hsl(var(--satotrack-neon) / 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 
 .animate-glow {
-  animation: glow 2s ease-in-out infinite;
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-pulse-neon {
+  animation: pulse-neon 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 /* Scrollbar customizada */
@@ -78,15 +109,52 @@ body {
   background: hsl(var(--satotrack-neon) / 0.8);
 }
 
-/* Overrides para componentes específicos */
+/* Cards cyberpunk */
 .cyberpunk-card {
-  background: linear-gradient(135deg, hsl(var(--dashboard-medium) / 0.8), hsl(var(--dashboard-dark) / 0.9));
+  background: linear-gradient(135deg, hsl(var(--dashboard-medium) / 0.3), hsl(var(--dashboard-dark) / 0.8));
   border: 1px solid hsl(var(--satotrack-neon) / 0.2);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyberpunk-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, hsl(var(--satotrack-neon) / 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.cyberpunk-card:hover::before {
+  left: 100%;
 }
 
 .cyberpunk-card:hover {
   border-color: hsl(var(--satotrack-neon) / 0.4);
-  box-shadow: 0 0 20px hsl(var(--satotrack-neon) / 0.1);
+  box-shadow: 0 8px 32px hsl(var(--satotrack-neon) / 0.1);
+  transform: translateY(-2px);
+}
+
+/* Efeitos especiais para botões */
+.btn-primary-glow {
+  box-shadow: 0 0 20px hsl(var(--satotrack-neon) / 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary-glow:hover {
+  box-shadow: 0 0 30px hsl(var(--satotrack-neon) / 0.5), 0 0 40px hsl(var(--satotrack-neon) / 0.2);
+  transform: translateY(-1px);
+}
+
+/* Hero específico */
+.hero-background {
+  background: 
+    radial-gradient(circle at 20% 50%, hsl(var(--satotrack-neon) / 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, hsl(var(--satotrack-secondary) / 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, hsl(var(--dashboard-dark)) 0%, hsl(var(--dashboard-medium) / 0.2) 100%);
 }
