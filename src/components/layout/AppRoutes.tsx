@@ -1,56 +1,65 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
+import { Routes, Route } from 'react-router-dom';
+import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import Dashboard from '@/pages/Dashboard';
-import Web3Dashboard from '@/pages/Web3Dashboard';
 import Auth from '@/pages/Auth';
-import Earn from '@/pages/Earn';
+import Carteiras from '@/pages/Carteiras';
 import Staking from '@/pages/Staking';
 import TatumTools from '@/pages/TatumTools';
-import NativeBottomNav from '@/components/mobile/NativeBottomNav';
-import LegacyRedirect from '@/components/navigation/LegacyRedirect';
+import Web3Dashboard from '@/components/web3/Web3Dashboard';
+import NFTSystem from '@/pages/NFTSystem';
+import { useAuth } from '@/contexts/auth';
 
-const AppRoutes: React.FC = () => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   
+  if (!isAuthenticated) {
+    window.location.href = '/auth';
+    return null;
+  }
+  
+  return <>{children}</>;
+};
+
+const AppRoutes: React.FC = () => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route 
-          path="/dashboard" 
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />} 
-        />
-        <Route 
-          path="/web3" 
-          element={<Web3Dashboard />}
-        />
-        <Route 
-          path="/earn" 
-          element={isAuthenticated ? <Earn /> : <Navigate to="/auth" />} 
-        />
-        <Route 
-          path="/staking" 
-          element={isAuthenticated ? <Staking /> : <Navigate to="/auth" />} 
-        />
-        <Route 
-          path="/tools" 
-          element={isAuthenticated ? <TatumTools /> : <Navigate to="/auth" />} 
-        />
-        
-        {/* Legacy redirects */}
-        <Route path="/wallets" element={<LegacyRedirect from="/wallets" to="/dashboard" />} />
-        
-        {/* Catch all - redirect to home */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-      
-      {isAuthenticated && <NativeBottomNav />}
-    </>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/carteiras" element={
+        <ProtectedRoute>
+          <Carteiras />
+        </ProtectedRoute>
+      } />
+      <Route path="/staking" element={
+        <ProtectedRoute>
+          <Staking />
+        </ProtectedRoute>
+      } />
+      <Route path="/tatum-tools" element={
+        <ProtectedRoute>
+          <TatumTools />
+        </ProtectedRoute>
+      } />
+      <Route path="/web3" element={
+        <ProtectedRoute>
+          <Web3Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/nft" element={
+        <ProtectedRoute>
+          <NFTSystem />
+        </ProtectedRoute>
+      } />
+    </Routes>
   );
 };
 
