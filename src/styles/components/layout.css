@@ -14,4 +14,33 @@
   .mobile-container {
     @apply px-2 py-2 sm:px-4 sm:py-4;
   }
+
+  /* Mobile safe areas */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Mobile layout adjustments */
+  .mobile-layout {
+    @apply pt-14 pb-16; /* Top header + bottom nav space */
+  }
+
+  .mobile-content {
+    @apply px-2 py-4;
+  }
+
+  /* Desktop layout adjustments */
+  @media (min-width: 768px) {
+    .mobile-layout {
+      @apply pt-0 pb-0;
+    }
+    
+    .mobile-content {
+      @apply px-6 py-6;
+    }
+  }
 }

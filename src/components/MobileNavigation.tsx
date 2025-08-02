@@ -26,7 +26,7 @@ const MobileNavigation: React.FC = () => {
   }
 
   return (
-    <>
+    <div className="md:hidden">
       {/* Top Header Mobile */}
       <MobileHeader 
         isMenuOpen={isMenuOpen}
@@ -37,7 +37,7 @@ const MobileNavigation: React.FC = () => {
       <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <SheetContent 
           side="right" 
-          className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-[70]"
+          className="w-80 bg-dashboard-dark border-dashboard-medium p-0 z-[200]"
         >
           <MobileMenuContent 
             setIsMenuOpen={setIsMenuOpen}
@@ -48,9 +48,9 @@ const MobileNavigation: React.FC = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Bottom Navigation Bar (Quick Access) */}
-      {isAuthenticated && <MobileBottomNavigation />}
-    </>
+      {/* Bottom Navigation Bar - Always visible when authenticated */}
+      <MobileBottomNavigation />
+    </div>
   );
 };
 

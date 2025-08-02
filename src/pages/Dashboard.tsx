@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { UnifiedDashboard } from '@/components/dashboard/UnifiedDashboard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Dashboard: React.FC = () => {
   const { user, loading } = useAuth();
+  const isMobile = useIsMobile();
 
   // Aguardar carregamento
   if (loading) {
@@ -24,9 +27,11 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-background">
-      {/* Dashboard Unificado */}
-      <UnifiedDashboard />
+    <div className={`relative min-h-screen bg-background ${isMobile ? 'pb-20' : ''}`}>
+      {/* Dashboard Unificado com padding bottom no mobile para a navigation bar */}
+      <div className={isMobile ? 'px-2 py-4' : 'p-6'}>
+        <UnifiedDashboard />
+      </div>
     </div>
   );
 };
