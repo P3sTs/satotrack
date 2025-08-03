@@ -10,7 +10,7 @@ const TermosUso: React.FC = () => {
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-10">
           <div className="mb-6">
-            <Link to="/landing">
+            <Link to="/home">
               <Button variant="outline" className="mb-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar

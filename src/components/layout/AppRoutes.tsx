@@ -10,6 +10,9 @@ import Staking from '@/pages/Staking';
 import TatumTools from '@/pages/TatumTools';
 import Web3Dashboard from '@/components/web3/Web3Dashboard';
 import NFTSystem from '@/pages/NFTSystem';
+import Sobre from '@/pages/Sobre';
+import Privacidade from '@/pages/Privacidade';
+import TermosUso from '@/pages/TermosUso';
 import { useAuth } from '@/contexts/auth';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -29,6 +32,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<Index />} />
       <Route path="/home" element={<Home />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/sobre" element={<Sobre />} />
+      <Route path="/privacidade" element={<Privacidade />} />
+      <Route path="/termos" element={<TermosUso />} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
