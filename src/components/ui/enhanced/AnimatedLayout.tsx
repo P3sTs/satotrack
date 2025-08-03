@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
 interface AnimatedLayoutProps {
@@ -8,49 +8,49 @@ interface AnimatedLayoutProps {
   className?: string;
 }
 
-const pageVariants = {
+const pageVariants: Variants = {
   initial: { 
     opacity: 0, 
     x: -20, 
     scale: 0.98,
     filter: 'blur(4px)' 
   },
-  in: { 
+  animate: { 
     opacity: 1, 
     x: 0, 
     scale: 1,
     filter: 'blur(0px)',
     transition: { 
       duration: 0.4, 
-      ease: [0.4, 0, 0.2, 1],
+      ease: "easeOut",
       staggerChildren: 0.1 
     } 
   },
-  out: { 
+  exit: { 
     opacity: 0, 
     x: 20, 
     scale: 0.98,
     filter: 'blur(4px)',
     transition: { 
       duration: 0.3, 
-      ease: [0.4, 0, 0.2, 1] 
+      ease: "easeOut" 
     } 
   }
 };
 
-const childVariants = {
+const childVariants: Variants = {
   initial: { 
     opacity: 0, 
     y: 20,
     scale: 0.95 
   },
-  in: { 
+  animate: { 
     opacity: 1, 
     y: 0,
     scale: 1,
     transition: { 
       duration: 0.3,
-      ease: [0.4, 0, 0.2, 1] 
+      ease: "easeOut" 
     } 
   }
 };
@@ -68,8 +68,8 @@ export const AnimatedLayout: React.FC<AnimatedLayoutProps> = ({
         className={`min-h-screen ${className}`}
         variants={pageVariants}
         initial="initial"
-        animate="in"
-        exit="out"
+        animate="animate"
+        exit="exit"
       >
         <motion.div variants={childVariants}>
           {children}

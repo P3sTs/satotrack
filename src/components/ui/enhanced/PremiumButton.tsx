@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface PremiumButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface PremiumButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag'> {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'ghost' | 'neon';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   loading?: boolean;
@@ -51,7 +51,6 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const [isPressed, setIsPressed] = useState(false);
   const [rippleEffect, setRippleEffect] = useState<Array<{ id: number; x: number; y: number }>>([]);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -94,9 +93,6 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
       className={buttonClasses}
       disabled={disabled || loading}
       onClick={handleClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
       whileHover={!disabled && !loading ? { scale: 1.05 } : undefined}
       whileTap={!disabled && !loading ? { scale: 0.95 } : undefined}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}

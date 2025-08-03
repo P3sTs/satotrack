@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Bitcoin, TrendingUp, Shield, Zap, BarChart3, Eye } from 'lucide-react';
 import PremiumButton from '@/components/ui/enhanced/PremiumButton';
@@ -23,7 +23,7 @@ const Home: React.FC = () => {
     navigate(isAuthenticated ? '/dashboard' : '/auth');
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -34,12 +34,12 @@ const Home: React.FC = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+      transition: { duration: 0.5, ease: "easeOut" }
     }
   };
 
