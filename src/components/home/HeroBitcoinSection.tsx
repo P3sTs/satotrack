@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
 import { Eye } from 'lucide-react';
+import AnimatedGradientBackground from '@/components/ui/animated-gradient-background';
 
 const HeroBitcoinSection = () => {
   const { user } = useAuth();
@@ -17,9 +18,31 @@ const HeroBitcoinSection = () => {
     }
   };
 
+  // Cores customizadas para o tema SatoTrack
+  const bitcoinGradient = [
+    "#1A1A1A",           // Darker base
+    "#F7931A",           // Bitcoin orange
+    "#00FFC6",           // SatoTrack neon
+    "#FFD700",           // Gold
+    "#FF8C00",           // Dark orange
+    "#32CD32",           // Lime green
+    "#4169E1"            // Royal blue
+  ];
+
   return (
-    <section className="bg-gradient-to-r from-dashboard-dark to-dashboard-medium py-16 md:py-20 text-white">
-      <div className="container px-4 md:px-6 mx-auto">
+    <section className="relative py-16 md:py-20 text-white overflow-hidden">
+      {/* Background Gradient Animado */}
+      <AnimatedGradientBackground
+        Breathing={true}
+        gradientColors={bitcoinGradient}
+        gradientStops={[30, 45, 60, 72, 82, 92, 100]}
+        startingGap={100}
+        breathingRange={7}
+        animationSpeed={0.012}
+        topOffset={20}
+      />
+      
+      <div className="container px-4 md:px-6 mx-auto relative z-10">
         <div className="flex flex-col items-center text-center space-y-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="relative">

@@ -2,21 +2,18 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Bitcoin, TrendingUp, Shield, Zap, BarChart3, Eye } from 'lucide-react';
+import { ArrowRight, Shield, Zap, BarChart3, Eye } from 'lucide-react';
 import PremiumButton from '@/components/ui/enhanced/PremiumButton';
 import PremiumCard from '@/components/ui/enhanced/PremiumCard';
 import AnimatedLayout from '@/components/ui/enhanced/AnimatedLayout';
-import SkeletonLoader from '@/components/ui/enhanced/SkeletonLoader';
+import AnimatedGradientBackground from '@/components/ui/animated-gradient-background';
 import PlatformInfo from '@/components/home/PlatformInfo';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
-import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
-import { formatCurrency } from '@/utils/formatters';
 import { useAuth } from '@/contexts/auth';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { data: bitcoinData, isLoading } = useBitcoinPrice();
   const { isAuthenticated } = useAuth();
 
   const handleGetStarted = () => {
@@ -43,39 +40,33 @@ const Home: React.FC = () => {
     }
   };
 
+  // Cores customizadas para o tema SatoTrack
+  const satoTrackGradient = [
+    "#0A0A0A",           // Dashboard dark
+    "#00FFC6",           // SatoTrack neon
+    "#06B6D4",           // Cyan-500
+    "#3B82F6",           // Blue-500  
+    "#8B5CF6",           // Violet-500
+    "#10B981",           // Emerald-500
+    "#F59E0B"            // Amber-500
+  ];
+
   return (
     <AnimatedLayout>
-      <div className="min-h-screen bg-gradient-mesh">
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Background Gradient Animado */}
+        <AnimatedGradientBackground
+          Breathing={true}
+          gradientColors={satoTrackGradient}
+          gradientStops={[20, 35, 50, 65, 75, 85, 100]}
+          startingGap={120}
+          breathingRange={8}
+          animationSpeed={0.015}
+          topOffset={10}
+        />
+        
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <motion.div
-            className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          <motion.div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
-            animate={{
-              scale: [1.2, 1, 1.2],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2
-            }}
-          />
-
           <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 relative z-10">
             <motion.div
               className="text-center max-w-5xl mx-auto"
@@ -123,36 +114,6 @@ const Home: React.FC = () => {
                 Análises em tempo real, alertas inteligentes e insights poderosos 
                 para maximizar seus investimentos.
               </motion.p>
-
-              {/* Bitcoin Price Widget */}
-              <motion.div
-                className="inline-flex items-center gap-4 bg-card/80 backdrop-blur-md border border-border/50 rounded-full px-6 py-3 mb-8 shadow-glow-blue"
-                variants={itemVariants}
-              >
-                <Bitcoin className="h-6 w-6 text-bitcoin animate-float" />
-                <div className="text-left">
-                  {isLoading ? (
-                    <SkeletonLoader variant="text" lines={1} className="w-24 h-4" />
-                  ) : (
-                    <>
-                      <div className="text-sm text-muted-foreground">Bitcoin agora</div>
-                      <div className="text-lg font-bold text-bitcoin">
-                        {formatCurrency(bitcoinData?.price_usd || 0, 'USD')}
-                      </div>
-                    </>
-                  )}
-                </div>
-                {bitcoinData?.price_change_24h && (
-                  <div className={`flex items-center gap-1 text-sm ${
-                    bitcoinData.price_change_24h > 0 ? 'text-profit' : 'text-loss'
-                  }`}>
-                    <TrendingUp className={`h-4 w-4 ${
-                      bitcoinData.price_change_24h < 0 ? 'rotate-180' : ''
-                    }`} />
-                    <span>{bitcoinData.price_change_24h.toFixed(2)}%</span>
-                  </div>
-                )}
-              </motion.div>
 
               {/* CTA Buttons */}
               <motion.div
@@ -243,7 +204,7 @@ const Home: React.FC = () => {
         <CallToActionSection />
 
         {/* Footer */}
-        <footer className="bg-dashboard-dark/50 backdrop-blur-md border-t border-border/30 py-12">
+        <footer className="bg-dashboard-dark/50 backdrop-blur-md border-t border-border/30 py-12 relative z-10">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="space-y-4">
