@@ -70,15 +70,15 @@ const Configuracoes = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
+    visible: { opacity: 1, y: 0 }
   };
 
   const renderProfileSection = () => (
-    <motion.div variants={itemVariants} className="space-y-6">
+    <motion.div 
+      variants={itemVariants} 
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <Card className="card-premium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-satotrack-neon">
@@ -121,7 +121,11 @@ const Configuracoes = () => {
   );
 
   const renderSecuritySection = () => (
-    <motion.div variants={itemVariants} className="space-y-6">
+    <motion.div 
+      variants={itemVariants} 
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <Card className="card-premium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-satotrack-neon">
@@ -202,7 +206,11 @@ const Configuracoes = () => {
   );
 
   const renderNotificationsSection = () => (
-    <motion.div variants={itemVariants} className="space-y-6">
+    <motion.div 
+      variants={itemVariants} 
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <Card className="card-premium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-satotrack-neon">
@@ -246,7 +254,11 @@ const Configuracoes = () => {
   );
 
   const renderAppearanceSection = () => (
-    <motion.div variants={itemVariants} className="space-y-6">
+    <motion.div 
+      variants={itemVariants} 
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <Card className="card-premium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-satotrack-neon">
@@ -298,7 +310,11 @@ const Configuracoes = () => {
   );
 
   const renderLanguageSection = () => (
-    <motion.div variants={itemVariants} className="space-y-6">
+    <motion.div 
+      variants={itemVariants} 
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="space-y-6"
+    >
       <Card className="card-premium">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-satotrack-neon">
